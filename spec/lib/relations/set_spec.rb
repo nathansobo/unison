@@ -41,7 +41,15 @@ module Unison
         it "adds tuples to the Set" do
           tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
           set.insert(tuple)
-          set.tuples.should == [tuple]
+          set.read.should == [tuple]
+        end
+      end
+
+      describe "#read" do
+        it "returns all Tuples in the Set" do
+          set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
+          set.insert(set.tuple_class.new(:id => 2, :name => "Alissa"))
+          set.read.should == set.tuples
         end
       end
     end

@@ -21,5 +21,9 @@ module Unison
     def insert(tuple)
       tuples.push(tuple)
     end
+
+    def read
+      tuples
+    end
   end
 end
