@@ -80,70 +80,45 @@
       <file leaf-file-name="selection_spec.rb" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/spec/lib/relations/selection_spec.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="6" selection-start="120" selection-end="120" vertical-scroll-proportion="0.23529412">
+            <state line="28" column="38" selection-start="972" selection-end="972" vertical-scroll-proportion="0.65882355">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="set_spec.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/spec/lib/relations/set_spec.rb">
+      <file leaf-file-name="predicates_spec.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/spec/lib/predicates_spec.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="39" column="27" selection-start="1132" selection-end="1132" vertical-scroll-proportion="1.8352941">
+            <state line="18" column="11" selection-start="687" selection-end="687" vertical-scroll-proportion="0.40923077">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="unison.rb" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/lib/unison.rb">
+      <file leaf-file-name="predicates.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/unison/predicates.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="35" selection-start="66" selection-end="66" vertical-scroll-proportion="0.047058824">
+            <state line="14" column="17" selection-start="387" selection-end="387" vertical-scroll-proportion="0.3882353">
+              <folding>
+                <marker date="1214971659000" expanded="true" signature="369:438" placeholder=" ... end" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="spec_helper.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/spec/spec_helper.rb">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="13" column="33" selection-start="328" selection-end="338" vertical-scroll-proportion="0.6117647">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="tuple.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/unison/tuple.rb">
+      <file leaf-file-name="selection.rb" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/lib/unison/relations/selection.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="38" column="11" selection-start="705" selection-end="705" vertical-scroll-proportion="0.33235294">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Rakefile" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Rakefile">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="0" selection-start="132" selection-end="132" vertical-scroll-proportion="0.28235295">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="attribute.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/unison/attribute.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="24" selection-start="248" selection-end="248" vertical-scroll-proportion="0.47058824">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="tuple_spec.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/spec/lib/tuple_spec.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="set.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/unison/relations/set.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="22" selection-start="308" selection-end="308" vertical-scroll-proportion="0.33235294">
+            <state line="6" column="31" selection-start="165" selection-end="165" vertical-scroll-proportion="0.28235295">
               <folding />
             </state>
           </provider>
@@ -217,7 +192,69 @@
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
         </PATH_ELEMENT>
         <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/nathansobo/workspace/unison/spec" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="unison" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="unison" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/nathansobo/workspace/unison" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/nathansobo/workspace/unison/spec" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/nathansobo/workspace/unison/spec/lib" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="unison" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="unison" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/nathansobo/workspace/unison" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
           <option name="myItemId" value="PsiDirectory:/Users/nathansobo/workspace/unison/lib" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="unison" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="unison" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/nathansobo/workspace/unison" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/nathansobo/workspace/unison/lib" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="PsiDirectory:/Users/nathansobo/workspace/unison/lib/unison" />
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
         </PATH_ELEMENT>
       </PATH>
@@ -253,10 +290,10 @@
     <RUBY_DOC NAME="DEFAULTS" VALUE="true" />
     <RUBY_DOC NAME="NUMBER" VALUE="0" />
   </component>
-  <component name="RunManager" selected="RubyOnRails.set_spec">
-    <tempConfiguration default="false" name="set_spec" type="RubyRunConfigurationType" factoryName="RSpec">
+  <component name="RunManager" selected="RubyOnRails.selection_spec">
+    <tempConfiguration default="false" name="selection_spec" type="RubyRunConfigurationType" factoryName="RSpec">
       <RSPEC_RUN_CONFIG_SETTINGS_ID NAME="TESTS_FOLDER_PATH" VALUE="" />
-      <RSPEC_RUN_CONFIG_SETTINGS_ID NAME="TEST_SCRIPT_PATH" VALUE="$PROJECT_DIR$/spec/lib/relations/set_spec.rb" />
+      <RSPEC_RUN_CONFIG_SETTINGS_ID NAME="TEST_SCRIPT_PATH" VALUE="$PROJECT_DIR$/spec/lib/relations/selection_spec.rb" />
       <RSPEC_RUN_CONFIG_SETTINGS_ID NAME="SPEC_RUNNER_PATH" VALUE="[none]" />
       <RSPEC_RUN_CONFIG_SETTINGS_ID NAME="TEST_FILE_MASK" VALUE="**/*_spec.rb" />
       <RSPEC_RUN_CONFIG_SETTINGS_ID NAME="TEST_TEST_TYPE" VALUE="TEST_SCRIPT" />
@@ -343,7 +380,7 @@
       <envs />
     </configuration>
     <list size="1">
-      <item index="0" class="java.lang.String" itemvalue="RubyOnRails.set_spec" />
+      <item index="0" class="java.lang.String" itemvalue="RubyOnRails.selection_spec" />
     </list>
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
@@ -403,7 +440,7 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="7" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" order="0" />
       <window_info id="RDoc" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="1" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32998565" order="1" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="1" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" order="6" />
@@ -485,58 +522,9 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/spec/spec_helper.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="25" selection-start="190" selection-end="190" vertical-scroll-proportion="0.14479639">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/spec/lib/attribute_spec.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="0" selection-start="0" selection-end="66" vertical-scroll-proportion="0.07239819">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/unison/relations/selection.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="19" selection-start="52" selection-end="52" vertical-scroll-proportion="0.04826546">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/spec/lib/tuple_spec.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/unison/relations/set.rb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="13" column="22" selection-start="308" selection-end="308" vertical-scroll-proportion="0.33235294">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/unison/attribute.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="24" selection-start="248" selection-end="248" vertical-scroll-proportion="0.47058824">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/spec/lib/relations/selection_spec.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="6" selection-start="120" selection-end="120" vertical-scroll-proportion="0.23529412">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/spec/lib/relations/set_spec.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="39" column="27" selection-start="1132" selection-end="1132" vertical-scroll-proportion="1.8352941">
           <folding />
         </state>
       </provider>
@@ -555,9 +543,74 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/spec/lib/relations/set_spec.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="39" column="27" selection-start="1132" selection-end="1132" vertical-scroll-proportion="1.8352941">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/unison.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="35" selection-start="66" selection-end="66" vertical-scroll-proportion="0.047058824">
+        <state line="2" column="26" selection-start="94" selection-end="94" vertical-scroll-proportion="0.10031348">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spec/lib/tuple_spec.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="3" column="0" selection-start="0" selection-end="66" vertical-scroll-proportion="0.15789473">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/unison/attribute.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="20" selection-start="361" selection-end="361" vertical-scroll-proportion="0.7523511">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spec/lib/attribute_spec.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="32" column="36" selection-start="1131" selection-end="1131" vertical-scroll-proportion="0.86520374">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spec/spec_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="33" selection-start="328" selection-end="338" vertical-scroll-proportion="0.6117647">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/unison/predicates.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="17" selection-start="387" selection-end="387" vertical-scroll-proportion="0.3882353">
+          <folding>
+            <marker date="1214971659000" expanded="true" signature="369:438" placeholder=" ... end" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spec/lib/predicates_spec.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="18" column="11" selection-start="687" selection-end="687" vertical-scroll-proportion="0.40923077">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spec/lib/relations/selection_spec.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="38" selection-start="972" selection-end="972" vertical-scroll-proportion="0.65882355">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/unison/relations/selection.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="6" column="31" selection-start="165" selection-end="165" vertical-scroll-proportion="0.28235295">
           <folding />
         </state>
       </provider>

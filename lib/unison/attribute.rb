@@ -10,5 +10,13 @@ module Unison
       return false unless other.instance_of?(Attribute)
       relation == other.relation && name == other.name
     end
+
+    module PredicateConstructors
+      def eq(other)
+        Predicates::Eq.new(self, other)
+      end
+    end
+    include PredicateConstructors
+
   end
 end
