@@ -30,6 +30,18 @@ module Unison
         end
       end
 
+      describe "#has_attribute?" do
+        it "when passed an Attribute, returns true if the #attributes contains the argument and false otherwise" do
+          set.should have_attribute(Attribute.new(set, :name))
+          set.should_not have_attribute(Attribute.new(set, :bogus))
+        end
+
+        it "when passed a Symbol, returns true if the #attributes contains an Attribute with that symbol as its name and false otherwise" do
+          set.should have_attribute(:name)
+          set.should_not have_attribute(:bogus)
+        end
+      end
+
       describe "#[]" do
         it "retrieves the Set's Attribute by the given name" do
           set[:id].should == Attribute.new(set, :id)
@@ -50,6 +62,20 @@ module Unison
           set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
           set.insert(set.tuple_class.new(:id => 2, :name => "Alissa"))
           set.read.should == set.tuples
+        end
+      end
+
+      describe "#each" do
+        it "iterates over all Tuples in the Set" do
+          set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
+          set.insert(set.tuple_class.new(:id => 2, :name => "Alissa"))
+
+          eached_tuples = []
+          set.each do |tuple|
+            eached_tuples.push(tuple)
+          end
+          eached_tuples.should_not be_empty
+          eached_tuples.should == set.read
         end
       end
     end

@@ -14,6 +14,15 @@ module Unison
       attributes.push(Attribute.new(self, name))
     end
 
+    def has_attribute?(attribute)
+      case attribute
+      when Attribute
+        attributes.include?(attribute)
+      when Symbol
+        !self[attribute].nil?
+      end
+    end
+
     def [](attribute_name)
       attributes.detect {|attribute| attribute.name == attribute_name}
     end
@@ -24,6 +33,10 @@ module Unison
 
     def read
       tuples
+    end
+
+    def each(&block)
+      tuples.each(&block)
     end
   end
 end

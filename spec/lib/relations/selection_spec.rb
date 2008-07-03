@@ -22,7 +22,7 @@ module Unison
           users_set.insert(user_class.new(:id => 3, :name => "Corey"))
         end
 
-        it "returns all tuples in its operand that for which its predicate returns true" do
+        it "returns all tuples in its operand for which its predicate returns true" do
           tuples = selection.read
           tuples.size.should == 2
           tuples.each do |tuple|
