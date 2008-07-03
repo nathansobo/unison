@@ -22,37 +22,26 @@ Spec::Runner.configure do |config|
         end)
       end
     end
-
-    @users_set = Unison::Relations::Set.new(:users)
-    users_set.attribute(:id)
-    users_set.attribute(:name)
-    @user_class = users_set.tuple_class
-
-    @photos_set = Unison::Relations::Set.new(:photos)
-    photos_set.attribute(:id)
-    photos_set.attribute(:user_id)
-    photos_set.attribute(:name)
-    @photo_class = photos_set.tuple_class
-
-    users_set.insert(user_class.new(:id => 1, :name => "Nathan"))
-    users_set.insert(user_class.new(:id => 2, :name => "Corey"))
-    users_set.insert(user_class.new(:id => 3, :name => "Ross"))
-    photos_set.insert(photo_class.new(:id => 1, :user_id => 1, :name => "Photo 1"))
-    photos_set.insert(photo_class.new(:id => 2, :user_id => 1, :name => "Photo 2"))
-    photos_set.insert(photo_class.new(:id => 3, :user_id => 2, :name => "Photo 3"))
+  
+    users_set.insert(User.new(:id => 1, :name => "Nathan"))
+    users_set.insert(User.new(:id => 2, :name => "Corey"))
+    users_set.insert(User.new(:id => 3, :name => "Ross"))
+    photos_set.insert(Photo.new(:id => 1, :user_id => 1, :name => "Photo 1"))
+    photos_set.insert(Photo.new(:id => 2, :user_id => 1, :name => "Photo 2"))
+    photos_set.insert(Photo.new(:id => 3, :user_id => 2, :name => "Photo 3"))
   end
 end
 
 class Spec::ExampleGroup
-  attr_reader :users_set, :user_class, :photos_set, :photo_class
+  attr_reader :users_set, :User, :photos_set, :Photo
 
-#  def users_set
-#    User.relation
-#  end
-#
-#  def photos_set
-#    Photo.relation
-#  end
+  def users_set
+    User.relation
+  end
+
+  def photos_set
+    Photo.relation
+  end
 end
 
 module Kernel

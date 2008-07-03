@@ -4,8 +4,8 @@ module Unison
   describe CompoundTuple::Base do
     attr_reader :nested_tuple_1, :nested_tuple_2, :compound_tuple
     before do
-      @nested_tuple_1 = user_class.new(:id => 1, :name => "Damon")
-      @nested_tuple_2 = photo_class.new(:id => 1, :name => "Silly Photo", :user_id => 1)
+      @nested_tuple_1 = User.new(:id => 1, :name => "Damon")
+      @nested_tuple_2 = Photo.new(:id => 1, :name => "Silly Photo", :user_id => 1)
       @compound_tuple = CompoundTuple::Base.new(nested_tuple_1, nested_tuple_2)
     end
 
