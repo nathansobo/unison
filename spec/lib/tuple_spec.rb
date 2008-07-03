@@ -17,24 +17,32 @@ module Unison
     end
 
     describe ".attribute" do
-      it "delegates to #relation" do
+      it "delegates to .relation" do
         mock(User.relation).attribute(:name)
         User.attribute(:name)
       end
     end
 
-    describe ".relates_to_n" do
-      before do
-        User.relates_to_n :photos do
-          photos_set.where(photos[:user_id].eq(id))
-        end
+    describe ".[]" do
+      it "delegates to .relation" do
+        mock.proxy(User.relation)[:name]
+        User[:name]
+      end
+    end
+
+    describe ".where" do
+      it "delegates to .relation" do
+        predicate = User[:name].eq("Nathan")
+        mock.proxy(User.relation).where(User[:name].eq("Nathan"))
+        User.where(User[:name].eq("Nathan"))
       end
 
+    end
+
+    describe ".relates_to_n" do
       it "creates an instance method representing the given relation" do
-        pending "Getting fixture classes in place" do
-          user = User.find(1)
-          user.photos.should == photos_set.where(photos[:user_id].eq(id))
-        end
+        user = User.find(1)
+        user.photos.should == photos_set.where(photos_set[:user_id].eq(1))
       end
     end
     

@@ -12,6 +12,10 @@ Spec::Runner.configure do |config|
           member_of Unison::Relations::Set.new(:users)
           attribute :id
           attribute :name
+
+          relates_to_n :photos do
+            Photo.where(Photo[:user_id].eq(self[:id]))
+          end
         end)
 
         const_set(:Photo, Class.new(Unison::Tuple::Base) do

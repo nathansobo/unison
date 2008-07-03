@@ -12,6 +12,14 @@ module Unison
         relation.attribute(name)
       end
 
+      def [](attribute)
+        relation[attribute]
+      end
+
+      def where(predicate)
+        relation.where(predicate)
+      end
+
       def relates_to_n(name, &block)
         define_method name, &block
       end

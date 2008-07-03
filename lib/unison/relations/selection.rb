@@ -12,6 +12,11 @@ module Unison
           predicate.call(tuple)
         end
       end
+
+      def ==(other)
+        return false unless other.instance_of?(Selection)
+        operand == other.operand && predicate == other.predicate
+      end
     end
   end
 end
