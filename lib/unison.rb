@@ -1,3 +1,4 @@
+require "unison/relations/relation"
 require "unison/relations/set"
 require "unison/relations/selection"
 require "unison/relations/inner_join"

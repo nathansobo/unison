@@ -1,42 +1,47 @@
 module Unison
-  class Set
-    attr_reader :name, :attributes, :tuple_class, :tuples
-    
-    def initialize(name)
-      @name = name
-      @attributes = []
-      @tuple_class = Class.new(Tuple::Base)
-      tuple_class.relation = self
-      @tuples = []
-    end
+  module Relations
+    class Set < Relation
+      attr_reader :name, :attributes, :tuples
 
-    def attribute(name)
-      attributes.push(Attribute.new(self, name))
-    end
-
-    def has_attribute?(attribute)
-      case attribute
-      when Attribute
-        attributes.include?(attribute)
-      when Symbol
-        !self[attribute].nil?
+      def initialize(name)
+        super()
+        @name = name
+        @attributes = []
+        @tuples = []
       end
-    end
 
-    def [](attribute_name)
-      attributes.detect {|attribute| attribute.name == attribute_name}
-    end
+      def tuple_superclass
+        Tuple::Base
+      end
 
-    def insert(tuple)
-      tuples.push(tuple)
-    end
+      def attribute(name)
+        attributes.push(Attribute.new(self, name))
+      end
 
-    def read
-      tuples
-    end
+      def has_attribute?(attribute)
+        case attribute
+        when Attribute
+          attributes.include?(attribute)
+        when Symbol
+          !self[attribute].nil?
+        end
+      end
 
-    def each(&block)
-      tuples.each(&block)
+      def [](attribute_name)
+        attributes.detect {|attribute| attribute.name == attribute_name}
+      end
+
+      def insert(tuple)
+        tuples.push(tuple)
+      end
+
+      def read
+        tuples
+      end
+
+      def each(&block)
+        tuples.each(&block)
+      end
     end
   end
 end

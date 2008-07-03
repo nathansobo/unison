@@ -3,12 +3,12 @@ require "unison"
 
 Spec::Runner.configure do |config|
   config.before do
-    @users_set = Unison::Set.new(:users)
+    @users_set = Unison::Relations::Set.new(:users)
     users_set.attribute(:id)
     users_set.attribute(:name)
     @user_class = users_set.tuple_class
 
-    @photos_set = Unison::Set.new(:photos)
+    @photos_set = Unison::Relations::Set.new(:photos)
     photos_set.attribute(:id)
     photos_set.attribute(:user_id)
     photos_set.attribute(:name)

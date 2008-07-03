@@ -1,6 +1,6 @@
 module Unison
   module Relations
-    class Selection
+    class Selection < Relation
       attr_reader :operand, :predicate
 
       def initialize(operand, predicate)

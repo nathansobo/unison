@@ -1,11 +1,10 @@
 module Unison
   module Relations
-    class InnerJoin
-      attr_reader :operand_1, :operand_2, :predicate, :tuple_class
+    class InnerJoin < Relation
+      attr_reader :operand_1, :operand_2, :predicate
       def initialize(operand_1, operand_2, predicate)
+        super()
         @operand_1, @operand_2, @predicate = operand_1, operand_2, predicate
-        @tuple_class = Class.new(CompoundTuple::Base)
-        tuple_class.relation = self        
       end
 
       def read
