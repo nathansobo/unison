@@ -2,6 +2,23 @@ module Unison
   module Tuple
     module ClassMethods
       attr_accessor :relation
+
+      def member_of(relation)
+        @relation = relation
+        relation.tuple_class = self
+      end
+
+      def attribute(name)
+        relation.attribute(name)
+      end
+
+      def relates_to_n(name, &block)
+        define_method name, &block
+      end
+
+      def find(id)
+        relation.where(relation[:id].eq(id)).first
+      end
     end
 
     def self.included(a_module)

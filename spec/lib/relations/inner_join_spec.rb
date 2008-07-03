@@ -21,15 +21,6 @@ module Unison
       end
 
       describe "#read" do
-        before do
-          users_set.insert(user_class.new(:id => 1, :name => "Nathan"))
-          users_set.insert(user_class.new(:id => 2, :name => "Corey"))
-          users_set.insert(user_class.new(:id => 3, :name => "Ross"))
-          photos_set.insert(photo_class.new(:id => 1, :user_id => 1, :name => "Photo 1"))
-          photos_set.insert(photo_class.new(:id => 2, :user_id => 1, :name => "Photo 2"))
-          photos_set.insert(photo_class.new(:id => 3, :user_id => 2, :name => "Photo 3"))
-        end
-
         it "returns all tuples in its operands for which its predicate returns true" do
           tuples = join.read
           tuples.size.should == 3
