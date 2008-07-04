@@ -27,6 +27,10 @@ module Unison
       def find(id)
         relation.where(relation[:id].eq(id)).first
       end
+
+      def create(attributes)
+        relation.insert(new(attributes))
+      end
     end
 
     def self.included(a_module)

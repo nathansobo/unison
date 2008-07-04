@@ -5,18 +5,33 @@ module Unison
 
       def initialize(operand, predicate)
         @operand, @predicate = operand, predicate
-      end
-
-      def read
-        operand.read.select do |tuple|
-          predicate.call(tuple)
-        end
+        @tuples = initial_read
       end
 
       def ==(other)
         return false unless other.instance_of?(Selection)
         operand == other.operand && predicate == other.predicate
       end
+
+      def read
+        initial_read
+      end
+
+      def mailbox=(mailbox)
+        mailbox.subscribe(operand, :create) do |tuple|
+          tuples.push(tuple) if predicate.call(tuple)
+        end
+      end
+
+      protected
+      attr_reader :tuples
+
+      def initial_read
+        operand.read.select do |tuple|
+          predicate.call(tuple)
+        end
+      end
+
     end
   end
 end

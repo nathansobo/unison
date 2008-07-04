@@ -33,6 +33,7 @@ module Unison
 
       def insert(tuple)
         tuples.push(tuple)
+        tuple
       end
 
       def read
