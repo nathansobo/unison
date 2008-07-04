@@ -14,10 +14,6 @@ module Unison
           join.operand_2.should == photos_set
           join.predicate.should == photos_set[:user_id].eq(users_set[:id])
         end
-
-        it "sets the #tuple_class to an anonymous subclass of CompoundTuple::Base" do
-          join.tuple_class.superclass.should == CompoundTuple::Base
-        end
       end
 
       describe "#read" do

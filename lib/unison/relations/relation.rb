@@ -7,11 +7,7 @@ module Unison
       end
       
       def tuple_class
-        @tuple_class ||= Class.new(tuple_superclass)
-      end
-
-      def tuple_superclass
-        CompoundTuple::Base
+        @tuple_class ||= Class.new(Tuple::Base)
       end
 
       def where(predicate)

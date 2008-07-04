@@ -33,12 +33,18 @@ module Unison
       a_module.extend ClassMethods
     end
 
-    attr_reader :attributes
+    attr_reader :attributes, :nested_tuples
 
-    def initialize(attributes)
-      @attributes = {}
-      attributes.each do |attribute, value|
-        self[attribute] = value
+    def initialize(*args)
+      if attributes_hash?(args)
+        @primitive = true
+        @attributes = {}
+        args.first.each do |attribute, value|
+          self[attribute] = value
+        end
+      else
+        @primitive = false
+        @nested_tuples = args
       end
     end
     
@@ -46,8 +52,23 @@ module Unison
       self.class.relation
     end
 
+    def primitive?
+      @primitive
+    end
+
+    def compound?
+      !primitive?
+    end
+
     def [](attribute)
-      attributes[attribute_for(attribute)]
+      if primitive?
+        attributes[attribute_for(attribute)]
+      else
+        nested_tuples.each do |tuple|
+          return tuple[attribute] if tuple.relation.has_attribute?(attribute)
+        end
+        raise "Attribute #{attribute} not found"
+      end
     end
 
     def []=(attribute, value)
@@ -70,5 +91,8 @@ module Unison
       end
     end
 
+    def attributes_hash?(args)
+      args.size == 1 && args.first.instance_of?(Hash)
+    end
   end
 end
