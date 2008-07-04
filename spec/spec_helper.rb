@@ -1,4 +1,5 @@
 require "rubygems"
+require "spec"
 $LOAD_PATH.push("#{File.dirname(__FILE__)}/../lib")
 require "unison"
 
@@ -37,6 +38,7 @@ Spec::Runner.configure do |config|
 end
 
 class Spec::ExampleGroup
+  include Unison
   attr_reader :users_set, :User, :photos_set, :Photo
 
   def users_set
