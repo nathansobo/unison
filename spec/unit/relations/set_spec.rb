@@ -56,6 +56,29 @@ describe Unison::Relations::Set do
     end
   end
 
+  describe "#subscribe" do
+    it "for the :insert event type, sends the notifications of the created object to the subscribing Mailbox" do
+      mailbox = Mailbox.new
+      users_set.subscribe(mailbox, :insert)
+      mailbox.events.should be_empty
+      user = User.create(:id => 100, :name => "Farb")
+      mailbox.events.length.should == 1
+      event = mailbox.events.first
+      event.relation.should == users_set
+      event.type.should == :insert
+      event.object.should == user
+    end
+
+    it "will not subscribe to the same event type twice for the same Mailbox" do
+      mailbox = Mailbox.new
+      users_set.subscribe(mailbox, :insert)
+      users_set.subscribe(mailbox, :insert)
+      mailbox.events.should be_empty
+      user = User.create(:id => 100, :name => "Farb")
+      mailbox.events.length.should == 1
+    end
+  end
+
   describe "#read" do
     it "returns all Tuples in the Set" do
       set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
