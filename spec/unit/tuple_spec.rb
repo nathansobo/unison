@@ -74,6 +74,10 @@ describe Unison::Tuple::Base do
         tuple[:id].should == 1
         tuple[:name].should == "Nathan"
       end
+
+      it "assigns a #mailbox" do
+        tuple.mailbox.should be_an_instance_of(Mailbox)
+      end
     end
 
     describe "#compound?" do

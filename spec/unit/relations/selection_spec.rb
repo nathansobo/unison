@@ -24,6 +24,12 @@ describe Unison::Relations::Selection do
     end
   end
 
+  describe "#size" do
+    it "returns the number of tuples in the relation" do
+      selection.size.should == selection.read.size
+    end
+  end
+
   describe "#==" do
     it "returns true for Selections with the same #operand and #predicate and false otherwise" do
       selection.should == Selection.new(photos_set, photos_set[:user_id].eq(1))

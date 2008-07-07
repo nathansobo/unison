@@ -37,7 +37,7 @@ module Unison
       a_module.extend ClassMethods
     end
 
-    attr_reader :attributes, :nested_tuples
+    attr_reader :attributes, :nested_tuples, :mailbox
 
     def initialize(*args)
       if attributes_hash?(args)
@@ -50,6 +50,7 @@ module Unison
         @primitive = false
         @nested_tuples = args
       end
+      @mailbox = Mailbox.new
     end
     
     def relation
