@@ -4,7 +4,7 @@ module Unison
 
     def initialize
       @subscriptions = Hash.new {|h,k| h[k] = Hash.new {|h,k| h[k] = []} }
-      @events = []
+      @frozen = false
     end
 
     def subscribe(relation, event_type, &proc)
@@ -13,21 +13,34 @@ module Unison
     end
 
     def freeze
+      @frozen = true
+      @events = []
+    end
+
+    def frozen?
+      @frozen
     end
 
     def take
       return if events.empty?
-      event = events.shift
-      subscriptions[event.relation][event.type].each do |proc|
-        proc.call(event.object)
-      end
+      invoke_callbacks(events.shift)
     end
 
     def publish(event)
-      events.push(event)
+      if frozen?
+        events.push(event)
+      else
+        invoke_callbacks(event)
+      end
     end
 
     protected
     attr_reader :subscriptions
+
+    def invoke_callbacks(event)
+      subscriptions[event.relation][event.type].each do |proc|
+        proc.call(event.object)
+      end
+    end
   end
 end

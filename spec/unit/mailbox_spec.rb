@@ -3,19 +3,45 @@ require "#{File.dirname(__FILE__)}/../spec_helper"
 describe Unison::Mailbox do
   attr_reader :mailbox
   before do
-    @mailbox = Mailbox.new
+    @mailbox = Unison::Mailbox.new
   end
 
   describe "#publish" do
-    it "pushes the given event to the #events array" do
-      event = Event.new(users_set, :insert, User.find(1))
-      mailbox.publish(event)
-      mailbox.events.should == [event]
+    context "when the Mailbox is #frozen?" do
+      before do
+        mailbox.freeze
+        mailbox.should be_frozen
+      end
+
+      it "pushes the given event to the #events array" do
+        event = Event.new(users_set, :insert, User.find(1))
+        mailbox.publish(event)
+        mailbox.events.should == [event]
+      end
+    end
+
+    context "when the Mailbox is not #frozen?" do
+      include Unison
+
+      before do
+        mailbox.should_not be_frozen
+      end
+
+      it "executes the events immediately" do
+        callback_argument = nil
+        mailbox.subscribe(users_set, :insert) do |event|
+          callback_argument = event
+        end
+        user = User.find(1)
+        mailbox.publish(Unison::Event.new(users_set, :insert, User.find(1)))
+        callback_argument.should == user
+      end
     end
   end
 
   describe "#take" do
     it "processes one event from the events array, calling the registered procedures" do
+      mailbox.freeze
       inserts = []
       object = User.find(1)
       mailbox.subscribe(photos_set, :insert) do |inserted|

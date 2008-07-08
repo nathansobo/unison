@@ -20,8 +20,9 @@ module Unison
         relation.where(predicate)
       end
 
-      def relates_to_n(name, &block)
-        define_method name, &block
+      def relates_to_n(name, &proc)
+        instance_relations[name] = proc
+        attr_reader name
       end
 
       def find(id)
@@ -30,6 +31,11 @@ module Unison
 
       def create(attributes)
         relation.insert(new(attributes))
+      end
+
+      protected
+      def instance_relations
+        @instance_relations ||= Hash.new
       end
     end
 
@@ -51,6 +57,11 @@ module Unison
         @nested_tuples = args
       end
       @mailbox = Mailbox.new
+      instance_relations.each do |name, proc|
+        relation = instance_eval(&proc)
+        relation.mailbox = mailbox
+        instance_variable_set("@#{name}", relation)
+      end
     end
     
     def relation
@@ -98,6 +109,10 @@ module Unison
 
     def attributes_hash?(args)
       args.size == 1 && args.first.instance_of?(Hash)
+    end
+
+    def instance_relations
+      self.class.send(:instance_relations)
     end
   end
 end

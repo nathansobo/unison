@@ -59,6 +59,7 @@ describe Unison::Relations::Set do
   describe "#subscribe" do
     it "for the :insert event type, sends the notifications of the created object to the subscribing Mailbox" do
       mailbox = Mailbox.new
+      mailbox.freeze
       users_set.subscribe(mailbox, :insert)
       mailbox.events.should be_empty
       user = User.create(:id => 100, :name => "Farb")
@@ -71,6 +72,7 @@ describe Unison::Relations::Set do
 
     it "will not subscribe to the same event type twice for the same Mailbox" do
       mailbox = Mailbox.new
+      mailbox.freeze
       users_set.subscribe(mailbox, :insert)
       users_set.subscribe(mailbox, :insert)
       mailbox.events.should be_empty

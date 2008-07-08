@@ -14,7 +14,7 @@ module Unison
       end
 
       def read
-        initial_read
+        tuples
       end
 
       def size
@@ -22,7 +22,7 @@ module Unison
       end
 
       def mailbox=(mailbox)
-        mailbox.subscribe(operand, :create) do |tuple|
+        mailbox.subscribe(operand, :insert) do |tuple|
           tuples.push(tuple) if predicate.call(tuple)
         end
       end
