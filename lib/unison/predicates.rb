@@ -11,7 +11,7 @@ module Unison
         operand_1 == other.operand_1 && operand_2 == other.operand_2 
       end
 
-      def call(tuple)
+      def eval(tuple)
         tuple.bind(operand_1) == tuple.bind(operand_2)
       end
     end

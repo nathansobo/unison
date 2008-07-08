@@ -17,6 +17,5 @@ module Unison
       end
     end
     include PredicateConstructors
-
   end
 end

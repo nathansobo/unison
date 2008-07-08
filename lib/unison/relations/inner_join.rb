@@ -8,7 +8,7 @@ module Unison
       end
 
       def read
-        cartesian_product.select {|tuple| predicate.call(tuple)}
+        cartesian_product.select {|tuple| predicate.eval(tuple)}
       end
 
       protected

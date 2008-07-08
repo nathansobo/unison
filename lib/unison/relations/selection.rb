@@ -23,7 +23,7 @@ module Unison
 
       def mailbox=(mailbox)
         mailbox.subscribe(operand, :insert) do |tuple|
-          tuples.push(tuple) if predicate.call(tuple)
+          tuples.push(tuple) if predicate.eval(tuple)
         end
       end
 
@@ -32,7 +32,7 @@ module Unison
 
       def initial_read
         operand.read.select do |tuple|
-          predicate.call(tuple)
+          predicate.eval(tuple)
         end
       end
 
