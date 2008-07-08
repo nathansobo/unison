@@ -91,6 +91,15 @@ module Unison
       attributes[attribute_for(attribute)] = value
     end
 
+    def bind(expression)
+      case expression
+      when Attribute
+        self[expression]
+      else
+        expression
+      end
+    end
+
     class Base
       include Tuple
     end

@@ -62,7 +62,7 @@ describe Unison::Tuple::Base do
     end
   end
 
-  context "instantiated with an attributes hash" do
+  context "a primitive tuple" do
     before do
       User.superclass.should == Tuple::Base
       @tuple = User.new(:id => 1, :name => "Nathan")
@@ -119,9 +119,22 @@ describe Unison::Tuple::Base do
         tuple[:name].should == "Corey"
       end
     end
+
+    describe "#bind" do
+      it "retrieves the value for an Attribute defined on the relation of the Tuple class" do
+        tuple.bind(User.relation[:id]).should == 1
+        tuple.bind(User.relation[:name]).should == "Nathan"
+      end
+
+      it "for non-attribute arguments, is the identity function" do
+        tuple.bind(:id).should == :id
+        tuple.bind(1).should == 1
+        tuple.bind("Hi").should == "Hi"
+      end
+    end
   end
 
-  context "instantiated with other tuples" do
+  context "a compound tuple" do
     attr_reader :nested_tuple_1, :nested_tuple_2
     before do
       @nested_tuple_1 = User.new(:id => 1, :name => "Damon")
