@@ -6,12 +6,13 @@ module Unison
       user = User.find(1)
       user.mailbox.freeze
       user.mailbox.events.size.should == 0
-      photo_count = user.photos.size
-      photo_count.should be > 0
-      photos_set.insert(Photo.new(:id => 99, :user_id => 1, :name => "Another photo"))
-      user.photos.size.should == photo_count
+      user.photos.read.should_not be_empty
+
+      photo = photos_set.insert(Photo.new(:id => 99, :user_id => 1, :name => "Another photo"))
+
+      user.photos.read.should_not include(photo)
       user.mailbox.take
-      user.photos.size.should == photo_count + 1
+      user.photos.read.should include(photo)
     end
   end
 end
