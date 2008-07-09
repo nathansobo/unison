@@ -1,0 +1,11 @@
+class Question < Tuple::Base
+  # automate this for the default case
+  member_of Relations::Set.new(:questions)  
+
+  attribute :id
+  attribute :body
+
+  relates_to_n :answers do
+    Answer.where(Answer[:question_id].eq(id))
+  end
+end
