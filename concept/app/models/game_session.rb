@@ -4,6 +4,7 @@ module Models
     member_of Relations::Set.new(:game_sessions)
 
     attribute :id
+    attribute :game_id
     attribute :answer_id
     attribute :deactivated_at
 
@@ -12,7 +13,9 @@ module Models
     end
 
     relates_to_1 :game do
-      Game.where(Game[:id].eq(game_id))
+      Game.where(Game[:id].eq(self[:game_id]))
     end
+
+    alias_method :room, :game
   end
 end

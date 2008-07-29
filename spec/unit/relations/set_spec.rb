@@ -47,6 +47,14 @@ module Unison
           set[:id].should == Attribute.new(set, :id)
           set[:name].should == Attribute.new(set, :name)
         end
+        
+        context "when no Attribute with the passed-in name is defined" do
+          it "raises an ArgumentError" do
+            lambda do
+              set[:i_dont_exist]
+            end.should raise_error(ArgumentError)
+          end
+        end
       end
 
       describe "#insert" do

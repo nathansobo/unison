@@ -4,7 +4,7 @@ module Topics
   describe GameSession do
     attr_reader :game_session, :game, :topic
     before do
-      @game_session = ::GameSession.find(1)
+      @game_session = Models::GameSession.find(1)
       @game = game_session.game
       @topic = GameSession.new(game_session)
     end

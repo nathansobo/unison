@@ -18,17 +18,18 @@ module Unison
         attributes.push(Attribute.new(self, name))
       end
 
-      def has_attribute?(attribute)
-        case attribute
+      def has_attribute?(attribute_or_symbol)
+        case attribute_or_symbol
         when Attribute
-          attributes.include?(attribute)
+          attributes.include?(attribute_or_symbol)
         when Symbol
-          !self[attribute].nil?
+          attributes.any? {|attribute| attribute.name == attribute_or_symbol}
         end
       end
 
       def [](attribute_name)
-        attributes.detect {|attribute| attribute.name == attribute_name}
+        attributes.detect {|attribute| attribute.name == attribute_name} ||
+          raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on this Set")
       end
 
       def insert(tuple)

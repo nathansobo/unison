@@ -8,17 +8,13 @@ require File.expand_path("#{dir}/../concept")
 
 Spec::Runner.configure do |config|
   config.mock_with :rr
+
+  config.before do
+    Models::Game.create(:id => 1)
+    Models::GameSession.create(:id => 1, :game_id => 1)
+    Models::GameSession.create(:id => 2, :game_id => 1)    
+  end
 end
 
 class Spec::ExampleGroup
-  include Unison
-  attr_reader :users_set, :User, :photos_set, :Photo
-
-  def users_set
-    User.relation
-  end
-
-  def photos_set
-    Photo.relation
-  end
 end
