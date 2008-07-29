@@ -26,6 +26,18 @@ module Unison
             end
           end
         end
+
+        operand_1.on_delete do |operand_1_tuple|
+          tuples.each do |compound_tuple|
+            tuples.delete(compound_tuple) if compound_tuple[operand_1] == operand_1_tuple
+          end
+        end
+
+        operand_2.on_delete do |operand_2_tuple|
+          tuples.each do |compound_tuple|
+            tuples.delete(compound_tuple) if compound_tuple[operand_2] == operand_2_tuple
+          end
+        end
       end
 
       def read
