@@ -8,7 +8,7 @@ module Unison
         @name = name
         @attributes = []
         @tuples = []
-        @subscriptions = Hash.new {|h,k| h[k] = []}
+        @insert_subscriptions = []
       end
 
       def tuple_superclass
@@ -34,8 +34,8 @@ module Unison
 
       def insert(tuple)
         tuples.push(tuple)
-        subscriptions[:insert].each do |subscriber|
-          subscriber.publish(Event.new(self, :insert, tuple))
+        insert_subscriptions.each do |proc|
+          proc.call(tuple)
         end
         tuple
       end
@@ -48,8 +48,12 @@ module Unison
         tuples.each(&block)
       end
 
+      def on_insert(&blk)
+        insert_subscriptions << blk
+      end
+
       protected
-      attr_reader :subscriptions
+      attr_reader :insert_subscriptions
     end
   end
 end

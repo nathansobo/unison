@@ -65,6 +65,18 @@ module Unison
         end
       end
 
+      describe "#subscribe" do
+        it "when passed :insert and a block, will invoke the block when tuples are inserted" do
+          inserted = nil
+          set.on_insert do |tuple|
+            inserted = tuple
+          end
+          tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+          set.insert(tuple)
+          inserted.should == tuple
+        end
+      end
+
       describe "#each" do
         it "iterates over all Tuples in the Set" do
           set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
