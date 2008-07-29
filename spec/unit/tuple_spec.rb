@@ -130,6 +130,31 @@ module Unison
             tuple.bind("Hi").should == "Hi"
           end
         end
+        
+        describe "#==" do
+          attr_reader :other_tuple
+          context "when other Tuple#attributes == #attributes" do
+            before do
+              @other_tuple = User.new(:id => 1, :name => "Nathan")
+              other_tuple.attributes.should == tuple.attributes
+            end
+
+            it "returns true" do
+              tuple.should == other_tuple
+            end
+          end
+
+          context "when other Tuple#attributes != #attributes" do
+            before do
+              @other_tuple = User.new(:id => 100, :name => "Nathan's Clone")
+              other_tuple.attributes.should_not == tuple.attributes
+            end
+
+            it "returns false" do
+              tuple.should_not == other_tuple
+            end
+          end
+        end
       end
 
       context "a compound tuple" do
@@ -162,6 +187,31 @@ module Unison
           it "retrieves the value of an Attribute from the appropriate nested Tuple" do
             tuple[users_set[:id]].should == nested_tuple_1[users_set[:id]]
             tuple[photos_set[:id]].should == nested_tuple_2[photos_set[:id]]
+          end
+        end
+
+        describe "#==" do
+          attr_reader :other_tuple
+          context "when other Tuple#nested_tuples == #nested_tuples" do
+            before do
+              @other_tuple = Tuple::Base.new(nested_tuple_1, nested_tuple_2)
+              other_tuple.nested_tuples.should == tuple.nested_tuples
+            end
+
+            it "returns true" do
+              tuple.should == other_tuple
+            end
+          end
+
+          context "when other Tuple#attributes != #attributes" do
+            before do
+              @other_tuple = Tuple::Base.new(User.new(:id => 100, :name => "Ross"), Photo.new(:id => 100, :name => "Super Photo", :user_id => 100))
+              other_tuple.nested_tuples.should_not == tuple.nested_tuples
+            end
+
+            it "returns false" do
+              tuple.should_not == other_tuple
+            end
           end
         end
       end

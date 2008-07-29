@@ -89,6 +89,14 @@ module Unison
       attributes[attribute_for(attribute)] = value
     end
 
+    def ==(other)
+      if primitive?
+        attributes == other.attributes
+      else
+        nested_tuples == other.nested_tuples
+      end
+    end
+
     def bind(expression)
       case expression
       when Attribute

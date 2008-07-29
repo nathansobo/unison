@@ -14,6 +14,40 @@ module Unison
           join.operand_2.should == photos_set
           join.predicate.should == photos_set[:user_id].eq(users_set[:id])
         end
+
+        context "when a Tuple is inserted into #operand_1 that creates a compound Tuple that matches the #predicate" do
+          attr_reader :photo, :user, :tuple_class, :expected_tuple
+          before do
+            @tuple_class = join.tuple_class
+            @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+            @user = User.new(:id => 100, :name => "Brian")
+            @expected_tuple = tuple_class.new(user, photo)
+            join.predicate.eval(expected_tuple).should be_true
+          end
+
+          it "adds the compound Tuple to the result of #read" do
+            join.read.should_not include(expected_tuple)
+            users_set.insert(user)
+            join.read.should include(expected_tuple)
+          end
+        end
+
+        context "when a Tuple that does not match the #predicate is inserted into the #operand" do
+          attr_reader :photo, :user, :tuple_class, :expected_tuple
+          before do
+            @tuple_class = join.tuple_class
+            @photo = Photo.create(:id => 100, :user_id => 999, :name => "Photo 100")
+            @user = User.new(:id => 100, :name => "Brian")
+            @expected_tuple = tuple_class.new(user, photo)
+            join.predicate.eval(expected_tuple).should be_false
+          end
+
+          it "does not add the compound Tuple to the result of #read" do
+            join.read.should_not include(expected_tuple)
+            users_set.insert(user)
+            join.read.should_not include(expected_tuple)
+          end
+        end
       end
 
       describe "#read" do

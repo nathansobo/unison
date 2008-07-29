@@ -5,6 +5,16 @@ module Unison
       def initialize(operand_1, operand_2, predicate)
         super()
         @operand_1, @operand_2, @predicate = operand_1, operand_2, predicate
+
+#        operand_1.on_insert do |inserted|
+#          operand_2.each do |operand_2_tuple|
+#            compound_tuple = tuple_class.new(inserted, operand_2_tuple)
+#            tuples.push(compound_tuple) if predicate.eval(compound_tuple)
+#          end
+#        end
+
+
+
       end
 
       def read
