@@ -1,4 +1,4 @@
-require "#{File.dirname(__FILE__)}/../spec_helper"
+require File.expand_path("#{File.dirname(__FILE__)}/../spec_helper")
 
 module Unison
   describe "A Tuple with a has-many relation" do
