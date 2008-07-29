@@ -3,16 +3,17 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
 module Unison
   module Relations
     describe InnerJoin do
-      attr_reader :join
+      attr_reader :join, :predicate
       before do
-        @join = InnerJoin.new(users_set, photos_set, photos_set[:user_id].eq(users_set[:id]))
+        @predicate = photos_set[:user_id].eq(users_set[:id])
+        @join = InnerJoin.new(users_set, photos_set, predicate)
       end
 
       describe "#initialize" do
         it "sets #operand_1, #operand_2, and #predicate" do
           join.operand_1.should == users_set
           join.operand_2.should == photos_set
-          join.predicate.should == photos_set[:user_id].eq(users_set[:id])
+          predicate.should == photos_set[:user_id].eq(users_set[:id])
         end
 
         context "when a Tuple inserted into #operand_1" do
@@ -23,7 +24,7 @@ module Unison
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.new(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
-              join.predicate.eval(expected_tuple).should be_true
+              predicate.eval(expected_tuple).should be_true
             end
 
             it "adds the compound Tuple to the result of #read" do
@@ -40,7 +41,7 @@ module Unison
               @photo = Photo.create(:id => 100, :user_id => 999, :name => "Photo 100")
               @user = User.new(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
-              join.predicate.eval(expected_tuple).should be_false
+              predicate.eval(expected_tuple).should be_false
             end
 
             it "does not add the compound Tuple to the result of #read" do
@@ -59,7 +60,7 @@ module Unison
               @photo = Photo.new(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
-              join.predicate.eval(expected_tuple).should be_true
+              predicate.eval(expected_tuple).should be_true
             end
 
             it "adds the compound Tuple to the result of #read" do
@@ -76,7 +77,7 @@ module Unison
               @photo = Photo.new(:id => 100, :user_id => 999, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
-              join.predicate.eval(expected_tuple).should be_false
+              predicate.eval(expected_tuple).should be_false
             end
 
             it "does not add the compound Tuple to the result of #read" do
@@ -96,7 +97,7 @@ module Unison
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @compound_tuple = join.read.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
-              join.predicate.eval(compound_tuple).should be_true
+              predicate.eval(compound_tuple).should be_true
               join.read.should include(compound_tuple)
             end
 
@@ -132,7 +133,7 @@ module Unison
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @compound_tuple = join.read.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
-              join.predicate.eval(compound_tuple).should be_true
+              predicate.eval(compound_tuple).should be_true
               join.read.should include(compound_tuple)
             end
 
@@ -187,35 +188,64 @@ module Unison
 
       describe "#on_insert" do
         context "when a Tuple is inserted into #operand_2" do
-          it "will invoke the block when the insertion results in a compound Tuple that matches the #predicate" do
-            inserted = nil
-            join.on_insert do |tuple|
-              inserted = tuple
-            end
-            photo = Photo.create(:id => 100, :user_id => 1, :name => "Photo 100")
+          context "when the inserted Tuple creates a compound Tuple that matches the #predicate" do
+            it "invokes the block" do
+              inserted = nil
+              join.on_insert do |tuple|
+                inserted = tuple
+              end
+              photo = Photo.create(:id => 100, :user_id => 1, :name => "Photo 100")
 
-            inserted[photos_set].should == photo
-            inserted[users_set].should == User.find(1)
+              predicate.eval(inserted).should be_true
+              inserted[photos_set].should == photo
+              inserted[users_set].should == User.find(1)
+            end
+          end
+
+          context "when the inserted Tuple creates a compound Tuple that does not match the #predicate" do
+            it "does not invoke the block" do
+              join.on_insert do |tuple|
+                raise "I should not be invoked"
+              end
+              Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+            end
           end
         end
 
         context "when a Tuple is inserted into #operand_1" do
           attr_reader :photo
-          before do
-            @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+
+          context "when the inserted Tuple creates a compound Tuple that matches the #predicate" do
+            before do
+              @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+            end
+            
+            it "invokes the block" do
+              inserted = nil
+              join.on_insert do |tuple|
+                inserted = tuple
+              end
+              user = User.create(:id => 100, :name => "Brian")
+
+              predicate.eval(inserted).should be_true
+              inserted[photos_set].should == photo
+              inserted[users_set].should == user
+            end
           end
 
-          it "will invoke the block when the insertion results in a compound Tuple that matches the #predicate" do
-            inserted = nil
-            join.on_insert do |tuple|
-              inserted = tuple
+          context "when the inserted Tuple creates a compound Tuple that does not match the #predicate" do
+            it "does not invoke the block" do
+              join.on_insert do |tuple|
+                raise "I should not be invoked"
+              end
+              User.create(:id => 100, :name => "Brian")
             end
-            user = User.create(:id => 100, :name => "Brian")
-
-            inserted[photos_set].should == photo
-            inserted[users_set].should == user
           end
         end
+      end
+
+      describe "#on_delete" do
+        
       end
     end
   end
