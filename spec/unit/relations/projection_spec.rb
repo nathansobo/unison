@@ -49,33 +49,32 @@ module Unison
         context "when the a Tuple is deleted from the #operand" do
           context "when the deleted Tuple restricted by #attributes is in the Projection" do
             before do
-              @user = projection.read.first
+              @user = User.create(:id => 100, :name => "Brian")
+              @photo = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
               projection.read.should include(user)
             end
 
             it "removes the Tuple restricted by #attributes" do
-              pending "Reenable when handling InnerJoin#on_delete" do
-                lambda do
-                  users_set.delete(user)
-                end.should change{projection.read.length}.by(-1)
-                projection.read.should_not include(user)
-              end
+              lambda do
+                users_set.delete(user)
+              end.should change{projection.read.length}.by(-1)
+              projection.read.should_not include(user)
             end
           end
 
-#          context "when the deleted Tuple restricted by #attributes is not in the Projection" do
-#            before do
-#              @user = User.create(:id => 100, :name => "Brian")
-#              projection.read.should_not include(user)
-#            end
-#
-#            it "does not remove the Tuple restricted by #attributes" do
-#              lambda do
-#                users_set.delete(user)
-#              end.should_not change{projection.read.length}
-#              projection.read.should_not include(user)
-#            end
-#          end
+          context "when the deleted Tuple restricted by #attributes is not in the Projection" do
+            before do
+              @user = User.create(:id => 100, :name => "Brian")
+              projection.read.should_not include(user)
+            end
+
+            it "does not remove the Tuple restricted by #attributes" do
+              lambda do
+                users_set.delete(user)
+              end.should_not change{projection.read.length}
+              projection.read.should_not include(user)
+            end
+          end
         end
       end
 
@@ -116,6 +115,61 @@ module Unison
             Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
 
             inserted.should == user
+          end
+        end
+      end
+
+      describe "#on_delete" do
+        attr_reader :user
+        context "when the deleted Tuple restricted by #attributes is in the relation" do
+          attr_reader :user
+          context "and another identical Tuple restricted by #attributes is in the operand" do
+            attr_reader :photo_1, :photo_2
+            before do
+              @user = User.create(:id => 100, :name => "Brian")
+              @photo_1 = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
+              @photo_2 = Photo.create(:id => 101, :user_id => user[:id], :name => "Photo 101")
+              projection.read.should include(user)
+            end
+
+            it "does not invoke the block" do
+              projection.on_delete do |tuple|
+                raise "I should not be invoked"
+              end
+              photos_set.delete(photo_1)
+            end
+          end
+
+          context "and another identical Tuple restricted by #attributes is not in the operand" do
+            before do
+              @user = User.create(:id => 100, :name => "Brian")
+              @photo = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
+              projection.read.should include(user)
+            end
+
+            it "invokes the block" do
+              deleted = nil
+              projection.on_delete do |tuple|
+                deleted = tuple
+              end
+              users_set.delete(user)
+
+              deleted.should == user
+            end
+          end
+        end
+
+        context "when the deleted Tuple restricted by #attributes is not in the relation" do
+          before do
+            @user = User.create(:id => 100, :name => "Brian")
+            projection.read.should_not include(user)
+          end
+
+          it "does not invoke the block" do
+            projection.on_delete do |tuple|
+              raise "I should not be invoked"
+            end
+            users_set.delete(user)
           end
         end
       end

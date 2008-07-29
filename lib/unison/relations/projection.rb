@@ -15,10 +15,13 @@ module Unison
           end
         end
 
-#        operand.on_delete do |deleted|
-#          restricted = deleted[attributes]
-#          tuples.delete(restricted)
-#        end
+        operand.on_delete do |deleted|
+          restricted = deleted[attributes]
+          unless initial_read.include?(restricted)
+            tuples.delete(restricted)
+            trigger_on_delete(restricted)
+          end
+        end
       end
 
       def read
