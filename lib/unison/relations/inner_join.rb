@@ -13,8 +13,12 @@ module Unison
           end
         end
 
-
-
+        operand_1.on_insert do |operand_1_tuple|
+          operand_2.each do |operand_2_tuple|
+            compound_tuple = tuple_class.new(operand_1_tuple, operand_2_tuple)
+            trigger_on_insert(compound_tuple) if predicate.eval(compound_tuple)
+          end
+        end
       end
 
       def read

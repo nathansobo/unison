@@ -82,7 +82,6 @@ module Unison
             join.read.should_not include(expected_tuple)
           end
         end
-
       end
 
       describe "#read" do
@@ -111,29 +110,39 @@ module Unison
       end
 
       describe "#on_insert" do
-        context "when passed a block" do
-          context "when a Tuple is inserted into #operand_2" do
-            it "will invoke the block when the insertion results in a compound Tuple that matches the #predicate" do
-              inserted = nil
-              join.on_insert do |tuple|
-                inserted = tuple
-              end
-              photo = Photo.create(:id => 100, :user_id => 1, :name => "Photo 100")
-
-              inserted[photos_set].should == photo
-              inserted[users_set].should == User.find(1)
+        context "when a Tuple is inserted into #operand_2" do
+          it "will invoke the block when the insertion results in a compound Tuple that matches the #predicate" do
+            inserted = nil
+            join.on_insert do |tuple|
+              inserted = tuple
             end
+            photo = Photo.create(:id => 100, :user_id => 1, :name => "Photo 100")
+
+            inserted[photos_set].should == photo
+            inserted[users_set].should == User.find(1)
           end
         end
 
-        context "when not passed a block" do
-          it "raises an ArgumentError" do
-            lambda do
-              join.on_insert
-            end.should raise_error(ArgumentError)
+        context "when a Tuple is inserted into #operand_1" do
+          attr_reader :photo
+          before do
+            @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+          end
+
+          it "will invoke the block when the insertion results in a compound Tuple that matches the #predicate" do
+            inserted = nil
+            join.on_insert do |tuple|
+              inserted = tuple
+            end
+            user = User.create(:id => 100, :name => "Brian")
+
+            inserted[photos_set].should == photo
+            inserted[users_set].should == user
           end
         end
-      end      
+
+
+      end
     end
   end
 end
