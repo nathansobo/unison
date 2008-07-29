@@ -55,46 +55,36 @@ module Unison
       end
 
       describe "#on_insert" do
-        context "when passed a block" do
-          attr_reader :user
-          context "when the inserted Tuple restricted by #attributes is already in the relation" do
-            before do
-              @user = User.find(1)
-              projection.read.should include(user)
-            end
-
-            it "will not invoke the block when tuples are inserted" do
-              projection.on_insert do |tuple|
-                raise "I should not be called"
-              end
-              
-              Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-            end
+        attr_reader :user
+        context "when the inserted Tuple restricted by #attributes is already in the relation" do
+          before do
+            @user = User.find(1)
+            projection.read.should include(user)
           end
 
-          context "when the inserted Tuple restricted by #attributes is not in the relation" do
-            before do
-              @user = User.create(:id => 100, :name => "Brian")
-              projection.read.should_not include(user)
+          it "will not invoke the block when tuples are inserted" do
+            projection.on_insert do |tuple|
+              raise "I should not be called"
             end
 
-            it "will invoke the block when tuples are inserted" do
-              inserted = nil
-              projection.on_insert do |tuple|
-                inserted = tuple
-              end
-              Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-
-              inserted.should == user
-            end
+            Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
           end
         end
 
-        context "when not passed a block" do
-          it "raises an ArgumentError" do
-            lambda do
-              projection.on_insert
-            end.should raise_error(ArgumentError)
+        context "when the inserted Tuple restricted by #attributes is not in the relation" do
+          before do
+            @user = User.create(:id => 100, :name => "Brian")
+            projection.read.should_not include(user)
+          end
+
+          it "will invoke the block when tuples are inserted" do
+            inserted = nil
+            projection.on_insert do |tuple|
+              inserted = tuple
+            end
+            Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
+
+            inserted.should == user
           end
         end
       end

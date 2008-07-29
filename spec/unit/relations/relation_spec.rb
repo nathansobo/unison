@@ -17,6 +17,21 @@ module Unison
           users_set.first.should == users_set.read.first
         end
       end
+
+      describe "#on_insert" do
+        context "when not passed a block" do
+          attr_reader :relation
+          before do
+            @relation = users_set
+          end
+
+          it "raises an ArgumentError" do
+            lambda do
+              relation.on_insert
+            end.should raise_error(ArgumentError)
+          end
+        end
+      end
     end
   end
 end

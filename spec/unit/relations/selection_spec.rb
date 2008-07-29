@@ -54,26 +54,16 @@ module Unison
       end
 
       describe "#on_insert" do
-        context "when passed a block" do
-          it "will invoke the block when tuples are inserted" do
-            inserted = nil
-            selection.on_insert do |tuple|
-              inserted = tuple
-            end
-            photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
-            selection.predicate.eval(photo).should be_true
-            photos_set.insert(photo)
-            
-            inserted.should == photo
+        it "will invoke the block when tuples are inserted" do
+          inserted = nil
+          selection.on_insert do |tuple|
+            inserted = tuple
           end
-        end
+          photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
+          selection.predicate.eval(photo).should be_true
+          photos_set.insert(photo)
 
-        context "when not passed a block" do
-          it "raises an ArgumentError" do
-            lambda do
-              selection.on_insert
-            end.should raise_error(ArgumentError)
-          end
+          inserted.should == photo
         end
       end
 
