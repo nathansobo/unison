@@ -166,7 +166,6 @@ module Unison
       describe "#==" do
         it "returns true for Selections with the same #operand and #predicate and false otherwise" do
           selection.should == Selection.new(photos_set, photos_set[:user_id].eq(1))
-          selection.should_not == Selection.new(users_set, photos_set[:user_id].eq(1))
           selection.should_not == Selection.new(photos_set, photos_set[:user_id].eq(2))
           selection.should_not == Object.new
         end

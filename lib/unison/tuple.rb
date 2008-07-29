@@ -46,6 +46,7 @@ module Unison
     attr_reader :attributes, :nested_tuples
 
     def initialize(*args)
+      @signals = {}
       if attributes_hash?(args)
         @primitive = true
         @attributes = {}
@@ -86,8 +87,12 @@ module Unison
       end
     end
 
-    def []=(attribute, value)
-      attributes[attribute_for(attribute)] = value
+    def []=(attribute_or_symbol, value)
+      attribute = attribute_for(attribute_or_symbol)
+      old_value = attributes[attribute]
+      attributes[attribute] = value
+      signals[attribute].trigger_on_update(old_value, value) if signals[attribute]
+      value
     end
 
     def ==(other)
@@ -107,14 +112,23 @@ module Unison
       end
     end
 
+    def signal(attribute_or_symbol)
+      attribute = attribute_for(attribute_or_symbol)
+      signals[attribute] ||= Signal.new(self, attribute)
+    end
+
     class Base
       include Tuple
     end
 
     protected
+    attr_reader :signals
     def attribute_for(attribute_or_name)
       case attribute_or_name
       when Attribute
+        unless relation.has_attribute?(attribute_or_name)
+          raise ArgumentError, "Attribute must be part of the Tuple's Relation"
+        end
         attribute_or_name
       when Symbol
         relation[attribute_or_name]

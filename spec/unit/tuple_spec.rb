@@ -118,6 +118,66 @@ module Unison
           end
         end
 
+        describe "#signal" do
+          attr_reader :user, :signal
+          before do
+            @user = User.find(1)
+          end
+
+          context "when passed a Symbol" do
+            before do
+              @signal = user.signal(:name)
+            end
+
+            it "returns a Signal with the corresponding Attribute from the Tuple's Relation" do
+              signal.attribute.should == users_set[:name]
+            end
+          end
+
+          context "when passed an Attribute from the Relation" do
+            before do
+              @signal = user.signal(users_set[:name])
+            end
+            
+            it "returns a Signal with #attribute set to the passed in Attribute" do
+              signal.attribute.should == users_set[:name]
+            end
+          end
+
+          context "when passed an Attribute not from the Relation" do
+            it "raises an ArgumentError" do
+              lambda do
+                @signal = user.signal(photos_set[:name])
+              end.should raise_error(ArgumentError)
+            end
+          end
+
+          describe ".on_update" do
+            context "when the Signal#attribute value is changed" do
+              it "invokes the block" do
+                on_update_arguments = nil
+                user.signal(:name).on_update do |user, old_value, new_value|
+                  on_update_arguments = [user, old_value, new_value]
+                end
+
+                old_name = user[:name]
+                user[:name] = "Wilhelm"
+                on_update_arguments.should == [user, old_name, "Wilhelm"]
+              end
+            end
+
+            context "when another Attribute value is changed" do
+              it "does not invoke the block" do
+                user.signal(:name).on_update do |user, old_value, new_value|
+                  raise "I should not be Invoked"
+                end
+
+                user[:id] = 100
+              end
+            end
+          end
+        end
+
         describe "#bind" do
           it "retrieves the value for an Attribute defined on the relation of the Tuple class" do
             tuple.bind(User.relation[:id]).should == 1
