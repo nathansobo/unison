@@ -1,5 +1,5 @@
 module Models
-  class GameSession < Tuple::Base
+  class GameSession < Unison::Tuple::Base
     # automate this for the default case
     member_of Relations::Set.new(:game_sessions)
 

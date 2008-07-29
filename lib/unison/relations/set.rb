@@ -11,7 +11,7 @@ module Unison
       end
 
       def tuple_superclass
-        Tuple::Base
+        Unison::Tuple::Base
       end
 
       def attribute(name)

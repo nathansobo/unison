@@ -1,5 +1,6 @@
 module Unison
   module Tuple
+    include Unison
     module ClassMethods
       attr_accessor :relation
 
@@ -32,6 +33,10 @@ module Unison
       def create(attributes)
         relation.insert(new(attributes))
       end
+
+#      def relates_to_1(attribute, &definition)
+#
+#      end
 
       protected
       def instance_relations

@@ -7,27 +7,27 @@ Spec::Runner.configure do |config|
   config.mock_with :rr
   
   config.before do
-    silence_warnings do
-      Object.class_eval do
-        const_set(:User, Class.new(Unison::Tuple::Base) do
-          member_of Unison::Relations::Set.new(:users)
-          attribute :id
-          attribute :name
+    Object.class_eval do
+      remove_const :User if const_defined?(:User)
+      const_set(:User, Class.new(Unison::Tuple::Base) do
+        member_of Unison::Relations::Set.new(:users)
+        attribute :id
+        attribute :name
 
-          relates_to_n :photos do
-            Photo.where(Photo[:user_id].eq(self[:id]))
-          end
-        end)
+        relates_to_n :photos do
+          Photo.where(Photo[:user_id].eq(self[:id]))
+        end
+      end)
 
-        const_set(:Photo, Class.new(Unison::Tuple::Base) do
-          member_of Unison::Relations::Set.new(:photos)
-          attribute :id
-          attribute :user_id
-          attribute :name
-        end)
-      end
+      remove_const :Photo if const_defined?(:Photo)
+      const_set(:Photo, Class.new(Unison::Tuple::Base) do
+        member_of Unison::Relations::Set.new(:photos)
+        attribute :id
+        attribute :user_id
+        attribute :name
+      end)
     end
-  
+
     users_set.insert(User.new(:id => 1, :name => "Nathan"))
     users_set.insert(User.new(:id => 2, :name => "Corey"))
     users_set.insert(User.new(:id => 3, :name => "Ross"))
@@ -47,14 +47,5 @@ class Spec::ExampleGroup
 
   def photos_set
     Photo.relation
-  end
-end
-
-module Kernel
-  def silence_warnings
-    old_verbose, $VERBOSE = $VERBOSE, nil
-    yield
-  ensure
-    $VERBOSE = old_verbose
   end
 end

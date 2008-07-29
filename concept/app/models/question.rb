@@ -1,5 +1,5 @@
 module Models
-  class Question < Tuple::Base
+  class Question < Unison::Tuple::Base
     # automate this for the default case
     member_of Relations::Set.new(:questions)
 

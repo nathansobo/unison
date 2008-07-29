@@ -9,7 +9,7 @@ module Unison
       end
       
       def tuple_class
-        @tuple_class ||= Class.new(Tuple::Base)
+        @tuple_class ||= Class.new(Unison::Tuple::Base)
       end
 
       def where(predicate)

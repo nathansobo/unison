@@ -1,5 +1,5 @@
-module Topics
-  class Base
+module Unison
+  class Topic
     class << self
       def expose_to_client(relation_name)
         relation = root_object.send(relation_name)
@@ -14,7 +14,7 @@ module Topics
 
       def new_client_representation_for(tuple)
 #        tuple.on_update
-        
+
       end
 
     end
