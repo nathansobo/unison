@@ -29,13 +29,19 @@ module Unison
 
         operand_1.on_delete do |operand_1_tuple|
           tuples.each do |compound_tuple|
-            tuples.delete(compound_tuple) if compound_tuple[operand_1] == operand_1_tuple
+            if compound_tuple[operand_1] == operand_1_tuple
+              tuples.delete(compound_tuple)
+              trigger_on_delete(compound_tuple)
+            end
           end
         end
 
         operand_2.on_delete do |operand_2_tuple|
           tuples.each do |compound_tuple|
-            tuples.delete(compound_tuple) if compound_tuple[operand_2] == operand_2_tuple
+            if compound_tuple[operand_2] == operand_2_tuple
+              tuples.delete(compound_tuple)
+              trigger_on_delete(compound_tuple)
+            end
           end
         end
       end
