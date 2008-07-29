@@ -21,12 +21,6 @@ module Unison
         read.size
       end
 
-      def mailbox=(mailbox)
-        mailbox.subscribe(operand, :insert) do |tuple|
-          tuples.push(tuple) if predicate.eval(tuple)
-        end
-      end
-
       protected
       attr_reader :tuples
 

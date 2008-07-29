@@ -43,7 +43,7 @@ module Unison
       a_module.extend ClassMethods
     end
 
-    attr_reader :attributes, :nested_tuples, :mailbox
+    attr_reader :attributes, :nested_tuples
 
     def initialize(*args)
       if attributes_hash?(args)
@@ -56,10 +56,8 @@ module Unison
         @primitive = false
         @nested_tuples = args
       end
-      @mailbox = Mailbox.new
       instance_relations.each do |name, proc|
         relation = instance_eval(&proc)
-        relation.mailbox = mailbox
         instance_variable_set("@#{name}", relation)
       end
     end

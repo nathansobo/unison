@@ -40,11 +40,6 @@ module Unison
         tuple
       end
 
-      def subscribe(mailbox, event_type)
-        subscribers = subscriptions[event_type]
-        subscribers.push(mailbox) unless subscribers.include?(mailbox)
-      end
-
       def read
         tuples
       end
