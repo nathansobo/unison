@@ -140,8 +140,6 @@ module Unison
             inserted[users_set].should == user
           end
         end
-
-
       end
     end
   end
