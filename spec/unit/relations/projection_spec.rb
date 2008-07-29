@@ -11,14 +11,13 @@ module Unison
       end
 
       describe "#initialize" do
+        attr_reader :user
         it "sets #operand and #attributes" do
           projection.operand.should == operand
           projection.attributes.should == attributes
         end
 
         context "when the a Tuple is inserted into the #operand" do
-          attr_reader :user
-
           context "when the inserted Tuple restricted by #attributes is not in the Projection" do
             before do
               @user = User.create(:id => 100, :name => "Brian")
@@ -45,6 +44,38 @@ module Unison
               end.should_not change{projection.read.length}
             end
           end
+        end
+
+        context "when the a Tuple is deleted from the #operand" do
+          context "when the deleted Tuple restricted by #attributes is in the Projection" do
+            before do
+              @user = projection.read.first
+              projection.read.should include(user)
+            end
+
+            it "removes the Tuple restricted by #attributes" do
+              pending "Reenable when handling InnerJoin#on_delete" do
+                lambda do
+                  users_set.delete(user)
+                end.should change{projection.read.length}.by(-1)
+                projection.read.should_not include(user)
+              end
+            end
+          end
+
+#          context "when the deleted Tuple restricted by #attributes is not in the Projection" do
+#            before do
+#              @user = User.create(:id => 100, :name => "Brian")
+#              projection.read.should_not include(user)
+#            end
+#
+#            it "does not remove the Tuple restricted by #attributes" do
+#              lambda do
+#                users_set.delete(user)
+#              end.should_not change{projection.read.length}
+#              projection.read.should_not include(user)
+#            end
+#          end
         end
       end
 

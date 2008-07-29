@@ -15,61 +15,66 @@ module Unison
           predicate.should == photos_set[:user_id].eq(1)
         end
 
-        context "when a Tuple that matches the #predicate is inserted into the #operand" do
-          attr_reader :photo
-          before do
-            @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
-            predicate.eval(photo).should be_true
+        context "when a Tuple is inserted into the #operand" do
+          context "when the Tuple matches the #predicate" do
+            attr_reader :photo
+            before do
+              @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
+              predicate.eval(photo).should be_true
+            end
+
+            it "is added to the objects returned by #read" do
+              selection.read.should_not include(photo)
+              photos_set.insert(photo)
+              selection.read.should include(photo)
+            end
           end
 
-          it "is added to the objects returned by #read" do
-            selection.read.should_not include(photo)
-            photos_set.insert(photo)
-            selection.read.should include(photo)
+          context "when the Tuple does not match the #predicate" do
+            attr_reader :photo
+            before do
+              @photo = Photo.new(:id => 100, :user_id => 2, :name => "Photo 100")
+              predicate.eval(photo).should be_false
+            end
+
+            it "is not added to the objects returned by #read" do
+              selection.read.should_not include(photo)
+              photos_set.insert(photo)
+              selection.read.should_not include(photo)
+            end
           end
         end
 
-        context "when a Tuple that does not match the #predicate is inserted into the #operand" do
-          attr_reader :photo
-          before do
-            @photo = Photo.new(:id => 100, :user_id => 2, :name => "Photo 100")
-            predicate.eval(photo).should be_false
+        context "when a Tuple is deleted into the #operand" do
+          context "when the Tuple matches the #predicate" do
+            attr_reader :photo
+            before do
+              @photo = selection.read.first
+              predicate.eval(photo).should be_true
+            end
+
+            it "is deleted from the objects returned by #read" do
+              selection.read.should include(photo)
+              photos_set.delete(photo)
+              selection.read.should_not include(photo)
+            end
           end
 
-          it "is not added to the objects returned by #read" do
-            selection.read.should_not include(photo)
-            photos_set.insert(photo)
-            selection.read.should_not include(photo)
+          context "when the Tuple does not match the #predicate" do
+            attr_reader :photo
+            before do
+              @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+              predicate.eval(photo).should be_false
+            end
+
+            it "is not deleted from the objects returned by #read" do
+              selection.read.should_not include(photo)
+              photos_set.delete(photo)
+              selection.read.should_not include(photo)
+            end
           end
         end
 
-        context "when a Tuple that matches the #predicate is deleted from the #operand" do
-          attr_reader :photo
-          before do
-            @photo = selection.read.first
-            predicate.eval(photo).should be_true
-          end
-
-          it "is deleted from the objects returned by #read" do
-            selection.read.should include(photo)
-            photos_set.delete(photo)
-            selection.read.should_not include(photo)
-          end
-        end
-
-        context "when a Tuple that does not match the #predicate is deleted from the #operand" do
-          attr_reader :photo
-          before do
-            @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-            predicate.eval(photo).should be_false
-          end
-          
-          it "is not deleted from the objects returned by #read" do
-            selection.read.should_not include(photo)
-            photos_set.delete(photo)
-            selection.read.should_not include(photo)
-          end
-        end
       end
 
       describe "#read" do

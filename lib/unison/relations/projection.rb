@@ -8,12 +8,17 @@ module Unison
         @tuples = initial_read
 
         operand.on_insert do |created|
-          projected = created[attributes]
-          unless tuples.include?(projected)
-            tuples.push(projected)
-            trigger_on_insert(projected)
+          restricted = created[attributes]
+          unless tuples.include?(restricted)
+            tuples.push(restricted)
+            trigger_on_insert(restricted)
           end
         end
+
+#        operand.on_delete do |deleted|
+#          restricted = deleted[attributes]
+#          tuples.delete(restricted)
+#        end
       end
 
       def read
