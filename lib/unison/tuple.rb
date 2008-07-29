@@ -79,6 +79,7 @@ module Unison
         attributes[attribute_for(attribute)]
       else
         nested_tuples.each do |tuple|
+          return tuple if tuple.relation == attribute
           return tuple[attribute] if tuple.relation.has_attribute?(attribute)
         end
         raise "Attribute #{attribute} not found"

@@ -26,6 +26,13 @@ module Unison
 
       protected
       attr_reader :insert_subscriptions
+
+      def trigger_on_insert(inserted)
+        insert_subscriptions.each do |subscription|
+          subscription.call(inserted)
+        end
+        inserted
+      end
     end
   end
 end

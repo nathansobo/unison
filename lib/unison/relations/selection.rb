@@ -11,9 +11,7 @@ module Unison
         operand.on_insert do |created|
           if predicate.eval(created)
             tuples.push(created)
-            insert_subscriptions.each do |subscription|
-              subscription.call(created)
-            end
+            trigger_on_insert(created)
           end
         end
       end

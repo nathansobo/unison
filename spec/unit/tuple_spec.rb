@@ -184,9 +184,18 @@ module Unison
         end
 
         describe "#[]" do
-          it "retrieves the value of an Attribute from the appropriate nested Tuple" do
-            tuple[users_set[:id]].should == nested_tuple_1[users_set[:id]]
-            tuple[photos_set[:id]].should == nested_tuple_2[photos_set[:id]]
+          context "when passed an Attribute" do
+            it "retrieves the value of an Attribute from the appropriate nested Tuple" do
+              tuple[users_set[:id]].should == nested_tuple_1[users_set[:id]]
+              tuple[photos_set[:id]].should == nested_tuple_2[photos_set[:id]]
+            end
+          end
+
+          context "when passed a Relation" do
+            it "retrieves the first nested Tuple belonging to that Relation" do
+              tuple[users_set].should == nested_tuple_1
+              tuple[photos_set].should == nested_tuple_2
+            end
           end
         end
 

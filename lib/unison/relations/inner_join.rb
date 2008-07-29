@@ -6,12 +6,12 @@ module Unison
         super()
         @operand_1, @operand_2, @predicate = operand_1, operand_2, predicate
 
-#        operand_1.on_insert do |inserted|
-#          operand_2.each do |operand_2_tuple|
-#            compound_tuple = tuple_class.new(inserted, operand_2_tuple)
-#            tuples.push(compound_tuple) if predicate.eval(compound_tuple)
-#          end
-#        end
+        operand_2.on_insert do |operand_2_tuple|
+          operand_1.each do |operand_1_tuple|
+            compound_tuple = tuple_class.new(operand_1_tuple, operand_2_tuple)
+            trigger_on_insert(compound_tuple) if predicate.eval(compound_tuple)
+          end
+        end
 
 
 
