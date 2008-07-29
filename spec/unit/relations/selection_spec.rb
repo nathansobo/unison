@@ -3,22 +3,23 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
 module Unison
   module Relations
     describe Selection do
-      attr_reader :selection
+      attr_reader :selection, :predicate
       before do
-        @selection = Selection.new(photos_set, photos_set[:user_id].eq(1))
+        @predicate = photos_set[:user_id].eq(1)
+        @selection = Selection.new(photos_set, predicate)
       end
 
       describe "#initialize" do
         it "sets the #operand and #predicate" do
           selection.operand.should == photos_set
-          selection.predicate.should == photos_set[:user_id].eq(1)
+          predicate.should == photos_set[:user_id].eq(1)
         end
 
         context "when a Tuple that matches the #predicate is inserted into the #operand" do
           attr_reader :photo
           before do
             @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
-            selection.predicate.eval(photo).should be_true
+            predicate.eval(photo).should be_true
           end
 
           it "is added to the objects returned by #read" do
@@ -32,12 +33,40 @@ module Unison
           attr_reader :photo
           before do
             @photo = Photo.new(:id => 100, :user_id => 2, :name => "Photo 100")
-            selection.predicate.eval(photo).should be_false
+            predicate.eval(photo).should be_false
           end
 
           it "is not added to the objects returned by #read" do
             selection.read.should_not include(photo)
             photos_set.insert(photo)
+            selection.read.should_not include(photo)
+          end
+        end
+
+        context "when a Tuple that matches the #predicate is deleted from the #operand" do
+          attr_reader :photo
+          before do
+            @photo = selection.read.first
+            predicate.eval(photo).should be_true
+          end
+
+          it "is deleted from the objects returned by #read" do
+            selection.read.should include(photo)
+            photos_set.delete(photo)
+            selection.read.should_not include(photo)
+          end
+        end
+
+        context "when a Tuple that does not match the #predicate is deleted from the #operand" do
+          attr_reader :photo
+          before do
+            @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+            predicate.eval(photo).should be_false
+          end
+          
+          it "is not deleted from the objects returned by #read" do
+            selection.read.should_not include(photo)
+            photos_set.delete(photo)
             selection.read.should_not include(photo)
           end
         end
@@ -54,16 +83,72 @@ module Unison
       end
 
       describe "#on_insert" do
-        it "will invoke the block when tuples are inserted" do
-          inserted = nil
-          selection.on_insert do |tuple|
-            inserted = tuple
+        attr_reader :photo
+        context "when a Tuple that matches the #predicate is inserted into the #operand" do
+          before do
+            @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
+            predicate.eval(photo).should be_true
           end
-          photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
-          selection.predicate.eval(photo).should be_true
-          photos_set.insert(photo)
 
-          inserted.should == photo
+          it "invokes the block with the Tuple" do
+            inserted = nil
+            selection.on_insert do |tuple|
+              inserted = tuple
+            end
+            photos_set.insert(photo)
+
+            inserted.should == photo
+          end
+        end
+
+        context "when a Tuple that does not match the #predicate is inserted into the #operand" do
+          before do
+            @photo = Photo.new(:id => 100, :user_id => 100, :name => "Photo 100")
+            predicate.eval(photo).should be_false
+          end
+
+          it "does not invoke the block" do
+            selection.on_insert do |tuple|
+              raise "I should not be invoked"
+            end
+            photos_set.insert(photo)
+          end
+        end
+      end
+
+      describe "#on_delete" do
+        attr_reader :photo
+        context "when a Tuple that matches the #predicate is deleted from the #operand" do
+          before do
+            @photo = Photo.create(:id => 100, :user_id => 1, :name => "Photo 100")
+            predicate.eval(photo).should be_true
+            selection.read.should include(photo)
+          end
+
+          it "invokes the block with the Tuple" do
+            deleted = nil
+            selection.on_delete do |tuple|
+              deleted = tuple
+            end
+
+            photos_set.delete(photo)
+            deleted.should == photo
+          end
+        end
+
+        context "when a Tuple that does not match the #predicate is deleted from the #operand" do
+          before do
+            @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+            predicate.eval(photo).should be_false
+            selection.read.should_not include(photo)
+          end
+
+          it "does not invoke the block" do
+            selection.on_delete do |tuple|
+              raise "I should not be invoked"
+            end
+            photos_set.delete(photo)
+          end
         end
       end
 

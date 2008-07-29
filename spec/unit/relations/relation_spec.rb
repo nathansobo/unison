@@ -42,7 +42,7 @@ module Unison
 
           it "raises an ArgumentError" do
             lambda do
-              relation.on_remove
+              relation.on_delete
             end.should raise_error(ArgumentError)
           end
         end

@@ -104,7 +104,7 @@ module Unison
       end
 
       describe "#on_delete" do
-        it "will invoke the block when a Tuple is deleted" do
+        it "will invoke the block when a Tuple is deleted from the Set" do
           tuple = set.tuple_class.create(:id => 1, :name => "Nathan")
           deleted = nil
           set.on_delete do |deleted_tuple|

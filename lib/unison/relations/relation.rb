@@ -39,6 +39,13 @@ module Unison
         end
         inserted
       end
+
+      def trigger_on_delete(deleted)
+        delete_subscriptions.each do |subscription|
+          subscription.call(deleted)
+        end
+        deleted
+      end
     end
   end
 end

@@ -14,6 +14,13 @@ module Unison
             trigger_on_insert(created)
           end
         end
+
+        operand.on_delete do |deleted|
+          if predicate.eval(deleted)
+            tuples.delete(deleted)
+            trigger_on_delete(deleted)
+          end
+        end
       end
 
       def ==(other)
