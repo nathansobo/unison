@@ -6,6 +6,10 @@ module Unison
       def initialize(operand, predicate)
         @operand, @predicate = operand, predicate
         @tuples = initial_read
+
+        operand.on_insert do |created|
+          tuples.push(created) if predicate.eval(created)
+        end
       end
 
       def ==(other)

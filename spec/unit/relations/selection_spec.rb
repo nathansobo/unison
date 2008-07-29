@@ -15,6 +15,34 @@ module Unison
         end
       end
 
+      context "when a Tuple that matches the #predicate is inserted into the #operand" do
+        attr_reader :photo
+        before do
+          @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
+          selection.predicate.eval(photo).should be_true
+        end
+
+        it "is added to the objects returned by #read" do
+          selection.read.should_not include(photo)
+          photos_set.insert(photo)
+          selection.read.should include(photo)
+        end
+      end
+
+      context "when a Tuple that does not matche the #predicate is inserted into the #operand" do
+        attr_reader :photo
+        before do
+          @photo = Photo.new(:id => 100, :user_id => 2, :name => "Photo 100")
+          selection.predicate.eval(photo).should be_false
+        end
+
+        it "is not added to the objects returned by #read" do
+          selection.read.should_not include(photo)
+          photos_set.insert(photo)
+          selection.read.should_not include(photo)
+        end
+      end
+
       describe "#read" do
         it "returns all tuples in its #operand for which its #predicate returns true" do
           tuples = selection.read
