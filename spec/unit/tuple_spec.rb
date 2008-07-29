@@ -259,6 +259,14 @@ module Unison
           end
         end
 
+        describe "#signal" do
+          it "raises a NotImplementedError" do
+            lambda do
+              tuple.signal(:name)
+            end.should raise_error(NotImplementedError)
+          end
+        end
+
         describe "#==" do
           attr_reader :other_tuple
           context "when other Tuple#nested_tuples == #nested_tuples" do

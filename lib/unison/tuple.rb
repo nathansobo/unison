@@ -83,7 +83,7 @@ module Unison
           return tuple if tuple.relation == attribute
           return tuple[attribute] if tuple.relation.has_attribute?(attribute)
         end
-        raise "Attribute #{attribute} not found"
+        raise ArgumentError, "Attribute #{attribute} not found"
       end
     end
 
@@ -113,6 +113,7 @@ module Unison
     end
 
     def signal(attribute_or_symbol)
+      raise NotImplementedError, "You can only call #signal on primitive Tuples" unless primitive?
       attribute = attribute_for(attribute_or_symbol)
       signals[attribute] ||= Signal.new(self, attribute)
     end
