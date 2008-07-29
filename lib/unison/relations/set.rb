@@ -8,7 +8,6 @@ module Unison
         @name = name
         @attributes = []
         @tuples = []
-        @insert_subscriptions = []
       end
 
       def tuple_superclass
@@ -48,12 +47,7 @@ module Unison
         tuples.each(&block)
       end
 
-      def on_insert(&blk)
-        insert_subscriptions << blk
-      end
-
       protected
-      attr_reader :insert_subscriptions
     end
   end
 end

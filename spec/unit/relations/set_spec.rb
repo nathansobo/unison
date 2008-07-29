@@ -65,15 +65,25 @@ module Unison
         end
       end
 
-      describe "#subscribe" do
-        it "when passed :insert and a block, will invoke the block when tuples are inserted" do
-          inserted = nil
-          set.on_insert do |tuple|
-            inserted = tuple
+      describe "#on_insert" do
+        context "when passed a block" do
+          it "will invoke the block when tuples are inserted" do
+            inserted = nil
+            set.on_insert do |tuple|
+              inserted = tuple
+            end
+            tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+            set.insert(tuple)
+            inserted.should == tuple
           end
-          tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
-          set.insert(tuple)
-          inserted.should == tuple
+        end
+
+        context "when not passed a block" do
+          it "raises an ArgumentError" do
+            lambda do
+              set.on_insert
+            end.should raise_error(ArgumentError)
+          end
         end
       end
 

@@ -13,33 +13,33 @@ module Unison
           selection.operand.should == photos_set
           selection.predicate.should == photos_set[:user_id].eq(1)
         end
-      end
 
-      context "when a Tuple that matches the #predicate is inserted into the #operand" do
-        attr_reader :photo
-        before do
-          @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
-          selection.predicate.eval(photo).should be_true
+        context "when a Tuple that matches the #predicate is inserted into the #operand" do
+          attr_reader :photo
+          before do
+            @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
+            selection.predicate.eval(photo).should be_true
+          end
+
+          it "is added to the objects returned by #read" do
+            selection.read.should_not include(photo)
+            photos_set.insert(photo)
+            selection.read.should include(photo)
+          end
         end
 
-        it "is added to the objects returned by #read" do
-          selection.read.should_not include(photo)
-          photos_set.insert(photo)
-          selection.read.should include(photo)
-        end
-      end
+        context "when a Tuple that does not match the #predicate is inserted into the #operand" do
+          attr_reader :photo
+          before do
+            @photo = Photo.new(:id => 100, :user_id => 2, :name => "Photo 100")
+            selection.predicate.eval(photo).should be_false
+          end
 
-      context "when a Tuple that does not matche the #predicate is inserted into the #operand" do
-        attr_reader :photo
-        before do
-          @photo = Photo.new(:id => 100, :user_id => 2, :name => "Photo 100")
-          selection.predicate.eval(photo).should be_false
-        end
-
-        it "is not added to the objects returned by #read" do
-          selection.read.should_not include(photo)
-          photos_set.insert(photo)
-          selection.read.should_not include(photo)
+          it "is not added to the objects returned by #read" do
+            selection.read.should_not include(photo)
+            photos_set.insert(photo)
+            selection.read.should_not include(photo)
+          end
         end
       end
 
@@ -49,6 +49,30 @@ module Unison
           tuples.size.should == 2
           tuples.each do |tuple|
             tuple[:user_id].should == 1
+          end
+        end
+      end
+
+      describe "#on_insert" do
+        context "when passed a block" do
+          it "will invoke the block when tuples are inserted" do
+            inserted = nil
+            selection.on_insert do |tuple|
+              inserted = tuple
+            end
+            photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
+            selection.predicate.eval(photo).should be_true
+            photos_set.insert(photo)
+            
+            inserted.should == photo
+          end
+        end
+
+        context "when not passed a block" do
+          it "raises an ArgumentError" do
+            lambda do
+              selection.on_insert
+            end.should raise_error(ArgumentError)
           end
         end
       end

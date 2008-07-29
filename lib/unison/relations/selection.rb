@@ -4,11 +4,17 @@ module Unison
       attr_reader :operand, :predicate
 
       def initialize(operand, predicate)
+        super()
         @operand, @predicate = operand, predicate
         @tuples = initial_read
 
         operand.on_insert do |created|
-          tuples.push(created) if predicate.eval(created)
+          if predicate.eval(created)
+            tuples.push(created)
+            insert_subscriptions.each do |subscription|
+              subscription.call(created)
+            end
+          end
         end
       end
 
