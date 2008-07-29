@@ -21,6 +21,11 @@ module Unison
         relation.where(predicate)
       end
 
+      def relates_to_1(name, &definition)
+        singleton_instance_relations[name] = definition
+        attr_reader name
+      end
+
       def relates_to_n(name, &proc)
         instance_relations[name] = proc
         attr_reader name
@@ -34,13 +39,13 @@ module Unison
         relation.insert(new(attributes))
       end
 
-#      def relates_to_1(attribute, &definition)
-#
-#      end
-
       protected
       def instance_relations
         @instance_relations ||= Hash.new
+      end
+
+      def singleton_instance_relations
+        @singleton_instance_relations ||= {}
       end
     end
 
@@ -62,8 +67,14 @@ module Unison
         @primitive = false
         @nested_tuples = args
       end
+
       instance_relations.each do |name, proc|
         relation = instance_eval(&proc)
+        instance_variable_set("@#{name}", relation)
+      end
+
+      singleton_instance_relations.each do |name, definition|
+        relation = instance_eval(&definition)
         instance_variable_set("@#{name}", relation)
       end
     end
@@ -149,6 +160,10 @@ module Unison
 
     def instance_relations
       self.class.send(:instance_relations)
+    end
+
+    def singleton_instance_relations
+      self.class.send(:singleton_instance_relations)
     end
   end
 end

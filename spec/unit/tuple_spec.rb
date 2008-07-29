@@ -64,6 +64,14 @@ module Unison
         end
       end
 
+      describe ".relates_to_1" do
+        it "defines a method named after the name which returns the Relation that is produced by instance-evaling the block" do
+          photo = Photo.find(1)
+          photo.user.read.should_not be_empty
+          photo.user.should == User.where(User[:id].eq(photo[:user_id]))
+        end
+      end
+
       context "a primitive tuple" do
         before do
           User.superclass.should == Tuple::Base

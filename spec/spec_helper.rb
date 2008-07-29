@@ -8,7 +8,6 @@ Spec::Runner.configure do |config|
   
   config.before do
     Object.class_eval do
-      remove_const :User if const_defined?(:User)
       const_set(:User, Class.new(Unison::Tuple::Base) do
         member_of Unison::Relations::Set.new(:users)
         attribute :id
@@ -19,12 +18,15 @@ Spec::Runner.configure do |config|
         end
       end)
 
-      remove_const :Photo if const_defined?(:Photo)
       const_set(:Photo, Class.new(Unison::Tuple::Base) do
         member_of Unison::Relations::Set.new(:photos)
         attribute :id
         attribute :user_id
         attribute :name
+
+        relates_to_1(:user) do
+          User.where(User[:id].eq(self[:user_id]))
+        end
       end)
     end
 
@@ -35,11 +37,17 @@ Spec::Runner.configure do |config|
     photos_set.insert(Photo.new(:id => 2, :user_id => 1, :name => "Photo 2"))
     photos_set.insert(Photo.new(:id => 3, :user_id => 2, :name => "Photo 3"))
   end
+
+  config.after do
+    Object.class_eval do
+      remove_const :User
+      remove_const :Photo
+    end
+  end
 end
 
 class Spec::ExampleGroup
   include Unison
-  attr_reader :users_set, :User, :photos_set, :Photo
 
   def users_set
     User.relation

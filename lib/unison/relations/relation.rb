@@ -30,6 +30,10 @@ module Unison
         delete_subscriptions << block
       end
 
+      def inspect
+        "<#{self.class} @insert_subscriptions.length=#{insert_subscriptions.length} @delete_subscriptions.length=#{delete_subscriptions.length}>"
+      end
+
       protected
       attr_reader :insert_subscriptions, :delete_subscriptions
 
