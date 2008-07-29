@@ -1,5 +1,5 @@
 module Topics
-  class GameSession < Topic::Base
+  class GameSession < Base
     topic_url "/game_sessions/:guid"
     expose_to_client :self, :game_sessions, :question, :answers
 

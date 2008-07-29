@@ -5,6 +5,7 @@ module Unison
       def initialize
         tuple_class.relation = self
         @insert_subscriptions = []
+        @delete_subscriptions = []
       end
       
       def tuple_class
@@ -24,8 +25,13 @@ module Unison
         insert_subscriptions << block
       end
 
+      def on_delete(&block)
+        raise ArgumentError, "#on_delete needs a block passed in" unless block
+        delete_subscriptions << block
+      end
+
       protected
-      attr_reader :insert_subscriptions
+      attr_reader :insert_subscriptions, :delete_subscriptions
 
       def trigger_on_insert(inserted)
         insert_subscriptions.each do |subscription|

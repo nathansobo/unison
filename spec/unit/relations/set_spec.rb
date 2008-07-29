@@ -57,6 +57,32 @@ module Unison
         end
       end
 
+      describe "#delete" do
+        context "when the Tuple is in the Set" do
+          it "removes the Tuple from the Set" do
+            tuple = set.tuple_class.create(:id => 1, :name => "Nathan")
+
+            set.read.should include(tuple)
+            set.delete(tuple)
+            set.read.should_not include(tuple)
+          end
+        end
+
+        context "when the Tuple is not in the Set" do
+          attr_reader :tuple_not_in_set
+          before do
+            @tuple_not_in_set = set.tuple_class.new(:id => 100, :name => "Nathan")
+            set.read.should_not include(tuple_not_in_set)
+          end
+          
+          it "raises an Error" do
+            lambda do
+              set.delete(tuple_not_in_set)
+            end.should raise_error(ArgumentError)
+          end
+        end
+      end
+
       describe "#read" do
         it "returns all Tuples in the Set" do
           set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
@@ -66,7 +92,7 @@ module Unison
       end
 
       describe "#on_insert" do
-        it "will invoke the block when tuples are inserted" do
+        it "will invoke the block when a Tuple is inserted" do
           inserted = nil
           set.on_insert do |tuple|
             inserted = tuple
@@ -74,6 +100,19 @@ module Unison
           tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
           set.insert(tuple)
           inserted.should == tuple
+        end
+      end
+
+      describe "#on_delete" do
+        it "will invoke the block when a Tuple is deleted" do
+          tuple = set.tuple_class.create(:id => 1, :name => "Nathan")
+          deleted = nil
+          set.on_delete do |deleted_tuple|
+            deleted = deleted_tuple
+          end
+
+          set.delete(tuple)
+          deleted.should == tuple
         end
       end
 

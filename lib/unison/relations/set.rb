@@ -33,7 +33,13 @@ module Unison
 
       def insert(tuple)
         tuples.push(tuple)
-        insert_subscriptions.each do |proc|
+        trigger_on_insert(tuple)
+      end
+
+      def delete(tuple)
+        raise ArgumentError, "Tuple #{tuple.inspect} is not in the set" unless tuples.include?(tuple)
+        tuples.delete(tuple)
+        delete_subscriptions.each do |proc|
           proc.call(tuple)
         end
         tuple

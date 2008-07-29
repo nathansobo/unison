@@ -32,6 +32,21 @@ module Unison
           end
         end
       end
+
+      describe "#on_remove" do
+        context "when not passed a block" do
+          attr_reader :relation
+          before do
+            @relation = users_set
+          end
+
+          it "raises an ArgumentError" do
+            lambda do
+              relation.on_remove
+            end.should raise_error(ArgumentError)
+          end
+        end
+      end
     end
   end
 end
