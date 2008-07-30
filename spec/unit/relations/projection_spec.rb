@@ -99,40 +99,98 @@ module Unison
         end
 
         context "when a Tuple is updated in the #operand" do
+          attr_reader :operand_compound_tuple, :operand_projected_tuple, :projected_tuple, :attribute
+          before do
+            @operand_compound_tuple = operand.read.first
+            @operand_projected_tuple = operand_compound_tuple[users_set]
+            @projected_tuple = projection.read.find do |tuple|
+              tuple == operand_projected_tuple
+            end
+            @attribute = users_set[:name]
+          end
+          
           context "and the updated Attribute is in #attributes" do
-            attr_reader :operand_compound_tuple, :operand_projected_tuple, :projected_tuple
+            attr_reader :old_value, :new_value
             before do
-              @operand_compound_tuple = operand.read.first
-              @operand_projected_tuple = operand_compound_tuple[users_set]
-              @projected_tuple = projection.read.find do |tuple|
-                tuple == operand_projected_tuple
-              end
+              operand.read.select do |tuple|
+                tuple[users_set] == operand_projected_tuple
+              end.size.should be > 1
+              @old_value = operand_projected_tuple[:name]
+              @new_value = "Joe"
             end
 
             it "updates the projected Tuple's value in #read" do
-              operand_projected_tuple[:name] = "Joe"
+              operand_projected_tuple[:name] = new_value
               projected_tuple[:name].should == "Joe"
             end
 
             it "triggers #on_tuple_update subscriptions once" do
-              operand.read.select do |tuple|
-                tuple[users_set] == operand_projected_tuple
-              end.size.should be > 1
-
-              updated = []
+              on_tuple_update_arguments = []
               projection.on_tuple_update do |tuple, attribute, old_value, new_value|
-                updated.push [tuple, attribute, old_value, new_value]
+                on_tuple_update_arguments.push [tuple, attribute, old_value, new_value]
+              end
+              operand_projected_tuple[:name] = new_value
+              on_tuple_update_arguments.should == [[projected_tuple, attribute, old_value, new_value]]
+            end
+
+            context "when the same Attribute on a different Tuple is subsequently updated from the same old value to the same new value" do
+              attr_reader :another_compound_tuple, :another_projected_tuple
+              before do
+                @another_compound_tuple = operand.read.find do |tuple|
+                  tuple[users_set] != projected_tuple
+                end
+                @another_projected_tuple = another_compound_tuple[users_set]
+                another_projected_tuple.should_not == projected_tuple
+
+                another_projected_tuple[:name] = old_value
+                projected_tuple[:name] = new_value
               end
 
-              old_name = operand_projected_tuple[:name]
-              new_name = "Joe"
-              operand_projected_tuple[:name] = new_name
-              updated.should == [[projected_tuple, users_set[:name], old_name, new_name ]]
+              it "triggers #on_tuple_update subscriptions once" do
+                on_tuple_update_arguments = []
+                projection.on_tuple_update do |tuple, attribute, old_value, new_value|
+                  on_tuple_update_arguments.push [tuple, attribute, old_value, new_value]
+                end
+
+                another_projected_tuple[:name] = new_value
+                on_tuple_update_arguments.should == [
+                  [another_projected_tuple, attribute, old_value, new_value]
+                ]
+              end
+            end
+
+            context "when a different Attribute on the same Tuple is subsequently updated from the same old value to the same new value" do
+              before do
+                operand_projected_tuple[:hobby] = old_value
+                operand_projected_tuple[:name] = new_value
+              end
+
+              it "triggers #on_tuple_update subscriptions once" do
+                on_tuple_update_arguments = []
+                projection.on_tuple_update do |tuple, attribute, old_value, new_value|
+                  on_tuple_update_arguments.push [tuple, attribute, old_value, new_value]
+                end
+
+                operand_projected_tuple[:hobby] = new_value
+                on_tuple_update_arguments.should == [
+                  [projected_tuple, users_set[:hobby], old_value, new_value]
+                ]
+              end
             end
           end
 
           context "and the updated Attribute is not in #attributes" do
-
+            attr_reader :photo
+            before do
+              @photo = operand_compound_tuple[photos_set]
+            end
+            
+            it "does not trigger #on_tuple_update subscriptions" do
+              projection.on_tuple_update do |tuple, attribute, old_value, new_value|
+                raise "Dont call me"
+              end
+              photo[:name] = "Freak show"
+            end
           end
         end
       end

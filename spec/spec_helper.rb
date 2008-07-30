@@ -12,6 +12,7 @@ Spec::Runner.configure do |config|
         member_of Unison::Relations::Set.new(:users)
         attribute :id
         attribute :name
+        attribute :hobby
 
         relates_to_n :photos do
           Photo.where(Photo[:user_id].eq(self[:id]))
@@ -30,9 +31,9 @@ Spec::Runner.configure do |config|
       end)
     end
 
-    users_set.insert(User.new(:id => 1, :name => "Nathan"))
-    users_set.insert(User.new(:id => 2, :name => "Corey"))
-    users_set.insert(User.new(:id => 3, :name => "Ross"))
+    users_set.insert(User.new(:id => 1, :name => "Nathan", :hobby => "Yoga"))
+    users_set.insert(User.new(:id => 2, :name => "Corey", :hobby => "Drugs & Art & Burning Man"))
+    users_set.insert(User.new(:id => 3, :name => "Ross", :hobby => "Manicorn"))
     photos_set.insert(Photo.new(:id => 1, :user_id => 1, :name => "Photo 1"))
     photos_set.insert(Photo.new(:id => 2, :user_id => 1, :name => "Photo 2"))
     photos_set.insert(Photo.new(:id => 3, :user_id => 2, :name => "Photo 3"))

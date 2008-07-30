@@ -25,9 +25,10 @@ module Unison
         end
 
         operand.on_tuple_update do |updated, attribute, old_value, new_value|
-          unless last_update == [attributes, old_value, new_value]
-            restricted = updated[attributes]
-            @last_update = [attributes, old_value, new_value]
+          restricted = updated[attributes]
+          # TODO: BT/NS - Make sure that this condition is sufficient for nested composite Tuples 
+          if attributes.has_attribute?(attribute) && last_update != [restricted, attribute, old_value, new_value]
+            @last_update = [restricted, attribute, old_value, new_value]
             trigger_on_tuple_update(restricted, attribute, old_value, new_value)
           end
         end
