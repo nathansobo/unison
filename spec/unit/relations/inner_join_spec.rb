@@ -159,6 +159,217 @@ module Unison
             end
           end          
         end
+        
+        context "when a Tuple in #operand_1 is updated" do
+          context "when the Tuple is not a member of a compound Tuple that matches the #predicate" do
+            attr_reader :user, :photo, :expected_compound_tuple
+            before do
+              @user = users_set.read.first
+              @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+              @expected_compound_tuple = join.tuple_class.new(user, photo)
+            end
+
+            context "when the update causes a compound Tuple to match the #predicate" do
+              it "adds that compound Tuple to the result of #read" do
+                join.read.should_not include(expected_compound_tuple)
+                user[:id] = photo[:user_id]
+                join.read.should include(expected_compound_tuple)
+              end
+
+              it "invokes the #on_insert event" do
+                inserted = nil
+                join.on_insert do |tuple|
+                  inserted = tuple
+                end
+                user[:id] = photo[:user_id]
+
+                predicate.eval(inserted).should be_true
+                inserted[photos_set].should == photo
+                inserted[users_set].should == user
+              end
+            end
+
+            context "when the update does not cause the Tuple to match the #predicate" do
+              it "does not add the Tuple into the result of #read" do
+                join.read.should_not include(expected_compound_tuple)
+                user[:id] = photo[:user_id] + 1
+                join.read.should_not include(expected_compound_tuple)
+              end
+
+              it "does not invoke the #on_insert event" do
+                join.on_insert do |tuple|
+                  raise "Do not call me"
+                end
+                user[:id] = photo[:user_id] + 1
+              end
+            end
+          end
+
+          context "when the Tuple is a member of a compound Tuple that matches the #predicate" do
+            attr_reader :compound_tuples, :user
+            before do
+              @user = User.find(1)
+              @compound_tuples = join.read.select do |compound_tuple|
+                compound_tuple[users_set] == user
+              end
+              compound_tuples.size.should be > 1
+              compound_tuples.each do |compound_tuple|
+                join.read.should include(compound_tuple)
+              end
+            end
+
+            context "and the update causes the compound Tuple to not match the #predicate" do
+              it "removes the Tuple from the result of #read" do
+                user[:id] = 100
+                compound_tuples.each do |compound_tuple|
+                  join.read.should_not include(compound_tuple)
+                end
+              end
+
+              it "invokes the on_delete event" do
+                deleted = []
+                join.on_delete do |tuple|
+                  deleted.push tuple
+                end
+                user[:id] = 100
+                deleted.size.should == compound_tuples.size
+                compound_tuples.each do |compound_tuple|
+                  deleted.should include(compound_tuple)
+                end
+              end
+            end
+
+            context "and the compound Tuple continues to match the #predicate after the update" do
+              it "does not remove that compound Tuple from the results of #read" do
+                user[:name] = "Joe"
+                compound_tuples.each do |compound_tuple|
+                  join.read.should include(compound_tuple)
+                end
+              end
+
+              it "invokes the #on_tuple_update event for the compound Tuple" do
+                updated = []
+                join.on_tuple_update do |tuple|
+                  updated.push tuple
+                end
+                user[:name] = "Joe"
+                updated.size.should == compound_tuples.size
+                compound_tuples.each do |compound_tuple|
+                  updated.should include(compound_tuple)
+                end
+              end
+
+              it "does not invoke the #on_insert or #on_delete event" do
+                join.on_insert do |tuple|
+                  raise "Dont call me"
+                end
+                join.on_delete do |tuple|
+                  raise "Dont call me"
+                end
+                user[:name] = "Joe"
+              end
+            end
+          end
+        end
+
+        context "when a Tuple in #operand_2 is updated" do
+          context "when the Tuple is not a member of a compound Tuple that matches the #predicate" do
+            attr_reader :user, :photo, :expected_compound_tuple
+            before do
+              @user = users_set.read.first
+              @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+              @expected_compound_tuple = join.tuple_class.new(user, photo)
+            end
+
+            context "when the update causes a compound Tuple to match the #predicate" do
+              it "adds that compound Tuple to the result of #read" do
+                join.read.should_not include(expected_compound_tuple)
+                photo[:user_id] = user[:id]
+                join.read.should include(expected_compound_tuple)
+              end
+
+              it "invokes the #on_insert event" do
+                inserted = nil
+                join.on_insert do |tuple|
+                  inserted = tuple
+                end
+                photo[:user_id] = user[:id]
+
+                predicate.eval(inserted).should be_true
+                inserted[photos_set].should == photo
+                inserted[users_set].should == user
+              end
+            end
+
+            context "when the update does not cause the Tuple to match the #predicate" do
+              it "does not add the Tuple into the result of #read" do
+                join.read.should_not include(expected_compound_tuple)
+                photo[:user_id] = 1000
+                join.read.should_not include(expected_compound_tuple)
+              end
+
+              it "does not invoke the #on_insert event" do
+                join.on_insert do |tuple|
+                  raise "Do not call me"
+                end
+                photo[:user_id] = 1000
+              end
+            end
+          end
+
+          context "when the Tuple is a member of a compound Tuple that matches the #predicate" do
+            attr_reader :compound_tuple, :photo
+            before do
+              @photo = photos_set.read.first
+              @compound_tuple = join.read.find do |compound_tuple|
+                compound_tuple[photos_set] == photo
+              end
+              join.read.should include(compound_tuple)
+            end
+
+            context "and the update causes the compound Tuple to not match the #predicate" do
+              it "removes the Tuple from the result of #read" do
+                photo[:user_id] = 100
+                join.read.should_not include(compound_tuple)
+              end
+
+              it "invokes the on_delete event" do
+                deleted = []
+                join.on_delete do |tuple|
+                  deleted.push tuple
+                end
+                photo[:user_id] = 100
+                deleted.should == [compound_tuple]
+              end
+            end
+
+            context "and the compound Tuple continues to match the #predicate after the update" do
+              it "does not remove that compound Tuple from the results of #read" do
+                photo[:name] = "A great naked show"
+                join.read.should include(compound_tuple)
+              end
+
+              it "invokes the #on_tuple_update event for the compound Tuple" do
+                updated = []
+                join.on_tuple_update do |tuple|
+                  updated.push tuple
+                end
+                photo[:name] = "A great naked show part 2"
+                updated.should == [compound_tuple]
+              end
+
+              it "does not invoke the #on_insert or #on_delete event" do
+                join.on_insert do |tuple|
+                  raise "Dont call me"
+                end
+                join.on_delete do |tuple|
+                  raise "Dont call me"
+                end
+                photo[:name] = "A great naked show part 3"
+              end
+            end
+          end
+        end
 
         context "when passed in #predicate is a constant value Predicate" do
           it "raises an ArgumentError"

@@ -26,6 +26,36 @@ module Unison
         operand_2.on_delete do |operand_2_tuple|
           delete_if_member_of_compound_tuple operand_2, operand_2_tuple
         end
+
+        operand_1.on_tuple_update do |operand_1_tuple|
+          operand_2.each do |operand_2_tuple|
+            compound_tuple = tuple_class.new(operand_1_tuple, operand_2_tuple)
+            if tuples.include?(compound_tuple)
+              if predicate.eval(compound_tuple)
+                trigger_on_tuple_update compound_tuple
+              else
+                delete_compound_tuple compound_tuple
+              end
+            else
+              insert_if_predicate_matches compound_tuple
+            end
+          end
+        end
+
+        operand_2.on_tuple_update do |operand_2_tuple|
+          operand_1.each do |operand_1_tuple|
+            compound_tuple = tuple_class.new(operand_1_tuple, operand_2_tuple)
+            if tuples.include?(compound_tuple)
+              if predicate.eval(compound_tuple)
+                trigger_on_tuple_update compound_tuple
+              else
+                delete_compound_tuple compound_tuple
+              end
+            else
+              insert_if_predicate_matches compound_tuple
+            end
+          end
+        end
       end
 
       def read
@@ -45,10 +75,14 @@ module Unison
       def delete_if_member_of_compound_tuple(operand, tuple)
         tuples.each do |compound_tuple|
           if compound_tuple[operand] == tuple
-            tuples.delete(compound_tuple)
-            trigger_on_delete(compound_tuple)
+            delete_compound_tuple compound_tuple
           end
         end
+      end
+
+      def delete_compound_tuple(compound_tuple)
+        tuples.delete(compound_tuple)
+        trigger_on_delete(compound_tuple)
       end
 
       def initial_read
