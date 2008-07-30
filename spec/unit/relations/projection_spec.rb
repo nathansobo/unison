@@ -46,7 +46,7 @@ module Unison
           end
         end
 
-        context "when the a Tuple is deleted from the #operand" do
+        context "when a Tuple is deleted from the #operand" do
           context "when the deleted Tuple restricted by #attributes is in the Projection" do
             attr_reader :user
             context "and no other identical Tuple restricted by #attributes is in the operand" do
@@ -95,6 +95,44 @@ module Unison
               end.should_not change{projection.read.length}
               projection.read.should_not include(user)
             end
+          end
+        end
+
+        context "when a Tuple is updated in the #operand" do
+          context "and the updated Attribute is in #attributes" do
+            attr_reader :operand_compound_tuple, :operand_projected_tuple, :projected_tuple
+            before do
+              @operand_compound_tuple = operand.read.first
+              @operand_projected_tuple = operand_compound_tuple[users_set]
+              @projected_tuple = projection.read.find do |tuple|
+                tuple == operand_projected_tuple
+              end
+            end
+
+            it "updates the projected Tuple's value in #read" do
+              operand_projected_tuple[:name] = "Joe"
+              projected_tuple[:name].should == "Joe"
+            end
+
+            it "triggers #on_tuple_update subscriptions once" do
+              operand.read.select do |tuple|
+                tuple[users_set] == operand_projected_tuple
+              end.size.should be > 1
+
+              updated = []
+              projection.on_tuple_update do |tuple|
+                updated.push tuple
+              end
+
+              pending "Add when tracking attribute & old attribute value & new attribute value" do
+                operand_projected_tuple[:name] = "Joe"
+                updated.should == [projected_tuple]
+              end
+            end
+          end
+
+          context "and the updated Attribute is not in #attributes" do
+
           end
         end
       end

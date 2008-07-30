@@ -22,6 +22,11 @@ module Unison
             trigger_on_delete(restricted)
           end
         end
+
+        operand.on_tuple_update do |updated|
+          restricted = updated[attributes]
+          trigger_on_tuple_update(restricted)
+        end
       end
 
       def read
