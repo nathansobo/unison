@@ -7,6 +7,10 @@ module Models
     attribute :deactivated_at
 
     # has_many :game_sessions
+    relates_to_n :game_sessions do
+      GameSession.where(GameSession[:game_id].eq(self[:id]))
+    end
+
     relates_to_n :active_game_sessions do
       GameSession.where(GameSession[:game_id].eq(self[:id])).where(GameSession[:deactivated_at].eq(nil))
     end

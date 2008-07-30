@@ -22,12 +22,12 @@ module Unison
       end
 
       def relates_to_1(name, &definition)
-        singleton_instance_relations[name] = definition
+        singleton_instance_relations.push [name, definition]
         attr_reader name
       end
 
-      def relates_to_n(name, &proc)
-        instance_relations[name] = proc
+      def relates_to_n(name, &definition)
+        instance_relations.push [name, definition]
         attr_reader name
       end
 
@@ -41,11 +41,11 @@ module Unison
 
       protected
       def instance_relations
-        @instance_relations ||= Hash.new
+        @instance_relations ||= []
       end
 
       def singleton_instance_relations
-        @singleton_instance_relations ||= {}
+        @singleton_instance_relations ||= []
       end
     end
 
