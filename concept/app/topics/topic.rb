@@ -34,7 +34,7 @@ module Topics
         relation.on_delete do |removed|
           class_name ||= inserted.class.basename
           hash[class_name] ||= {}
-          hash[class_name].delete(inserted[:id].to_s)
+          hash[class_name].delete(removed[:id].to_s)
         end
       end
       hash
