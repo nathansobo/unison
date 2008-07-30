@@ -1,6 +1,7 @@
 module Topics
   class GameSession < Topics::Topic
 #    topic_url "/game_sessions/:guid"
+    expose_to_client :self
     expose_to_client :game_sessions
 #    expose_to_client :self, :game_sessions, :question, :answers
 

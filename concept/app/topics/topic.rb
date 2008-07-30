@@ -18,7 +18,7 @@ module Topics
       return hash if hash
       @hash = {}
       exposed_relations.each do |relation_name|
-        relation = room.send(relation_name)
+        relation = relation_from_name(relation_name)
         class_name = nil
         relation.read.each do |tuple|
           class_name ||= tuple.class.basename
@@ -44,6 +44,14 @@ module Topics
     attr_reader :hash
     def exposed_relations
       self.class.exposed_relations
+    end
+
+    def relation_from_name(relation_name)
+      if relation_name == :self
+        room.relation.where(room.relation[:id].eq(room[:id]))
+      else
+        room.send(relation_name)
+      end
     end
 
     def new_client_representation_for(tuple, class_name)
