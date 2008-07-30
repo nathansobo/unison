@@ -42,8 +42,50 @@ module Unison
       end
 
       describe "#on_update" do
+        context "when a block is passed in" do
+          context "when #operand_1 is a Signal and is updated" do
+            attr_reader :user
+            before do
+              @user = User.find(1)
+              @predicate = Eq.new(user.signal(:name), "Nathan")
+            end
+
+            it "invokes the block" do
+              on_update_called = false
+              predicate.on_update do
+                on_update_called = true
+              end
+
+              user[:name] = "Nathan2"
+              on_update_called.should be_true
+            end
+          end
+
+          context "when #operand_2 is a Signal and is updated" do
+            attr_reader :user
+            before do
+              @user = User.find(1)
+              @predicate = Eq.new("Nathan", user.signal(:name))
+            end
+
+            it "invokes the block" do
+              on_update_called = false
+              predicate.on_update do
+                on_update_called = true
+              end
+
+              user[:name] = "Nathan2"
+              on_update_called.should be_true
+            end
+          end
+        end
+
         context "when no block is passed in" do
-          
+          it "raises an ArgumentError" do
+            lambda do
+              predicate.on_update
+            end.should raise_error(ArgumentError)
+          end
         end
       end
     end
