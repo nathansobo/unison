@@ -16,11 +16,13 @@ module Unison
         end
       end
 
-      describe "#trigger_on_update" do
+      describe "#on_update" do
         it "returns a Subscription" do
           signal.on_update {}.class.should == Subscription
         end
+      end
 
+      describe "#trigger_on_update" do
         it "invokes all #on_update subscriptions" do
           on_update_arguments = nil
           signal.on_update do |tuple, old_value, new_value|

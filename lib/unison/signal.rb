@@ -1,5 +1,6 @@
 module Unison
   class Signal
+    include Retainable
     attr_reader :tuple, :attribute
     def initialize(tuple, attribute)
       @tuple, @attribute = tuple, attribute

@@ -5,6 +5,7 @@ module Unison
       attr_reader :operand_1, :operand_2
       def initialize(operand_1, operand_2)
         @operand_1, @operand_2 = operand_1, operand_2
+        @operand_subscriptions = []
         subscribe_to_operand_update_if_signal operand_1
         subscribe_to_operand_update_if_signal operand_2
         @update_subscriptions = []
@@ -27,15 +28,28 @@ module Unison
       end
 
       protected
+      attr_reader :operand_subscriptions
+
+      def destroy
+        operand_subscriptions.each do |subscription|
+          subscription.destroy
+        end
+        operand_1.release(self) if operand_1.is_a?(Signal)
+        operand_2.release(self) if operand_2.is_a?(Signal)
+      end
+
       def eval_operand(operand)
         operand.is_a?(Signal) ? operand.value : operand
       end
 
       def subscribe_to_operand_update_if_signal(operand)
         if operand.is_a?(Signal)
-          operand.on_update do
-            trigger_on_update
-          end
+          operand.retain(self)
+          operand_subscriptions.push(
+            operand.on_update do
+              trigger_on_update
+            end
+          )
         end
       end
 
