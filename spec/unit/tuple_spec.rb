@@ -65,10 +65,18 @@ module Unison
       end
 
       describe ".relates_to_1" do
+        attr_reader :photo
+        before do
+          @photo = Photo.find(1)
+        end
+
         it "defines a method named after the name which returns the Relation that is produced by instance-evaling the block" do
-          photo = Photo.find(1)
           photo.user.read.should_not be_empty
           photo.user.should == User.where(User[:id].eq(photo[:user_id]))
+        end
+
+        it "causes the Relation to be treated as a singleton" do
+          photo.user.should be_singleton
         end
       end
 

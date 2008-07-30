@@ -6,6 +6,7 @@ module Unison
         tuple_class.relation = self
         @insert_subscriptions = []
         @delete_subscriptions = []
+        @singleton = false
       end
       
       def tuple_class
@@ -18,6 +19,14 @@ module Unison
 
       def first
         read.first
+      end
+
+      def treat_as_singleton
+        @singleton = true
+      end
+
+      def singleton?
+        @singleton
       end
 
       def on_insert(&block)
@@ -36,6 +45,14 @@ module Unison
 
       protected
       attr_reader :insert_subscriptions, :delete_subscriptions
+
+      def method_missing(method_name, *args, &block)
+        if singleton?
+          read.first.send(method_name, *args, &block)
+        else
+          super
+        end
+      end
 
       def trigger_on_insert(inserted)
         insert_subscriptions.each do |subscription|

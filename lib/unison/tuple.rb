@@ -75,6 +75,7 @@ module Unison
 
       singleton_instance_relations.each do |name, definition|
         relation = instance_eval(&definition)
+        relation.treat_as_singleton
         instance_variable_set("@#{name}", relation)
       end
     end

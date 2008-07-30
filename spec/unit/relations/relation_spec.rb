@@ -18,6 +18,25 @@ module Unison
         end
       end
 
+      describe "#treat_as_singleton" do
+        attr_reader :relation, :user
+        before do
+          @user = User.find(1)
+          @relation = users_set.where(users_set[:id].eq(1))
+          relation.should_not be_singleton
+          relation.treat_as_singleton
+        end
+
+        it "causes #singleton? to be true" do
+          relation.should be_singleton
+        end
+
+        it "forwards #method_missing to the first Tuple in the Relation" do
+          mock(user).my_method {:return_value}
+          relation.my_method.should == :return_value
+        end
+      end
+
       describe "#on_insert" do
         context "when not passed a block" do
           attr_reader :relation
