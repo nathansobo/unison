@@ -8,6 +8,20 @@ module Unison
         @operand, @predicate = operand, predicate
         @tuples = initial_read
 
+        predicate.on_update do
+          new_tuples = initial_read
+          deleted_tuples = tuples - new_tuples
+          inserted_tuples = new_tuples - tuples
+          tuples.clear
+          tuples.concat initial_read
+          deleted_tuples.each do |deleted_tuple|
+            trigger_on_delete(deleted_tuple)
+          end
+          inserted_tuples.each do |inserted_tuple|
+            trigger_on_insert(inserted_tuple)
+          end
+        end
+
         operand.on_insert do |created|
           if predicate.eval(created)
             tuples.push(created)

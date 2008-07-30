@@ -15,6 +15,41 @@ module Unison
           predicate.should == photos_set[:user_id].eq(1)
         end
 
+        context "when the #predicate is updated" do
+          attr_reader :user, :new_photo, :old_photos
+          before do
+            @user = User.find(1)
+            @predicate = photos_set[:user_id].eq(user.signal(:id))
+            @selection = Selection.new(photos_set, predicate)
+            @old_photos = selection.read.dup
+            @new_photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+          end
+
+          it "reloads the contents of #read" do
+            selection.read.should_not == [new_photo]
+            user[:id] = 100
+            selection.read.should == [new_photo]
+          end
+
+          it "invokes #on_insert callbacks for Tuples inserted into the Relation" do
+            inserted_photos = []
+            selection.on_insert do |photo|
+              inserted_photos.push photo
+            end
+            user[:id] = 100
+            inserted_photos.should == [new_photo]
+          end
+
+          it "invokes #on_delete callbacks for Tuples deleted from the Relation" do
+            deleted_photos = []
+            selection.on_delete do |photo|
+              deleted_photos.push photo
+            end
+            user[:id] = 100
+            deleted_photos.should == old_photos
+          end
+        end
+
         context "when a Tuple is inserted into the #operand" do
           context "when the Tuple matches the #predicate" do
             attr_reader :photo
