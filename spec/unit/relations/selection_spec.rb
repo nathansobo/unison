@@ -16,6 +16,10 @@ module Unison
           predicate.should == photos_set[:user_id].eq(1)
         end
 
+        it "retains its #predicate" do
+          predicate.should be_retained_by(selection)
+        end
+
         it "retains its #operand" do
           operand.should be_retained_by(selection)
         end
@@ -306,12 +310,10 @@ module Unison
         end
       end
 
-      describe "#release" do
-        context "when #retain has been called once" do
-          attr_reader :retainer, :operand
+      describe "#destroy" do
+        describe "effects on #operand" do
+          attr_reader :operand
           before do
-            @retainer = Object.new
-            selection.retain retainer
             class << operand
               def subscriptions
                 insert_subscriptions + delete_subscriptions + tuple_update_subscriptions
@@ -322,17 +324,40 @@ module Unison
 
           it "unsubscribes from and releases its #operand" do
             operand.should be_retained_by(selection)
-            
+
             selection.operand_subscriptions.each do |subscription|
               operand.subscriptions.should include(subscription)
             end
 
-            selection.release retainer
+            selection.send(:destroy)
 
             operand.should_not be_retained_by(selection)
             selection.operand_subscriptions.each do |subscription|
               operand.subscriptions.should_not include(subscription)
             end
+          end          
+        end
+
+        describe "effects on #predicate" do
+          before do
+            class << selection
+              public :predicate_subscription
+            end
+            class << predicate
+              public :update_subscriptions
+            end
+
+            selection.predicate_subscription.should_not be_nil
+          end
+
+          it "unsubscribes from and releases its #predicate" do
+            predicate.should be_retained_by(selection)
+            predicate.update_subscriptions.should include(selection.predicate_subscription)
+
+            selection.send(:destroy)
+
+            predicate.should_not be_retained_by(selection)
+            predicate.update_subscriptions.should_not include(selection.predicate_subscription)
           end
         end
       end

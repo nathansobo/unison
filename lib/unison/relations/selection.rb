@@ -7,10 +7,11 @@ module Unison
         super()
         @operand_subscriptions = []
         @operand, @predicate = operand, predicate
+        predicate.retain(self)
         operand.retain(self)
         @tuples = initial_read
 
-        predicate_subscription =
+        @predicate_subscription =
           predicate.on_update do
             new_tuples = initial_read
             deleted_tuples = tuples - new_tuples
@@ -83,9 +84,11 @@ module Unison
       end
 
       def destroy
+        predicate_subscription.destroy
         operand_subscriptions.each do |subscription|
           subscription.destroy
         end
+        predicate.release self
         operand.release self
       end
     end

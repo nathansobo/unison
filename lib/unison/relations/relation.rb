@@ -1,6 +1,7 @@
 module Unison
   module Relations
     class Relation
+      include Retainable
       attr_writer :tuple_class
       def initialize
         tuple_class.relation = self
@@ -8,7 +9,6 @@ module Unison
         @delete_subscriptions = []
         @tuple_update_subscriptions = []
         @singleton = false
-        @retainers = {}
       end
       
       def tuple_class
@@ -47,26 +47,8 @@ module Unison
         "<#{self.class} @insert_subscriptions.length=#{insert_subscriptions.length} @delete_subscriptions.length=#{delete_subscriptions.length}>"
       end
 
-      def retain(retainer)
-        raise ArgumentError, "Object #{retainer.inspect} has already retained this Object" if retained_by?(retainer)
-        retainers[retainer.object_id] = retainer
-      end
-
-      def release(retainer)
-        retainers.delete(retainer.object_id)
-        destroy if refcount == 0
-      end
-
-      def refcount
-        retainers.length
-      end
-
-      def retained_by?(potential_retainer)
-        retainers[potential_retainer.object_id] ? true : false
-      end
-
       protected
-      attr_reader :insert_subscriptions, :delete_subscriptions, :tuple_update_subscriptions, :retainers
+      attr_reader :insert_subscriptions, :delete_subscriptions, :tuple_update_subscriptions
 
       def method_missing(method_name, *args, &block)
         if singleton?
@@ -74,10 +56,6 @@ module Unison
         else
           super
         end
-      end
-
-      def destroy
-        
       end
 
       def trigger_on_insert(inserted)

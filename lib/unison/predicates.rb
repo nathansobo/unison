@@ -1,6 +1,7 @@
 module Unison
   module Predicates
     class Eq
+      include Retainable
       attr_reader :operand_1, :operand_2
       def initialize(operand_1, operand_2)
         @operand_1, @operand_2 = operand_1, operand_2
@@ -22,8 +23,7 @@ module Unison
       end
 
       def on_update(&block)
-        raise ArgumentError, "#on_update needs a block passed in" unless block
-        update_subscriptions.push(block)
+        Subscription.new(update_subscriptions, &block)
       end
 
       protected
