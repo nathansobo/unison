@@ -72,15 +72,16 @@ module Unison
         end
 
         context "when passed a block" do
-          it "invokes the block when a member Tuple is updated" do
-            on_tuple_update_tuple = nil
-            relation.on_tuple_update do |member_tuple|
-              on_tuple_update_tuple = member_tuple
+          it "invokes the block with the (Attribute, old_value, new_value) when a member Tuple is updated" do
+            arguments = []
+            relation.on_tuple_update do |tuple, attribute, old_value, new_value|
+              arguments.push [tuple, attribute, old_value, new_value]
             end
 
             user = relation.read.first
+            old_name = user[:name]
             user[:name] = "Another Name"
-            on_tuple_update_tuple.should == user
+            arguments.should == [[user, users_set[:name], old_name, "Another Name"]]
           end
         end
 

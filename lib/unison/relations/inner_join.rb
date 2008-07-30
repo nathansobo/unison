@@ -27,12 +27,12 @@ module Unison
           delete_if_member_of_compound_tuple operand_2, operand_2_tuple
         end
 
-        operand_1.on_tuple_update do |operand_1_tuple|
+        operand_1.on_tuple_update do |operand_1_tuple, attribute, old_value, new_value|
           operand_2.each do |operand_2_tuple|
             compound_tuple = tuple_class.new(operand_1_tuple, operand_2_tuple)
             if tuples.include?(compound_tuple)
               if predicate.eval(compound_tuple)
-                trigger_on_tuple_update compound_tuple
+                trigger_on_tuple_update compound_tuple, attribute, old_value, new_value
               else
                 delete_compound_tuple compound_tuple
               end
@@ -42,12 +42,12 @@ module Unison
           end
         end
 
-        operand_2.on_tuple_update do |operand_2_tuple|
+        operand_2.on_tuple_update do |operand_2_tuple, attribute, old_value, new_value|
           operand_1.each do |operand_1_tuple|
             compound_tuple = tuple_class.new(operand_1_tuple, operand_2_tuple)
             if tuples.include?(compound_tuple)
               if predicate.eval(compound_tuple)
-                trigger_on_tuple_update compound_tuple
+                trigger_on_tuple_update compound_tuple, attribute, old_value, new_value
               else
                 delete_compound_tuple compound_tuple
               end

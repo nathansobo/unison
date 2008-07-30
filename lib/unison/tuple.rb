@@ -114,7 +114,7 @@ module Unison
       old_value = attributes[attribute]
       attributes[attribute] = value
       signals[attribute].trigger_on_update(old_value, value) if signals[attribute]
-      trigger_on_update
+      trigger_on_update(attribute, old_value, value)
       value
     end
 
@@ -165,9 +165,9 @@ module Unison
     protected
     attr_reader :signals, :update_subscriptions
 
-    def trigger_on_update
+    def trigger_on_update(attribute, old_value, new_value)
       update_subscriptions.each do |subscription|
-        subscription.call
+        subscription.call(attribute, old_value, new_value)
       end
     end
 

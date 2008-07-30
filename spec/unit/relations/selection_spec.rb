@@ -151,13 +151,15 @@ module Unison
             end
 
             it "invokes the #on_tuple_update event" do
-              on_tuple_update_tuple = nil
-              selection.on_tuple_update do |tuple|
-                on_tuple_update_tuple = tuple
+              arguments = []
+              selection.on_tuple_update do |tuple, attribute, old_value, new_value|
+                arguments.push [tuple, attribute, old_value, new_value]
               end
 
-              photo[:name] = "New Name"
-              on_tuple_update_tuple.should == photo
+              old_value = photo[:name]
+              new_value = "New Name"
+              photo[:name] = new_value
+              arguments.should == [[photo, photos_set[:name], old_value, new_value]]
             end
 
             it "does not invoke the #on_insert or #on_delete event" do

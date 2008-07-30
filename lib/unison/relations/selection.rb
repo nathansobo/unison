@@ -36,10 +36,10 @@ module Unison
           end
         end
 
-        operand.on_tuple_update do |tuple|
+        operand.on_tuple_update do |tuple, attribute, old_value, new_value|
           if predicate.eval(tuple)
             if tuples.include?(tuple)
-              trigger_on_tuple_update(tuple)
+              trigger_on_tuple_update(tuple, attribute, old_value, new_value)
             else
               tuples.push(tuple)
               trigger_on_insert(tuple)

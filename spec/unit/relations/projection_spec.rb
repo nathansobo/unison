@@ -120,13 +120,15 @@ module Unison
               end.size.should be > 1
 
               updated = []
-              projection.on_tuple_update do |tuple|
-                updated.push tuple
+              projection.on_tuple_update do |tuple, attribute, old_value, new_value|
+                updated.push [tuple, attribute, old_value, new_value]
               end
 
               pending "Add when tracking attribute & old attribute value & new attribute value" do
-                operand_projected_tuple[:name] = "Joe"
-                updated.should == [projected_tuple]
+                old_name = operand_projected_tuple[:name]
+                new_name = "Joe"
+                operand_projected_tuple[:name] = new_name
+                updated.should == [[projected_tuple, users_set[:name], old_name, new_name ]]
               end
             end
           end

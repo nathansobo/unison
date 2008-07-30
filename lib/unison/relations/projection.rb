@@ -23,9 +23,9 @@ module Unison
           end
         end
 
-        operand.on_tuple_update do |updated|
+        operand.on_tuple_update do |updated, attribute, old_value, new_value|
           restricted = updated[attributes]
-          trigger_on_tuple_update(restricted)
+          trigger_on_tuple_update(restricted, attribute, old_value, new_value)
         end
       end
 

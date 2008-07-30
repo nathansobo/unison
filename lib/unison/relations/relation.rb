@@ -74,9 +74,9 @@ module Unison
         deleted
       end
 
-      def trigger_on_tuple_update(updated_tuple)
+      def trigger_on_tuple_update(updated_tuple, attribute, old_value, new_value)
         tuple_update_subscriptions.each do |subscription|
-          subscription.call(updated_tuple)
+          subscription.call(updated_tuple, attribute, old_value, new_value)
         end
         updated_tuple
       end

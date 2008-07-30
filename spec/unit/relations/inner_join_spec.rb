@@ -249,13 +249,14 @@ module Unison
 
               it "invokes the #on_tuple_update event for the compound Tuple" do
                 updated = []
-                join.on_tuple_update do |tuple|
-                  updated.push tuple
+                join.on_tuple_update do |tuple, attribute, old_value, new_value|
+                  updated.push [tuple, attribute, old_value, new_value]
                 end
+                old_name = user[:name]
                 user[:name] = "Joe"
                 updated.size.should == compound_tuples.size
                 compound_tuples.each do |compound_tuple|
-                  updated.should include(compound_tuple)
+                  updated.should include([compound_tuple, users_set[:name], old_name, "Joe"])
                 end
               end
 
@@ -351,11 +352,13 @@ module Unison
 
               it "invokes the #on_tuple_update event for the compound Tuple" do
                 updated = []
-                join.on_tuple_update do |tuple|
-                  updated.push tuple
+                join.on_tuple_update do |tuple, attribute, old_value, new_value|
+                  updated.push [tuple, attribute, old_value, new_value]
                 end
-                photo[:name] = "A great naked show part 2"
-                updated.should == [compound_tuple]
+                old_value = photo[:name]
+                new_value = "A great naked show part 2"
+                photo[:name] = new_value
+                updated.should == [[compound_tuple, photos_set[:name], old_value, new_value]]
               end
 
               it "does not invoke the #on_insert or #on_delete event" do

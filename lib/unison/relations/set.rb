@@ -34,8 +34,8 @@ module Unison
 
       def insert(tuple)
         tuples.push(tuple)
-        tuple.on_update do
-          trigger_on_tuple_update tuple
+        tuple.on_update do |attribute, old_value, new_value|
+          trigger_on_tuple_update tuple, attribute, old_value, new_value
         end
         trigger_on_insert(tuple)
       end

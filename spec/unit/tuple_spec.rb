@@ -248,13 +248,15 @@ module Unison
           context "when passed a block" do
             context "when an attribute is changed" do
               it "invokes the block when the Tuple is updated" do
-                on_update_called = false
-                tuple.on_update do
-                  on_update_called = true
+                update_args = []
+                tuple.on_update do |attribute, old_value, new_value|
+                  update_args.push [attribute, old_value, new_value]
                 end
 
-                tuple[:id] = tuple[:id] + 1
-                on_update_called.should be_true
+                old_value = tuple[:id]
+                new_value = tuple[:id] + 1
+                tuple[:id] = new_value
+                update_args.should == [[tuple.relation[:id], old_value, new_value]]
               end
             end
 
