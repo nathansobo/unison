@@ -25,8 +25,8 @@ module Models
 #      Question.where(Question[:index].gt(current_question.signal(:index)))
 #    end
 
-#    relates_to_n :answers do
-#      Answer.where(Answer[:question_id].eq(signal(:current_question_id)))
-#    end
+    relates_to_n :current_answers do
+      Answer.where(Answer[:question_id].eq(signal(:current_question_id)))
+    end
   end
 end

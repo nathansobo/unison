@@ -4,6 +4,7 @@ module Topics
     expose_to_client :self
     expose_to_client :game_sessions
     expose_to_client :current_question
+    expose_to_client :current_answers
 #    expose_to_client :self, :game_sessions, :question, :answers
 
     attr_reader :session
@@ -27,6 +28,10 @@ module Topics
     end
 
     class Question < ClientRepresentation
+
+    end
+
+    class Answer < ClientRepresentation
 
     end
   end

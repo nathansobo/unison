@@ -21,16 +21,31 @@ module Topics
           },
           'Question' => {
             '1' => Topics::GameSession::Question.new(Models::Question.find(1))
+          },
+          'Answer' => {
+            '1' => Topics::GameSession::Question.new(Models::Answer.find(1)),
+            '2' => Topics::GameSession::Question.new(Models::Answer.find(2))
           }
         }
       end
 
       context "when the current Question changes" do
-        it "updates the Topic hash to the new value of Question" do
+        before do
           topic.to_hash
+        end
+
+        it "updates the Topic hash to the new value of Question" do
           game[:current_question_id] = 2
           topic.to_hash['Question'].should == {
             '2' => Topics::GameSession::Question.new(Models::Question.find(2))
+          }
+        end
+
+        it "updates the Topic hash to the new value of Answers" do
+          game[:current_question_id] = 2
+          topic.to_hash['Answer'].should == {
+            '3' => Topics::GameSession::Question.new(Models::Answer.find(3)),
+            '4' => Topics::GameSession::Question.new(Models::Answer.find(4))
           }
         end
       end

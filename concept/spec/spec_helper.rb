@@ -15,6 +15,10 @@ Spec::Runner.configure do |config|
     Models::GameSession.create(:id => 2, :game_id => 1)    
     Models::Question.create(:id => 1)
     Models::Question.create(:id => 2)    
+    Models::Answer.create(:id => 1, :question_id => 1)
+    Models::Answer.create(:id => 2, :question_id => 1)
+    Models::Answer.create(:id => 3, :question_id => 2)
+    Models::Answer.create(:id => 4, :question_id => 2)    
   end
 end
 
