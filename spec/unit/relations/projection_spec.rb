@@ -124,12 +124,10 @@ module Unison
                 updated.push [tuple, attribute, old_value, new_value]
               end
 
-              pending "Add when tracking attribute & old attribute value & new attribute value" do
-                old_name = operand_projected_tuple[:name]
-                new_name = "Joe"
-                operand_projected_tuple[:name] = new_name
-                updated.should == [[projected_tuple, users_set[:name], old_name, new_name ]]
-              end
+              old_name = operand_projected_tuple[:name]
+              new_name = "Joe"
+              operand_projected_tuple[:name] = new_name
+              updated.should == [[projected_tuple, users_set[:name], old_name, new_name ]]
             end
           end
 

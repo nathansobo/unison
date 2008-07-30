@@ -6,6 +6,7 @@ module Unison
         super()
         @operand, @attributes = operand, attributes
         @tuples = initial_read
+        @last_update = nil
 
         operand.on_insert do |created|
           restricted = created[attributes]
@@ -24,8 +25,11 @@ module Unison
         end
 
         operand.on_tuple_update do |updated, attribute, old_value, new_value|
-          restricted = updated[attributes]
-          trigger_on_tuple_update(restricted, attribute, old_value, new_value)
+          unless last_update == [attributes, old_value, new_value]
+            restricted = updated[attributes]
+            @last_update = [attributes, old_value, new_value]
+            trigger_on_tuple_update(restricted, attribute, old_value, new_value)
+          end
         end
       end
 
@@ -34,7 +38,7 @@ module Unison
       end
 
       protected
-      attr_reader :tuples
+      attr_reader :tuples, :last_update
       def initial_read
         operand.read.map do |tuple|
           tuple[attributes]
