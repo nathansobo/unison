@@ -159,6 +159,10 @@ module Unison
             end
           end          
         end
+
+        context "when passed in #predicate is a constant value Predicate" do
+          it "raises an ArgumentError"
+        end
       end
 
       describe "#read" do
