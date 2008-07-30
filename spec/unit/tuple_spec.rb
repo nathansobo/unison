@@ -80,6 +80,14 @@ module Unison
         end
       end
 
+      describe ".basename" do
+        it "returns the last segment of name" do
+          tuple_class = Class.new(Tuple::Base)
+          stub(tuple_class).name {"Foo::Bar::Baz"}
+          tuple_class.basename.should == "Baz"
+        end
+      end
+
       context "a primitive tuple" do
         before do
           User.superclass.should == Tuple::Base
@@ -206,7 +214,7 @@ module Unison
             tuple.bind("Hi").should == "Hi"
           end
         end
-        
+
         describe "#==" do
           attr_reader :other_tuple
           context "when other Tuple#attributes == #attributes" do

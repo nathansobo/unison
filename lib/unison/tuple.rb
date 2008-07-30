@@ -39,6 +39,10 @@ module Unison
         relation.insert(new(attributes))
       end
 
+      def basename
+        name.split("::").last
+      end
+
       protected
       def instance_relations
         @instance_relations ||= []

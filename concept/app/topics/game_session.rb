@@ -17,6 +17,10 @@ module Topics
     # Specific representations for object types can be scoped under the topic's module
     # Otherwise a default representation can be used that forwards all declared attributes
     class Game < ClientRepresentation
+      
+    end
+
+    class GameSession < ClientRepresentation
 
     end
   end
