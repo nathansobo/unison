@@ -9,6 +9,13 @@ module Unison
         @signal = Signal.new(user, users_set[:name])
       end
 
+      describe "#value" do
+        it "returns the #attribute value from the #tuple" do
+          user[:name].should_not be_nil
+          signal.value.should == user[:name]
+        end
+      end
+
       describe "#trigger_on_update" do
         context "when passed a block" do
           it "invokes all #on_update subscriptions" do

@@ -6,6 +6,10 @@ module Unison
       @update_subscriptions = []
     end
 
+    def value
+      tuple[attribute]
+    end
+
     def on_update(&block)
       raise ArgumentError, "#on_update needs a block passed in" unless block
       update_subscriptions.push(block)

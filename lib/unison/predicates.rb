@@ -15,7 +15,12 @@ module Unison
       end
 
       def eval(tuple)
-        tuple.bind(operand_1) == tuple.bind(operand_2)
+        tuple.bind(eval_operand(operand_1)) == tuple.bind(eval_operand(operand_2))
+      end
+
+      protected
+      def eval_operand(operand)
+        operand.is_a?(Signal) ? operand.value : operand
       end
     end
   end

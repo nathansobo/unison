@@ -203,15 +203,19 @@ module Unison
         end
 
         describe "#bind" do
-          it "retrieves the value for an Attribute defined on the relation of the Tuple class" do
-            tuple.bind(User.relation[:id]).should == 1
-            tuple.bind(User.relation[:name]).should == "Nathan"
+          context "when passed in expression is an Attribute" do
+            it "retrieves the value for an Attribute defined on the relation of the Tuple class" do
+              tuple.bind(User.relation[:id]).should == 1
+              tuple.bind(User.relation[:name]).should == "Nathan"
+            end
           end
 
-          it "for non-attribute arguments, is the identity function" do
-            tuple.bind(:id).should == :id
-            tuple.bind(1).should == 1
-            tuple.bind("Hi").should == "Hi"
+          context "when passed in expression is not an Attribute" do
+            it "is the identity function" do
+              tuple.bind(:id).should == :id
+              tuple.bind(1).should == 1
+              tuple.bind("Hi").should == "Hi"
+            end
           end
         end
 

@@ -22,6 +22,14 @@ module Unison
           predicate = Eq.new(1, 1)
           predicate.eval(User.new(:id => 1, :name => "Nathan")).should be_true
         end
+
+        context "when one of the operands is a Signal" do
+          it "uses the value of the Signal in the predication" do
+            user = User.new(:id => 1, :name => "Nathan")
+            Eq.new(1, user.signal(:id)).eval(user).should be_true
+            Eq.new(user.signal(:id), 1).eval(user).should be_true
+          end
+        end
       end
 
       describe "#==" do
@@ -30,6 +38,12 @@ module Unison
           predicate.should_not == Eq.new(users_set[:id], "Nathan")
           predicate.should_not == Eq.new(users_set[:name], "Corey")
           predicate.should_not == Object.new
+        end
+      end
+
+      describe "#on_update" do
+        context "when no block is passed in" do
+          
         end
       end
     end
