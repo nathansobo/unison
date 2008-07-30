@@ -34,6 +34,9 @@ module Unison
 
       def insert(tuple)
         tuples.push(tuple)
+        tuple.on_update do
+          trigger_on_tuple_update tuple
+        end
         trigger_on_insert(tuple)
       end
 
@@ -55,6 +58,7 @@ module Unison
       end
 
       protected
+      attr_reader :signals
     end
   end
 end

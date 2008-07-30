@@ -243,6 +243,34 @@ module Unison
             end
           end
         end
+
+        describe "#on_update" do
+          context "when passed a block" do
+            context "when an attribute is changed" do
+              it "invokes the block when the Tuple is updated" do
+                on_update_called = false
+                tuple.on_update do
+                  on_update_called = true
+                end
+
+                tuple[:id] = tuple[:id] + 1
+                on_update_called.should be_true
+              end
+            end
+
+            context "when an attribute is not changed" do
+              it "does not invoke the block"
+            end
+          end
+
+          context "when not passed a block" do
+            it "raises an ArgumentError" do
+              lambda do
+                tuple.on_update
+              end.should raise_error(ArgumentError)
+            end
+          end
+        end
       end
 
       context "a compound tuple" do

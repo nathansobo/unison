@@ -35,6 +35,20 @@ module Unison
             trigger_on_delete(deleted)
           end
         end
+
+        operand.on_tuple_update do |tuple|
+          if predicate.eval(tuple)
+            if tuples.include?(tuple)
+              trigger_on_tuple_update(tuple)
+            else
+              tuples.push(tuple)
+              trigger_on_insert(tuple)
+            end
+          else
+            tuples.delete(tuple)
+            trigger_on_delete(tuple)
+          end
+        end
       end
 
       def ==(other)

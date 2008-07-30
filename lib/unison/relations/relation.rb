@@ -6,6 +6,7 @@ module Unison
         tuple_class.relation = self
         @insert_subscriptions = []
         @delete_subscriptions = []
+        @tuple_update_subscriptions = []
         @singleton = false
       end
       
@@ -39,12 +40,17 @@ module Unison
         delete_subscriptions << block
       end
 
+      def on_tuple_update(&block)
+        raise ArgumentError, "#on_tuple_update needs a block passed in" unless block
+        tuple_update_subscriptions.push(block)
+      end
+
       def inspect
         "<#{self.class} @insert_subscriptions.length=#{insert_subscriptions.length} @delete_subscriptions.length=#{delete_subscriptions.length}>"
       end
 
       protected
-      attr_reader :insert_subscriptions, :delete_subscriptions
+      attr_reader :insert_subscriptions, :delete_subscriptions, :tuple_update_subscriptions
 
       def method_missing(method_name, *args, &block)
         if singleton?
@@ -66,6 +72,13 @@ module Unison
           subscription.call(deleted)
         end
         deleted
+      end
+
+      def trigger_on_tuple_update(updated_tuple)
+        tuple_update_subscriptions.each do |subscription|
+          subscription.call(updated_tuple)
+        end
+        updated_tuple
       end
     end
   end

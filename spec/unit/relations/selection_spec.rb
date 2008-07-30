@@ -3,7 +3,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
 module Unison
   module Relations
     describe Selection do
-      attr_reader :selection, :predicate
+      attr_reader :selection, :predicate, :photo
       before do
         @predicate = photos_set[:user_id].eq(1)
         @selection = Selection.new(photos_set, predicate)
@@ -52,7 +52,6 @@ module Unison
 
         context "when a Tuple is inserted into the #operand" do
           context "when the Tuple matches the #predicate" do
-            attr_reader :photo
             before do
               @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
               predicate.eval(photo).should be_true
@@ -66,7 +65,6 @@ module Unison
           end
 
           context "when the Tuple does not match the #predicate" do
-            attr_reader :photo
             before do
               @photo = Photo.new(:id => 100, :user_id => 2, :name => "Photo 100")
               predicate.eval(photo).should be_false
@@ -76,6 +74,101 @@ module Unison
               selection.read.should_not include(photo)
               photos_set.insert(photo)
               selection.read.should_not include(photo)
+            end
+          end
+        end
+
+        context "when a Tuple in the #operand that does not match the #predicate is updated" do
+          before do
+            @photo = Photo.create(:id => 100, :user_id => 2, :name => "Photo 100")
+          end
+
+          context "when the update causes the Tuple to match the #predicate" do
+            it "adds the Tuple to the result of #read" do
+              selection.read.should_not include(photo)
+              photo[:user_id] = 1
+              selection.read.should include(photo)
+            end
+
+            it "invokes the #on_insert event" do
+              on_insert_tuple = nil
+              selection.on_insert do |tuple|
+                on_insert_tuple = tuple
+              end
+
+              photo[:user_id] = 1
+              on_insert_tuple.should == photo
+            end
+          end
+
+          context "when the update does not cause the Tuple to match the #predicate" do
+            it "does not add the Tuple into the result of #read" do
+              selection.read.should_not include(photo)
+              photo[:user_id] = 3
+              selection.read.should_not include(photo)
+            end
+
+            it "does not invoke the #on_insert event" do
+              selection.on_insert do |tuple|
+                raise "Dont call me"
+              end
+
+              photo[:user_id] = 3
+            end
+          end
+        end
+
+        context "when a Tuple that matches the #predicate in the #operand is updated" do
+          before do
+            @photo = selection.read.first
+          end
+
+          context "when the update causes the Tuple to not match the #predicate" do
+            it "removes the Tuple from the result of #read" do
+              selection.read.should include(photo)
+              photo[:user_id] = 3
+              selection.read.should_not include(photo)
+            end
+
+            it "invokes the on_delete event" do
+              on_delete_tuple = nil
+              selection.on_delete do |tuple|
+                on_delete_tuple = tuple
+              end
+
+              photo[:user_id] = 3
+              on_delete_tuple.should == photo
+            end
+          end
+
+          context "when the Tuple continues to match the #predicate after the update" do
+            it "does not change the size of the result of #read" do
+              selection.read.should include(photo)
+              lambda do
+                photo[:name] = "New Name"
+              end.should_not change {selection.read.size}
+              selection.read.should include(photo)
+            end
+
+            it "invokes the #on_tuple_update event" do
+              on_tuple_update_tuple = nil
+              selection.on_tuple_update do |tuple|
+                on_tuple_update_tuple = tuple
+              end
+
+              photo[:name] = "New Name"
+              on_tuple_update_tuple.should == photo
+            end
+
+            it "does not invoke the #on_insert or #on_delete event" do
+              selection.on_insert do |tuple|
+                raise "Dont call me"
+              end
+              selection.on_delete do |tuple|
+                raise "Dont call me"
+              end
+
+              photo[:name] = "New Name"
             end
           end
         end

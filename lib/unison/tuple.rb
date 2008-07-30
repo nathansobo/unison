@@ -61,6 +61,7 @@ module Unison
 
     def initialize(*args)
       @signals = {}
+      @update_subscriptions = []
       if attributes_hash?(args)
         @primitive = true
         @attributes = {}
@@ -113,6 +114,7 @@ module Unison
       old_value = attributes[attribute]
       attributes[attribute] = value
       signals[attribute].trigger_on_update(old_value, value) if signals[attribute]
+      trigger_on_update
       value
     end
 
@@ -139,12 +141,36 @@ module Unison
       signals[attribute] ||= Signal.new(self, attribute)
     end
 
+    def on_update(&block)
+      raise ArgumentError, "#on_update needs a block passed in" unless block
+      update_subscriptions.push(block)
+    end
+
+    def trigger_on_update(old_value, new_value)
+      update_subscriptions.each do |subscription|
+        subscription.call(tuple, old_value, new_value)
+      end
+      new_value
+    end
+
+    def on_update(&block)
+      raise ArgumentError, "#on_update needs a block passed in" unless block
+      update_subscriptions.push(block)
+    end
+    
     class Base
       include Tuple
     end
 
     protected
-    attr_reader :signals
+    attr_reader :signals, :update_subscriptions
+
+    def trigger_on_update
+      update_subscriptions.each do |subscription|
+        subscription.call
+      end
+    end
+
     def attribute_for(attribute_or_name)
       case attribute_or_name
       when Attribute
