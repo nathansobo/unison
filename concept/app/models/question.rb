@@ -7,7 +7,7 @@ module Models
     attribute :body
 
     relates_to_n :answers do
-      Answer.where(Answer[:question_id].eq(id))
+      Answer.where(Answer[:question_id].eq(self[:id]))
     end
   end
 end

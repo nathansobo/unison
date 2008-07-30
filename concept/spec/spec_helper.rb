@@ -10,9 +10,11 @@ Spec::Runner.configure do |config|
   config.mock_with :rr
 
   config.before do
-    Models::Game.create(:id => 1)
+    Models::Game.create(:id => 1, :current_question_id => 1)
     Models::GameSession.create(:id => 1, :game_id => 1)
     Models::GameSession.create(:id => 2, :game_id => 1)    
+    Models::Question.create(:id => 1)
+    Models::Question.create(:id => 2)    
   end
 end
 

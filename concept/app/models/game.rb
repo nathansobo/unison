@@ -5,6 +5,7 @@ module Models
 
     attribute :id
     attribute :deactivated_at
+    attribute :current_question_id
 
     # has_many :game_sessions
     relates_to_n :game_sessions do
@@ -16,9 +17,9 @@ module Models
     end
 
     # belongs_to :current_question, :class_name => :Question
-#    relates_to_1 :current_question do
-#      Question.where(Question[:id].eq(signal(:current_question_id)))
-#    end
+    relates_to_1 :current_question do
+      Question.where(Question[:id].eq(signal(:current_question_id)))
+    end
 
 #    relates_to_1 :next_question do
 #      Question.where(Question[:index].gt(current_question.signal(:index)))

@@ -7,8 +7,11 @@ module Unison
       end
 
       def ==(other)
-        return false unless other.instance_of?(Eq)
-        operand_1 == other.operand_1 && operand_2 == other.operand_2 
+        if other.instance_of?(Eq)
+          operand_1 == other.operand_1 && operand_2 == other.operand_2
+        else
+          false
+        end
       end
 
       def eval(tuple)
