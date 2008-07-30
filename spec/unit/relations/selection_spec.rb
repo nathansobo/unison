@@ -3,16 +3,21 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
 module Unison
   module Relations
     describe Selection do
-      attr_reader :selection, :predicate, :photo
+      attr_reader :operand, :selection, :predicate, :photo
       before do
-        @predicate = photos_set[:user_id].eq(1)
-        @selection = Selection.new(photos_set, predicate)
+        @operand = photos_set
+        @predicate = operand[:user_id].eq(1)
+        @selection = Selection.new(operand, predicate)
       end
 
       describe "#initialize" do
         it "sets the #operand and #predicate" do
           selection.operand.should == photos_set
           predicate.should == photos_set[:user_id].eq(1)
+        end
+
+        it "retains its #operand" do
+          operand.should be_retained_by(selection)
         end
 
         context "when the #predicate is updated" do
@@ -298,6 +303,37 @@ module Unison
           selection.should == Selection.new(photos_set, photos_set[:user_id].eq(1))
           selection.should_not == Selection.new(photos_set, photos_set[:user_id].eq(2))
           selection.should_not == Object.new
+        end
+      end
+
+      describe "#release" do
+        context "when #retain has been called once" do
+          attr_reader :retainer, :operand
+          before do
+            @retainer = Object.new
+            selection.retain retainer
+            class << operand
+              def subscriptions
+                insert_subscriptions + delete_subscriptions + tuple_update_subscriptions
+              end
+            end
+            selection.operand_subscriptions.should_not be_empty
+          end
+
+          it "unsubscribes from and releases its #operand" do
+            operand.should be_retained_by(selection)
+            
+            selection.operand_subscriptions.each do |subscription|
+              operand.subscriptions.should include(subscription)
+            end
+
+            selection.release retainer
+
+            operand.should_not be_retained_by(selection)
+            selection.operand_subscriptions.each do |subscription|
+              operand.subscriptions.should_not include(subscription)
+            end
+          end
         end
       end
     end

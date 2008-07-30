@@ -245,33 +245,31 @@ module Unison
         end
 
         describe "#on_update" do
-          context "when passed a block" do
-            context "when an attribute is changed" do
-              it "invokes the block when the Tuple is updated" do
-                update_args = []
-                tuple.on_update do |attribute, old_value, new_value|
-                  update_args.push [attribute, old_value, new_value]
-                end
+          it "returns a Subscription" do
+            tuple.on_update {}.class.should == Subscription
+          end
 
-                old_value = tuple[:id]
-                new_value = tuple[:id] + 1
-                tuple[:id] = new_value
-                update_args.should == [[tuple.relation[:id], old_value, new_value]]
+          context "when an attribute is changed" do
+            it "invokes the block when the Tuple is updated" do
+              update_args = []
+              tuple.on_update do |attribute, old_value, new_value|
+                update_args.push [attribute, old_value, new_value]
               end
-            end
 
-            context "when an attribute is not changed" do
-              it "does not invoke the block"
+              old_value = tuple[:id]
+              new_value = tuple[:id] + 1
+              tuple[:id] = new_value
+              update_args.should == [[tuple.relation[:id], old_value, new_value]]
             end
           end
 
-          context "when not passed a block" do
-            it "raises an ArgumentError" do
-              lambda do
-                tuple.on_update
-              end.should raise_error(ArgumentError)
-            end
+          context "when an attribute is not changed" do
+            it "does not invoke the block"
           end
+        end
+        
+        describe "#delete" do
+          it "releases all of its instance Relations"
         end
       end
 

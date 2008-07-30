@@ -8,6 +8,7 @@ module Unison
         @delete_subscriptions = []
         @tuple_update_subscriptions = []
         @singleton = false
+        @retainers = {}
       end
       
       def tuple_class
@@ -31,26 +32,41 @@ module Unison
       end
 
       def on_insert(&block)
-        raise ArgumentError, "#on_insert needs a block passed in" unless block
-        insert_subscriptions << block
+        Subscription.new(insert_subscriptions, &block)
       end
 
       def on_delete(&block)
-        raise ArgumentError, "#on_delete needs a block passed in" unless block
-        delete_subscriptions << block
+        Subscription.new(delete_subscriptions, &block)
       end
 
       def on_tuple_update(&block)
-        raise ArgumentError, "#on_tuple_update needs a block passed in" unless block
-        tuple_update_subscriptions.push(block)
+        Subscription.new(tuple_update_subscriptions, &block)
       end
 
       def inspect
         "<#{self.class} @insert_subscriptions.length=#{insert_subscriptions.length} @delete_subscriptions.length=#{delete_subscriptions.length}>"
       end
 
+      def retain(retainer)
+        raise ArgumentError, "Object #{retainer.inspect} has already retained this Object" if retained_by?(retainer)
+        retainers[retainer.object_id] = retainer
+      end
+
+      def release(retainer)
+        retainers.delete(retainer.object_id)
+        destroy if refcount == 0
+      end
+
+      def refcount
+        retainers.length
+      end
+
+      def retained_by?(potential_retainer)
+        retainers[potential_retainer.object_id] ? true : false
+      end
+
       protected
-      attr_reader :insert_subscriptions, :delete_subscriptions, :tuple_update_subscriptions
+      attr_reader :insert_subscriptions, :delete_subscriptions, :tuple_update_subscriptions, :retainers
 
       def method_missing(method_name, *args, &block)
         if singleton?
@@ -58,6 +74,10 @@ module Unison
         else
           super
         end
+      end
+
+      def destroy
+        
       end
 
       def trigger_on_insert(inserted)

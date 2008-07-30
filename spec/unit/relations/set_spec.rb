@@ -122,6 +122,9 @@ module Unison
           set.delete(tuple)
           deleted.should == tuple
         end
+
+        it "causes the deleted Tuple's instance relations to unsubscribe from their #operands"
+
       end
 
       describe "#each" do

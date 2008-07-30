@@ -142,8 +142,7 @@ module Unison
     end
 
     def on_update(&block)
-      raise ArgumentError, "#on_update needs a block passed in" unless block
-      update_subscriptions.push(block)
+      Subscription.new(update_subscriptions, &block)
     end
 
     def trigger_on_update(old_value, new_value)
@@ -153,11 +152,6 @@ module Unison
       new_value
     end
 
-    def on_update(&block)
-      raise ArgumentError, "#on_update needs a block passed in" unless block
-      update_subscriptions.push(block)
-    end
-    
     class Base
       include Tuple
     end

@@ -13,7 +13,7 @@ module Models
     end
 
     relates_to_n :active_game_sessions do
-      GameSession.where(GameSession[:game_id].eq(self[:id])).where(GameSession[:deactivated_at].eq(nil))
+      game_sessions.where(GameSession[:deactivated_at].eq(nil))
     end
 
     # belongs_to :current_question, :class_name => :Question

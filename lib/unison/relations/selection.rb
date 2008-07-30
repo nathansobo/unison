@@ -1,54 +1,63 @@
 module Unison
   module Relations
     class Selection < Relation
-      attr_reader :operand, :predicate
+      attr_reader :operand, :predicate, :operand_subscriptions, :predicate_subscription
 
       def initialize(operand, predicate)
         super()
+        @operand_subscriptions = []
         @operand, @predicate = operand, predicate
+        operand.retain(self)
         @tuples = initial_read
 
-        predicate.on_update do
-          new_tuples = initial_read
-          deleted_tuples = tuples - new_tuples
-          inserted_tuples = new_tuples - tuples
-          tuples.clear
-          tuples.concat initial_read
-          deleted_tuples.each do |deleted_tuple|
-            trigger_on_delete(deleted_tuple)
-          end
-          inserted_tuples.each do |inserted_tuple|
-            trigger_on_insert(inserted_tuple)
-          end
-        end
-
-        operand.on_insert do |created|
-          if predicate.eval(created)
-            tuples.push(created)
-            trigger_on_insert(created)
-          end
-        end
-
-        operand.on_delete do |deleted|
-          if predicate.eval(deleted)
-            tuples.delete(deleted)
-            trigger_on_delete(deleted)
-          end
-        end
-
-        operand.on_tuple_update do |tuple, attribute, old_value, new_value|
-          if predicate.eval(tuple)
-            if tuples.include?(tuple)
-              trigger_on_tuple_update(tuple, attribute, old_value, new_value)
-            else
-              tuples.push(tuple)
-              trigger_on_insert(tuple)
+        predicate_subscription =
+          predicate.on_update do
+            new_tuples = initial_read
+            deleted_tuples = tuples - new_tuples
+            inserted_tuples = new_tuples - tuples
+            tuples.clear
+            tuples.concat initial_read
+            deleted_tuples.each do |deleted_tuple|
+              trigger_on_delete(deleted_tuple)
             end
-          else
-            tuples.delete(tuple)
-            trigger_on_delete(tuple)
+            inserted_tuples.each do |inserted_tuple|
+              trigger_on_insert(inserted_tuple)
+            end
           end
-        end
+
+        operand_subscriptions.push(
+          operand.on_insert do |created|
+            if predicate.eval(created)
+              tuples.push(created)
+              trigger_on_insert(created)
+            end
+          end
+        )
+
+        operand_subscriptions.push(
+          operand.on_delete do |deleted|
+            if predicate.eval(deleted)
+              tuples.delete(deleted)
+              trigger_on_delete(deleted)
+            end
+          end
+        )
+
+        operand_subscriptions.push(
+          operand.on_tuple_update do |tuple, attribute, old_value, new_value|
+            if predicate.eval(tuple)
+              if tuples.include?(tuple)
+                trigger_on_tuple_update(tuple, attribute, old_value, new_value)
+              else
+                tuples.push(tuple)
+                trigger_on_insert(tuple)
+              end
+            else
+              tuples.delete(tuple)
+              trigger_on_delete(tuple)
+            end
+          end
+        )
       end
 
       def ==(other)
@@ -73,6 +82,12 @@ module Unison
         end
       end
 
+      def destroy
+        operand_subscriptions.each do |subscription|
+          subscription.destroy
+        end
+        operand.release self
+      end
     end
   end
 end
