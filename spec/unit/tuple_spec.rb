@@ -14,14 +14,30 @@ module Unison
       end
 
       describe ".attribute" do
-        it "delegates to .relation (BRIAN - This won't work with mock)" do
-          #      mock(User.relation).attribute(:name)
-          #      User.attribute(:name)
-        end
-
         it "delegates to .relation" do
           mock.proxy(User.relation).attribute(:name, :string)
           User.attribute(:name, :string)
+        end
+      end
+
+      describe ".attribute_reader" do
+        it "creates an attribute on the .relation" do
+          mock.proxy(User.relation).attribute(:name, :string)
+          User.attribute_reader(:name, :string)
+        end
+
+        it "adds a reader method to the Tuple" do
+          User.attribute_reader(:nick_name, :string)
+          user = User.new(:nick_name => "Bob")
+          user.nick_name.should == "Bob"
+        end
+
+        it "does not add a writer method to the Tuple" do
+          pending "Enable when we have PrimitiveTuple and a CompoundTuple" do
+            User.attribute_reader(:name, :string)
+            user = User.new
+            user.should_not respond_to(:name=)
+          end
         end
       end
 

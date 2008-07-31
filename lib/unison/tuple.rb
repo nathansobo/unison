@@ -14,9 +14,12 @@ module Unison
         relation.attribute(name, type)
       end
 
-#      def attribute_reader(name)
-#
-#      end
+      def attribute_reader(name, type)
+        attribute = relation.attribute(name, type)
+        define_method(name) do
+          self[attribute]
+        end
+      end
 
       def [](attribute)
         relation[attribute]

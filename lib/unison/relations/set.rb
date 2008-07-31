@@ -15,7 +15,9 @@ module Unison
       end
 
       def attribute(name, type)
-        attributes.push(Attribute.new(self, name, type))
+        attribute = Attribute.new(self, name, type)
+        attributes.push(attribute)
+        attribute
       end
 
       def has_attribute?(attribute_or_symbol)

@@ -28,6 +28,11 @@ module Unison
           set.attribute(:name, :string)
           set.attributes.should == [Attribute.new(set, :name, :string)]
         end
+        
+        it "returns the Attribute" do
+          set = Set.new(:user)
+          set.attribute(:name, :string).should == Attribute.new(set, :name, :string)
+        end
       end
 
       describe "#has_attribute?" do
