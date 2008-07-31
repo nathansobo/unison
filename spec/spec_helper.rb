@@ -12,7 +12,7 @@ Spec::Runner.configure do |config|
   
   config.before do
     Object.class_eval do
-      const_set(:User, Class.new(Unison::Tuple::Base) do
+      const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:users)
         attribute :id, :integer
         attribute :name, :string
@@ -26,7 +26,7 @@ Spec::Runner.configure do |config|
         has_many :accounts
       end)
 
-      const_set(:Profile, Class.new(Unison::Tuple::Base) do
+      const_set(:Profile, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:profiles)
         attribute :id, :integer
         attribute :user_id, :integer
@@ -34,7 +34,7 @@ Spec::Runner.configure do |config|
         belongs_to :user
       end)
 
-      const_set(:Photo, Class.new(Unison::Tuple::Base) do
+      const_set(:Photo, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:photos)
         attribute :id, :integer
         attribute :user_id, :integer
@@ -45,7 +45,7 @@ Spec::Runner.configure do |config|
         end
       end)
 
-      const_set(:Account, Class.new(Unison::Tuple::Base) do
+      const_set(:Account, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:accounts)
         attribute :id, :integer
         attribute :user_id, :integer

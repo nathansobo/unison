@@ -8,17 +8,11 @@ module Unison
       end
 
       include Retainable
-      attr_writer :tuple_class
       def initialize
-        tuple_class.relation = self
         @insert_subscriptions = []
         @delete_subscriptions = []
         @tuple_update_subscriptions = []
         @singleton = false
-      end
-      
-      def tuple_class
-        @tuple_class ||= Class.new(Unison::Tuple::Base)
       end
 
       def where(predicate)

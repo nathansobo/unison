@@ -10,9 +10,14 @@ module Unison
         @tuples = []
       end
 
-      def tuple_superclass
-        Unison::Tuple::Base
+      def tuple_class
+        @tuple_class ||= begin
+          tuple_class = Class.new(Unison::PrimitiveTuple::Base)
+          tuple_class.relation = self
+          tuple_class
+        end
       end
+      attr_writer :tuple_class
 
       def attribute(name, type)
         attribute = Attribute.new(self, name, type)

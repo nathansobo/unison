@@ -28,7 +28,7 @@ module Unison
           context "when the inserted Tuple creates a compound Tuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
-              @tuple_class = join.tuple_class
+              @tuple_class = CompoundTuple::Base
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.new(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
@@ -45,7 +45,7 @@ module Unison
           context "when the inserted Tuple creates a compound Tuple that does not match the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
-              @tuple_class = join.tuple_class
+              @tuple_class = CompoundTuple::Base
               @photo = Photo.create(:id => 100, :user_id => 999, :name => "Photo 100")
               @user = User.new(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
@@ -64,7 +64,7 @@ module Unison
           context "when the inserted Tuple creates a compound Tuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
-              @tuple_class = join.tuple_class
+              @tuple_class = CompoundTuple::Base
               @photo = Photo.new(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
@@ -81,7 +81,7 @@ module Unison
           context "when the inserted Tuple creates a compound Tuple that does not match the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
-              @tuple_class = join.tuple_class
+              @tuple_class = CompoundTuple::Base
               @photo = Photo.new(:id => 100, :user_id => 999, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
@@ -101,7 +101,7 @@ module Unison
           context "is a member of a compound Tuple that matches the #predicate" do
             attr_reader :photo, :compound_tuple
             before do
-              @tuple_class = join.tuple_class
+              @tuple_class = CompoundTuple::Base
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @compound_tuple = join.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
@@ -117,7 +117,7 @@ module Unison
 
           context "is not a member of a compound Tuple that matches the #predicate" do
             before do
-              @tuple_class = join.tuple_class
+              @tuple_class = CompoundTuple::Base
               @user = User.create(:id => 100, :name => "Brian")
               join.any? do |compound_tuple|
                 compound_tuple[users_set] == user
@@ -137,7 +137,7 @@ module Unison
           context "is a member of a compound Tuple that matches the #predicate" do
             attr_reader :user, :compound_tuple
             before do
-              @tuple_class = join.tuple_class
+              @tuple_class = CompoundTuple::Base
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @compound_tuple = join.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
@@ -153,7 +153,7 @@ module Unison
 
           context "is not a member of a compound Tuple that matches the #predicate" do
             before do
-              @tuple_class = join.tuple_class
+              @tuple_class = CompoundTuple::Base
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               join.any? do |compound_tuple|
                 compound_tuple[photos_set] == photo
@@ -174,7 +174,7 @@ module Unison
             before do
               @user = users_set.read.first
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-              @expected_compound_tuple = join.tuple_class.new(user, photo)
+              @expected_compound_tuple = CompoundTuple::Base.new(user, photo)
             end
 
             context "when the update causes a compound Tuple to match the #predicate" do
@@ -287,7 +287,7 @@ module Unison
             before do
               @user = users_set.read.first
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-              @expected_compound_tuple = join.tuple_class.new(user, photo)
+              @expected_compound_tuple = CompoundTuple::Base.new(user, photo)
             end
 
             context "when the update causes a compound Tuple to match the #predicate" do

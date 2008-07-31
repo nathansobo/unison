@@ -14,7 +14,7 @@ module Unison
         operand_1_subscriptions.push(
           operand_1.on_insert do |operand_1_tuple|
             operand_2.each do |operand_2_tuple|
-              insert_if_predicate_matches tuple_class.new(operand_1_tuple, operand_2_tuple)
+              insert_if_predicate_matches CompoundTuple::Base.new(operand_1_tuple, operand_2_tuple)
             end
           end
         )
@@ -22,7 +22,7 @@ module Unison
         operand_2_subscriptions.push(
           operand_2.on_insert do |operand_2_tuple|
             operand_1.each do |operand_1_tuple|
-              insert_if_predicate_matches tuple_class.new(operand_1_tuple, operand_2_tuple)
+              insert_if_predicate_matches CompoundTuple::Base.new(operand_1_tuple, operand_2_tuple)
             end
           end
         )
@@ -42,7 +42,7 @@ module Unison
         operand_1_subscriptions.push(
           operand_1.on_tuple_update do |operand_1_tuple, attribute, old_value, new_value|
             operand_2.each do |operand_2_tuple|
-              compound_tuple = tuple_class.new(operand_1_tuple, operand_2_tuple)
+              compound_tuple = CompoundTuple::Base.new(operand_1_tuple, operand_2_tuple)
               if tuples.include?(compound_tuple)
                 if predicate.eval(compound_tuple)
                   trigger_on_tuple_update compound_tuple, attribute, old_value, new_value
@@ -59,7 +59,7 @@ module Unison
         operand_2_subscriptions.push(
           operand_2.on_tuple_update do |operand_2_tuple, attribute, old_value, new_value|
             operand_1.each do |operand_1_tuple|
-              compound_tuple = tuple_class.new(operand_1_tuple, operand_2_tuple)
+              compound_tuple = CompoundTuple::Base.new(operand_1_tuple, operand_2_tuple)
               if tuples.include?(compound_tuple)
                 if predicate.eval(compound_tuple)
                   trigger_on_tuple_update compound_tuple, attribute, old_value, new_value
@@ -117,7 +117,7 @@ module Unison
         tuples = []
         operand_1.each do |tuple_1|
           operand_2.each do |tuple_2|
-            tuples.push(tuple_class.new(tuple_1, tuple_2))
+            tuples.push(CompoundTuple::Base.new(tuple_1, tuple_2))
           end
         end
         tuples

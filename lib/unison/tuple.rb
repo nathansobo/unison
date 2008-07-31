@@ -3,24 +3,6 @@ module Unison
     include Unison
     include Retainable
     module ClassMethods
-      attr_accessor :relation
-
-      def member_of(relation)
-        @relation = relation
-        relation.tuple_class = self
-      end
-
-      def attribute(name, type)
-        relation.attribute(name, type)
-      end
-
-      def attribute_reader(name, type)
-        attribute = relation.attribute(name, type)
-        define_method(name) do
-          self[attribute]
-        end
-      end
-
       def [](attribute)
         relation[attribute]
       end
@@ -29,137 +11,23 @@ module Unison
         relation.where(predicate)
       end
 
-      def relates_to_n(name, &definition)
-        instance_relations.push [name, definition]
-        attr_reader name
-      end
-
-      def relates_to_1(name, &definition)
-        singleton_instance_relations.push [name, definition]
-        attr_reader name
-      end
-      
-      def has_many(name)
-        relates_to_n(name) do
-          self.class.foreign_key_selection self, name.to_s.singularize.classify.constantize
-        end
-      end
-
-      def has_one(name)
-        relates_to_1(name) do
-          self.class.foreign_key_selection self, name.to_s.classify.constantize
-        end
-      end
-
-      def belongs_to(name)
-        relates_to_1(name) do
-          target_class = name.to_s.classify.constantize
-          target_relation = target_class.relation
-          foreign_key = :"#{name}_id"
-          target_relation.where(target_relation[:id].eq(self[foreign_key]))
-        end
-      end
-
-      def foreign_key_selection(instance, target_class)
-        target_relation = target_class.relation
-        foreign_key = :"#{name.underscore}_id"
-        target_relation.where(target_relation[foreign_key].eq(instance[:id]))
-      end
-
       def find(id)
         relation.where(relation[:id].eq(id)).first
-      end
-
-      def create(attributes)
-        relation.insert(new(attributes))
       end
 
       def basename
         name.split("::").last
       end
-
-      protected
-      def instance_relations
-        @instance_relations ||= []
-      end
-
-      def singleton_instance_relations
-        @singleton_instance_relations ||= []
-      end
     end
 
-    def self.included(a_module)
-      a_module.extend ClassMethods
-    end
+    attr_reader :nested_tuples
 
-    attr_reader :attributes, :nested_tuples
-
-    def initialize(*args)
-      @signals = {}
+    def initialize
       @update_subscriptions = []
-      if attributes_hash?(args)
-        @primitive = true
-        @attributes = {}
-        args.first.each do |attribute, value|
-          self[attribute] = value
-        end
-      else
-        @primitive = false
-        @nested_tuples = args
-      end
-
-      instance_relations.each do |name, proc|
-        relation = instance_eval(&proc)
-        instance_variable_set("@#{name}", relation)
-      end
-
-      singleton_instance_relations.each do |name, definition|
-        relation = instance_eval(&definition)
-        relation.treat_as_singleton
-        instance_variable_set("@#{name}", relation)
-      end
     end
     
     def relation
       self.class.relation
-    end
-
-    def primitive?
-      @primitive
-    end
-
-    def compound?
-      !primitive?
-    end
-
-    def [](attribute)
-      if primitive?
-        attributes[attribute_for(attribute)]
-      else
-        nested_tuples.each do |tuple|
-          return tuple if tuple.relation == attribute
-          return tuple[attribute] if tuple.relation.has_attribute?(attribute)
-        end
-        raise ArgumentError, "Attribute #{attribute} not found"
-      end
-    end
-
-    def []=(attribute_or_symbol, value)
-      attribute = attribute_for(attribute_or_symbol)
-      old_value = attributes[attribute]
-      attributes[attribute] = value
-      signals[attribute].trigger_on_update(old_value, value) if signals[attribute]
-      trigger_on_update(attribute, old_value, value)
-      value
-    end
-
-    def ==(other)
-      return false unless other.is_a?(Tuple)
-      if primitive?
-        attributes == other.attributes
-      else
-        nested_tuples == other.nested_tuples
-      end
     end
 
     def bind(expression)
@@ -171,25 +39,8 @@ module Unison
       end
     end
 
-    def signal(attribute_or_symbol)
-      raise NotImplementedError, "You can only call #signal on primitive Tuples" unless primitive?
-      attribute = attribute_for(attribute_or_symbol)
-      signals[attribute] ||= Signal.new(self, attribute)
-    end
-
     def on_update(&block)
       Subscription.new(update_subscriptions, &block)
-    end
-
-    def trigger_on_update(old_value, new_value)
-      update_subscriptions.each do |subscription|
-        subscription.call(tuple, old_value, new_value)
-      end
-      new_value
-    end
-
-    class Base
-      include Tuple
     end
 
     protected
@@ -199,6 +50,7 @@ module Unison
       update_subscriptions.each do |subscription|
         subscription.call(attribute, old_value, new_value)
       end
+      new_value
     end
 
     def attribute_for(attribute_or_name)
@@ -213,18 +65,6 @@ module Unison
       else
         raise "Attributes must be Attributes or Symbols"
       end
-    end
-
-    def attributes_hash?(args)
-      args.size == 1 && args.first.instance_of?(Hash)
-    end
-
-    def instance_relations
-      self.class.send(:instance_relations)
-    end
-
-    def singleton_instance_relations
-      self.class.send(:singleton_instance_relations)
     end
   end
 end
