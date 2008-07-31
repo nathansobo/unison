@@ -74,10 +74,6 @@ module Unison
         )
       end
 
-      def read
-        @tuples
-      end
-
       protected
       attr_reader :tuples, :operand_1_subscriptions, :operand_2_subscriptions
 

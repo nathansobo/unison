@@ -1,6 +1,12 @@
 module Unison
   module Relations
     class Relation
+      instance_methods.each do |m|
+        unless m =~ /(^__|^methods$|^respond_to\?$|^instance_of\?$|^equal\?$|^is_a\?$|^extend$|^class$|^nil\?$|^send$|^object_id$|^should)/
+          undef_method m
+        end
+      end
+
       include Retainable
       attr_writer :tuple_class
       def initialize
@@ -17,6 +23,10 @@ module Unison
 
       def where(predicate)
         Selection.new(self, predicate)
+      end
+
+      def read
+        tuples
       end
 
       def first
@@ -47,14 +57,22 @@ module Unison
         "<#{self.class} @insert_subscriptions.length=#{insert_subscriptions.length} @delete_subscriptions.length=#{delete_subscriptions.length}>"
       end
 
+      def ==(other)
+        if other.is_a?(self.class)
+          read == other.read
+        else
+          method_missing(:==, other)
+        end
+      end
+
       protected
-      attr_reader :insert_subscriptions, :delete_subscriptions, :tuple_update_subscriptions
+      attr_reader :tuples, :insert_subscriptions, :delete_subscriptions, :tuple_update_subscriptions
 
       def method_missing(method_name, *args, &block)
         if singleton?
           read.first.send(method_name, *args, &block)
         else
-          super
+          read.send(method_name, *args, &block)
         end
       end
 

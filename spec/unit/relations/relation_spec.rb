@@ -38,6 +38,40 @@ module Unison
         end
       end
 
+      describe "#==" do
+        before do
+          @relation = Set.new(:users)
+        end
+
+        context "when passed the same Set" do
+          it "returns true" do
+            relation.should == relation
+          end
+        end
+
+        context "when passed a different Set" do
+          context "with the same result of #read" do
+            it "returns true" do
+              relation.should == Set.new(:users)
+            end
+          end
+
+          context "with the a different result of #read" do
+            it "returns false" do
+              another_relation = Set.new(:users)
+              another_relation.insert(User.new(:id => 100, :name => "Brian"))
+              relation.should_not == another_relation
+            end
+          end
+        end
+
+        context "when an Array == to #read" do
+          it "returns true" do
+            relation.should == relation.read
+          end
+        end
+      end      
+
       describe "#on_insert" do
         before do
           @relation = users_set

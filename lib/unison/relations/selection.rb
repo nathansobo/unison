@@ -61,15 +61,6 @@ module Unison
         )
       end
 
-      def ==(other)
-        return false unless other.instance_of?(Selection)
-        operand == other.operand && predicate == other.predicate
-      end
-
-      def read
-        tuples
-      end
-
       def size
         read.size
       end

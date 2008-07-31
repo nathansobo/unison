@@ -8,7 +8,7 @@ module Unison
 
     def ==(other)
       return false unless other.instance_of?(Attribute)
-      relation == other.relation && name == other.name
+      relation.equal?(other.relation) && name == other.name
     end
 
     module PredicateConstructors

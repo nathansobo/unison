@@ -42,10 +42,6 @@ module Unison
         )
       end
 
-      def read
-        tuples
-      end
-
       protected
       attr_reader :tuples, :last_update, :operand_subscriptions
 

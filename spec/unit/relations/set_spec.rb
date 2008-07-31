@@ -13,8 +13,8 @@ module Unison
       describe "#initialize" do
         it "sets the name of the set" do
           set.name.should == :users
-        end
 
+        end
         it "sets the #tuple_class of the Set to a subclass of Tuple::Base, and sets its #relation to itself" do
           tuple_class = set.tuple_class
           tuple_class.superclass.should == Tuple::Base

@@ -49,10 +49,6 @@ module Unison
         tuple
       end
 
-      def read
-        tuples
-      end
-
       def each(&block)
         tuples.each(&block)
       end
