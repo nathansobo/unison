@@ -22,15 +22,22 @@ module Unison
         relation.where(predicate)
       end
 
-      def relates_to_1(name, &definition)
-        singleton_instance_relations.push [name, definition]
-        attr_reader name
-      end
-
       def relates_to_n(name, &definition)
         instance_relations.push [name, definition]
         attr_reader name
       end
+
+      def relates_to_1(name, &definition)
+        singleton_instance_relations.push [name, definition]
+        attr_reader name
+      end
+      
+      def has_many(name)
+        
+        relates_to_n(name) do
+          
+        end
+      end  
 
       def find(id)
         relation.where(relation[:id].eq(id)).first

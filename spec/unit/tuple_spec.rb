@@ -38,29 +38,12 @@ module Unison
           mock.proxy(User.relation).where(User[:name].eq("Nathan"))
           User.where(User[:name].eq("Nathan"))
         end
-
       end
 
       describe ".relates_to_n" do
         it "creates an instance method representing the given relation" do
           user = User.find(1)
           user.photos.should == photos_set.where(photos_set[:user_id].eq(1))
-        end
-      end
-
-      describe ".find" do
-        it "when passed an integer, returns the first Tuple whose :id =='s it" do
-          user = User.find(1)
-          user.should be_an_instance_of(User)
-          user[users_set[:id]].should == 1
-        end
-      end
-
-      describe ".create" do
-        it "instantiates an instance of the Tuple with the given attributes and inserts it into its .relation, then returns it" do
-          User.find(100).should be_nil
-          user = User.create(:id => 100, :name => "Ernie")
-          User.find(100).should == user
         end
       end
 
@@ -77,6 +60,35 @@ module Unison
 
         it "causes the Relation to be treated as a singleton" do
           photo.user.should be_singleton
+        end
+      end
+
+      describe ".has_many" do
+        attr_reader :user
+        before do
+          @user = User.find(1)
+        end
+
+        it "creates a Selection on the target Set where the foreign key matches id" do
+          pending "Implement me" do
+            user.accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
+          end
+        end
+      end
+      
+      describe ".find" do
+        it "when passed an integer, returns the first Tuple whose :id =='s it" do
+          user = User.find(1)
+          user.should be_an_instance_of(User)
+          user[users_set[:id]].should == 1
+        end
+      end
+
+      describe ".create" do
+        it "instantiates an instance of the Tuple with the given attributes and inserts it into its .relation, then returns it" do
+          User.find(100).should be_nil
+          user = User.create(:id => 100, :name => "Ernie")
+          User.find(100).should == user
         end
       end
 

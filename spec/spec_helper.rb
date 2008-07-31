@@ -17,6 +17,8 @@ Spec::Runner.configure do |config|
         relates_to_n :photos do
           Photo.where(Photo[:user_id].eq(self[:id]))
         end
+
+        has_many :accounts
       end)
 
       const_set(:Photo, Class.new(Unison::Tuple::Base) do
@@ -29,6 +31,14 @@ Spec::Runner.configure do |config|
           User.where(User[:id].eq(self[:user_id]))
         end
       end)
+
+      const_set(:Account, Class.new(Unison::Tuple::Base) do
+        member_of Unison::Relations::Set.new(:accounts)
+        attribute :id
+        attribute :user_id
+        attribute :name
+#        belongs_to :user
+      end)
     end
 
     users_set.insert(User.new(:id => 1, :name => "Nathan", :hobby => "Yoga"))
@@ -37,12 +47,16 @@ Spec::Runner.configure do |config|
     photos_set.insert(Photo.new(:id => 1, :user_id => 1, :name => "Photo 1"))
     photos_set.insert(Photo.new(:id => 2, :user_id => 1, :name => "Photo 2"))
     photos_set.insert(Photo.new(:id => 3, :user_id => 2, :name => "Photo 3"))
+    accounts_set.insert(Account.new(:id => 1, :user_id => 1, :name => "Account 1"))
+    accounts_set.insert(Account.new(:id => 2, :user_id => 1, :name => "Account 2"))
+    accounts_set.insert(Account.new(:id => 3, :user_id => 2, :name => "Account 3"))
   end
 
   config.after do
     Object.class_eval do
       remove_const :User
       remove_const :Photo
+      remove_const :Account
     end
   end
 end
@@ -56,6 +70,10 @@ class Spec::ExampleGroup
 
   def photos_set
     Photo.relation
+  end
+
+  def accounts_set
+    Account.relation
   end
 end
 
