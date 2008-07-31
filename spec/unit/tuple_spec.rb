@@ -20,8 +20,8 @@ module Unison
         end
 
         it "delegates to .relation" do
-          mock.proxy(User.relation).attribute(:name)
-          User.attribute(:name)
+          mock.proxy(User.relation).attribute(:name, :string)
+          User.attribute(:name, :string)
         end
       end
 

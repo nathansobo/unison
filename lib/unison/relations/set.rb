@@ -14,8 +14,8 @@ module Unison
         Unison::Tuple::Base
       end
 
-      def attribute(name)
-        attributes.push(Attribute.new(self, name))
+      def attribute(name, type)
+        attributes.push(Attribute.new(self, name, type))
       end
 
       def has_attribute?(attribute_or_symbol)

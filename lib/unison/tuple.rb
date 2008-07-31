@@ -10,9 +10,13 @@ module Unison
         relation.tuple_class = self
       end
 
-      def attribute(name)
-        relation.attribute(name)
+      def attribute(name, type)
+        relation.attribute(name, type)
       end
+
+#      def attribute_reader(name)
+#
+#      end
 
       def [](attribute)
         relation[attribute]

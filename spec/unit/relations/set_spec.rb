@@ -6,8 +6,8 @@ module Unison
       attr_reader :set
       before do
         @set = Set.new(:users)
-        set.attribute(:id)
-        set.attribute(:name)
+        set.attribute(:id, :integer)
+        set.attribute(:name, :string)
       end
 
       describe "#initialize" do
@@ -25,15 +25,15 @@ module Unison
       describe "#attribute" do
         it "adds an Attribute to the Set by the given name" do
           set = Set.new(:user)
-          set.attribute(:name)
-          set.attributes.should == [Attribute.new(set, :name)]
+          set.attribute(:name, :string)
+          set.attributes.should == [Attribute.new(set, :name, :string)]
         end
       end
 
       describe "#has_attribute?" do
         it "when passed an Attribute, returns true if the #attributes contains the argument and false otherwise" do
-          set.should have_attribute(Attribute.new(set, :name))
-          set.should_not have_attribute(Attribute.new(set, :bogus))
+          set.should have_attribute(Attribute.new(set, :name, :string))
+          set.should_not have_attribute(Attribute.new(set, :bogus, :integer))
         end
 
         it "when passed a Symbol, returns true if the #attributes contains an Attribute with that symbol as its name and false otherwise" do
@@ -44,8 +44,8 @@ module Unison
 
       describe "#[]" do
         it "retrieves the Set's Attribute by the given name" do
-          set[:id].should == Attribute.new(set, :id)
-          set[:name].should == Attribute.new(set, :name)
+          set[:id].should == Attribute.new(set, :id, :integer)
+          set[:name].should == Attribute.new(set, :name, :string)
         end
         
         context "when no Attribute with the passed-in name is defined" do

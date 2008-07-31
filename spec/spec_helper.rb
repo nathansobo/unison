@@ -14,9 +14,9 @@ Spec::Runner.configure do |config|
     Object.class_eval do
       const_set(:User, Class.new(Unison::Tuple::Base) do
         member_of Unison::Relations::Set.new(:users)
-        attribute :id
-        attribute :name
-        attribute :hobby
+        attribute :id, :integer
+        attribute :name, :string
+        attribute :hobby, :string
 
         relates_to_n :photos do
           Photo.where(Photo[:user_id].eq(self[:id]))
@@ -28,17 +28,17 @@ Spec::Runner.configure do |config|
 
       const_set(:Profile, Class.new(Unison::Tuple::Base) do
         member_of Unison::Relations::Set.new(:profiles)
-        attribute :id
-        attribute :user_id
+        attribute :id, :integer
+        attribute :user_id, :integer
 
         belongs_to :user
       end)
 
       const_set(:Photo, Class.new(Unison::Tuple::Base) do
         member_of Unison::Relations::Set.new(:photos)
-        attribute :id
-        attribute :user_id
-        attribute :name
+        attribute :id, :integer
+        attribute :user_id, :integer
+        attribute :name, :string
 
         relates_to_1(:user) do
           User.where(User[:id].eq(self[:user_id]))
@@ -47,9 +47,9 @@ Spec::Runner.configure do |config|
 
       const_set(:Account, Class.new(Unison::Tuple::Base) do
         member_of Unison::Relations::Set.new(:accounts)
-        attribute :id
-        attribute :user_id
-        attribute :name
+        attribute :id, :integer
+        attribute :user_id, :integer
+        attribute :name, :string
         belongs_to :user
       end)
     end
