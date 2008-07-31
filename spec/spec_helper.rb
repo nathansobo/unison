@@ -14,9 +14,9 @@ Spec::Runner.configure do |config|
     Object.class_eval do
       const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:users)
-        attribute :id, :integer
-        attribute :name, :string
-        attribute :hobby, :string
+        attribute_accessor :id, :integer
+        attribute_accessor :name, :string
+        attribute_accessor :hobby, :string
 
         relates_to_n :photos do
           Photo.where(Photo[:user_id].eq(self[:id]))

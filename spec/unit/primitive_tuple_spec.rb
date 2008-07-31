@@ -16,15 +16,15 @@ module Unison
 
         describe ".attribute" do
           it "delegates to .relation" do
-            mock.proxy(User.relation).attribute(:name, :string)
-            User.attribute(:name, :string)
+            mock.proxy(User.relation).attribute(:nick_name, :string)
+            User.attribute(:nick_name, :string)
           end
         end
 
         describe ".attribute_reader" do
           it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).attribute(:name, :string)
-            User.attribute_reader(:name, :string)
+            mock.proxy(User.relation).attribute(:nick_name, :string)
+            User.attribute_reader(:nick_name, :string)
           end
 
           it "adds a reader method to the Tuple" do
@@ -34,16 +34,16 @@ module Unison
           end
 
           it "does not add a writer method to the Tuple" do
-            User.attribute_reader(:name, :string)
+            User.attribute_reader(:nick_name, :string)
             user = User.new
-            user.should_not respond_to(:name=)
+            user.should_not respond_to(:nick_name=)
           end
         end
 
         describe ".attribute_writer" do
           it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).attribute(:name, :string)
-            User.attribute_writer(:name, :string)
+            mock.proxy(User.relation).attribute(:nick_name, :string)
+            User.attribute_writer(:nick_name, :string)
           end
 
           it "adds a writer method to the Tuple" do
@@ -54,16 +54,16 @@ module Unison
           end
 
           it "does not add a reader method to the Tuple" do
-            User.attribute_writer(:name, :string)
+            User.attribute_writer(:nick_name, :string)
             user = User.new
-            user.should_not respond_to(:name)
+            user.should_not respond_to(:nick_name)
           end
         end
 
         describe ".attribute_accessor" do
           it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).attribute(:name, :string).at_least(1)
-            User.attribute_accessor(:name, :string)
+            mock.proxy(User.relation).attribute(:nick_name, :string).at_least(1)
+            User.attribute_accessor(:nick_name, :string)
           end
 
           it "adds a reader and a writer method to the Tuple" do
