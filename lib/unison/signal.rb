@@ -24,5 +24,10 @@ module Unison
 
     protected
     attr_reader :update_subscriptions
+
+    def destroy
+      raise "Signal #{self.inspect} is not registered on its Tuple" unless tuple.send(:signals)[attribute] == self
+      tuple.send(:signals).delete(attribute)
+    end
   end
 end

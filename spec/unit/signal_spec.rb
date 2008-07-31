@@ -6,13 +6,32 @@ module Unison
       attr_reader :user, :signal
       before do
         @user = User.find(1)
-        @signal = Signal.new(user, users_set[:name])
+        @signal = user.signal(users_set[:name])
       end
 
       describe "#value" do
         it "returns the #attribute value from the #tuple" do
           user[:name].should_not be_nil
           signal.value.should == user[:name]
+        end
+      end
+      
+      describe "#destroy" do
+        context "when the Signal is registered in Tuple#signals[#attribute]" do
+          it "removes itself from its Tuple#signals hash" do
+            user.send(:signals)[users_set[:name]].should == signal
+            signal.send(:destroy)
+            user.send(:signals)[users_set[:name]].should be_nil
+          end
+        end
+
+        context "when Signal is not registered in Tuple#signals[#attribute]" do
+          it "removes itself from its Tuple#signals hash" do
+            signal.send(:destroy)
+            lambda do
+              signal.send(:destroy)
+            end.should raise_error
+          end
         end
       end
 
