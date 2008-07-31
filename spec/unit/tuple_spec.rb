@@ -70,7 +70,7 @@ module Unison
         end
 
         it "creates a Selection on the target Set where the foreign key matches id" do
-          user.accounts.read.should_not be_empty
+          user.accounts.should_not be_empty
           user.accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
         end
 
@@ -87,7 +87,7 @@ module Unison
 
         it "creates a singleton Selection on the target Set where the foreign key matches id" do
           user.profile.should be_singleton
-          user.profile.read.should == [Profile.find(1)]
+          user.profile.should == Profile.find(1)
         end
       end
 
@@ -100,7 +100,7 @@ module Unison
 
         it "creates a singleton Selection on the target Set where the target's id matches the instance's foreign key" do
           profile.user.should be_singleton
-          profile.user.read.should == [user]
+          profile.user.should == user
         end
       end
       
@@ -261,6 +261,13 @@ module Unison
 
         describe "#==" do
           attr_reader :other_tuple
+          context "when other is not a Tuple" do
+            it "returns false" do
+              other_object = Object.new
+              tuple.should_not == other_object
+            end
+          end
+          
           context "when other Tuple#attributes == #attributes" do
             before do
               @other_tuple = User.new(:id => 1, :name => "Nathan")

@@ -147,6 +147,7 @@ module Unison
     end
 
     def ==(other)
+      return false unless other.is_a?(Tuple)
       if primitive?
         attributes == other.attributes
       else
