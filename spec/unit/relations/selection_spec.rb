@@ -311,50 +311,39 @@ module Unison
       end
 
       describe "#destroy" do
-        describe "effects on #operand" do
-          attr_reader :operand
-          before do
-            operand.extend AddSubscriptionsMethodToRelation
-            selection.operand_subscriptions.should_not be_empty
+        it "unsubscribes from and releases its #operand" do
+          operand.extend AddSubscriptionsMethodToRelation
+          selection.operand_subscriptions.should_not be_empty
+          operand.should be_retained_by(selection)
+
+          selection.operand_subscriptions.each do |subscription|
+            operand.subscriptions.should include(subscription)
           end
 
-          it "unsubscribes from and releases its #operand" do
-            operand.should be_retained_by(selection)
+          selection.send(:destroy)
 
-            selection.operand_subscriptions.each do |subscription|
-              operand.subscriptions.should include(subscription)
-            end
-
-            selection.send(:destroy)
-
-            operand.should_not be_retained_by(selection)
-            selection.operand_subscriptions.each do |subscription|
-              operand.subscriptions.should_not include(subscription)
-            end
-          end          
+          operand.should_not be_retained_by(selection)
+          selection.operand_subscriptions.each do |subscription|
+            operand.subscriptions.should_not include(subscription)
+          end
         end
 
-        describe "effects on #predicate" do
-          before do
-            class << selection
-              public :predicate_subscription
-            end
-            class << predicate
-              public :update_subscriptions
-            end
-
-            selection.predicate_subscription.should_not be_nil
+        it "unsubscribes from and releases its #predicate" do
+          class << selection
+            public :predicate_subscription
+          end
+          class << predicate
+            public :update_subscriptions
           end
 
-          it "unsubscribes from and releases its #predicate" do
-            predicate.should be_retained_by(selection)
-            predicate.update_subscriptions.should include(selection.predicate_subscription)
+          selection.predicate_subscription.should_not be_nil
+          predicate.should be_retained_by(selection)
+          predicate.update_subscriptions.should include(selection.predicate_subscription)
 
-            selection.send(:destroy)
+          selection.send(:destroy)
 
-            predicate.should_not be_retained_by(selection)
-            predicate.update_subscriptions.should_not include(selection.predicate_subscription)
-          end
+          predicate.should_not be_retained_by(selection)
+          predicate.update_subscriptions.should_not include(selection.predicate_subscription)
         end
       end
     end

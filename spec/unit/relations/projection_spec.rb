@@ -17,6 +17,10 @@ module Unison
           projection.attributes.should == attributes
         end
 
+        it "retains its #operand" do
+          operand.should be_retained_by(projection)
+        end
+
         context "when the a Tuple is inserted into the #operand" do
           context "when the inserted Tuple restricted by #attributes is not in the Projection" do
             before do
@@ -198,6 +202,26 @@ module Unison
       describe "#read" do
         it "returns a set restricted to #attributes from the #operand" do
           projection.read.should == operand.read.map {|tuple| tuple[attributes]}.uniq
+        end
+      end
+
+      describe "#destroy" do
+        it "unsubscribes from and releases its #operand" do
+          operand.extend AddSubscriptionsMethodToRelation
+          operand.should be_retained_by(projection)
+
+          projection.send(:operand_subscriptions).should_not be_empty
+          projection.send(:operand_subscriptions).each do |subscription|
+            operand.subscriptions.should include(subscription)
+          end
+
+          projection.send(:destroy)
+
+          operand.should_not be_retained_by(projection)
+          projection.send(:operand_subscriptions).should_not be_empty
+          projection.send(:operand_subscriptions).each do |subscription|
+            operand.subscriptions.should_not include(subscription)
+          end
         end
       end
 
