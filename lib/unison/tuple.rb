@@ -1,6 +1,7 @@
 module Unison
   module Tuple
     include Unison
+    include Retainable
     module ClassMethods
       attr_accessor :relation
 

@@ -15,8 +15,35 @@ module Unison
           signal.value.should == user[:name]
         end
       end
-      
+
+      describe "#retain" do
+        context "when the Signal has not already retained its Tuple" do
+          it "retains its Tuple" do
+            user.should_not be_retained_by(signal)
+            signal.retain(Object.new)
+            user.should be_retained_by(signal)
+          end
+        end
+
+        context "when the Signal has already retained its Tuple" do
+          it "does attempt to re-retain its Tuple" do
+            signal.retain(Object.new)
+            user.should be_retained_by(signal)
+
+            dont_allow(user).retain(signal)
+            signal.retain(Object.new)
+          end
+        end
+      end
+
       describe "#destroy" do
+        it "releases its Tuple" do
+          signal.retain(Object.new)
+          user.should be_retained_by(signal)
+          signal.send(:destroy)
+          user.should_not be_retained_by(signal)
+        end
+
         context "when the Signal is registered in Tuple#signals[#attribute]" do
           it "removes itself from its Tuple#signals hash" do
             user.send(:signals)[users_set[:name]].should == signal

@@ -11,6 +11,11 @@ module Unison
       tuple[attribute]
     end
 
+    def retain(retainer)
+      super
+      tuple.retain(self) unless tuple.retained_by?(self)
+    end
+
     def on_update(&block)
       Subscription.new(update_subscriptions, &block)
     end
@@ -28,6 +33,7 @@ module Unison
     def destroy
       raise "Signal #{self.inspect} is not registered on its Tuple" unless tuple.send(:signals)[attribute] == self
       tuple.send(:signals).delete(attribute)
+      tuple.release(self)
     end
   end
 end
