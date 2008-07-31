@@ -314,11 +314,7 @@ module Unison
         describe "effects on #operand" do
           attr_reader :operand
           before do
-            class << operand
-              def subscriptions
-                insert_subscriptions + delete_subscriptions + tuple_update_subscriptions
-              end
-            end
+            operand.extend AddSubscriptionsMethodToRelation
             selection.operand_subscriptions.should_not be_empty
           end
 

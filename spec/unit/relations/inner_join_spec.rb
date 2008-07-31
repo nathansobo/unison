@@ -3,10 +3,12 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
 module Unison
   module Relations
     describe InnerJoin do
-      attr_reader :join, :predicate
+      attr_reader :join, :predicate, :operand_1, :operand_2
       before do
+        @operand_1 = users_set
+        @operand_2 = photos_set
         @predicate = photos_set[:user_id].eq(users_set[:id])
-        @join = InnerJoin.new(users_set, photos_set, predicate)
+        @join = InnerJoin.new(operand_1, operand_2, predicate)
       end
 
       describe "#initialize" do
@@ -14,6 +16,12 @@ module Unison
           join.operand_1.should == users_set
           join.operand_2.should == photos_set
           predicate.should == photos_set[:user_id].eq(users_set[:id])
+        end
+
+        it "retains the operands and #predicate" do
+          join.operand_1.should be_retained_by(join)
+          join.operand_2.should be_retained_by(join)
+          join.predicate.should be_retained_by(join)
         end
 
         context "when a Tuple inserted into #operand_1" do
@@ -401,6 +409,43 @@ module Unison
           tuples[2][photos_set[:id]].should == 3
           tuples[2][photos_set[:user_id]].should == 2
           tuples[2][photos_set[:name]].should == "Photo 3"
+        end
+      end
+
+      describe "#destroy" do
+        it "unsubscribes from and releases its operands" do
+          operand_1.extend AddSubscriptionsMethodToRelation
+          operand_2.extend AddSubscriptionsMethodToRelation
+
+          operand_1.should be_retained_by(join)
+          operand_2.should be_retained_by(join)
+          join.send(:operand_1_subscriptions).should_not be_empty
+          join.send(:operand_1_subscriptions).each do |subscription|
+            operand_1.subscriptions.should include(subscription)
+          end
+          join.send(:operand_2_subscriptions).should_not be_empty
+          join.send(:operand_2_subscriptions).each do |subscription|
+            operand_2.subscriptions.should include(subscription)
+          end
+
+          join.send(:destroy)
+
+          operand_1.should_not be_retained_by(join)
+          operand_2.should_not be_retained_by(join)
+          join.send(:operand_1_subscriptions).should_not be_empty
+          join.send(:operand_1_subscriptions).each do |subscription|
+            operand_1.subscriptions.should_not include(subscription)
+          end
+          join.send(:operand_2_subscriptions).should_not be_empty
+          join.send(:operand_2_subscriptions).each do |subscription|
+            operand_2.subscriptions.should_not include(subscription)
+          end
+        end
+
+        it "releases its #predicate" do
+          predicate.should be_retained_by(join)
+          join.send(:destroy)
+          predicate.should_not be_retained_by(join)
         end
       end
 

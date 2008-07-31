@@ -58,3 +58,9 @@ class Spec::ExampleGroup
     Photo.relation
   end
 end
+
+module AddSubscriptionsMethodToRelation
+  def subscriptions
+    insert_subscriptions + delete_subscriptions + tuple_update_subscriptions
+  end
+end
