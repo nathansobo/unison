@@ -3,6 +3,10 @@ require "spec"
 $LOAD_PATH.push("#{File.dirname(__FILE__)}/../lib")
 require "unison"
 
+# TODO: BT/NS - Remove dependency on ActiveSupport
+require "test/unit"
+require "active_support"
+
 Spec::Runner.configure do |config|
   config.mock_with :rr
   

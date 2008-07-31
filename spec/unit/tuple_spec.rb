@@ -70,9 +70,8 @@ module Unison
         end
 
         it "creates a Selection on the target Set where the foreign key matches id" do
-          pending "Implement me" do
-            user.accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
-          end
+          user.accounts.read.should_not be_empty
+          user.accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
         end
       end
       

@@ -33,9 +33,11 @@ module Unison
       end
       
       def has_many(name)
-        
         relates_to_n(name) do
-          
+          target_class = name.to_s.singularize.classify.constantize
+          target_relation = target_class.relation
+          foreign_key = :"#{self.class.name.underscore}_id"
+          target_relation.where(target_relation[foreign_key].eq(self[:id]))
         end
       end  
 
