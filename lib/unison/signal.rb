@@ -5,15 +5,11 @@ module Unison
     def initialize(tuple, attribute)
       @tuple, @attribute = tuple, attribute
       @update_subscriptions = []
+      tuple.retain(self)
     end
 
     def value
       tuple[attribute]
-    end
-
-    def retain(retainer)
-      super
-      tuple.retain(self) unless tuple.retained_by?(self)
     end
 
     def on_update(&block)

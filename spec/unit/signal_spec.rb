@@ -9,30 +9,16 @@ module Unison
         @signal = user.signal(users_set[:name])
       end
 
+      describe "#initialize" do
+        it "retains its Tuple" do
+          user.should be_retained_by(signal)
+        end
+      end
+
       describe "#value" do
         it "returns the #attribute value from the #tuple" do
           user[:name].should_not be_nil
           signal.value.should == user[:name]
-        end
-      end
-
-      describe "#retain" do
-        context "when the Signal has not already retained its Tuple" do
-          it "retains its Tuple" do
-            user.should_not be_retained_by(signal)
-            signal.retain(Object.new)
-            user.should be_retained_by(signal)
-          end
-        end
-
-        context "when the Signal has already retained its Tuple" do
-          it "does attempt to re-retain its Tuple" do
-            signal.retain(Object.new)
-            user.should be_retained_by(signal)
-
-            dont_allow(user).retain(signal)
-            signal.retain(Object.new)
-          end
         end
       end
 
