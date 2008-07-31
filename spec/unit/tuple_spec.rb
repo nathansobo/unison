@@ -73,6 +73,22 @@ module Unison
           user.accounts.read.should_not be_empty
           user.accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
         end
+
+        it "does not create a singleton Selection" do
+          user.accounts.should_not be_singleton
+        end
+      end
+
+      describe ".has_one" do
+        attr_reader :user
+        before do
+          @user = User.find(1)
+        end
+
+        it "creates a singleton Selection on the target Set where the foreign key matches id" do
+          user.profile.should be_singleton
+          user.profile.read.should == [Profile.find(1)]
+        end
       end
       
       describe ".find" do

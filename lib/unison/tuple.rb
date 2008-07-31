@@ -34,12 +34,21 @@ module Unison
       
       def has_many(name)
         relates_to_n(name) do
-          target_class = name.to_s.singularize.classify.constantize
-          target_relation = target_class.relation
-          foreign_key = :"#{self.class.name.underscore}_id"
-          target_relation.where(target_relation[foreign_key].eq(self[:id]))
+          self.class.foreign_key_selection self, name.to_s.singularize.classify.constantize
         end
-      end  
+      end
+
+      def has_one(name)
+        relates_to_1(name) do
+          self.class.foreign_key_selection self, name.to_s.classify.constantize
+        end
+      end
+
+      def foreign_key_selection(instance, target_class)
+        target_relation = target_class.relation
+        foreign_key = :"#{name.underscore}_id"
+        target_relation.where(target_relation[foreign_key].eq(instance[:id]))
+      end
 
       def find(id)
         relation.where(relation[:id].eq(id)).first
