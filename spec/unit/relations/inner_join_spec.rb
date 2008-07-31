@@ -36,9 +36,9 @@ module Unison
             end
 
             it "adds the compound Tuple to the result of #read" do
-              join.read.should_not include(expected_tuple)
+              join.should_not include(expected_tuple)
               users_set.insert(user)
-              join.read.should include(expected_tuple)
+              join.should include(expected_tuple)
             end
           end
 
@@ -53,9 +53,9 @@ module Unison
             end
 
             it "does not add the compound Tuple to the result of #read" do
-              join.read.should_not include(expected_tuple)
+              join.should_not include(expected_tuple)
               users_set.insert(user)
-              join.read.should_not include(expected_tuple)
+              join.should_not include(expected_tuple)
             end
           end
         end
@@ -72,9 +72,9 @@ module Unison
             end
 
             it "adds the compound Tuple to the result of #read" do
-              join.read.should_not include(expected_tuple)
+              join.should_not include(expected_tuple)
               photos_set.insert(photo)
-              join.read.should include(expected_tuple)
+              join.should include(expected_tuple)
             end
           end
 
@@ -89,9 +89,9 @@ module Unison
             end
 
             it "does not add the compound Tuple to the result of #read" do
-              join.read.should_not include(expected_tuple)
+              join.should_not include(expected_tuple)
               photos_set.insert(photo)
-              join.read.should_not include(expected_tuple)
+              join.should_not include(expected_tuple)
             end
           end
         end
@@ -104,14 +104,14 @@ module Unison
               @tuple_class = join.tuple_class
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
-              @compound_tuple = join.read.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
+              @compound_tuple = join.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
               predicate.eval(compound_tuple).should be_true
-              join.read.should include(compound_tuple)
+              join.should include(compound_tuple)
             end
 
             it "deletes the compound Tuple from the result of #read" do
               users_set.delete(user)
-              join.read.should_not include(compound_tuple)
+              join.should_not include(compound_tuple)
             end
           end
 
@@ -119,7 +119,7 @@ module Unison
             before do
               @tuple_class = join.tuple_class
               @user = User.create(:id => 100, :name => "Brian")
-              join.read.any? do |compound_tuple|
+              join.any? do |compound_tuple|
                 compound_tuple[users_set] == user
               end.should be_false
             end
@@ -127,7 +127,7 @@ module Unison
             it "does not delete a compound Tuple from the result of #read" do
               lambda do
                 users_set.delete(user)
-              end.should_not change{join.read.length}
+              end.should_not change{join.length}
             end
           end
         end
@@ -140,14 +140,14 @@ module Unison
               @tuple_class = join.tuple_class
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
-              @compound_tuple = join.read.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
+              @compound_tuple = join.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
               predicate.eval(compound_tuple).should be_true
-              join.read.should include(compound_tuple)
+              join.should include(compound_tuple)
             end
 
             it "deletes the compound Tuple from the result of #read" do
               photos_set.delete(photo)
-              join.read.should_not include(compound_tuple)
+              join.should_not include(compound_tuple)
             end
           end
 
@@ -155,7 +155,7 @@ module Unison
             before do
               @tuple_class = join.tuple_class
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-              join.read.any? do |compound_tuple|
+              join.any? do |compound_tuple|
                 compound_tuple[photos_set] == photo
               end.should be_false
             end
@@ -163,7 +163,7 @@ module Unison
             it "does not delete a compound Tuple from the result of #read" do
               lambda do
                 photos_set.delete(photo)
-              end.should_not change{join.read.length}
+              end.should_not change{join.length}
             end
           end          
         end
@@ -179,9 +179,9 @@ module Unison
 
             context "when the update causes a compound Tuple to match the #predicate" do
               it "adds that compound Tuple to the result of #read" do
-                join.read.should_not include(expected_compound_tuple)
+                join.should_not include(expected_compound_tuple)
                 user[:id] = photo[:user_id]
-                join.read.should include(expected_compound_tuple)
+                join.should include(expected_compound_tuple)
               end
 
               it "invokes the #on_insert event" do
@@ -199,9 +199,9 @@ module Unison
 
             context "when the update does not cause the Tuple to match the #predicate" do
               it "does not add the Tuple into the result of #read" do
-                join.read.should_not include(expected_compound_tuple)
+                join.should_not include(expected_compound_tuple)
                 user[:id] = photo[:user_id] + 1
-                join.read.should_not include(expected_compound_tuple)
+                join.should_not include(expected_compound_tuple)
               end
 
               it "does not invoke the #on_insert event" do
@@ -217,12 +217,12 @@ module Unison
             attr_reader :compound_tuples, :user
             before do
               @user = User.find(1)
-              @compound_tuples = join.read.select do |compound_tuple|
+              @compound_tuples = join.select do |compound_tuple|
                 compound_tuple[users_set] == user
               end
               compound_tuples.size.should be > 1
               compound_tuples.each do |compound_tuple|
-                join.read.should include(compound_tuple)
+                join.should include(compound_tuple)
               end
             end
 
@@ -230,7 +230,7 @@ module Unison
               it "removes the Tuple from the result of #read" do
                 user[:id] = 100
                 compound_tuples.each do |compound_tuple|
-                  join.read.should_not include(compound_tuple)
+                  join.should_not include(compound_tuple)
                 end
               end
 
@@ -251,7 +251,7 @@ module Unison
               it "does not remove that compound Tuple from the results of #read" do
                 user[:name] = "Joe"
                 compound_tuples.each do |compound_tuple|
-                  join.read.should include(compound_tuple)
+                  join.should include(compound_tuple)
                 end
               end
 
@@ -292,9 +292,9 @@ module Unison
 
             context "when the update causes a compound Tuple to match the #predicate" do
               it "adds that compound Tuple to the result of #read" do
-                join.read.should_not include(expected_compound_tuple)
+                join.should_not include(expected_compound_tuple)
                 photo[:user_id] = user[:id]
-                join.read.should include(expected_compound_tuple)
+                join.should include(expected_compound_tuple)
               end
 
               it "invokes the #on_insert event" do
@@ -312,9 +312,9 @@ module Unison
 
             context "when the update does not cause the Tuple to match the #predicate" do
               it "does not add the Tuple into the result of #read" do
-                join.read.should_not include(expected_compound_tuple)
+                join.should_not include(expected_compound_tuple)
                 photo[:user_id] = 1000
-                join.read.should_not include(expected_compound_tuple)
+                join.should_not include(expected_compound_tuple)
               end
 
               it "does not invoke the #on_insert event" do
@@ -330,16 +330,16 @@ module Unison
             attr_reader :compound_tuple, :photo
             before do
               @photo = photos_set.read.first
-              @compound_tuple = join.read.find do |compound_tuple|
+              @compound_tuple = join.find do |compound_tuple|
                 compound_tuple[photos_set] == photo
               end
-              join.read.should include(compound_tuple)
+              join.should include(compound_tuple)
             end
 
             context "and the update causes the compound Tuple to not match the #predicate" do
               it "removes the Tuple from the result of #read" do
                 photo[:user_id] = 100
-                join.read.should_not include(compound_tuple)
+                join.should_not include(compound_tuple)
               end
 
               it "invokes the on_delete event" do
@@ -355,7 +355,7 @@ module Unison
             context "and the compound Tuple continues to match the #predicate after the update" do
               it "does not remove that compound Tuple from the results of #read" do
                 photo[:name] = "A great naked show"
-                join.read.should include(compound_tuple)
+                join.should include(compound_tuple)
               end
 
               it "invokes the #on_tuple_update event for the compound Tuple" do
@@ -389,7 +389,7 @@ module Unison
 
       describe "#read" do
         it "returns all tuples in its operands for which its predicate returns true" do
-          tuples = join.read
+          tuples = join
           tuples.size.should == 3
 
           tuples[0][users_set[:id]].should == 1
@@ -512,7 +512,7 @@ module Unison
           attr_reader :compound_tuple, :user
           context "when the deleted Tuple is a member of a compound Tuple that matches the #predicate" do
             before do
-              @compound_tuple = join.read.first
+              @compound_tuple = join.first
               compound_tuple.should_not be_nil
               @user = compound_tuple[users_set]
             end
@@ -531,7 +531,7 @@ module Unison
           context "when the deleted Tuple is not a member of a compound Tuple that matches the #predicate" do
             before do
               @user = User.create(:id => 100, :name => "Brian")
-              join.read.all? do |compound_tuple|
+              join.all? do |compound_tuple|
                 compound_tuple[users_set] != user
               end.should be_true
             end
@@ -549,7 +549,7 @@ module Unison
           attr_reader :compound_tuple, :photo
           context "when the deleted Tuple is a member of a compound Tuple that matches the #predicate" do
             before do
-              @compound_tuple = join.read.first
+              @compound_tuple = join.first
               compound_tuple.should_not be_nil
               @photo = compound_tuple[photos_set]
             end
@@ -568,7 +568,7 @@ module Unison
           context "when the deleted Tuple is not a member of a compound Tuple that matches the #predicate" do
             before do
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-              join.read.all? do |compound_tuple|
+              join.all? do |compound_tuple|
                 compound_tuple[photos_set] != photo
               end.should be_true
             end
