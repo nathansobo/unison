@@ -31,7 +31,7 @@ Spec::Runner.configure do |config|
         attribute :id
         attribute :user_id
 
-        # belongs_to :user
+        belongs_to :user
       end)
 
       const_set(:Photo, Class.new(Unison::Tuple::Base) do
@@ -50,7 +50,7 @@ Spec::Runner.configure do |config|
         attribute :id
         attribute :user_id
         attribute :name
-#        belongs_to :user
+        belongs_to :user
       end)
     end
 

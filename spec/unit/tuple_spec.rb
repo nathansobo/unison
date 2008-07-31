@@ -90,6 +90,19 @@ module Unison
           user.profile.read.should == [Profile.find(1)]
         end
       end
+
+      describe ".belongs_to" do
+        attr_reader :profile, :user
+        before do
+          @profile = Profile.find(1)
+          @user = User.find(1)
+        end
+
+        it "creates a singleton Selection on the target Set where the target's id matches the instance's foreign key" do
+          profile.user.should be_singleton
+          profile.user.read.should == [user]
+        end
+      end
       
       describe ".find" do
         it "when passed an integer, returns the first Tuple whose :id =='s it" do

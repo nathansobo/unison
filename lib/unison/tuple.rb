@@ -44,6 +44,15 @@ module Unison
         end
       end
 
+      def belongs_to(name)
+        relates_to_1(name) do
+          target_class = name.to_s.classify.constantize
+          target_relation = target_class.relation
+          foreign_key = :"#{name}_id"
+          target_relation.where(target_relation[:id].eq(self[foreign_key]))
+        end
+      end
+
       def foreign_key_selection(instance, target_class)
         target_relation = target_class.relation
         foreign_key = :"#{name.underscore}_id"
