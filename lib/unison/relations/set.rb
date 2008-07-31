@@ -6,7 +6,7 @@ module Unison
       def initialize(name)
         super()
         @name = name
-        @attributes = []
+        @attributes = {}
         @tuples = []
       end
 
@@ -20,22 +20,28 @@ module Unison
       attr_writer :tuple_class
 
       def attribute(name, type)
-        attribute = Attribute.new(self, name, type)
-        attributes.push(attribute)
-        attribute
+        if attributes[name]
+          if attributes[name].type == type
+            attributes[name]
+          else
+            raise ArgumentError, "Attribute #{name} already exists with type #{attributes[name].inspect}. You tried to change the type to #{type.inspect}, which is an illegal operation."
+          end
+        else
+          attributes[name] = Attribute.new(self, name, type)
+        end
       end
 
       def has_attribute?(attribute_or_symbol)
         case attribute_or_symbol
         when Attribute
-          attributes.include?(attribute_or_symbol)
+          attributes.detect {|name, attribute| attribute == attribute_or_symbol}
         when Symbol
-          attributes.any? {|attribute| attribute.name == attribute_or_symbol}
+          attributes[attribute_or_symbol] ? true : false
         end
       end
 
       def [](attribute_name)
-        attributes.detect {|attribute| attribute.name == attribute_name} ||
+        attributes[attribute_name] ||
           raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on this Set")
       end
 

@@ -63,7 +63,7 @@ module Unison
       when Symbol
         relation[attribute_or_name]
       else
-        raise "Attributes must be Attributes or Symbols"
+        raise ArgumentError, "attribute_for only accepts an Attribute or Symbol"
       end
     end
   end

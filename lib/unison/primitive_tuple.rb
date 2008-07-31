@@ -21,6 +21,18 @@ module Unison
         end
       end
 
+      def attribute_writer(name, type)
+        attribute = relation.attribute(name, type)
+        define_method("#{name}=") do |value|
+          self[attribute] = value
+        end
+      end
+
+      def attribute_accessor(name, type)
+        attribute_reader(name, type)
+        attribute_writer(name, type)
+      end
+
       def relates_to_n(name, &definition)
         instance_relations.push [name, definition]
         attr_reader name

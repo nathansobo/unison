@@ -23,15 +23,45 @@ module Unison
       end
 
       describe "#attribute" do
-        it "adds an Attribute to the Set by the given name" do
-          set = Set.new(:user)
-          set.attribute(:name, :string)
-          set.attributes.should == [Attribute.new(set, :name, :string)]
+        context "when an Attribute with the same name has not already been added" do
+          it "adds an Attribute to the Set by the given name" do
+            set = Set.new(:user)
+            set.attribute(:name, :string)
+            set.attributes.should == {:name => Attribute.new(set, :name, :string)}
+          end
+
+          it "returns the Attribute" do
+            set = Set.new(:user)
+            set.attribute(:name, :string).should == Attribute.new(set, :name, :string)
+          end
         end
-        
-        it "returns the Attribute" do
-          set = Set.new(:user)
-          set.attribute(:name, :string).should == Attribute.new(set, :name, :string)
+
+        context "when an Attribute with the same name has already been added" do
+          context "when the previously added Attribute has the same #type" do
+            attr_reader :set, :attribute
+            before do
+              @set = Set.new(:user)
+              @attribute = set.attribute(:name, :string)
+            end
+            
+            it "returns the previously added Attribute" do
+              set.attribute(:name, :string).should equal(attribute)
+            end
+          end
+
+          context "when the previously added Attribute has a different #type" do
+            attr_reader :set
+            before do
+              @set = Set.new(:user)
+              set.attribute(:name, :string)
+            end
+
+            it "raises an ArgumentError" do
+              lambda do
+                set.attribute(:name, :symbol)
+              end.should raise_error(ArgumentError)
+            end
+          end
         end
       end
 

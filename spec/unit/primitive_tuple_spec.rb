@@ -40,6 +40,41 @@ module Unison
           end
         end
 
+        describe ".attribute_writer" do
+          it "creates an attribute on the .relation" do
+            mock.proxy(User.relation).attribute(:name, :string)
+            User.attribute_writer(:name, :string)
+          end
+
+          it "adds a writer method to the Tuple" do
+            User.attribute_writer(:nick_name, :string)
+            user = User.new(:nick_name => "Bob")
+            user.nick_name = "Jane"
+            user[:nick_name].should == "Jane"
+          end
+
+          it "does not add a reader method to the Tuple" do
+            User.attribute_writer(:name, :string)
+            user = User.new
+            user.should_not respond_to(:name)
+          end
+        end
+
+        describe ".attribute_accessor" do
+          it "creates an attribute on the .relation" do
+            mock.proxy(User.relation).attribute(:name, :string).at_least(1)
+            User.attribute_accessor(:name, :string)
+          end
+
+          it "adds a reader and a writer method to the Tuple" do
+            User.attribute_accessor(:nick_name, :string)
+            user = User.new(:nick_name => "Bob")
+            user.nick_name = "Jane"
+            user.nick_name.should == "Jane"
+            user[:nick_name].should == "Jane"
+          end
+        end
+        
         describe ".relates_to_n" do
           it "creates an instance method representing the given relation" do
             user = User.find(1)
