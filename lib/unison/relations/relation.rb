@@ -29,8 +29,8 @@ module Unison
         tuples
       end
 
-      def first
-        read.first
+      def nil?
+        singleton?? read.first.nil? : false
       end
 
       def treat_as_singleton

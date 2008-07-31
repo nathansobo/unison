@@ -13,6 +13,38 @@ module Unison
         end
       end
 
+      describe "#nil?" do
+        context "when the Relation is a singleton" do
+          context "when #read.first is nil" do
+            it "returns true" do
+              selection = users_set.where(users_set[:id].eq(100))
+              selection.treat_as_singleton
+
+              selection.read.first.should be_nil
+              selection.should be_nil
+            end
+          end
+
+          context "when #read.first is not nil" do
+            it "returns false" do
+              selection = users_set.where(users_set[:id].eq(1))
+              selection.treat_as_singleton
+
+              selection.read.first.should_not be_nil
+              selection.should_not be_nil
+            end
+          end
+        end
+
+        context "when the Relation is not a singleton" do
+          it "always returns false even when #read is empty" do
+            users_set.where(users_set[:id].eq(1)).should_not be_nil
+            users_set.where(users_set[:id].eq(100)).should be_empty
+            users_set.where(users_set[:id].eq(100)).should_not be_nil
+          end
+        end
+      end
+
       describe "#first" do
         it "returns the first tuple from #read" do
           users_set.first.should == users_set.read.first

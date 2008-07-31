@@ -54,7 +54,7 @@ module Unison
         end
 
         it "defines a method named after the name which returns the Relation that is produced by instance-evaling the block" do
-          photo.user.read.should_not be_empty
+          photo.user.should_not be_nil
           photo.user.should == User.where(User[:id].eq(photo[:user_id]))
         end
 
