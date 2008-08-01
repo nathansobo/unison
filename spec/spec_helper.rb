@@ -14,6 +14,7 @@ Spec::Runner.configure do |config|
     Object.class_eval do
       const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:users)
+        
         attribute_accessor :id, :integer
         attribute_accessor :name, :string
         attribute_accessor :hobby, :string
@@ -24,6 +25,7 @@ Spec::Runner.configure do |config|
 
         has_one :profile
         has_many :accounts
+        has_many :active_accounts, :class_name => "Account", :conditions => lambda {Account.active?}
       end)
 
       const_set(:Profile, Class.new(Unison::PrimitiveTuple::Base) do
@@ -47,9 +49,17 @@ Spec::Runner.configure do |config|
 
       const_set(:Account, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:accounts)
+
+        class << self
+          def active?
+            self[:deactivated_at].eq(nil)
+          end
+        end
+
         attribute :id, :integer
         attribute :user_id, :integer
         attribute :name, :string
+        attribute_accessor :deactivated_at, :datetime
         belongs_to :user
       end)
     end
@@ -63,9 +73,9 @@ Spec::Runner.configure do |config|
     photos_set.insert(Photo.new(:id => 1, :user_id => 1, :name => "Photo 1"))
     photos_set.insert(Photo.new(:id => 2, :user_id => 1, :name => "Photo 2"))
     photos_set.insert(Photo.new(:id => 3, :user_id => 2, :name => "Photo 3"))
-    accounts_set.insert(Account.new(:id => 1, :user_id => 1, :name => "Account 1"))
-    accounts_set.insert(Account.new(:id => 2, :user_id => 1, :name => "Account 2"))
-    accounts_set.insert(Account.new(:id => 3, :user_id => 2, :name => "Account 3"))
+    accounts_set.insert(Account.new(:id => 1, :user_id => 1, :name => "Account 1", :deactivated_at => nil))
+    accounts_set.insert(Account.new(:id => 2, :user_id => 1, :name => "Account 2", :deactivated_at => nil))
+    accounts_set.insert(Account.new(:id => 3, :user_id => 2, :name => "Account 3", :deactivated_at => Time.utc(2008, 8, 2)))
   end
 
   config.after do

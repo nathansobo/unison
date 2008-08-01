@@ -43,15 +43,17 @@ module Unison
         attr_reader name
       end
 
-      def has_many(name)
+      def has_many(name, options={})
         relates_to_n(name) do
-          self.class.foreign_key_selection self, name.to_s.singularize.classify.constantize
+          options[:class_name] ||= name.to_s.singularize.classify
+          self.class.foreign_key_selection self, options
         end
       end
 
-      def has_one(name)
+      def has_one(name, options={})
         relates_to_1(name) do
-          self.class.foreign_key_selection self, name.to_s.classify.constantize
+          options[:class_name] ||= name.to_s.classify
+          self.class.foreign_key_selection self, options
         end
       end
 
@@ -64,7 +66,8 @@ module Unison
         end
       end
 
-      def foreign_key_selection(instance, target_class)
+      def foreign_key_selection(instance, options={})
+        target_class = options[:class_name].constantize
         target_relation = target_class.relation
         foreign_key = :"#{name.underscore}_id"
         target_relation.where(target_relation[foreign_key].eq(instance[:id]))

@@ -5,6 +5,7 @@ module Unison
       
       def initialize(&block)
         raise ArgumentError, "Predicate must take a block" unless block
+        super()
         @proc = block
       end
 

@@ -3,7 +3,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/../spec_helper")
 module Unison
   module PrimitiveTuple
     describe Base do
-      attr_reader :tuple_class, :tuple
+      attr_reader :tuple
 
       describe "Class Methods" do
         describe ".member_of" do
@@ -111,6 +111,25 @@ module Unison
 
           it "does not create a singleton Selection" do
             user.accounts.should_not be_singleton
+          end
+
+          context "when passed :class_name option" do
+            it "creates a Selection whose #operand is the Set of the class matching the passed in String" do
+              user.active_accounts.operand.should == accounts_set
+            end
+          end
+
+          context "when passed :conditions option" do
+            context "when the :conditions option is a Predicate" do
+              it "returns the Tuples in the Relation that match the passed in Predicate" do
+                user.active_accounts.should == accounts_set.where(
+                  Predicates::And.new(
+                    accounts_set[:user_id].eq(user[:id]),
+                    Account[:deactivated_at].eq(nil)
+                  )
+                )
+              end
+            end
           end
         end
 

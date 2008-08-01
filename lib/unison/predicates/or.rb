@@ -4,6 +4,7 @@ module Unison
       attr_reader :child_predicates
       def initialize(*child_predicates)
         raise ArgumentError, "And predicate must have at least one child Predicate" if child_predicates.empty?
+        super()
         @child_predicates = child_predicates
       end
 
