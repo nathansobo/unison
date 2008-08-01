@@ -56,6 +56,7 @@ module Unison
 
       context "when #refcount becomes > 0" do
         it "does not call #destroy on itself" do
+          retainable.retain(Object.new)
           retainable.refcount.should be > 1
           dont_allow(retainable).destroy
           retainable.release(retainer)

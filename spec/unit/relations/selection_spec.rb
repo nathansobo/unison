@@ -16,14 +16,6 @@ module Unison
           predicate.should == photos_set[:user_id].eq(1)
         end
 
-        it "retains its #predicate" do
-          predicate.should be_retained_by(selection)
-        end
-
-        it "retains its #operand" do
-          operand.should be_retained_by(selection)
-        end
-
         context "when the #predicate is updated" do
           attr_reader :user, :new_photo, :old_photos
           before do
@@ -226,6 +218,20 @@ module Unison
         end
       end
 
+      describe "#retain" do
+        it "retains its #predicate" do
+          predicate.should_not be_retained_by(selection)
+          selection.retain(Object.new)
+          predicate.should be_retained_by(selection)
+        end
+
+        it "retains its #operand" do
+          operand.should_not be_retained_by(selection)
+          selection.retain(Object.new)
+          operand.should be_retained_by(selection)
+        end
+      end
+
       describe "#on_insert" do
         attr_reader :photo
         context "when a Tuple that matches the #predicate is inserted into the #operand" do
@@ -303,6 +309,10 @@ module Unison
       end
 
       describe "#destroy" do
+        before do
+          selection.retain(Object.new)
+        end
+
         it "unsubscribes from and releases its #operand" do
           operand.extend AddSubscriptionsMethodToRelation
           selection.operand_subscriptions.should_not be_empty

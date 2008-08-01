@@ -7,8 +7,6 @@ module Unison
         super()
         @operand_subscriptions = []
         @operand, @predicate = operand, predicate
-        predicate.retain(self)
-        operand.retain(self)
         @tuples = initial_read
 
         @predicate_subscription =
@@ -63,6 +61,12 @@ module Unison
 
       def size
         read.size
+      end
+
+      def retain(object)
+        super
+        predicate.retain(self)
+        operand.retain(self)
       end
 
       protected
