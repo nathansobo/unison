@@ -18,12 +18,6 @@ module Unison
           predicate.should == photos_set[:user_id].eq(users_set[:id])
         end
 
-        it "retains the operands and #predicate" do
-          join.operand_1.should be_retained_by(join)
-          join.operand_2.should be_retained_by(join)
-          join.predicate.should be_retained_by(join)
-        end
-
         context "when a Tuple inserted into #operand_1" do
           context "when the inserted Tuple creates a compound Tuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
@@ -412,7 +406,24 @@ module Unison
         end
       end
 
+      describe "#retain" do
+        it "retains the operands and #predicate" do
+          join.operand_1.should_not be_retained_by(join)
+          join.operand_2.should_not be_retained_by(join)
+          join.predicate.should_not be_retained_by(join)
+
+          join.retain(Object.new)
+          join.operand_1.should be_retained_by(join)
+          join.operand_2.should be_retained_by(join)
+          join.predicate.should be_retained_by(join)
+        end
+      end
+
       describe "#destroy" do
+        before do
+          join.retain(Object.new)
+        end
+
         it "unsubscribes from and releases its operands" do
           operand_1.extend AddSubscriptionsMethodToRelation
           operand_2.extend AddSubscriptionsMethodToRelation

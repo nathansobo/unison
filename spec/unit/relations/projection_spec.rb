@@ -17,10 +17,6 @@ module Unison
           projection.attributes.should == attributes
         end
 
-        it "retains its #operand" do
-          operand.should be_retained_by(projection)
-        end
-
         context "when the a Tuple is inserted into the #operand" do
           context "when the inserted Tuple restricted by #attributes is not in the Projection" do
             before do
@@ -205,7 +201,19 @@ module Unison
         end
       end
 
+      describe "#retain" do
+        it "retains its #operand" do
+          operand.should_not be_retained_by(projection)
+          projection.retain Object.new
+          operand.should be_retained_by(projection)
+        end
+      end
+
       describe "#destroy" do
+        before do
+          projection.retain(Object.new)
+        end
+
         it "unsubscribes from and releases its #operand" do
           operand.extend AddSubscriptionsMethodToRelation
           operand.should be_retained_by(projection)

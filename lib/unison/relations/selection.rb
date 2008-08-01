@@ -63,7 +63,7 @@ module Unison
         read.size
       end
 
-      def retain(object)
+      def retain(retainer)
         super
         predicate.retain(self)
         operand.retain(self)

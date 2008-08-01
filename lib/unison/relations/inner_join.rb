@@ -6,9 +6,6 @@ module Unison
         super()
         @operand_1, @operand_2, @predicate = operand_1, operand_2, predicate
         @operand_1_subscriptions, @operand_2_subscriptions = [], []
-        operand_1.retain(self)
-        operand_2.retain(self)
-        predicate.retain(self)
         @tuples = initial_read
 
         operand_1_subscriptions.push(
@@ -72,6 +69,13 @@ module Unison
             end
           end
         )
+      end
+
+      def retain(retainer)
+        super
+        operand_1.retain(self)
+        operand_2.retain(self)
+        predicate.retain(self)
       end
 
       protected

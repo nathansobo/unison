@@ -6,7 +6,6 @@ module Unison
         super()
         @operand, @attributes = operand, attributes
         @operand_subscriptions = []
-        operand.retain(self)
         @tuples = initial_read
         @last_update = nil
 
@@ -40,6 +39,11 @@ module Unison
             end
           end
         )
+      end
+
+      def retain(retainer)
+        super
+        operand.retain(self)
       end
 
       protected
