@@ -32,6 +32,7 @@ Spec::Runner.configure do |config|
         relates_to_n :active_accounts do
           select_n(Account).where(Account.active?)
         end
+
 #        relates_to_1 :best_friend do
 #          select_1(User, :foreign_key => :best_friend_id)
 #        end
@@ -62,9 +63,20 @@ Spec::Runner.configure do |config|
 
       const_set(:Profile, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:profiles)
-        attribute :id, :integer
-        attribute :user_id, :integer
+        attribute_reader :id, :integer
+        attribute_accessor :user_id, :integer
 
+        belongs_to :user
+      end)
+
+      const_set(:LifeGoal, Class.new(Unison::PrimitiveTuple::Base) do
+        member_of Unison::Relations::Set.new(:life_goals)
+        attribute :id, :integer
+        attribute :owner_id, :integer
+
+#        relates_to_1 do
+#          select_1_parent(User, :owner_id)
+#        end
         belongs_to :user
       end)
 
@@ -123,6 +135,7 @@ Spec::Runner.configure do |config|
     Object.class_eval do
       remove_const :User
       remove_const :Friendship
+      remove_const :LifeGoal
       remove_const :Profile
       remove_const :Photo
       remove_const :Account

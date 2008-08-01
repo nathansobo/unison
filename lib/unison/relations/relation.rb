@@ -29,6 +29,7 @@ module Unison
 
       def treat_as_singleton
         @singleton = true
+        self
       end
 
       def singleton?

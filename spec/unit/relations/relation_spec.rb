@@ -68,6 +68,10 @@ module Unison
           mock(user).my_method {:return_value}
           relation.my_method.should == :return_value
         end
+
+        it "returns self" do
+          relation.treat_as_singleton.should == relation
+        end
       end
 
       describe "#==" do

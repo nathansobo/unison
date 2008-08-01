@@ -150,8 +150,14 @@ module Unison
       target_relation.where(target_relation[foreign_key].eq(self[:id]))
     end
 
-    def select_1(target_relation, options={})
+    def select_1_child(target_relation, options={})
+      foreign_key = options[:foreign_key] || :"#{self.class.name.underscore}_id"
+      target_relation.where(target_relation[foreign_key].eq(self[:id])).treat_as_singleton
+    end
 
+    def select_1_parent(target_relation, options={})
+      foreign_key = options[:foreign_key] || :"#{target_relation.name.underscore}_id"
+      target_relation.where(target_relation[:id].eq(self[foreign_key])).treat_as_singleton
     end
 
     def signal(attribute_or_symbol)
