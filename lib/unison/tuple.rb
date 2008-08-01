@@ -46,10 +46,6 @@ module Unison
     protected
     attr_reader :signals, :update_subscription_node
 
-    def trigger_on_update(attribute, old_value, new_value)
-      update_subscription_node.call(attribute, old_value, new_value)
-    end
-
     def attribute_for(attribute_or_name)
       case attribute_or_name
       when Attribute

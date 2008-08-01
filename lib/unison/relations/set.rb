@@ -48,9 +48,9 @@ module Unison
       def insert(tuple)
         tuples.push(tuple)
         tuple.on_update do |attribute, old_value, new_value|
-          trigger_on_tuple_update tuple, attribute, old_value, new_value
+          tuple_update_subscription_node.call tuple, attribute, old_value, new_value
         end
-        trigger_on_insert(tuple)
+        insert_subscription_node.call(tuple)
         tuple
       end
 

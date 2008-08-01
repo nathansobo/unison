@@ -15,7 +15,7 @@ module Unison
             restricted = created[attributes]
             unless tuples.include?(restricted)
               tuples.push(restricted)
-              trigger_on_insert(restricted)
+              insert_subscription_node.call(restricted)
             end
           end
         )
@@ -25,7 +25,7 @@ module Unison
             restricted = deleted[attributes]
             unless initial_read.include?(restricted)
               tuples.delete(restricted)
-              trigger_on_delete(restricted)
+              delete_subscription_node.call(restricted)
             end
           end
         )
@@ -36,7 +36,7 @@ module Unison
             # TODO: BT/NS - Make sure that this condition is sufficient for nested composite Tuples
             if attributes.has_attribute?(attribute) && last_update != [restricted, attribute, old_value, new_value]
               @last_update = [restricted, attribute, old_value, new_value]
-              trigger_on_tuple_update(restricted, attribute, old_value, new_value)
+              tuple_update_subscription_node.call(restricted, attribute, old_value, new_value)
             end
           end
         )

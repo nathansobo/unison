@@ -53,20 +53,6 @@ module Unison
           signal.on_update {}.class.should == Subscription
         end
       end
-
-      describe "#trigger_on_update" do
-        it "invokes all #on_update subscriptions" do
-          on_update_arguments = nil
-          signal.on_update do |tuple, old_value, new_value|
-            on_update_arguments = [tuple, old_value, new_value]
-          end
-
-          old_name = user[:name]
-          new_name = "Wilhelm"
-          signal.trigger_on_update(old_name, new_name)
-          on_update_arguments.should == [user, old_name, new_name]
-        end
-      end
     end
   end
 end

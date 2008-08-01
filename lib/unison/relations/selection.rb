@@ -19,10 +19,10 @@ module Unison
             tuples.clear
             tuples.concat initial_read
             deleted_tuples.each do |deleted_tuple|
-              trigger_on_delete(deleted_tuple)
+              delete_subscription_node.call(deleted_tuple)
             end
             inserted_tuples.each do |inserted_tuple|
-              trigger_on_insert(inserted_tuple)
+              insert_subscription_node.call(inserted_tuple)
             end
           end
 
@@ -30,7 +30,7 @@ module Unison
           operand.on_insert do |created|
             if predicate.eval(created)
               tuples.push(created)
-              trigger_on_insert(created)
+              insert_subscription_node.call(created)
             end
           end
         )
@@ -39,7 +39,7 @@ module Unison
           operand.on_delete do |deleted|
             if predicate.eval(deleted)
               tuples.delete(deleted)
-              trigger_on_delete(deleted)
+              delete_subscription_node.call(deleted)
             end
           end
         )
@@ -48,14 +48,14 @@ module Unison
           operand.on_tuple_update do |tuple, attribute, old_value, new_value|
             if predicate.eval(tuple)
               if tuples.include?(tuple)
-                trigger_on_tuple_update(tuple, attribute, old_value, new_value)
+                tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
               else
                 tuples.push(tuple)
-                trigger_on_insert(tuple)
+                insert_subscription_node.call(tuple)
               end
             else
               tuples.delete(tuple)
-              trigger_on_delete(tuple)
+              delete_subscription_node.call(tuple)
             end
           end
         )

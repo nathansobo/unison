@@ -21,10 +21,6 @@ module Unison
 
       protected
       attr_reader :update_subscription_node
-
-      def trigger_on_update
-        update_subscription_node.call
-      end
     end
   end
 end

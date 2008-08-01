@@ -12,7 +12,7 @@ module Unison
           child_predicate.retain(self)
           child_predicate_subscriptions.push(
             child_predicate.on_update do
-              trigger_on_update
+              update_subscription_node.call
             end
           )
         end

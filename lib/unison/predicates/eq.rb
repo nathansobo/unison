@@ -42,7 +42,7 @@ module Unison
           operand.retain(self)
           operand_subscriptions.push(
             operand.on_update do
-              trigger_on_update
+              update_subscription_node.call
             end
           )
         end

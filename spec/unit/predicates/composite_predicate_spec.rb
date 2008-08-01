@@ -3,20 +3,20 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
 module Unison
   module Predicates
     describe CompositePredicate do
-      attr_reader :user, :predicate, :signal, :child_predicate_without_signal, :child_predicate_subscribed_signal
+      attr_reader :user, :predicate, :signal, :child_predicate_without_signal, :child_predicate_with_signal
 
       before do
         @user = User.find(1)
         @signal = user.signal(:name)
         @child_predicate_without_signal = Eq.new(users_set[:id], 1)
-        @child_predicate_subscribed_signal = Eq.new(signal, "Nathan")
-        @predicate = And.new(child_predicate_without_signal, child_predicate_subscribed_signal)
+        @child_predicate_with_signal = Eq.new(signal, "Nathan")
+        @predicate = And.new(child_predicate_without_signal, child_predicate_with_signal)
       end
 
       describe "#initialize" do
         it "retains its #child_predicates" do
           child_predicate_without_signal.should be_retained_by(predicate)
-          child_predicate_subscribed_signal.should be_retained_by(predicate)
+          child_predicate_with_signal.should be_retained_by(predicate)
         end
 
         context "when passed no arguments" do
@@ -33,8 +33,6 @@ module Unison
             predicate.on_update do
               on_update_called = true
             end
-            mock.proxy(signal).trigger_on_update("Nathan", "Bob")
-            mock.proxy(child_predicate_subscribed_signal).trigger_on_update
 
             user.name = "Bob"
             on_update_called.should be_true
@@ -68,9 +66,9 @@ module Unison
           predicate.send(:destroy)
 
           child_predicate_without_signal.send(:update_subscription_node).should be_empty
-          child_predicate_subscribed_signal.send(:update_subscription_node).should be_empty
+          child_predicate_with_signal.send(:update_subscription_node).should be_empty
           child_predicate_without_signal.should_not be_retained_by(predicate)
-          child_predicate_subscribed_signal.should_not be_retained_by(predicate)
+          child_predicate_with_signal.should_not be_retained_by(predicate)
         end
       end
     end

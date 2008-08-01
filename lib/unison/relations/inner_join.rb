@@ -45,7 +45,7 @@ module Unison
               compound_tuple = CompoundTuple::Base.new(operand_1_tuple, operand_2_tuple)
               if tuples.include?(compound_tuple)
                 if predicate.eval(compound_tuple)
-                  trigger_on_tuple_update compound_tuple, attribute, old_value, new_value
+                  tuple_update_subscription_node.call compound_tuple, attribute, old_value, new_value
                 else
                   delete_compound_tuple compound_tuple
                 end
@@ -62,7 +62,7 @@ module Unison
               compound_tuple = CompoundTuple::Base.new(operand_1_tuple, operand_2_tuple)
               if tuples.include?(compound_tuple)
                 if predicate.eval(compound_tuple)
-                  trigger_on_tuple_update compound_tuple, attribute, old_value, new_value
+                  tuple_update_subscription_node.call compound_tuple, attribute, old_value, new_value
                 else
                   delete_compound_tuple compound_tuple
                 end
@@ -92,7 +92,7 @@ module Unison
       def insert_if_predicate_matches(compound_tuple)
         if predicate.eval(compound_tuple)
           tuples.push(compound_tuple)
-          trigger_on_insert(compound_tuple)
+          insert_subscription_node.call(compound_tuple)
         end
       end
 
@@ -106,7 +106,7 @@ module Unison
 
       def delete_compound_tuple(compound_tuple)
         tuples.delete(compound_tuple)
-        trigger_on_delete(compound_tuple)
+        delete_subscription_node.call(compound_tuple)
       end
 
       def initial_read

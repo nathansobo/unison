@@ -69,18 +69,6 @@ module Unison
           read.send(method_name, *args, &block)
         end
       end
-
-      def trigger_on_insert(inserted)
-        insert_subscription_node.call(inserted)
-      end
-
-      def trigger_on_delete(deleted)
-        delete_subscription_node.call(deleted)
-      end
-
-      def trigger_on_tuple_update(updated_tuple, attribute, old_value, new_value)
-        tuple_update_subscription_node.call(updated_tuple, attribute, old_value, new_value)
-      end
     end
   end
 end
