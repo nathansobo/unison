@@ -11,6 +11,7 @@ module Unison
     def call(*args)
       proc.call(*args)
     end
+    alias_method :trigger, :call
     
     def destroy
       subscription_node.delete(self)
