@@ -23,7 +23,7 @@ module Unison
     attr_reader :nested_tuples
 
     def initialize
-      @update_subscriptions = []
+      @update_subscription_node = SubscriptionNode.new
     end
     
     def relation
@@ -40,17 +40,14 @@ module Unison
     end
 
     def on_update(&block)
-      Subscription.new(update_subscriptions, &block)
+      update_subscription_node.subscribe(&block)
     end
 
     protected
-    attr_reader :signals, :update_subscriptions
+    attr_reader :signals, :update_subscription_node
 
     def trigger_on_update(attribute, old_value, new_value)
-      update_subscriptions.each do |subscription|
-        subscription.call(attribute, old_value, new_value)
-      end
-      new_value
+      update_subscription_node.call(attribute, old_value, new_value)
     end
 
     def attribute_for(attribute_or_name)

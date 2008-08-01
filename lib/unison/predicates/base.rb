@@ -4,7 +4,7 @@ module Unison
       include Retainable
 
       def initialize
-        @update_subscriptions = []
+        @update_subscription_node = SubscriptionNode.new
       end
 
       def eval(tuple)
@@ -16,16 +16,14 @@ module Unison
       end
 
       def on_update(&block)
-        Subscription.new(update_subscriptions, &block)
+        update_subscription_node.subscribe(&block)
       end
 
       protected
-      attr_reader :update_subscriptions
+      attr_reader :update_subscription_node
 
       def trigger_on_update
-        update_subscriptions.each do |subscription|
-          subscription.call
-        end
+        update_subscription_node.call
       end
     end
   end

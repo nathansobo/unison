@@ -24,7 +24,7 @@ module Unison
           it "#retains and #subscribes to #on_update on the Signal" do
             operand.should be_retained_by(predicate)
 
-            operand.send(:update_subscriptions).should include(operand_subscription)
+            operand.send(:update_subscription_node).should include(operand_subscription)
           end
 
           context "when #operand_1 is updated" do
@@ -54,7 +54,7 @@ module Unison
           it "#retains and #subscribes to #on_update on the Signal" do
             operand.should be_retained_by(predicate)
 
-            operand.send(:update_subscriptions).should include(operand_subscription)
+            operand.send(:update_subscription_node).should include(operand_subscription)
           end
 
           context "when #operand_2 is updated" do
@@ -124,7 +124,7 @@ module Unison
 
           it "unsubscribes from and releases #operand_1" do
             predicate.send(:destroy)
-            operand.send(:update_subscriptions).should be_empty
+            operand.send(:update_subscription_node).should be_empty
             operand.should_not be_retained_by(predicate)
           end
         end
@@ -140,7 +140,7 @@ module Unison
           it "unsubscribes from and releases #operand_1" do
             predicate.send(:destroy)
             operand.should_not be_retained_by(predicate)
-            operand.send(:update_subscriptions).should be_empty
+            operand.send(:update_subscription_node).should be_empty
           end
         end
       end

@@ -29,10 +29,10 @@ module Unison
           predicate.on_update {}.class.should == Subscription
         end
 
-        it "adds the new Subscription to #update_subscriptions" do
-          predicate.send(:update_subscriptions).should be_empty
+        it "adds the new Subscription to #update_subscription_node" do
+          predicate.send(:update_subscription_node).should be_empty
           subscription = predicate.on_update {}
-          predicate.send(:update_subscriptions).should == [subscription]
+          predicate.send(:update_subscription_node).should == [subscription]
         end
       end
     end

@@ -67,8 +67,8 @@ module Unison
           child_predicates = predicate.child_predicates.dup
           predicate.send(:destroy)
 
-          child_predicate_without_signal.send(:update_subscriptions).should be_empty
-          child_predicate_subscribed_signal.send(:update_subscriptions).should be_empty
+          child_predicate_without_signal.send(:update_subscription_node).should be_empty
+          child_predicate_subscribed_signal.send(:update_subscription_node).should be_empty
           child_predicate_without_signal.should_not be_retained_by(predicate)
           child_predicate_subscribed_signal.should_not be_retained_by(predicate)
         end

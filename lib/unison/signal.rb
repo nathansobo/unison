@@ -4,7 +4,7 @@ module Unison
     attr_reader :tuple, :attribute
     def initialize(tuple, attribute)
       @tuple, @attribute = tuple, attribute
-      @update_subscriptions = []
+      @update_subscription_node = SubscriptionNode.new
       tuple.retain(self)
     end
 
@@ -13,18 +13,15 @@ module Unison
     end
 
     def on_update(&block)
-      Subscription.new(update_subscriptions, &block)
+      update_subscription_node.subscribe(&block)
     end
 
     def trigger_on_update(old_value, new_value)
-      update_subscriptions.each do |subscription|
-        subscription.call(tuple, old_value, new_value)
-      end
-      new_value
+      update_subscription_node.call(tuple, old_value, new_value)
     end
 
     protected
-    attr_reader :update_subscriptions
+    attr_reader :update_subscription_node
 
     def destroy
       raise "Signal #{self.inspect} is not registered on its Tuple" unless tuple.send(:signals)[attribute] == self

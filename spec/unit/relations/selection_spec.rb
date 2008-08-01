@@ -325,17 +325,17 @@ module Unison
             public :predicate_subscription
           end
           class << predicate
-            public :update_subscriptions
+            public :update_subscription_node
           end
 
           selection.predicate_subscription.should_not be_nil
           predicate.should be_retained_by(selection)
-          predicate.update_subscriptions.should include(selection.predicate_subscription)
+          predicate.update_subscription_node.should include(selection.predicate_subscription)
 
           selection.send(:destroy)
 
           predicate.should_not be_retained_by(selection)
-          predicate.update_subscriptions.should_not include(selection.predicate_subscription)
+          predicate.update_subscription_node.should_not include(selection.predicate_subscription)
         end
       end
     end
