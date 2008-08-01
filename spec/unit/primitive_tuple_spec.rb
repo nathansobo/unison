@@ -98,25 +98,15 @@ module Unison
           end
         end
 
-        describe ".has_many" do
+        describe ".has_one" do
           attr_reader :user
           before do
             @user = User.find(1)
           end
 
-          it "creates a Selection on the target Set where the foreign key matches id" do
-            user.accounts.should_not be_empty
-            user.accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
-          end
-
-          it "does not create a singleton Selection" do
-            user.accounts.should_not be_singleton
-          end
-
-          context "when passed :class_name option" do
-            it "creates a Selection whose #operand is the Set of the class matching the passed in String" do
-              user.active_accounts.operand.should == accounts_set
-            end
+          it "creates a singleton Selection on the target Set where the foreign key matches id" do
+            user.profile.should be_singleton
+            user.profile.should == Profile.find(1)
           end
 
           context "when passed :conditions option" do
@@ -130,18 +120,6 @@ module Unison
                 )
               end
             end
-          end
-        end
-
-        describe ".has_one" do
-          attr_reader :user
-          before do
-            @user = User.find(1)
-          end
-
-          it "creates a singleton Selection on the target Set where the foreign key matches id" do
-            user.profile.should be_singleton
-            user.profile.should == Profile.find(1)
           end
         end
 
@@ -334,6 +312,42 @@ module Unison
 
             it "returns false" do
               tuple.should_not == other_tuple
+            end
+          end
+        end
+
+        describe "#select_n" do
+          attr_reader :user
+          before do
+            @user = User.find(1)
+          end
+
+          it "does not create a singleton Selection" do
+            user.select_n(Account).should_not be_singleton
+          end
+
+          context "when passed a Tuple" do
+            it "creates a Selection on the target Set where the foreign key matches the instances' id" do
+              accounts = user.select_n(Account)
+              accounts.should_not be_empty
+              accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
+            end
+          end
+
+          context "when passed a Relation" do
+            it "creates a Selection on the target Relation where the foreign key matches the instances' id" do
+              accounts = user.select_n(Account.relation)
+              accounts.should_not be_empty
+              accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
+            end
+          end
+
+          context "when passed :foreign_key option" do
+            it "returns the Tuples in the relation that match the instance's foreign_key value" do
+              target_friendships = user.select_n(Friendship, :foreign_key => :target_id)
+              target_friendships.should == friendships_set.where(
+                friendships_set[:target_id].eq(user[:id])
+              )
             end
           end
         end

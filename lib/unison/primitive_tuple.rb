@@ -1,5 +1,18 @@
 module Unison
   module PrimitiveTuple
+    class HasMany
+      attr_reader :tuple_class, :definition
+      def initialize(tuple_class, &definition)
+        @tuple_class, @definition = tuple_class, definition
+      end
+
+      def create_relation
+        tuple_class.relates_to_n do
+          
+        end
+      end
+    end
+
     include Tuple
     module ClassMethods
       include Tuple::ClassMethods
@@ -41,13 +54,6 @@ module Unison
       def relates_to_1(name, &definition)
         singleton_instance_relations.push [name, definition]
         attr_reader name
-      end
-
-      def has_many(name, options={})
-        relates_to_n(name) do
-          options[:class_name] ||= name.to_s.singularize.classify
-          self.class.foreign_key_selection self, options
-        end
       end
 
       def has_one(name, options={})
@@ -137,6 +143,15 @@ module Unison
 
     def compound?
       false
+    end
+
+    def select_n(target_relation, options={})
+      foreign_key = options[:foreign_key] || :"#{self.class.name.underscore}_id"
+      target_relation.where(target_relation[foreign_key].eq(self[:id]))
+    end
+
+    def select_1(target_relation, options={})
+
     end
 
     def signal(attribute_or_symbol)
