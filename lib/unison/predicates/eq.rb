@@ -1,7 +1,6 @@
 module Unison
   module Predicates
-    class Eq
-      include Retainable
+    class Eq < Base
       attr_reader :operand_1, :operand_2
       def initialize(operand_1, operand_2)
         @operand_1, @operand_2 = operand_1, operand_2

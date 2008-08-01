@@ -1,7 +1,6 @@
 module Unison
   module Predicates
-    class Predicate
-      include Retainable
+    class Predicate < Base
       attr_reader :proc
       
       def initialize(&block)
