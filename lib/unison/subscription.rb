@@ -1,11 +1,11 @@
 module Unison
   class Subscription
-    attr_reader :event_node
-    def initialize(event_node, &proc)
+    attr_reader :subscription_node
+    def initialize(subscription_node, &proc)
       raise ArgumentError, "Subscription needs a block to execute" unless proc
-      @event_node = event_node
+      @subscription_node = subscription_node
       @proc = proc
-      event_node.push(self)
+      subscription_node.push(self)
     end
 
     def call(*args)
@@ -13,7 +13,7 @@ module Unison
     end
     
     def destroy
-      event_node.delete(self)
+      subscription_node.delete(self)
     end
 
     protected

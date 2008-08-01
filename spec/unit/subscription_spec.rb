@@ -4,10 +4,10 @@ module Unison
   describe Subscription do
     describe "#initialize" do
       context "when a block is passed in" do
-        it "adds itself to its #event_node" do
-          event_node = []
-          subscription = Subscription.new(event_node) {}
-          event_node.should == [subscription]
+        it "adds itself to its #subscription_node" do
+          subscription_node = []
+          subscription = Subscription.new(subscription_node) {}
+          subscription_node.should == [subscription]
         end
       end
 
@@ -33,12 +33,12 @@ module Unison
     end
 
     describe "#destroy" do
-      it "removes itself from its #event_node" do
-        event_node = []
-        subscription = Subscription.new(event_node) {}
-        event_node.should == [subscription]
+      it "removes itself from its #subscription_node" do
+        subscription_node = []
+        subscription = Subscription.new(subscription_node) {}
+        subscription_node.should == [subscription]
         subscription.destroy
-        event_node.should == []
+        subscription_node.should == []
       end
     end
   end
