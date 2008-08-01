@@ -124,8 +124,8 @@ module Unison
 
           it "unsubscribes from and releases #operand_1" do
             predicate.send(:destroy)
-            operand.should_not be_retained_by(predicate)
             operand.send(:update_subscriptions).should be_empty
+            operand.should_not be_retained_by(predicate)
           end
         end
 
