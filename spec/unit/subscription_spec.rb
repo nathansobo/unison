@@ -22,13 +22,18 @@ module Unison
 
     describe "#call" do
       it "invokes the passed in proc" do
-        invocation_args = nil
+        invocation_args = []
         subscription = Subscription.new([]) do |*args|
-          invocation_args = args
+          invocation_args.push(args)
         end
 
         subscription.call(1, 2, 3)
-        invocation_args.should == [1, 2, 3]
+        invocation_args.should == [[1, 2, 3]]
+      end
+
+      it "returns array of passed in arguments" do
+        subscription = Subscription.new([]) {}
+        subscription.call(1, 2, 3).should == [1, 2, 3]
       end
     end
 

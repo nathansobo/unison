@@ -8,6 +8,7 @@ module Unison
       each do |subscription|
         subscription.call(*args)
       end
+      args
     end
     alias_method :trigger, :call
   end

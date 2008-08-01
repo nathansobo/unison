@@ -51,14 +51,13 @@ module Unison
           trigger_on_tuple_update tuple, attribute, old_value, new_value
         end
         trigger_on_insert(tuple)
+        tuple
       end
 
       def delete(tuple)
         raise ArgumentError, "Tuple: #{tuple.inspect}\nis not in the set" unless tuples.include?(tuple)
         tuples.delete(tuple)
-        delete_subscriptions.each do |proc|
-          proc.call(tuple)
-        end
+        delete_subscription_node.call(tuple)
         tuple
       end
 

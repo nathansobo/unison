@@ -9,9 +9,9 @@ module Unison
 
       include Retainable
       def initialize
-        @insert_subscriptions = []
-        @delete_subscriptions = []
-        @tuple_update_subscriptions = []
+        @insert_subscription_node = SubscriptionNode.new
+        @delete_subscription_node = SubscriptionNode.new
+        @tuple_update_subscription_node = SubscriptionNode.new
         @singleton = false
       end
 
@@ -36,19 +36,19 @@ module Unison
       end
 
       def on_insert(&block)
-        Subscription.new(insert_subscriptions, &block)
+        insert_subscription_node.subscribe(&block)
       end
 
       def on_delete(&block)
-        Subscription.new(delete_subscriptions, &block)
+        delete_subscription_node.subscribe(&block)
       end
 
       def on_tuple_update(&block)
-        Subscription.new(tuple_update_subscriptions, &block)
+        tuple_update_subscription_node.subscribe(&block)
       end
 
       def inspect
-        "<#{self.class} @insert_subscriptions.length=#{insert_subscriptions.length} @delete_subscriptions.length=#{delete_subscriptions.length}>"
+        "<#{self.class} @insert_subscription_node.length=#{insert_subscription_node.length} @delete_subscription_node.length=#{delete_subscription_node.length} @tuple_update_subscription_node.length=#{tuple_update_subscription_node.length}>"
       end
 
       def ==(other)
@@ -60,7 +60,7 @@ module Unison
       end
 
       protected
-      attr_reader :tuples, :insert_subscriptions, :delete_subscriptions, :tuple_update_subscriptions
+      attr_reader :tuples, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
 
       def method_missing(method_name, *args, &block)
         if singleton?
@@ -71,24 +71,15 @@ module Unison
       end
 
       def trigger_on_insert(inserted)
-        insert_subscriptions.each do |subscription|
-          subscription.call(inserted)
-        end
-        inserted
+        insert_subscription_node.call(inserted)
       end
 
       def trigger_on_delete(deleted)
-        delete_subscriptions.each do |subscription|
-          subscription.call(deleted)
-        end
-        deleted
+        delete_subscription_node.call(deleted)
       end
 
       def trigger_on_tuple_update(updated_tuple, attribute, old_value, new_value)
-        tuple_update_subscriptions.each do |subscription|
-          subscription.call(updated_tuple, attribute, old_value, new_value)
-        end
-        updated_tuple
+        tuple_update_subscription_node.call(updated_tuple, attribute, old_value, new_value)
       end
     end
   end

@@ -10,6 +10,7 @@ module Unison
 
     def call(*args)
       proc.call(*args)
+      args
     end
     alias_method :trigger, :call
     

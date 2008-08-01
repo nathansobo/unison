@@ -110,6 +110,6 @@ end
 
 module AddSubscriptionsMethodToRelation
   def subscriptions
-    insert_subscriptions + delete_subscriptions + tuple_update_subscriptions
+    insert_subscription_node + delete_subscription_node + tuple_update_subscription_node
   end
 end

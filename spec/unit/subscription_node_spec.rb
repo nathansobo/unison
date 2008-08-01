@@ -30,6 +30,10 @@ module Unison
         subscription_1_args.should == [[1, 2, 3]]
         subscription_2_args.should == [[1, 2, 3]]
       end
+
+      it "returns the passed in arguments" do
+        node.call(1, 2, 3).should == [1, 2, 3]
+      end
     end
   end
 end
