@@ -2,60 +2,58 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
 
 module Unison
   module Predicates
-    describe Predicate do
+    describe And do
       attr_reader :predicate
 
+      before do
+        @predicate = And.new(Eq.new(users_set[:id], 1), Eq.new(users_set[:name], "Nathan"))
+      end
+
       describe "#initialize" do
-        context "when not passed a block" do
+        context "when passed no arguments" do
           it "raises an ArgumentError" do
             lambda do
-              Predicate.new
+              And.new
             end.should raise_error(ArgumentError)
           end
         end
       end
 
       describe "#eval" do
-        before do
-          @predicate = Predicate.new do |tuple|
-            tuple.name == "Nathan"
-          end
-        end
-
-        context "when the passed in Tuple causes the proc to evaluate to true" do
+        context "when the passed in Tuple all of the child Predicates to #eval to true" do
           it "returns true" do
             user = User.find(1)
+            user.id.should == 1
             user.name.should == "Nathan"
             predicate.eval(user).should be_true
           end
         end
 
-        context "when the passed in Tuple causes the proc to evaluate to false" do
+        context "when one of the child Predicates fail" do
           it "returns false" do
             user = User.find(2)
-            user.name.should_not == "Nathan"
+            user.name = "Nathan"
             predicate.eval(user).should be_false
           end
         end
       end
 
       describe "#==" do
-        context "when other Predicate has the same Proc" do
+        context "when other And has the same of #child_predicates" do
           it "returns true" do
-            proc = lambda {}
-            Predicate.new(&proc).should == Predicate.new(&proc)
+            predicate.should == And.new(Eq.new(users_set[:id], 1), Eq.new(users_set[:name], "Nathan"))
           end
         end
 
-        context "when other Predicate does not have the same Proc" do
+        context "when other And does not have the #child_predicates" do
           it "returns false" do
-            Predicate.new { 1==2 }.should_not == Predicate.new {true == true}
+            predicate.should_not == And.new(Eq.new(users_set[:id], 1))
           end
         end
         
-        context "when other is not a Predicate" do
+        context "when other is not an And" do
           it "returns false" do
-            Predicate.new {}.should_not == Eq.new(users_set[:name], "Nathan")
+            predicate.should_not == Eq.new(users_set[:name], "Nathan")
           end
         end
       end
