@@ -135,10 +135,30 @@ module Unison
         end
 
         describe "#initialize" do
+          attr_reader :tuple
+          before do
+            @tuple = User.new(:id => 1, :name => "Nathan")
+          end
+
           it "assigns a hash of attribute-value pairs corresponding to its relation" do
-            tuple = User.new(:id => 1, :name => "Nathan")
             tuple[:id].should == 1
             tuple[:name].should == "Nathan"
+          end
+
+          it "instantiates and retains its #instance_relations" do
+            relations = tuple.send(:instance_relations)
+            relations.should_not be_empty
+            relations.each do |relation_name, relation|
+              tuple.send(relation_name).should be_retained_by(tuple)
+            end
+          end
+
+          it "instantiates and retains its #singleton_instance_relations" do
+            relations = tuple.send(:singleton_instance_relations)
+            relations.should_not be_empty
+            relations.each do |relation_name, relation|
+              tuple.send(relation_name).should be_retained_by(tuple)
+            end
           end
         end
 
@@ -334,12 +354,10 @@ module Unison
             @user = User.find(1)
           end
 
-          context "when not passed :foreign_key option" do
-            it "creates a singleton Selection on the target Set where the target Set id matches the instance's default foreign key attribute value" do
-              profile = user.select_1_child(Profile)
-              profile.should be_singleton
-              profile.should == Profile.find(1)
-            end
+          it "creates a singleton Selection on the target Set where the target Set id matches the instance's default foreign key attribute value" do
+            profile = user.select_1_child(Profile)
+            profile.should be_singleton
+            profile.should == Profile.find(1)
           end
 
           context "when passed :foreign_key option" do
@@ -352,15 +370,6 @@ module Unison
         end
 
         describe "#select_1_parent" do
-          context "when not passed a :foreign_key" do
-            it "creates a singleton Selection on the target Set where the instance id matches the target Set's default foreign_key attribute value" do
-              profile = Profile.find(1)
-
-              user = profile.select_1_parent(User)
-              user.should_not be_nil
-              user.should == User.find(profile.user_id)
-            end
-          end
 
           context "when passed a :foreign_key" do
             it "creates a singleton Selection on the target Set where the instance id matches the target Set's passed in foreign_key attribute value" do

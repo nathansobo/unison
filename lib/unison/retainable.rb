@@ -24,6 +24,7 @@ module Unison
         end
         after_first_retain
       end
+      self
     end
 
     def release(retainer)

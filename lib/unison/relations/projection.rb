@@ -10,7 +10,18 @@ module Unison
         @operand_subscriptions = []
         @tuples = initial_read
         @last_update = nil
+      end
 
+      protected
+      attr_reader :tuples, :last_update, :operand_subscriptions
+
+      def initial_read
+        operand.read.map do |tuple|
+          tuple[attributes]
+        end.uniq
+      end
+
+      def after_first_retain
         operand_subscriptions.push(
           operand.on_insert do |created|
             restricted = created[attributes]
@@ -41,15 +52,6 @@ module Unison
             end
           end
         )
-      end
-
-      protected
-      attr_reader :tuples, :last_update, :operand_subscriptions
-
-      def initial_read
-        operand.read.map do |tuple|
-          tuple[attributes]
-        end.uniq
       end
 
       def destroy

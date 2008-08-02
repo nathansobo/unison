@@ -9,7 +9,12 @@ module Unison
         @operand_1, @operand_2, @predicate = operand_1, operand_2, predicate
         @operand_1_subscriptions, @operand_2_subscriptions = [], []
         @tuples = initial_read
+      end
 
+      protected
+      attr_reader :tuples, :operand_1_subscriptions, :operand_2_subscriptions
+
+      def after_first_retain
         operand_1_subscriptions.push(
           operand_1.on_insert do |operand_1_tuple|
             operand_2.each do |operand_2_tuple|
@@ -72,9 +77,6 @@ module Unison
           end
         )
       end
-
-      protected
-      attr_reader :tuples, :operand_1_subscriptions, :operand_2_subscriptions
 
       def destroy
         operand_1_subscriptions.each do |subscription|

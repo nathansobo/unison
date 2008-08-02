@@ -9,7 +9,22 @@ module Unison
         @operand_subscriptions = []
         @operand, @predicate = operand, predicate
         @tuples = initial_read
+      end
 
+      def size
+        read.size
+      end
+
+      protected
+      attr_reader :tuples
+
+      def initial_read
+        operand.read.select do |tuple|
+          predicate.eval(tuple)
+        end
+      end
+
+      def after_first_retain
         @predicate_subscription =
           predicate.on_update do
             new_tuples = initial_read
@@ -58,19 +73,6 @@ module Unison
             end
           end
         )
-      end
-
-      def size
-        read.size
-      end
-
-      protected
-      attr_reader :tuples
-
-      def initial_read
-        operand.read.select do |tuple|
-          predicate.eval(tuple)
-        end
       end
 
       def destroy

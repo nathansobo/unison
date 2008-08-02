@@ -10,10 +10,139 @@ module Unison
         @selection = Selection.new(operand, predicate)
       end
 
-      describe "#initialize" do
-        it "sets the #operand and #predicate" do
-          selection.operand.should == photos_set
-          predicate.should == photos_set[:user_id].eq(1)
+      context "after #retain has been called" do
+        before do
+          selection.retain(Object.new)
+        end
+
+        describe "#initialize" do
+          it "sets the #operand and #predicate" do
+            selection.operand.should == photos_set
+            predicate.should == photos_set[:user_id].eq(1)
+          end
+        end
+
+        describe "#read" do
+          it "returns all tuples in its #operand for which its #predicate returns true" do
+            tuples = selection.read
+            tuples.size.should == 2
+            tuples.each do |tuple|
+              tuple[:user_id].should == 1
+            end
+          end
+        end
+
+        describe "#on_insert" do
+          attr_reader :photo
+          context "when a Tuple that matches the #predicate is inserted into the #operand" do
+            before do
+              @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
+              predicate.eval(photo).should be_true
+            end
+
+            it "invokes the block with the Tuple" do
+              inserted = nil
+              selection.on_insert do |tuple|
+                inserted = tuple
+              end
+              photos_set.insert(photo)
+
+              inserted.should == photo
+            end
+          end
+
+          context "when a Tuple that does not match the #predicate is inserted into the #operand" do
+            before do
+              @photo = Photo.new(:id => 100, :user_id => 100, :name => "Photo 100")
+              predicate.eval(photo).should be_false
+            end
+
+            it "does not invoke the block" do
+              selection.on_insert do |tuple|
+                raise "I should not be invoked"
+              end
+              photos_set.insert(photo)
+            end
+          end
+        end
+
+        describe "#on_delete" do
+          attr_reader :photo
+          context "when a Tuple that matches the #predicate is deleted from the #operand" do
+            before do
+              @photo = Photo.create(:id => 100, :user_id => 1, :name => "Photo 100")
+              predicate.eval(photo).should be_true
+              selection.read.should include(photo)
+            end
+
+            it "invokes the block with the Tuple" do
+              deleted = nil
+              selection.on_delete do |tuple|
+                deleted = tuple
+              end
+
+              photos_set.delete(photo)
+              deleted.should == photo
+            end
+          end
+
+          context "when a Tuple that does not match the #predicate is deleted from the #operand" do
+            before do
+              @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+              predicate.eval(photo).should be_false
+              selection.read.should_not include(photo)
+            end
+
+            it "does not invoke the block" do
+              selection.on_delete do |tuple|
+                raise "I should not be invoked"
+              end
+              photos_set.delete(photo)
+            end
+          end
+        end
+
+        describe "#size" do
+          it "returns the number of tuples in the relation" do
+            selection.size.should == selection.read.size
+          end
+        end
+
+        describe "#destroy" do
+          it "unsubscribes from and releases its #operand" do
+            operand.extend AddSubscriptionsMethodToRelation
+            selection.operand_subscriptions.should_not be_empty
+            operand.should be_retained_by(selection)
+
+            selection.operand_subscriptions.each do |subscription|
+              operand.subscriptions.should include(subscription)
+            end
+
+            selection.send(:destroy)
+
+            operand.should_not be_retained_by(selection)
+            selection.operand_subscriptions.each do |subscription|
+              operand.subscriptions.should_not include(subscription)
+            end
+          end
+
+          it "unsubscribes from and releases its #predicate" do
+            class << selection
+              public :predicate_subscription
+            end
+            class << predicate
+              public :update_subscription_node
+            end
+
+            selection.predicate_subscription.should_not be_nil
+            predicate.should be_retained_by(selection)
+            predicate.update_subscription_node.should include(selection.predicate_subscription)
+
+            selection.send(:destroy)
+
+            predicate.should_not be_retained_by(selection)
+            predicate.update_subscription_node.should_not include(selection.predicate_subscription)
+          end
         end
 
         context "when the #predicate is updated" do
@@ -21,7 +150,7 @@ module Unison
           before do
             @user = User.find(1)
             @predicate = photos_set[:user_id].eq(user.signal(:id))
-            @selection = Selection.new(photos_set, predicate)
+            @selection = Selection.new(photos_set, predicate).retain(Object.new)
             @old_photos = selection.read.dup
             @new_photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
           end
@@ -205,147 +334,27 @@ module Unison
             end
           end
         end
-
       end
 
-      describe "#read" do
-        it "returns all tuples in its #operand for which its #predicate returns true" do
-          tuples = selection.read
-          tuples.size.should == 2
-          tuples.each do |tuple|
-            tuple[:user_id].should == 1
-          end
-        end
-      end
+      context "before #retain has been called" do
+        describe "#retain" do
+          it "retains and subscribes to its #predicate" do
+            selection.predicate_subscription.should be_nil
+            predicate.should_not be_retained_by(selection)
 
-      describe "#retain" do
-        it "retains its #predicate" do
-          predicate.should_not be_retained_by(selection)
-          selection.retain(Object.new)
-          predicate.should be_retained_by(selection)
-        end
-
-        it "retains its #operand" do
-          operand.should_not be_retained_by(selection)
-          selection.retain(Object.new)
-          operand.should be_retained_by(selection)
-        end
-      end
-
-      describe "#on_insert" do
-        attr_reader :photo
-        context "when a Tuple that matches the #predicate is inserted into the #operand" do
-          before do
-            @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
-            predicate.eval(photo).should be_true
+            selection.retain(Object.new)
+            selection.predicate_subscription.should_not be_nil
+            predicate.should be_retained_by(selection)
           end
 
-          it "invokes the block with the Tuple" do
-            inserted = nil
-            selection.on_insert do |tuple|
-              inserted = tuple
-            end
-            photos_set.insert(photo)
+          it "retains and subscribes to its #operand" do
+            selection.operand_subscriptions.should be_empty
+            operand.should_not be_retained_by(selection)
 
-            inserted.should == photo
+            selection.retain(Object.new)
+            selection.operand_subscriptions.should_not be_empty
+            operand.should be_retained_by(selection)
           end
-        end
-
-        context "when a Tuple that does not match the #predicate is inserted into the #operand" do
-          before do
-            @photo = Photo.new(:id => 100, :user_id => 100, :name => "Photo 100")
-            predicate.eval(photo).should be_false
-          end
-
-          it "does not invoke the block" do
-            selection.on_insert do |tuple|
-              raise "I should not be invoked"
-            end
-            photos_set.insert(photo)
-          end
-        end
-      end
-
-      describe "#on_delete" do
-        attr_reader :photo
-        context "when a Tuple that matches the #predicate is deleted from the #operand" do
-          before do
-            @photo = Photo.create(:id => 100, :user_id => 1, :name => "Photo 100")
-            predicate.eval(photo).should be_true
-            selection.read.should include(photo)
-          end
-
-          it "invokes the block with the Tuple" do
-            deleted = nil
-            selection.on_delete do |tuple|
-              deleted = tuple
-            end
-
-            photos_set.delete(photo)
-            deleted.should == photo
-          end
-        end
-
-        context "when a Tuple that does not match the #predicate is deleted from the #operand" do
-          before do
-            @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-            predicate.eval(photo).should be_false
-            selection.read.should_not include(photo)
-          end
-
-          it "does not invoke the block" do
-            selection.on_delete do |tuple|
-              raise "I should not be invoked"
-            end
-            photos_set.delete(photo)
-          end
-        end
-      end
-
-      describe "#size" do
-        it "returns the number of tuples in the relation" do
-          selection.size.should == selection.read.size
-        end
-      end
-
-      describe "#destroy" do
-        before do
-          selection.retain(Object.new)
-        end
-
-        it "unsubscribes from and releases its #operand" do
-          operand.extend AddSubscriptionsMethodToRelation
-          selection.operand_subscriptions.should_not be_empty
-          operand.should be_retained_by(selection)
-
-          selection.operand_subscriptions.each do |subscription|
-            operand.subscriptions.should include(subscription)
-          end
-
-          selection.send(:destroy)
-
-          operand.should_not be_retained_by(selection)
-          selection.operand_subscriptions.each do |subscription|
-            operand.subscriptions.should_not include(subscription)
-          end
-        end
-
-        it "unsubscribes from and releases its #predicate" do
-          class << selection
-            public :predicate_subscription
-          end
-          class << predicate
-            public :update_subscription_node
-          end
-
-          selection.predicate_subscription.should_not be_nil
-          predicate.should be_retained_by(selection)
-          predicate.update_subscription_node.should include(selection.predicate_subscription)
-
-          selection.send(:destroy)
-
-          predicate.should_not be_retained_by(selection)
-          predicate.update_subscription_node.should_not include(selection.predicate_subscription)
         end
       end
     end

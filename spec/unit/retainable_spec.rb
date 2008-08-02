@@ -8,6 +8,10 @@ module Unison
     end
 
     describe "#retain" do
+      it "returns self" do
+        retainable.retain(Object.new).should == retainable
+      end
+
       it "retains its .children_to_retain only upon its first invocation" do
         retainable = users_set.where(users_set[:id].eq(1))
         retainable.operand.should_not be_retained_by(retainable)
@@ -21,6 +25,7 @@ module Unison
       end
 
       it "invokes #after_first_retain only after first invocation" do
+        retainable = Relations::Set.new(:test)
         mock.proxy(retainable).after_first_retain
         retainable.retain(Object.new)
         

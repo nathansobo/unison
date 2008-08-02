@@ -7,6 +7,7 @@ module Unison
 
       def member_of(relation)
         @relation = relation
+        relation.retain(self)
         relation.tuple_class = self
       end
 
@@ -96,11 +97,13 @@ module Unison
 
       instance_relations.each do |name, proc|
         relation = instance_eval(&proc)
+        relation.retain(self)
         instance_variable_set("@#{name}", relation)
       end
 
       singleton_instance_relations.each do |name, definition|
         relation = instance_eval(&definition)
+        relation.retain(self)
         relation.treat_as_singleton
         instance_variable_set("@#{name}", relation)
       end      
