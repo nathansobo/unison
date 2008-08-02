@@ -3,6 +3,7 @@ module Unison
     include Unison
     include Retainable
     module ClassMethods
+      include Retainable::ClassMethods
       def [](attribute)
         relation[attribute]
       end
@@ -18,6 +19,9 @@ module Unison
       def basename
         name.split("::").last
       end
+    end
+    def self.included(mod)
+      mod.extend(ClassMethods)
     end
 
     attr_reader :nested_tuples

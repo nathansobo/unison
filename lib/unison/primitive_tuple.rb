@@ -1,18 +1,5 @@
 module Unison
   module PrimitiveTuple
-    class HasMany
-      attr_reader :tuple_class, :definition
-      def initialize(tuple_class, &definition)
-        @tuple_class, @definition = tuple_class, definition
-      end
-
-      def create_relation
-        tuple_class.relates_to_n do
-          
-        end
-      end
-    end
-
     include Tuple
     module ClassMethods
       include Tuple::ClassMethods

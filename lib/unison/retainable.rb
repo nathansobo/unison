@@ -1,8 +1,26 @@
 module Unison
   module Retainable
+    module ClassMethods
+      def retains(*children)
+        children_to_retain.concat(children)
+      end
+
+      protected
+      def children_to_retain
+        @children_to_retain ||= []
+      end
+    end
+
+    def self.included(mod)
+      mod.extend ClassMethods
+    end
+
     def retain(retainer)
       raise ArgumentError, "Object #{retainer.inspect} has already retained this Object" if retained_by?(retainer)
       retainers[retainer.object_id] = retainer
+      self.class.send(:children_to_retain).each do |retainable_name|
+        send(retainable_name).retain(self)
+      end
     end
 
     def release(retainer)

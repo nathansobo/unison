@@ -2,6 +2,7 @@ module Unison
   module Relations
     class Selection < Relation
       attr_reader :operand, :predicate, :operand_subscriptions, :predicate_subscription
+      retains :operand, :predicate
 
       def initialize(operand, predicate)
         super()
@@ -61,12 +62,6 @@ module Unison
 
       def size
         read.size
-      end
-
-      def retain(retainer)
-        super
-        predicate.retain(self)
-        operand.retain(self)
       end
 
       protected

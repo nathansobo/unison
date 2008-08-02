@@ -2,6 +2,8 @@ module Unison
   module Relations
     class Projection < Relation
       attr_reader :operand, :attributes
+      retains :operand
+
       def initialize(operand, attributes)
         super()
         @operand, @attributes = operand, attributes
@@ -39,11 +41,6 @@ module Unison
             end
           end
         )
-      end
-
-      def retain(retainer)
-        super
-        operand.retain(self)
       end
 
       protected
