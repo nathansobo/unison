@@ -18,8 +18,11 @@ module Unison
     def retain(retainer)
       raise ArgumentError, "Object #{retainer.inspect} has already retained this Object" if retained_by?(retainer)
       retainers[retainer.object_id] = retainer
-      self.class.send(:children_to_retain).each do |retainable_name|
-        send(retainable_name).retain(self)
+      if refcount == 1
+        self.class.send(:children_to_retain).each do |retainable_name|
+          send(retainable_name).retain(self)
+        end
+        after_first_retain
       end
     end
 
@@ -39,6 +42,10 @@ module Unison
     protected
     def retainers
       @retainers ||= {}
+    end
+
+    def after_first_retain
+      
     end
 
     def destroy

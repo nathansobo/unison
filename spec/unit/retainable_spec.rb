@@ -8,6 +8,26 @@ module Unison
     end
 
     describe "#retain" do
+      it "retains its .children_to_retain only upon its first invocation" do
+        retainable = users_set.where(users_set[:id].eq(1))
+        retainable.operand.should_not be_retained_by(retainable)
+
+        mock.proxy(retainable.operand).retain(retainable)
+        retainable.retain(Object.new)
+        retainable.operand.should be_retained_by(retainable)
+
+        dont_allow(retainable.operand).retain(retainable)
+        retainable.retain(Object.new)
+      end
+
+      it "invokes #after_first_retain only after first invocation" do
+        mock.proxy(retainable).after_first_retain
+        retainable.retain(Object.new)
+        
+        dont_allow(retainable).after_first_retain
+        retainable.retain(Object.new)
+      end
+
       context "when passing in a retainer for the first time" do
         it "increments #refcount by 1" do
           lambda do
