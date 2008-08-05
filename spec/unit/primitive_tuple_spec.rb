@@ -108,7 +108,6 @@ module Unison
             user.select_children(Account).should_not be_singleton
           end
 
-
           context "when passed the pluralized name of the target Relation's Tuple class" do
             it "creates a reader method with the given name" do
               user.should respond_to(:photos)
@@ -162,32 +161,6 @@ module Unison
               end
             end
           end
-
-          context "when passed a Tuple" do
-            it "creates a Selection on the target Set where the foreign key matches the instances' id" do
-              accounts = user.select_children(Account)
-              accounts.should_not be_empty
-              accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
-            end
-          end
-
-          context "when passed a Relation" do
-            it "creates a Selection on the target Relation where the foreign key matches the instances' id" do
-              accounts = user.select_children(Account.relation)
-              accounts.should_not be_empty
-              accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
-            end
-          end
-
-          context "when passed :foreign_key option" do
-            it "returns the Tuples in the relation that match the instance's foreign_key value" do
-              to_friendships = user.select_children(Friendship, :foreign_key => :to_id)
-              to_friendships.should_not be_empty
-              to_friendships.should == friendships_set.where(
-                friendships_set[:to_id].eq(user[:id])
-              )
-            end
-          end
         end
 
         describe ".belongs_to" do
@@ -200,6 +173,63 @@ module Unison
           it "creates a singleton Selection on the target Set where the target's id matches the instance's foreign key" do
             profile.owner.should be_singleton
             profile.owner.should == user
+          end
+
+          context "when passed the lowercased name of the target Relation's Tuple class" do
+            it "creates a reader method with the given name" do
+              profile.should respond_to(:owner)
+            end
+
+            describe ":foreign_key option" do
+              context "when not passed :foreign_key" do
+                describe "the reader method" do
+                  it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                    friendship = Friendship.find(1)
+                    friendship.from.should == user
+                  end
+                end
+              end
+
+              context "when passed a :foreign_key option" do
+                describe "the reader method" do
+                  it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                    account = Account.find(1)
+                    account.owner.should == user
+                  end
+                end
+              end
+            end
+
+            describe ":class_name option" do
+              context "when not passed a :class_name option" do
+                it "chooses the target Relation by singularizing and classifying the given name" do
+                  photo = Photo.find(1)
+                  photo.user.operand.should == User.relation
+                end
+              end
+
+              context "when passed a :class_name option" do
+                it "uses the #relation of the class with the given name as the target Relation" do
+                  profile.owner.operand.should == User.relation
+                end
+              end
+            end
+
+            describe "customization block" do
+              context "when not passed a block" do
+                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                  profile.owner.should == user
+                end
+              end
+
+              context "when passed a block" do
+                describe "the reader method" do
+                  it "returns the result of the default Selection yielded to the block" do
+                    profile.yoga_owner.should == User.where(User[:id].eq(profile[:owner_id])).where(User[:hobby].eq("Yoga"))
+                  end
+                end
+              end
+            end
           end
         end
 

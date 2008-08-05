@@ -47,6 +47,9 @@ Spec::Runner.configure do |config|
         attribute_accessor :owner_id, :integer
 
         belongs_to :owner, :class_name => :User
+        belongs_to :yoga_owner, :class_name => :User, :foreign_key => :owner_id do |owner|
+          owner.where(User[:hobby].eq("Yoga"))
+        end
       end)
 
       const_set(:Photo, Class.new(Unison::PrimitiveTuple::Base) do
@@ -55,9 +58,7 @@ Spec::Runner.configure do |config|
         attribute :user_id, :integer
         attribute :name, :string
 
-        relates_to_1(:user) do
-          User.where(User[:id].eq(self[:user_id]))
-        end
+        belongs_to :user
       end)
 
       const_set(:Account, Class.new(Unison::PrimitiveTuple::Base) do
@@ -73,8 +74,7 @@ Spec::Runner.configure do |config|
         attribute :user_id, :integer
         attribute :name, :string
         attribute_accessor :deactivated_at, :datetime
-        belongs_to :user
-#        belongs_to :owner, :foreign_key => :user_id, :class_name => :User
+        belongs_to :owner, :foreign_key => :user_id, :class_name => :User
       end)
     end
 

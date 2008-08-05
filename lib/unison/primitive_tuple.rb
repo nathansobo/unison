@@ -61,11 +61,9 @@ module Unison
 
       def belongs_to(name, options = {})
         relates_to_1(name) do
-          class_name = options[:class_name] || name.to_s.singularize.classify
-          target_class = class_name.to_s.classify.constantize
-          target_relation = target_class.relation
-          foreign_key = :"#{name}_id"
-          target_relation.where(target_relation[:id].eq(self[foreign_key]))
+          class_name = options[:class_name] || name.to_s.classify
+          foreign_key = options[:foreign_key] || :"#{name}_id"
+          select_parent(class_name.to_s.constantize.relation, :foreign_key => foreign_key)
         end
       end
 
@@ -145,17 +143,17 @@ module Unison
     end
 
     def select_children(target_relation, options={})
-      foreign_key = options[:foreign_key] || :"#{self.class.name.underscore}_id"
+      foreign_key = options[:foreign_key] || :"#{self.class.name.to_s.underscore}_id"
       target_relation.where(target_relation[foreign_key].eq(self[:id]))
     end
 
     def select_child(target_relation, options={})
-      foreign_key = options[:foreign_key] || :"#{self.class.name.underscore}_id"
+      foreign_key = options[:foreign_key] || :"#{self.class.name.to_s.underscore}_id"
       target_relation.where(target_relation[foreign_key].eq(self[:id])).treat_as_singleton
     end
 
     def select_parent(target_relation, options={})
-      foreign_key = options[:foreign_key] || :"#{target_relation.name.underscore}_id"
+      foreign_key = options[:foreign_key] || :"#{target_relation.name.to_s.singularize.underscore}_id"
       target_relation.where(target_relation[:id].eq(self[foreign_key])).treat_as_singleton
     end
 
