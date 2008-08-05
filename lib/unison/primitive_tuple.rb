@@ -47,20 +47,22 @@ module Unison
       def has_many(name, options={})
         relates_to_n(name) do
           class_name = options[:class_name] || name.to_s.singularize.classify
-          select_children(class_name.to_s.constantize, :foreign_key => options[:foreign_key])
+          target_relation = class_name.to_s.constantize.relation
+          select_children(target_relation, :foreign_key => options[:foreign_key])
         end
       end
 
       def has_one(name, options={})
         relates_to_1(name) do
-          options[:class_name] ||= name.to_s.classify
-          self.class.foreign_key_selection self, options
+          class_name = name.to_s.classify
+          select_child class_name.constantize, options
         end
       end
 
-      def belongs_to(name)
+      def belongs_to(name, options = {})
         relates_to_1(name) do
-          target_class = name.to_s.classify.constantize
+          class_name = options[:class_name] || name.to_s.singularize.classify
+          target_class = class_name.to_s.classify.constantize
           target_relation = target_class.relation
           foreign_key = :"#{name}_id"
           target_relation.where(target_relation[:id].eq(self[foreign_key]))

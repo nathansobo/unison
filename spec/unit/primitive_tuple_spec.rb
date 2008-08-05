@@ -198,8 +198,8 @@ module Unison
           end
 
           it "creates a singleton Selection on the target Set where the target's id matches the instance's foreign key" do
-            profile.user.should be_singleton
-            profile.user.should == user
+            profile.owner.should be_singleton
+            profile.owner.should == user
           end
         end
 
@@ -447,29 +447,26 @@ module Unison
           end
 
           it "creates a singleton Selection on the target Set where the target Set id matches the instance's default foreign key attribute value" do
-            profile = user.select_child(Profile)
+            profile = user.select_child(Account)
             profile.should be_singleton
-            profile.should == Profile.find(1)
+            profile.should == Account.find(1)
           end
 
           context "when passed :foreign_key option" do
             it "creates a singleton Selection on the target Set where the target Set id matches the instance's passed in foreign_key attribute value" do
-              best_friend = user.select_child(User, :foreign_key => :best_friend_id)
-              best_friend.should_not be_nil
-              best_friend.should == users_set.where(users_set[:best_friend_id].eq(user[:id])).treat_as_singleton
+              profile = user.select_child(Profile, :foreign_key => :owner_id)
+              profile.should_not be_nil
+              profile.should == profiles_set.where(profiles_set[:owner_id].eq(user[:id])).treat_as_singleton
             end
           end
         end
 
         describe "#select_parent" do
-
           context "when passed a :foreign_key" do
             it "creates a singleton Selection on the target Set where the instance id matches the target Set's passed in foreign_key attribute value" do
-              user = User.find(1)
-
-              best_friend = user.select_parent(User, :foreign_key => :best_friend_id)
-              best_friend.should_not be_nil
-              best_friend.should == User.find(user.best_friend_id)
+              friendship = Friendship.find(1)
+              from_user = friendship.select_parent(User, :foreign_key => :from_id)
+              from_user.should == User.find(friendship.from_id)
             end
           end
         end
