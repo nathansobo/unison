@@ -311,19 +311,19 @@ module Unison
           end
         end
 
-        describe "#select_n" do
+        describe "#select_children" do
           attr_reader :user
           before do
             @user = User.find(1)
           end
 
           it "does not create a singleton Selection" do
-            user.select_n(Account).should_not be_singleton
+            user.select_children(Account).should_not be_singleton
           end
 
           context "when passed a Tuple" do
             it "creates a Selection on the target Set where the foreign key matches the instances' id" do
-              accounts = user.select_n(Account)
+              accounts = user.select_children(Account)
               accounts.should_not be_empty
               accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
             end
@@ -331,7 +331,7 @@ module Unison
 
           context "when passed a Relation" do
             it "creates a Selection on the target Relation where the foreign key matches the instances' id" do
-              accounts = user.select_n(Account.relation)
+              accounts = user.select_children(Account.relation)
               accounts.should_not be_empty
               accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
             end
@@ -339,7 +339,7 @@ module Unison
 
           context "when passed :foreign_key option" do
             it "returns the Tuples in the relation that match the instance's foreign_key value" do
-              target_friendships = user.select_n(Friendship, :foreign_key => :target_id)
+              target_friendships = user.select_children(Friendship, :foreign_key => :target_id)
               target_friendships.should_not be_empty
               target_friendships.should == friendships_set.where(
                 friendships_set[:target_id].eq(user[:id])
@@ -348,34 +348,34 @@ module Unison
           end
         end
 
-        describe "#select_1_child" do
+        describe "#select_child" do
           attr_reader :user
           before do
             @user = User.find(1)
           end
 
           it "creates a singleton Selection on the target Set where the target Set id matches the instance's default foreign key attribute value" do
-            profile = user.select_1_child(Profile)
+            profile = user.select_child(Profile)
             profile.should be_singleton
             profile.should == Profile.find(1)
           end
 
           context "when passed :foreign_key option" do
             it "creates a singleton Selection on the target Set where the target Set id matches the instance's passed in foreign_key attribute value" do
-              best_friend = user.select_1_child(User, :foreign_key => :best_friend_id)
+              best_friend = user.select_child(User, :foreign_key => :best_friend_id)
               best_friend.should_not be_nil
               best_friend.should == users_set.where(users_set[:best_friend_id].eq(user[:id])).treat_as_singleton
             end
           end
         end
 
-        describe "#select_1_parent" do
+        describe "#select_parent" do
 
           context "when passed a :foreign_key" do
             it "creates a singleton Selection on the target Set where the instance id matches the target Set's passed in foreign_key attribute value" do
               user = User.find(1)
 
-              best_friend = user.select_1_parent(User, :foreign_key => :best_friend_id)
+              best_friend = user.select_parent(User, :foreign_key => :best_friend_id)
               best_friend.should_not be_nil
               best_friend.should == User.find(user.best_friend_id)
             end

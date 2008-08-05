@@ -21,16 +21,16 @@ Spec::Runner.configure do |config|
         attribute_accessor :best_friend_id, :integer
 
         relates_to_n :photos do
-          Photo.where(Photo[:user_id].eq(self[:id]))
+          Photo.where(Photo[:user_id].eq(id))
         end
 
 
         has_one :profile
         relates_to_n :accounts do
-          select_n(Account)
+          select_children(Account)
         end
         relates_to_n :active_accounts do
-          select_n(Account).where(Account.active?)
+          select_children(Account).where(Account.active?)
         end
 
 #        relates_to_1 :best_friend do
@@ -38,11 +38,11 @@ Spec::Runner.configure do |config|
 #        end
 
         relates_to_n :target_friendships do
-          select_n(Friendship, :foreign_key => :target_id)
+          select_children(Friendship, :foreign_key => :target_id)
         end
 
         relates_to_n :source_friendships do
-          select_n(Friendship, :foreign_key => :source_id)
+          select_children(Friendship, :foreign_key => :source_id)
         end
       end)
 
@@ -75,7 +75,7 @@ Spec::Runner.configure do |config|
         attribute :owner_id, :integer
 
 #        relates_to_1 do
-#          select_1_parent(User, :owner_id)
+#          select_parent(User, :owner_id)
 #        end
         belongs_to :user
       end)
