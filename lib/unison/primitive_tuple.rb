@@ -44,6 +44,13 @@ module Unison
         attr_reader name
       end
 
+      def has_many(name, options={})
+        relates_to_n(name) do
+          class_name = options[:class_name] || name.to_s.singularize.classify
+          select_children(class_name.to_s.constantize, :foreign_key => options[:foreign_key])
+        end
+      end
+
       def has_one(name, options={})
         relates_to_1(name) do
           options[:class_name] ||= name.to_s.classify

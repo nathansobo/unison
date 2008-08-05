@@ -20,44 +20,34 @@ Spec::Runner.configure do |config|
         attribute_accessor :hobby, :string
         attribute_accessor :best_friend_id, :integer
 
-        relates_to_n :photos do
-          Photo.where(Photo[:user_id].eq(id))
-        end
-
+        has_many :photos
 
         has_one :profile
-        relates_to_n :accounts do
-          select_children(Account)
-        end
-        relates_to_n :active_accounts do
-          select_children(Account).where(Account.active?)
+        has_many :accounts
+        has_many :active_accounts, :class_name => :Account do |accounts|
+          accounts.where(Account.active?)
         end
 
 #        relates_to_1 :best_friend do
 #          select_1(User, :foreign_key => :best_friend_id)
 #        end
 
-        relates_to_n :target_friendships do
-          select_children(Friendship, :foreign_key => :target_id)
-        end
-
-        relates_to_n :source_friendships do
-          select_children(Friendship, :foreign_key => :source_id)
-        end
+        has_many :to_friendships, :foreign_key => :to_id, :class_name => :Friendship
+        has_many :from_friendships, :foreign_key => :from_id, :class_name => :Friendship
       end)
 
       const_set(:Friendship, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:friendships)
         attribute_accessor :id, :integer
-        attribute_accessor :source_id, :integer
-        attribute_accessor :target_id, :integer
+        attribute_accessor :from_id, :integer
+        attribute_accessor :to_id, :integer
 
 #        relates_to_1 :source do
-#          select_1(User, :foreign_key => :source_id)
+#          select_1(User, :foreign_key => :from_id)
 #        end
 
 #        relates_to_1 :target do
-#          select_1(User, :foreign_key => :target_id)
+#          select_1(User, :foreign_key => :to_id)
 #        end
       end)
 
@@ -112,11 +102,11 @@ Spec::Runner.configure do |config|
     users_set.insert(User.new(:id => 2, :name => "Corey", :hobby => "Drugs & Art & Burning Man", :best_friend_id => 3))
     users_set.insert(User.new(:id => 3, :name => "Ross", :hobby => "Manicorn", :best_friend_id => 1))
 
-    friendships_set.insert(Friendship.new(:id => 1, :target_id => 2, :source_id => 1))
-    friendships_set.insert(Friendship.new(:id => 2, :target_id => 3, :source_id => 1))
-    friendships_set.insert(Friendship.new(:id => 2, :target_id => 1, :source_id => 2))
-    friendships_set.insert(Friendship.new(:id => 2, :target_id => 3, :source_id => 2))
-    friendships_set.insert(Friendship.new(:id => 2, :target_id => 1, :source_id => 3))
+    friendships_set.insert(Friendship.new(:id => 1, :to_id => 2, :from_id => 1))
+    friendships_set.insert(Friendship.new(:id => 2, :to_id => 3, :from_id => 1))
+    friendships_set.insert(Friendship.new(:id => 2, :to_id => 1, :from_id => 2))
+    friendships_set.insert(Friendship.new(:id => 2, :to_id => 3, :from_id => 2))
+    friendships_set.insert(Friendship.new(:id => 2, :to_id => 1, :from_id => 3))
 
     profiles_set.insert(Profile.new(:id => 1, :user_id => 1))
     profiles_set.insert(Profile.new(:id => 2, :user_id => 2))
