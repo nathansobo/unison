@@ -67,13 +67,6 @@ module Unison
         end
       end
 
-      def foreign_key_selection(instance, options={})
-        target_class = options[:class_name].constantize
-        target_relation = target_class.relation
-        foreign_key = :"#{name.underscore}_id"
-        target_relation.where(target_relation[foreign_key].eq(instance[:id]))
-      end
-
       def create(attributes)
         relation.insert(new(attributes))
       end      
