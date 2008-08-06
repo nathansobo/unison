@@ -1,17 +1,17 @@
 module Unison
   module Predicates
     class CompositePredicate < Base
-      attr_reader :child_predicates
-      def initialize(*child_predicates)
-        raise ArgumentError, "And predicate must have at least one child Predicate" if child_predicates.empty?
+      attr_reader :operands
+      def initialize(*operands)
+        raise ArgumentError, "And predicate must have at least one child Predicate" if operands.empty?
         super()
-        @child_predicates = child_predicates
+        @operands = operands
         @child_predicate_subscriptions = []
       end
 
       def ==(other)
         if other.is_a?(self.class)
-          child_predicates == other.child_predicates
+          operands == other.operands
         else
           false
         end
@@ -21,7 +21,7 @@ module Unison
       attr_reader :child_predicate_subscriptions
 
       def after_first_retain
-        child_predicates.each do |child_predicate|
+        operands.each do |child_predicate|
           child_predicate.retain(self)
           child_predicate_subscriptions.push(
             child_predicate.on_update do
@@ -36,7 +36,7 @@ module Unison
           subscription.destroy
         end
 
-        child_predicates.each do |child_predicate|
+        operands.each do |child_predicate|
           child_predicate.release self
         end
       end

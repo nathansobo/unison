@@ -29,13 +29,13 @@ module Unison
         end
 
         describe "#==" do
-          context "when other And has the same #child_predicates" do
+          context "when other And has the same #operands" do
             it "returns true" do
-              predicate.should == And.new(*predicate.child_predicates)
+              predicate.should == And.new(*predicate.operands)
             end
           end
 
-          context "when other And does not have the same #child_predicates" do
+          context "when other And does not have the same #operands" do
             it "returns false" do
               predicate.should_not == And.new(Eq.new(users_set[:id], 1))
             end
@@ -63,8 +63,8 @@ module Unison
         end
 
         describe "#destroy" do
-          it "unsubscribes from and releases #child_predicates" do
-            child_predicates = predicate.child_predicates.dup
+          it "unsubscribes from and releases #operands" do
+            operands = predicate.operands.dup
             predicate.send(:destroy)
 
             child_predicate_without_signal.send(:update_subscription_node).should be_empty
@@ -77,7 +77,7 @@ module Unison
 
       context "before #retain is called" do
         describe "#retain" do
-          it "retains its #child_predicates" do
+          it "retains its #operands" do
             child_predicate_without_signal.should_not be_retained_by(predicate)
             child_predicate_with_signal.should_not be_retained_by(predicate)
             predicate.send(:child_predicate_subscriptions).should be_empty
