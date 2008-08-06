@@ -105,58 +105,120 @@ module Unison
           end
 
           it "does not create a singleton Selection" do
-            user.select_children(Account).should_not be_singleton
+            user.photos.should_not be_singleton
           end
 
-          context "when passed the pluralized name of the target Relation's Tuple class" do
-            it "creates a reader method with the given name" do
-              user.should respond_to(:photos)
-            end
+          it "creates a reader method with the given name" do
+            user.should respond_to(:photos)
+          end
 
-            describe ":foreign_key option" do
-              context "when not passed :foreign_key" do
-                describe "the reader method" do
-                  it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
-                    user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
-                  end
-                end
-              end
-              
-              context "when passed a :foreign_key option" do
-                describe "the reader method" do
-                  it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
-                    user.to_friendships.should == Friendship.where(Friendship[:to_id].eq(user[:id]))
-                  end
-                end
-              end
-            end
-
-            describe ":class_name option" do
-              context "when not passed a :class_name option" do
-                it "chooses the target Relation by singularizing and classifying the given name" do
-                  user.photos.operand.should == Photo.relation
-                end
-              end
-
-              context "when passed a :class_name option" do
-                it "uses the #relation of the class with the given name as the target Relation" do
-                  user.to_friendships.operand.should == Friendship.relation
-                end
-              end
-            end
-
-            describe "customization block" do
-              context "when not passed a block" do
+          describe ":foreign_key option" do
+            context "when not passed :foreign_key" do
+              describe "the reader method" do
                 it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
                   user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
                 end
               end
+            end
 
-              context "when passed a block" do
-                describe "the reader method" do
-                  it "returns the result of the default Selection yielded to the block" do
-                    user.active_accounts.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
-                  end
+            context "when passed a :foreign_key option" do
+              describe "the reader method" do
+                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                  user.to_friendships.should == Friendship.where(Friendship[:to_id].eq(user[:id]))
+                end
+              end
+            end
+          end
+
+          describe ":class_name option" do
+            context "when not passed a :class_name option" do
+              it "chooses the target Relation by singularizing and classifying the given name" do
+                user.photos.operand.should == Photo.relation
+              end
+            end
+
+            context "when passed a :class_name option" do
+              it "uses the #relation of the class with the given name as the target Relation" do
+                user.to_friendships.operand.should == Friendship.relation
+              end
+            end
+          end
+
+          describe "customization block" do
+            context "when not passed a block" do
+              it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
+              end
+            end
+
+            context "when passed a block" do
+              describe "the reader method" do
+                it "returns the result of the default Selection yielded to the block" do
+                  user.active_accounts.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
+                end
+              end
+            end
+          end
+        end
+
+        describe ".has_one" do
+          attr_reader :user
+          before do
+            @user = User.find(1)
+          end
+
+          it "creates a singleton Selection" do
+            user.profile.should be_singleton
+          end
+
+          it "creates a reader method with the given name" do
+            user.should respond_to(:profile)
+          end
+
+          describe ":foreign_key option" do
+            context "when not passed :foreign_key" do
+              describe "the reader method" do
+                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                  user.life_goal.should == LifeGoal.where(LifeGoal[:user_id].eq(user[:id]))
+                end
+              end
+            end
+
+            context "when passed a :foreign_key option" do
+              describe "the reader method" do
+                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                  user.profile.should == Profile.where(Profile[:owner_id].eq(user[:id]))
+                end
+              end
+            end
+          end
+
+          describe ":class_name option" do
+            context "when not passed a :class_name option" do
+              it "chooses the target Relation by singularizing and classifying the given name" do
+                user.profile.operand.should == Profile.relation
+              end
+            end
+
+            context "when passed a :class_name option" do
+              it "uses the #relation of the class with the given name as the target Relation" do
+                user.profile_alias.operand.should == Profile.relation
+              end
+            end
+          end
+
+          describe "customization block" do
+            context "when not passed a block" do
+              it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
+              end
+            end
+
+            context "when passed a block" do
+              describe "the reader method" do
+                it "returns the result of the default Selection yielded to the block" do
+                  user.active_account.should be_singleton
+                  user.active_account.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
                 end
               end
             end
@@ -175,58 +237,56 @@ module Unison
             profile.owner.should == user
           end
 
-          context "when passed the lowercased name of the target Relation's Tuple class" do
-            it "creates a reader method with the given name" do
-              profile.should respond_to(:owner)
-            end
+          it "creates a reader method with the given name" do
+            profile.should respond_to(:owner)
+          end
 
-            describe ":foreign_key option" do
-              context "when not passed :foreign_key" do
-                describe "the reader method" do
-                  it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
-                    friendship = Friendship.find(1)
-                    friendship.from.should == user
-                  end
-                end
-              end
-
-              context "when passed a :foreign_key option" do
-                describe "the reader method" do
-                  it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
-                    account = Account.find(1)
-                    account.owner.should == user
-                  end
-                end
-              end
-            end
-
-            describe ":class_name option" do
-              context "when not passed a :class_name option" do
-                it "chooses the target Relation by singularizing and classifying the given name" do
-                  photo = Photo.find(1)
-                  photo.user.operand.should == User.relation
-                end
-              end
-
-              context "when passed a :class_name option" do
-                it "uses the #relation of the class with the given name as the target Relation" do
-                  profile.owner.operand.should == User.relation
-                end
-              end
-            end
-
-            describe "customization block" do
-              context "when not passed a block" do
+          describe ":foreign_key option" do
+            context "when not passed :foreign_key" do
+              describe "the reader method" do
                 it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
-                  profile.owner.should == user
+                  friendship = Friendship.find(1)
+                  friendship.from.should == user
                 end
               end
+            end
 
-              context "when passed a block" do
-                describe "the reader method" do
-                  it "returns the result of the default Selection yielded to the block" do
-                    profile.yoga_owner.should == User.where(User[:id].eq(profile[:owner_id])).where(User[:hobby].eq("Yoga"))
-                  end
+            context "when passed a :foreign_key option" do
+              describe "the reader method" do
+                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                  account = Account.find(1)
+                  account.owner.should == user
+                end
+              end
+            end
+          end
+
+          describe ":class_name option" do
+            context "when not passed a :class_name option" do
+              it "chooses the target Relation by singularizing and classifying the given name" do
+                photo = Photo.find(1)
+                photo.user.operand.should == User.relation
+              end
+            end
+
+            context "when passed a :class_name option" do
+              it "uses the #relation of the class with the given name as the target Relation" do
+                profile.owner.operand.should == User.relation
+              end
+            end
+          end
+
+          describe "customization block" do
+            context "when not passed a block" do
+              it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                profile.owner.should == user
+              end
+            end
+
+            context "when passed a block" do
+              describe "the reader method" do
+                it "returns the result of the default Selection yielded to the block" do
+                  profile.yoga_owner.should == User.where(User[:id].eq(profile[:owner_id])).where(User[:hobby].eq("Yoga"))
                 end
               end
             end

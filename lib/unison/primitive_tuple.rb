@@ -54,8 +54,8 @@ module Unison
 
       def has_one(name, options={})
         relates_to_1(name) do
-          class_name = name.to_s.classify
-          select_child class_name.constantize, options
+          class_name = options[:class_name] || name.to_s.classify
+          select_child class_name.to_s.constantize, options
         end
       end
 

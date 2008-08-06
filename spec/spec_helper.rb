@@ -22,13 +22,27 @@ Spec::Runner.configure do |config|
         has_many :photos
 
         has_one :profile, :foreign_key => :owner_id
+        has_one :profile_alias, :class_name => :Profile, :foreign_key => :owner_id
+
+        has_one :life_goal
         has_many :accounts
+        has_one :active_account, :class_name => :Account do |account|
+          accounts.where(Account.active?)
+        end
         has_many :active_accounts, :class_name => :Account do |accounts|
           accounts.where(Account.active?)
         end
 
         has_many :to_friendships, :foreign_key => :to_id, :class_name => :Friendship
         has_many :from_friendships, :foreign_key => :from_id, :class_name => :Friendship
+      end)
+
+      const_set(:LifeGoal, Class.new(Unison::PrimitiveTuple::Base) do
+        member_of Unison::Relations::Set.new(:life_goals)
+        attribute_accessor :id, :integer
+        attribute_accessor :user_id, :integer
+
+        belongs_to :user
       end)
 
       const_set(:Friendship, Class.new(Unison::PrimitiveTuple::Base) do
@@ -82,6 +96,10 @@ Spec::Runner.configure do |config|
     users_set.insert(User.new(:id => 2, :name => "Corey", :hobby => "Drugs & Art & Burning Man"))
     users_set.insert(User.new(:id => 3, :name => "Ross", :hobby => "Manicorn"))
 
+    life_goals_set.insert(LifeGoal.new(:id => 1, :user_id => 1))
+    life_goals_set.insert(LifeGoal.new(:id => 2, :user_id => 2))
+    life_goals_set.insert(LifeGoal.new(:id => 3, :user_id => 3))
+
     friendships_set.insert(Friendship.new(:id => 1, :to_id => 2, :from_id => 1))
     friendships_set.insert(Friendship.new(:id => 2, :to_id => 3, :from_id => 1))
     friendships_set.insert(Friendship.new(:id => 2, :to_id => 1, :from_id => 2))
@@ -104,6 +122,7 @@ Spec::Runner.configure do |config|
   config.after do
     Object.class_eval do
       remove_const :User
+      remove_const :LifeGoal
       remove_const :Friendship
       remove_const :Profile
       remove_const :Photo
@@ -117,6 +136,10 @@ class Spec::ExampleGroup
 
   def users_set
     User.relation
+  end
+
+  def life_goals_set
+    LifeGoal.relation
   end
 
   def friendships_set
