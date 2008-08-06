@@ -7,16 +7,6 @@ module Unison
         super()
         @child_predicates = child_predicates
         @child_predicate_subscriptions = []
-
-        child_predicates.each do |child_predicate|
-          # TODO - Move to after first retain
-          child_predicate.retain(self)
-          child_predicate_subscriptions.push(
-            child_predicate.on_update do
-              update_subscription_node.call
-            end
-          )
-        end
       end
 
       def ==(other)
@@ -29,6 +19,17 @@ module Unison
 
       protected
       attr_reader :child_predicate_subscriptions
+
+      def after_first_retain
+        child_predicates.each do |child_predicate|
+          child_predicate.retain(self)
+          child_predicate_subscriptions.push(
+            child_predicate.on_update do
+              update_subscription_node.call
+            end
+          )
+        end        
+      end
 
       def destroy
         child_predicate_subscriptions.each do |subscription|
