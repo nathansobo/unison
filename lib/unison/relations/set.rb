@@ -67,6 +67,10 @@ module Unison
 
       protected
       attr_reader :signals
+
+      def initial_read
+        tuples
+      end
     end
   end
 end

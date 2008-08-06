@@ -36,6 +36,10 @@ module Unison
       retainers.length
     end
 
+    def retained?
+      !retainers.empty?
+    end
+
     def retained_by?(potential_retainer)
       retainers[potential_retainer.object_id] ? true : false
     end

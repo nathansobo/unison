@@ -29,7 +29,6 @@ module Unison
       end
 
       def subscribe_to_operand_update_if_signal(operand)
-        # TODO: Move to after first retain
         if operand.is_a?(Signal)
           operand.retain(self)
           operand_subscriptions.push(

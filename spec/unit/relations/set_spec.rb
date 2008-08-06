@@ -5,7 +5,7 @@ module Unison
     describe Set do
       attr_reader :set
       before do
-        @set = Set.new(:users)
+        @set = Set.new(:users).retain(Object.new)
         set.attribute(:id, :integer)
         set.attribute(:name, :string)
       end

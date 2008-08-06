@@ -327,20 +327,14 @@ module Unison
             tuple[:name].should == "Nathan"
           end
 
-          it "instantiates and retains its #instance_relations" do
+          it "instantiates its #instance_relations" do
             relations = tuple.send(:instance_relations)
             relations.should_not be_empty
-            relations.each do |relation_name, relation|
-              tuple.send(relation_name).should be_retained_by(tuple)
-            end
           end
 
-          it "instantiates and retains its #singleton_instance_relations" do
+          it "instantiates its #singleton_instance_relations" do
             relations = tuple.send(:singleton_instance_relations)
             relations.should_not be_empty
-            relations.each do |relation_name, relation|
-              tuple.send(relation_name).should be_retained_by(tuple)
-            end
           end
         end
 

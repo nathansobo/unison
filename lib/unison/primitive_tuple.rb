@@ -97,15 +97,11 @@ module Unison
 
       instance_relations.each do |name, proc|
         relation = instance_eval(&proc)
-        # TODO: Remove Me
-        relation.retain(self)
         instance_variable_set("@#{name}", relation)
       end
 
       singleton_instance_relations.each do |name, definition|
         relation = instance_eval(&definition)
-        # TODO: Remove Me
-        relation.retain(self)
         relation.treat_as_singleton
         instance_variable_set("@#{name}", relation)
       end      

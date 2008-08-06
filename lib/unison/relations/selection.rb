@@ -11,10 +11,6 @@ module Unison
         @tuples = initial_read
       end
 
-      def size
-        read.size
-      end
-
       protected
       attr_reader :tuples
 

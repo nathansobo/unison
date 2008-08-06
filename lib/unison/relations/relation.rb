@@ -20,7 +20,7 @@ module Unison
       end
 
       def read
-        tuples
+        retained?? tuples : initial_read
       end
 
       def nil?
@@ -37,14 +37,17 @@ module Unison
       end
 
       def on_insert(&block)
+        raise "Relation must be retained" unless retained?
         insert_subscription_node.subscribe(&block)
       end
 
       def on_delete(&block)
+        raise "Relation must be retained" unless retained?
         delete_subscription_node.subscribe(&block)
       end
 
       def on_tuple_update(&block)
+        raise "Relation must be retained" unless retained?
         tuple_update_subscription_node.subscribe(&block)
       end
 
@@ -62,6 +65,10 @@ module Unison
 
       protected
       attr_reader :tuples, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+
+      def initial_read
+        raise NotImplementedError
+      end
 
       def method_missing(method_name, *args, &block)
         if singleton?

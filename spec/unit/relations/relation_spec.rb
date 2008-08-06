@@ -4,6 +4,7 @@ module Unison
   module Relations
     describe Relation do
       attr_reader :relation
+
       describe "#where" do
         it "returns a Selection with self as its #operand and the given predicate as its #predicate" do
           selection = users_set.where(users_set[:id].eq(1))
@@ -42,12 +43,6 @@ module Unison
             users_set.where(users_set[:id].eq(100)).should be_empty
             users_set.where(users_set[:id].eq(100)).should_not be_nil
           end
-        end
-      end
-
-      describe "#first" do
-        it "returns the first tuple from #read" do
-          users_set.first.should == users_set.read.first
         end
       end
 
@@ -106,47 +101,121 @@ module Unison
             relation.should == relation.read
           end
         end
-      end      
+      end
 
-      describe "#on_insert" do
-        before do
-          @relation = users_set
+      describe "#read" do
+        context "when the Relation is not retained" do
+          before do
+            @relation = Relations::Set.new(:unretained_set)
+            relation.should_not be_retained
+          end
+
+          it "returns the result of #initial_read" do
+            mock.proxy(relation).initial_read {[:initial, :read, :result]}
+            relation.read.should == [:initial, :read, :result]
+          end
         end
 
-        it "returns a Subscription" do
-          relation.on_insert {}.class.should == Subscription
+        context "when the Relation is retained" do
+          before do
+            @relation = users_set
+            relation.should be_retained
+          end
+
+          it "returns the cached Tuples without calling #initial_read" do
+            dont_allow(relation).initial_read
+            relation.read.should == relation.tuples
+          end
+        end
+      end
+
+      describe "#on_insert" do
+        context "when Relation is not retained" do
+          before do
+            @relation = Relations::Set.new(:unretained_set)
+            relation.should_not be_retained
+          end
+
+          it "raises an Error" do
+            lambda do
+              relation.on_insert {}
+            end.should raise_error
+          end
+        end
+
+        context "when Relation is retained" do
+          before do
+            @relation = users_set
+            relation.should be_retained            
+          end
+
+          it "returns a Subscription" do
+            relation.on_insert {}.class.should == Subscription
+          end
         end
       end
 
       describe "#on_delete" do
-        before do
-          @relation = users_set
+        context "when Relation is not retained" do
+          before do
+            @relation = Relations::Set.new(:unretained_set)
+            relation.should_not be_retained
+          end
+
+          it "raises an Error" do
+            lambda do
+              relation.on_delete {}
+            end.should raise_error
+          end
         end
 
-        it "returns a Subscription" do
-          relation.on_delete {}.class.should == Subscription
+        context "when Relation is retained" do
+          before do
+            @relation = users_set
+            relation.should be_retained
+          end
+
+          it "returns a Subscription" do
+            relation.on_delete {}.class.should == Subscription
+          end
         end
       end
 
       describe "#on_tuple_update" do
-        before do
-          @relation = users_set
-        end
-
-        it "returns a Subscription" do
-          relation.on_tuple_update {}.class.should == Subscription
-        end
-
-        it "invokes the block with the (Attribute, old_value, new_value) when a member Tuple is updated" do
-          arguments = []
-          relation.on_tuple_update do |tuple, attribute, old_value, new_value|
-            arguments.push [tuple, attribute, old_value, new_value]
+        context "when Relation is not retained" do
+          before do
+            @relation = Relations::Set.new(:unretained_set)
+            relation.should_not be_retained
           end
 
-          user = relation.read.first
-          old_name = user[:name]
-          user[:name] = "Another Name"
-          arguments.should == [[user, users_set[:name], old_name, "Another Name"]]
+          it "raises an Error" do
+            lambda do
+              relation.on_tuple_update {}
+            end.should raise_error
+          end
+        end
+
+        context "when Relation is retained" do
+          before do
+            @relation = users_set
+            relation.should be_retained
+          end
+
+          it "returns a Subscription" do
+            relation.on_tuple_update {}.class.should == Subscription
+          end
+
+          it "invokes the block with the (Attribute, old_value, new_value) when a member Tuple is updated" do
+            arguments = []
+            relation.on_tuple_update do |tuple, attribute, old_value, new_value|
+              arguments.push [tuple, attribute, old_value, new_value]
+            end
+
+            user = relation.read.first
+            old_name = user[:name]
+            user[:name] = "Another Name"
+            arguments.should == [[user, users_set[:name], old_name, "Another Name"]]
+          end
         end
       end
     end
