@@ -9,6 +9,7 @@ module Unison
         @child_predicate_subscriptions = []
 
         child_predicates.each do |child_predicate|
+          # TODO - Move to after first retain
           child_predicate.retain(self)
           child_predicate_subscriptions.push(
             child_predicate.on_update do
