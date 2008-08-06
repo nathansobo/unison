@@ -117,7 +117,6 @@ module Unison
       attribute = attribute_for(attribute_or_symbol)
       old_value = attributes[attribute]
       attributes[attribute] = value
-      signals[attribute].trigger_on_update(old_value, value) if signals[attribute]
       update_subscription_node.call(attribute, old_value, value)
       value
     end

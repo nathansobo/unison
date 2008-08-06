@@ -417,31 +417,6 @@ module Unison
               end.should raise_error(ArgumentError)
             end
           end
-
-          describe ".on_update" do
-            context "when the Signal#attribute value is changed" do
-              it "invokes the block" do
-                on_update_arguments = nil
-                user.signal(:name).on_update do |user, old_value, new_value|
-                  on_update_arguments = [user, old_value, new_value]
-                end
-
-                old_name = user[:name]
-                user[:name] = "Wilhelm"
-                on_update_arguments.should == [user, old_name, "Wilhelm"]
-              end
-            end
-
-            context "when another Attribute value is changed" do
-              it "does not invoke the block" do
-                user.signal(:name).on_update do |user, old_value, new_value|
-                  raise "I should not be Invoked"
-                end
-
-                user[:id] = 100
-              end
-            end
-          end
         end
 
         describe "#bind" do
