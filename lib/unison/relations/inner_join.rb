@@ -8,7 +8,6 @@ module Unison
         super()
         @operand_1, @operand_2, @predicate = operand_1, operand_2, predicate
         @operand_1_subscriptions, @operand_2_subscriptions = [], []
-        @tuples = initial_read
       end
 
       def to_sql
@@ -23,6 +22,7 @@ module Unison
       attr_reader :tuples, :operand_1_subscriptions, :operand_2_subscriptions
 
       def after_first_retain
+        super
         operand_1_subscriptions.push(
           operand_1.on_insert do |operand_1_tuple|
             operand_2.each do |operand_2_tuple|

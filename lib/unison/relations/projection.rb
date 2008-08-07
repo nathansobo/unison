@@ -8,7 +8,6 @@ module Unison
         super()
         @operand, @attributes = operand, attributes
         @operand_subscriptions = []
-        @tuples = initial_read
         @last_update = nil
       end
 
@@ -30,6 +29,7 @@ module Unison
       end
 
       def after_first_retain
+        super
         operand_subscriptions.push(
           operand.on_insert do |created|
             restricted = created[attributes]

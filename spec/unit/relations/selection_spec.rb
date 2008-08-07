@@ -387,6 +387,17 @@ module Unison
             selection.operand_subscriptions.should_not be_empty
             operand.should be_retained_by(selection)
           end
+
+          it "assigns #tuples to the result of #initial_read" do
+            class << selection
+              public :tuples, :initial_read
+            end
+
+            selection.tuples.should be_nil
+
+            selection.retain(Object.new)
+            selection.tuples.should == selection.initial_read
+          end
         end
       end
     end

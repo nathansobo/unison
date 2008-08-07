@@ -616,6 +616,17 @@ module Unison
             join.operand_2.should be_retained_by(join)
             join.predicate.should be_retained_by(join)
           end
+
+          it "assigns #tuples to the result of #initial_read" do
+            class << join
+              public :tuples, :initial_read
+            end
+
+            join.tuples.should be_nil
+
+            join.retain(Object.new)
+            join.tuples.should == join.initial_read
+          end
         end
       end
     end

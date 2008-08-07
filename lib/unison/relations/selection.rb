@@ -8,7 +8,6 @@ module Unison
         super()
         @operand_subscriptions = []
         @operand, @predicate = operand, predicate
-        @tuples = initial_read
       end
 
       def to_sql
@@ -29,6 +28,7 @@ module Unison
       end
 
       def after_first_retain
+        super
         @predicate_subscription =
           predicate.on_update do
             new_tuples = initial_read

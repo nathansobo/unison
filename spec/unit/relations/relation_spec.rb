@@ -71,7 +71,7 @@ module Unison
 
       describe "#==" do
         before do
-          @relation = Set.new(:users)
+          @relation = Set.new(:users).retain(Object.new)
         end
 
         context "when passed the same Set" do
@@ -89,7 +89,7 @@ module Unison
 
           context "with the a different result of #read" do
             it "returns false" do
-              another_relation = Set.new(:users)
+              another_relation = Set.new(:users).retain(Object.new)
               another_relation.insert(User.new(:id => 100, :name => "Brian"))
               relation.should_not == another_relation
             end

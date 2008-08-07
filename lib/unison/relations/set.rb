@@ -7,7 +7,6 @@ module Unison
         super()
         @name = name
         @attributes = SequencedHash.new
-        @tuples = []
       end
 
       def tuple_class
@@ -77,7 +76,7 @@ module Unison
       attr_reader :signals
 
       def initial_read
-        tuples
+        []
       end
     end
   end

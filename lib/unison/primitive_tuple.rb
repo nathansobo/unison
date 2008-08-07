@@ -6,8 +6,7 @@ module Unison
       attr_accessor :relation
 
       def member_of(relation)
-        @relation = relation
-        relation.retain(self)
+        @relation = relation.retain(self)
         relation.tuple_class = self
       end
 

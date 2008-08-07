@@ -13,6 +13,7 @@ module Unison
         @delete_subscription_node = SubscriptionNode.new
         @tuple_update_subscription_node = SubscriptionNode.new
         @singleton = false
+        @tuples = nil
       end
 
       def where(predicate)
@@ -65,6 +66,10 @@ module Unison
 
       protected
       attr_reader :tuples, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+
+      def after_first_retain
+        @tuples = initial_read
+      end
 
       def initial_read
         raise NotImplementedError

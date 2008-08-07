@@ -77,6 +77,28 @@ module Unison
         end
       end
 
+      describe "#retain" do
+        context "when called for the first time" do
+          before do
+            @set = Set.new(:users)
+            set.attribute(:id, :integer)
+            set.attribute(:name, :string)
+          end
+
+          it "assigns #tuples to the result of #initial_read" do
+            class << set
+              public :tuples, :initial_read
+            end
+            stub(set).initial_read {[set.tuple_class.new(:id => 1, :name => "Nathan")]}
+
+            set.tuples.should be_nil
+
+            set.retain(Object.new)
+            set.tuples.should == set.initial_read
+          end
+        end
+      end
+
       describe "#[]" do
         it "retrieves the Set's Attribute by the given name" do
           set[:id].should == Attribute.new(set, :id, :integer)
@@ -127,10 +149,36 @@ module Unison
       end
 
       describe "#read" do
-        it "returns all Tuples in the Set" do
-          set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
-          set.insert(set.tuple_class.new(:id => 2, :name => "Alissa"))
-          set.read.should == set.tuples
+        context "when #retained?" do
+          before do
+            set.should be_retained
+          end
+
+          it "returns all Tuples in the Set" do
+            set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
+            set.insert(set.tuple_class.new(:id => 2, :name => "Alissa"))
+            set.read.should == set.tuples
+          end
+        end
+
+        context "when not #retained?" do
+          before do
+            @set = Set.new(:users)
+            set.attribute(:id, :integer)
+            set.attribute(:name, :string)
+            set.should_not be_retained
+          end
+
+          it "returns all Tuples from a database query of the table" do
+            pending("implement test database") do
+  #            mock.proxy()
+
+              set.read.should == [
+                set.tuple_class.new(:id => 1, :name => "Nathan"),
+                set.tuple_class.new(:id => 2, :name => "Alissa")
+              ]
+            end
+          end
         end
       end
 
