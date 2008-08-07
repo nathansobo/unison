@@ -548,14 +548,6 @@ module Unison
               update_args.should == [[tuple.relation[:id], old_value, new_value]]
             end
           end
-
-          context "when an attribute is not changed" do
-            it "does not invoke the block"
-          end
-        end
-
-        describe "#delete" do
-          it "releases all of its instance Relations"
         end
       end
     end
