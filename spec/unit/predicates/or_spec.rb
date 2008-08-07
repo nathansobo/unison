@@ -28,6 +28,12 @@ module Unison
           end
         end
       end
+
+      describe "#to_sql" do
+        it "return to_sql value of each operand joined by or" do
+          predicate.to_sql.should == "((users.id = 3) or (users.name = 'Nathan'))"
+        end
+      end
     end
   end
 end

@@ -21,7 +21,7 @@ module Unison
       end
 
       def to_sql
-        "#{operand_1.to_sql} = #{operand_2.to_sql}"
+        "(#{operand_1.to_sql} = #{operand_2.to_sql})"
       end
 
       protected

@@ -6,6 +6,10 @@ module Unison
           operand.eval(tuple)
         end
       end
+
+      def to_sql
+        "(#{operands.map {|operand| operand.to_sql}.join(" and ")})"
+      end
     end
   end
 end

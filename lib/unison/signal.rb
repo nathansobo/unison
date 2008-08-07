@@ -19,6 +19,10 @@ module Unison
       update_subscription_node.subscribe(&block)
     end
 
+    def to_sql
+      attribute.to_sql
+    end
+
     protected
     attr_reader :update_subscription_node, :tuple_subscription
 

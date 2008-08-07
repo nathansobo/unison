@@ -3,10 +3,17 @@ require File.expand_path("#{File.dirname(__FILE__)}/../spec_helper")
 module Unison
   module Tuple
     describe Signal do
-      attr_reader :user, :signal
+      attr_reader :user, :attribute, :signal
       before do
         @user = User.find(1)
-        @signal = user.signal(users_set[:name])
+        @attribute = users_set[:name]
+        @signal = user.signal(attribute)
+      end
+
+      describe "#to_sql" do
+        it "delegates to #attribute.to_sql" do
+          signal.to_sql.should == attribute.to_sql
+        end
       end
 
       context "after #retain is called" do
