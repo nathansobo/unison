@@ -25,8 +25,8 @@ module Unison
       relation.equal?(other.relation) && name == other.name
     end
 
-    def to_sql
-      "#{relation.name}.#{name}"
+    def to_arel
+      relation.to_arel[name]
     end
 
     protected

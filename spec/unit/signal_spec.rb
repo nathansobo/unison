@@ -10,9 +10,9 @@ module Unison
         @signal = user.signal(attribute)
       end
 
-      describe "#to_sql" do
-        it "delegates to #attribute.to_sql" do
-          signal.to_sql.should == attribute.to_sql
+      describe "#to_arel" do
+        it "delegates to #value.to_arel" do
+          signal.to_arel.should == user[:name].to_arel
         end
       end
 

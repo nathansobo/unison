@@ -12,7 +12,11 @@ module Unison
       end
 
       def to_sql
-        "#{operand.to_sql} where #{predicate.to_sql}"
+        to_arel.to_sql
+      end
+
+      def to_arel
+        operand.to_arel.where(predicate.to_arel)
       end
 
       protected

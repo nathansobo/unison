@@ -20,8 +20,8 @@ module Unison
         tuple.bind(eval_operand(operand_1)) == tuple.bind(eval_operand(operand_2))
       end
 
-      def to_sql
-        "(#{operand_1.to_sql} = #{operand_2.to_sql})"
+      def to_arel
+        Arel::Equality.new(operand_1.to_arel, operand_2.to_arel)
       end
 
       protected

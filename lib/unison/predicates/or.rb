@@ -7,8 +7,10 @@ module Unison
         end
       end
 
-      def to_sql
-        "(#{operands.map {|operand| operand.to_sql}.join(" or ")})"
+      def to_arel
+        operands.inject(nil) do |acc, operand|
+          acc ? acc.or(operand.to_arel) : operand.to_arel
+        end
       end
     end
   end

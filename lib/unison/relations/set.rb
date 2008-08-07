@@ -69,12 +69,12 @@ module Unison
         to_arel.to_sql
       end
 
+      def to_arel
+        @arel ||= Arel::Table.new(name, Adapters::Arel::Engine.new(self))
+      end
+
       protected
       attr_reader :signals
-
-      def to_arel
-        Arel::Table.new(name, Adapters::Arel::Engine.new(self))
-      end
 
       def initial_read
         tuples

@@ -19,8 +19,8 @@ module Unison
       update_subscription_node.subscribe(&block)
     end
 
-    def to_sql
-      attribute.to_sql
+    def to_arel
+      value.to_arel
     end
 
     protected

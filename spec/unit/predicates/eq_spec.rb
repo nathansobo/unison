@@ -5,10 +5,12 @@ module Unison
     describe Eq do
       attr_reader :predicate
       
-      describe "#to_sql" do
-        it "returns (#operand_1.to_sql = #operand_2.to_sql)" do
-          predicate = Eq.new(users_set[:name], "Nathan")
-          predicate.to_sql.should == "(users.name = 'Nathan')"
+      describe "#to_arel" do
+        it "returns an Arel::Where representation" do
+          operand_1 = users_set[:name]
+          operand_2 = "Nathan"
+          predicate = Eq.new(operand_1, "Nathan")
+          predicate.to_arel.should == Arel::Equality.new(operand_1.to_arel, operand_2.to_arel)
         end
       end
 

@@ -4,7 +4,7 @@ module Unison
   describe Attribute do
     attr_reader :relation, :attribute
     before do
-      @relation = Relations::Set.new(:user)
+      @relation = Relations::Set.new(:users)
       @attribute = Attribute.new(relation, :name, :string)
     end
 
@@ -143,10 +143,19 @@ module Unison
         end
       end
     end
-
-    describe "#to_sql" do
-      it "returns (#set.name).(#name)" do
-        attribute.to_sql.should == "user.name"
+    
+    describe "#to_arel" do
+      before do
+        @relation = users_set
+        @attribute = Attribute.new(relation, :name, :string)
+      end
+      
+      it "returns the Arel::Attribute with the same #name from #relation.to_arel" do
+        attribute.to_arel.should == attribute.relation.to_arel[attribute.name]
+      end
+      
+      it "when called repeatedly, returns the same Arel::Attribute instance" do
+        attribute.to_arel.object_id.should == attribute.to_arel.object_id
       end
     end
   end

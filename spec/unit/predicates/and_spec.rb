@@ -32,9 +32,9 @@ module Unison
         end
       end
 
-      describe "#to_sql" do
-        it "return to_sql value of each operand joined by and" do
-          predicate.to_sql.should == "((users.id = 1) and (users.name = 'Nathan'))"
+      describe "#to_arel" do
+        it "return to_arel value of each operand joined by and" do
+          predicate.to_arel.should == child_predicate_without_signal.to_arel.and(child_predicate_subscribed_signal.to_arel)
         end
       end
     end
