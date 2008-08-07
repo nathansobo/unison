@@ -17,9 +17,7 @@ module Unison
           end
 
           it "returns '#operand.to_sql where #predicate.to_sql'" do
-            pending "use arel" do
-              selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby` FROM `users` WHERE `users`.`id` = 1")
-            end
+            selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby` FROM `users` WHERE `users`.`id` = 1")
           end
         end
 
@@ -29,10 +27,14 @@ module Unison
           end
 
           it "returns '#operand.to_sql where #predicate.to_sql'" do
-            pending "use arel" do
-              selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby` FROM `users` WHERE `users`.`id` = 1 AND `users`.`name` = 'Nathan'")
-            end
+            selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby` FROM `users` WHERE `users`.`id` = 1 AND `users`.`name` = 'Nathan'")
           end
+        end
+      end
+
+      describe "#to_arel" do
+        it "returns an Arel representation of the relation" do
+          selection.to_arel.should == operand.to_arel.where(predicate.to_arel)
         end
       end
 

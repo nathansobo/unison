@@ -18,6 +18,8 @@ module Unison
         def quote_column_name(name)
           "`#{name}`"
         end
+
+        include Quoting
       end
     end
   end
