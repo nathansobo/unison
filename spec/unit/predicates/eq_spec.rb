@@ -6,7 +6,10 @@ module Unison
       attr_reader :predicate
       
       describe "#to_sql" do
-        it "returns #operand_1.to_sql = #operand_2.to_sql"
+        it "returns #operand_1.to_sql = #operand_2.to_sql" do
+          predicate = Eq.new(users_set[:name], "Nathan")
+          predicate.to_sql.should == "users.name = 'Nathan'"
+        end
       end
 
       context "after #retain is called" do
