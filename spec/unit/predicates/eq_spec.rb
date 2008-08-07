@@ -4,6 +4,10 @@ module Unison
   module Predicates
     describe Eq do
       attr_reader :predicate
+      
+      describe "#to_sql" do
+        it "returns #operand_1.to_sql = #operand_2.to_sql"
+      end
 
       context "after #retain is called" do
         before do

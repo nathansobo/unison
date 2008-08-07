@@ -65,6 +65,10 @@ module Unison
         tuples.each(&block)
       end
 
+      def to_sql
+        "select * from #{name}"
+      end
+
       protected
       attr_reader :signals
 

@@ -172,6 +172,12 @@ module Unison
           eached_tuples.should == set.read
         end
       end
+
+      describe "#to_sql" do
+        it "returns a 'select * from #name'" do
+          set.to_sql.should == "select * from #{set.name}"
+        end
+      end
     end
   end
 end

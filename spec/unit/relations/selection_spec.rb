@@ -10,6 +10,12 @@ module Unison
         @selection = Selection.new(operand, predicate)
       end
 
+      describe "#to_sql" do
+        context "when #operand is a Set" do
+          it "returns '#operand.to_sql where #predicate.to_sql'"
+        end
+      end
+
       context "after #retain has been called" do
         before do
           selection.retain(Object.new)
