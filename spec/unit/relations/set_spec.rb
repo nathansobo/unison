@@ -174,8 +174,8 @@ module Unison
       end
 
       describe "#to_sql" do
-        it "returns a 'select * from #name'" do
-          set.to_sql.should == "select * from #{set.name}"
+        it "returns a 'select #attributes from #name'" do
+          set.to_sql.should be_like("SELECT `users`.`id`, `users`.`name` FROM `users`")
         end
       end
     end

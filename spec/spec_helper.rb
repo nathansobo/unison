@@ -1,11 +1,13 @@
 require "rubygems"
 require "spec"
-$LOAD_PATH.push("#{File.dirname(__FILE__)}/../lib")
+dir = File.dirname(__FILE__)
+$LOAD_PATH.push("#{dir}/../lib")
 require "unison"
 
 # TODO: BT/NS - Remove dependency on ActiveSupport
 require "test/unit"
 require "active_support"
+require "#{dir}/spec_helpers/be_like"
 
 Spec::Runner.configure do |config|
   config.mock_with :rr

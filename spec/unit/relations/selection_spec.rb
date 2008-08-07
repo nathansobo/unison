@@ -12,7 +12,27 @@ module Unison
 
       describe "#to_sql" do
         context "when #operand is a Set" do
-          it "returns '#operand.to_sql where #predicate.to_sql'"
+          before do
+            @selection = users_set.where(users_set[:id].eq(1))
+          end
+
+          it "returns '#operand.to_sql where #predicate.to_sql'" do
+            pending "use arel" do
+              selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby` FROM `users` WHERE `users`.`id` = 1")
+            end
+          end
+        end
+
+        context "when #operand is a Selection" do
+          before do
+            @selection = users_set.where(users_set[:id].eq(1)).where(users_set[:name].eq("Nathan"))
+          end
+
+          it "returns '#operand.to_sql where #predicate.to_sql'" do
+            pending "use arel" do
+              selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby` FROM `users` WHERE `users`.`id` = 1 AND `users`.`name` = 'Nathan'")
+            end
+          end
         end
       end
 

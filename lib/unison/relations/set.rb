@@ -6,7 +6,7 @@ module Unison
       def initialize(name)
         super()
         @name = name
-        @attributes = {}
+        @attributes = SequencedHash.new
         @tuples = []
       end
 
@@ -66,11 +66,15 @@ module Unison
       end
 
       def to_sql
-        "select * from #{name}"
+        to_arel.to_sql
       end
 
       protected
       attr_reader :signals
+
+      def to_arel
+        Arel::Table.new(name, Adapters::Arel::Engine.new(self))
+      end
 
       def initial_read
         tuples

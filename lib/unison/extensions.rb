@@ -1,4 +1,7 @@
 dir = File.dirname(__FILE__)
-Dir["#{dir}/extensions/*.rb"].each do |file|
-  require file
-end
+require "#{dir}/extensions/false_class"
+require "#{dir}/extensions/integer"
+require "#{dir}/extensions/nil_class"
+require "#{dir}/extensions/string"
+require "#{dir}/extensions/time"
+require "#{dir}/extensions/true_class"

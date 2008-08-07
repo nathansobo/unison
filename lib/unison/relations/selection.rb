@@ -11,6 +11,10 @@ module Unison
         @tuples = initial_read
       end
 
+      def to_sql
+        "#{operand.to_sql} where #{predicate.to_sql}"
+      end
+
       protected
       attr_reader :tuples
 
