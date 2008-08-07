@@ -11,6 +11,14 @@ module Unison
         @tuples = initial_read
       end
 
+      def to_sql
+        to_arel.to_sql
+      end
+
+      def to_arel
+        operand_1.to_arel.join(operand_2.to_arel).on(predicate.to_arel)
+      end
+
       protected
       attr_reader :tuples, :operand_1_subscriptions, :operand_2_subscriptions
 

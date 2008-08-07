@@ -11,6 +11,23 @@ module Unison
         @join = InnerJoin.new(operand_1, operand_2, predicate)
       end
 
+      describe "#to_sql" do
+        it "returns 'select #operand_1 inner join #operand_2 on #predicate'" do
+          join.to_sql.should be_like("
+            SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `photos`.`id`, `photos`.`user_id`, `photos`.`name`
+            FROM `users`
+            INNER JOIN `photos`
+            ON `photos`.`user_id` = `users`.`id`
+          ")
+        end
+      end
+
+      describe "#to_arel" do
+        it "returns an Arel representation of the relation" do
+          join.to_arel.should == operand_1.to_arel.join(operand_2.to_arel).on(predicate.to_arel)
+        end
+      end
+
       context "after #retain has been called" do
         before do
           join.retain(Object.new)

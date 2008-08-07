@@ -16,7 +16,7 @@ module Unison
             @selection = users_set.where(users_set[:id].eq(1))
           end
 
-          it "returns '#operand.to_sql where #predicate.to_sql'" do
+          it "returns 'select #operand where #predicate'" do
             selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby` FROM `users` WHERE `users`.`id` = 1")
           end
         end
@@ -26,8 +26,12 @@ module Unison
             @selection = users_set.where(users_set[:id].eq(1)).where(users_set[:name].eq("Nathan"))
           end
 
-          it "returns '#operand.to_sql where #predicate.to_sql'" do
-            selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby` FROM `users` WHERE `users`.`id` = 1 AND `users`.`name` = 'Nathan'")
+          it "returns 'select #operand where #predicate'" do
+            selection.to_sql.should be_like("
+              SELECT `users`.`id`, `users`.`name`, `users`.`hobby`
+              FROM `users`
+              WHERE `users`.`id` = 1 AND `users`.`name` = 'Nathan'
+            ")
           end
         end
       end
