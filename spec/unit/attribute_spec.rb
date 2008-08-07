@@ -134,13 +134,19 @@ module Unison
     end
 
     describe "predicate constructors" do
-      describe "eq" do
+      describe "#eq" do
         it "returns an instance of Predicates::Eq with the attribute and the argument as its operands" do
           predicate = attribute.eq(1)
           predicate.should be_an_instance_of(Predicates::Eq)
           predicate.operand_1.should == attribute
           predicate.operand_2.should == 1
         end
+      end
+    end
+
+    describe "#to_sql" do
+      it "returns (#set.name).(#name)" do
+        attribute.to_sql.should == "user.name"
       end
     end
   end
