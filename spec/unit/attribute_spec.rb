@@ -6,6 +6,7 @@ module Unison
     before do
       @relation = Relations::Set.new(:users)
       @attribute = Attribute.new(relation, :name, :string)
+      relation.attributes[attribute.name] = attribute
     end
 
     describe "#initialize" do

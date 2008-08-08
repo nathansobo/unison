@@ -19,7 +19,7 @@ module Unison
       end
 
       protected
-      attr_reader :tuples, :operand_1_subscriptions, :operand_2_subscriptions
+      attr_reader :operand_1_subscriptions, :operand_2_subscriptions
 
       def after_first_retain
         super

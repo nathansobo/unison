@@ -19,8 +19,6 @@ module Unison
       end
 
       protected
-      attr_reader :tuples
-
       def initial_read
         operand.read.select do |tuple|
           predicate.eval(tuple)

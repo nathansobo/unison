@@ -42,9 +42,10 @@ module Unison
         end
       end
 
-      context "after #retain has been called" do
+      context "after #retain and #read have been called" do
         before do
           selection.retain(Object.new)
+          selection.read
         end
 
         describe "#initialize" do
@@ -257,6 +258,7 @@ module Unison
               selection.on_insert do |tuple|
                 on_insert_tuple = tuple
               end
+              selection.read.should_not include(photo)
 
               photo[:user_id] = 1
               on_insert_tuple.should == photo
@@ -386,17 +388,6 @@ module Unison
             selection.retain(Object.new)
             selection.operand_subscriptions.should_not be_empty
             operand.should be_retained_by(selection)
-          end
-
-          it "assigns #tuples to the result of #initial_read" do
-            class << selection
-              public :tuples, :initial_read
-            end
-
-            selection.tuples.should be_nil
-
-            selection.retain(Object.new)
-            selection.tuples.should == selection.initial_read
           end
         end
       end

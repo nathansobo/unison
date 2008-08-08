@@ -16,14 +16,14 @@ module Unison
 
         describe ".attribute" do
           it "delegates to .relation" do
-            mock.proxy(User.relation).attribute(:nick_name, :string)
+            mock.proxy(User.relation).has_attribute(:nick_name, :string)
             User.attribute(:nick_name, :string)
           end
         end
 
         describe ".attribute_reader" do
           it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).attribute(:nick_name, :string)
+            mock.proxy(User.relation).has_attribute(:nick_name, :string)
             User.attribute_reader(:nick_name, :string)
           end
 
@@ -42,7 +42,7 @@ module Unison
 
         describe ".attribute_writer" do
           it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).attribute(:nick_name, :string)
+            mock.proxy(User.relation).has_attribute(:nick_name, :string)
             User.attribute_writer(:nick_name, :string)
           end
 
@@ -62,7 +62,7 @@ module Unison
 
         describe ".attribute_accessor" do
           it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).attribute(:nick_name, :string).at_least(1)
+            mock.proxy(User.relation).has_attribute(:nick_name, :string).at_least(1)
             User.attribute_accessor(:nick_name, :string)
           end
 
@@ -515,7 +515,7 @@ module Unison
             it "creates a singleton Selection on the target Set where the target Set id matches the instance's passed in foreign_key attribute value" do
               profile = user.select_child(Profile, :foreign_key => :owner_id)
               profile.should_not be_nil
-              profile.should == profiles_set.where(profiles_set[:owner_id].eq(user[:id])).treat_as_singleton
+              profile.should == profiles_set.where(profiles_set[:owner_id].eq(user[:id])).singleton
             end
           end
         end

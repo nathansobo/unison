@@ -95,7 +95,7 @@ module Unison
                 before do
                   @user = User.create(:id => 100, :name => "Brian")
                   @photo_1 = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-                  @photo_2 = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 101")
+                  @photo_2 = Photo.create(:id => 101, :user_id => user[:id], :name => "Photo 101")
                   projection.read.should include(user)
                 end
 
@@ -349,18 +349,6 @@ module Unison
             projection.retain Object.new
             operand.should be_retained_by(projection)
           end
-
-          it "assigns #tuples to the result of #initial_read" do
-            class << projection
-              public :tuples, :initial_read
-            end
-
-            projection.tuples.should be_nil
-
-            projection.retain(Object.new)
-            projection.tuples.should == projection.initial_read
-          end
-          
         end
       end
     end

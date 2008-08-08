@@ -9,10 +9,52 @@ require "test/unit"
 require "active_support"
 require "#{dir}/spec_helpers/be_like"
 
+connection = Sequel.sqlite
+Unison.origin = Unison::Repository.new(connection)
+connection.create_table :users do
+  column :id, :integer
+  column :name, :string
+  column :hobby, :string
+end
+
+connection.create_table :life_goals do
+  column :id, :integer
+  column :user_id, :integer
+end
+
+connection.create_table :friendships do
+  column :id, :integer
+  column :from_id, :integer
+  column :to_id, :integer
+end
+
+connection.create_table :profiles do
+  column :id, :integer
+  column :owner_id, :integer
+end
+
+connection.create_table :photos do
+  column :id, :integer
+  column :name, :string
+  column :user_id, :integer
+end
+
+connection.create_table :accounts do
+  column :id, :integer
+  column :name, :string
+  column :user_id, :integer
+  column :deactivated_at, :string
+end
+
 Spec::Runner.configure do |config|
   config.mock_with :rr
   
   config.before do
+    users = connection[:users]
+    users.delete
+    users << {:id => 11, :name => "Buffington", :hobby => "Bots"}
+    users << {:id => 12, :name => "Keefa", :hobby => "Begging"}
+
     Object.class_eval do
       const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:users)
@@ -104,9 +146,9 @@ Spec::Runner.configure do |config|
 
     friendships_set.insert(Friendship.new(:id => 1, :to_id => 2, :from_id => 1))
     friendships_set.insert(Friendship.new(:id => 2, :to_id => 3, :from_id => 1))
-    friendships_set.insert(Friendship.new(:id => 2, :to_id => 1, :from_id => 2))
-    friendships_set.insert(Friendship.new(:id => 2, :to_id => 3, :from_id => 2))
-    friendships_set.insert(Friendship.new(:id => 2, :to_id => 1, :from_id => 3))
+    friendships_set.insert(Friendship.new(:id => 3, :to_id => 1, :from_id => 2))
+    friendships_set.insert(Friendship.new(:id => 4, :to_id => 3, :from_id => 2))
+    friendships_set.insert(Friendship.new(:id => 5, :to_id => 1, :from_id => 3))
 
     profiles_set.insert(Profile.new(:id => 1, :owner_id => 1))
     profiles_set.insert(Profile.new(:id => 2, :owner_id => 2))
@@ -158,6 +200,14 @@ class Spec::ExampleGroup
 
   def accounts_set
     Account.relation
+  end
+
+  def origin
+    Unison.origin
+  end
+
+  def connection
+    origin.connection
   end
 end
 

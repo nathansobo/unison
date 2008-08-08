@@ -28,7 +28,7 @@ module Unison
         retainable = Relations::Set.new(:test)
         mock.proxy(retainable).after_first_retain
         retainable.retain(Object.new)
-        
+
         dont_allow(retainable).after_first_retain
         retainable.retain(Object.new)
       end

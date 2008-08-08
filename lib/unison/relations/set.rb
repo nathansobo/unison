@@ -1,7 +1,7 @@
 module Unison
   module Relations
     class Set < Relation
-      attr_reader :name, :attributes, :tuples
+      attr_reader :name, :attributes
 
       def initialize(name)
         super()
@@ -18,7 +18,7 @@ module Unison
       end
       attr_writer :tuple_class
 
-      def attribute(name, type)
+      def has_attribute(name, type)
         if attributes[name]
           if attributes[name].type == type
             attributes[name]
@@ -39,17 +39,20 @@ module Unison
         end
       end
 
-      def [](attribute_name)
+      def attribute(attribute_name)
         attributes[attribute_name] ||
           raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on this Set")
       end
 
       def insert(tuple)
-        tuples.push(tuple)
+        raise ArgumentError, "Passed in Tuple's relation must be #{self}" unless tuple.relation == self
+        unless find(tuple[:id]).nil?
+          raise ArgumentError, "Tuple with id #{tuple[:id]} already exists in this Set"
+        end
+        tuple = super
         tuple.on_update do |attribute, old_value, new_value|
           tuple_update_subscription_node.call tuple, attribute, old_value, new_value
         end
-        insert_subscription_node.call(tuple)
         tuple
       end
 
@@ -58,10 +61,6 @@ module Unison
         tuples.delete(tuple)
         delete_subscription_node.call(tuple)
         tuple
-      end
-
-      def each(&block)
-        tuples.each(&block)
       end
 
       def to_sql
@@ -76,7 +75,11 @@ module Unison
       attr_reader :signals
 
       def initial_read
-        []
+        raise "Set needs at least one Attribute to perform an initial_read" if attributes.empty? 
+        Unison.origin.pull(self)
+      end
+
+      def after_first_retain
       end
     end
   end

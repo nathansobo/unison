@@ -346,7 +346,7 @@ module Unison
               attr_reader :compound_tuple, :photo
               before do
                 @photo = photos_set.read.first
-                @compound_tuple = join.find do |compound_tuple|
+                @compound_tuple = join.read.find do |compound_tuple|
                   compound_tuple[photos_set] == photo
                 end
                 join.should include(compound_tuple)
@@ -615,17 +615,6 @@ module Unison
             join.operand_1.should be_retained_by(join)
             join.operand_2.should be_retained_by(join)
             join.predicate.should be_retained_by(join)
-          end
-
-          it "assigns #tuples to the result of #initial_read" do
-            class << join
-              public :tuples, :initial_read
-            end
-
-            join.tuples.should be_nil
-
-            join.retain(Object.new)
-            join.tuples.should == join.initial_read
           end
         end
       end

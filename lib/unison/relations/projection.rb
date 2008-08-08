@@ -20,7 +20,7 @@ module Unison
       end
 
       protected
-      attr_reader :tuples, :last_update, :operand_subscriptions
+      attr_reader :last_update, :operand_subscriptions
 
       def initial_read
         operand.read.map do |tuple|

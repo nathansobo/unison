@@ -11,18 +11,18 @@ module Unison
       end
 
       def attribute(name, type)
-        relation.attribute(name, type)
+        relation.has_attribute(name, type)
       end
 
       def attribute_reader(name, type)
-        attribute = relation.attribute(name, type)
+        attribute = relation.has_attribute(name, type)
         define_method(name) do
           self[attribute]
         end
       end
 
       def attribute_writer(name, type)
-        attribute = relation.attribute(name, type)
+        attribute = relation.has_attribute(name, type)
         define_method("#{name}=") do |value|
           self[attribute] = value
         end
@@ -88,7 +88,6 @@ module Unison
     def initialize(attributes={})
       super()
       @signals = {}
-      @primitive = true
       @attributes = attributes
       attributes.each do |attribute, value|
         self[attribute] = value
@@ -100,10 +99,9 @@ module Unison
       end
 
       singleton_instance_relations.each do |name, definition|
-        relation = instance_eval(&definition)
-        relation.treat_as_singleton
+        relation = instance_eval(&definition).singleton
         instance_variable_set("@#{name}", relation)
-      end      
+      end
     end
 
     def [](attribute)
@@ -138,12 +136,12 @@ module Unison
 
     def select_child(target_relation, options={})
       foreign_key = options[:foreign_key] || :"#{self.class.name.to_s.underscore}_id"
-      target_relation.where(target_relation[foreign_key].eq(self[:id])).treat_as_singleton
+      target_relation.where(target_relation[foreign_key].eq(self[:id])).singleton
     end
 
     def select_parent(target_relation, options={})
       foreign_key = options[:foreign_key] || :"#{target_relation.name.to_s.singularize.underscore}_id"
-      target_relation.where(target_relation[:id].eq(self[foreign_key])).treat_as_singleton
+      target_relation.where(target_relation[:id].eq(self[foreign_key])).singleton
     end
 
     def signal(attribute_or_symbol)
