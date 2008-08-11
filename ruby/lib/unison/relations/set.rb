@@ -45,11 +45,13 @@ module Unison
       end
 
       def insert(tuple)
+        raise "Relation must be retained" unless retained?
         raise ArgumentError, "Passed in Tuple's relation must be #{self}" unless tuple.relation == self
         unless find(tuple[:id]).nil?
           raise ArgumentError, "Tuple with id #{tuple[:id]} already exists in this Set"
         end
-        tuple = super
+        tuples.push(tuple)
+        insert_subscription_node.call(tuple)
         tuple.on_update do |attribute, old_value, new_value|
           tuple_update_subscription_node.call tuple, attribute, old_value, new_value
         end

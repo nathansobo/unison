@@ -99,6 +99,20 @@ module Unison
             set.should be_retained
           end
 
+          it "adds the given Tuple to the results of #read" do
+            tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+            lambda do
+              set.insert(tuple).should == tuple
+            end.should change {set.size}.by(1)
+            set.read.should include(tuple)
+          end
+
+          it "does not #retain the inserted Tuple" do
+            tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+            set.insert(tuple)
+            tuple.should_not be_retained_by(set)
+          end
+
           context "when an Tuple with the same #id exists in the Set" do
             before do
               set.insert(set.tuple_class.new(:id => 1))
@@ -112,15 +126,7 @@ module Unison
             end
           end
 
-          it "adds tuples to the Set and the added tuples" do
-            tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
-            lambda do
-              set.insert(tuple).should == tuple
-            end.should change {set.size}.by(1)
-            set.read.should include(tuple)
-          end
-
-          it "when self is not the passed in object's #relation, raises an ArgumentError" do
+          it "when the Set is not the passed in object's #relation, raises an ArgumentError" do
             incorrect_tuple = Profile.find(1)
             incorrect_tuple.relation.should_not == set
 
