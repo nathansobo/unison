@@ -75,7 +75,7 @@ module Unison
         if other.is_a?(Relation)
           read == other.read
         else
-          method_missing(:==, other)
+          delegate_to_read(:==, other)
         end
       end
 
