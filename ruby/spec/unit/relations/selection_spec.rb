@@ -66,76 +66,6 @@ module Unison
           end
         end
 
-        describe "#on_insert" do
-          attr_reader :photo
-          context "when a Tuple that matches the #predicate is inserted into the #operand" do
-            before do
-              @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
-              predicate.eval(photo).should be_true
-            end
-
-            it "invokes the block with the Tuple" do
-              inserted = nil
-              selection.on_insert do |tuple|
-                inserted = tuple
-              end
-              photos_set.insert(photo)
-
-              inserted.should == photo
-            end
-          end
-
-          context "when a Tuple that does not match the #predicate is inserted into the #operand" do
-            before do
-              @photo = Photo.new(:id => 100, :user_id => 100, :name => "Photo 100")
-              predicate.eval(photo).should be_false
-            end
-
-            it "does not invoke the block" do
-              selection.on_insert do |tuple|
-                raise "I should not be invoked"
-              end
-              photos_set.insert(photo)
-            end
-          end
-        end
-
-        describe "#on_delete" do
-          attr_reader :photo
-          context "when a Tuple that matches the #predicate is deleted from the #operand" do
-            before do
-              @photo = Photo.create(:id => 100, :user_id => 1, :name => "Photo 100")
-              predicate.eval(photo).should be_true
-              selection.read.should include(photo)
-            end
-
-            it "invokes the block with the Tuple" do
-              deleted = nil
-              selection.on_delete do |tuple|
-                deleted = tuple
-              end
-
-              photos_set.delete(photo)
-              deleted.should == photo
-            end
-          end
-
-          context "when a Tuple that does not match the #predicate is deleted from the #operand" do
-            before do
-              @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-              predicate.eval(photo).should be_false
-              selection.read.should_not include(photo)
-            end
-
-            it "does not invoke the block" do
-              selection.on_delete do |tuple|
-                raise "I should not be invoked"
-              end
-              photos_set.delete(photo)
-            end
-          end
-        end
-
         describe "#size" do
           it "returns the number of tuples in the relation" do
             selection.size.should == selection.read.size
@@ -345,6 +275,12 @@ module Unison
               photo[:user_id] = 3
               on_delete_tuple.should == photo
             end
+
+            it "#releases the deleted Tuple" do
+              photo.should be_retained_by(selection)
+              photo[:user_id] = 3
+              photo.should_not be_retained_by(selection)
+            end
           end
 
           context "when the Tuple continues to match the #predicate after the update" do
@@ -378,6 +314,12 @@ module Unison
 
               photo[:name] = "New Name"
             end
+
+            it "does not #release the deleted Tuple" do
+              photo.should be_retained_by(selection)
+              photo[:name] = "James Brown"
+              photo.should be_retained_by(selection)
+            end
           end
         end
 
@@ -394,6 +336,22 @@ module Unison
               photos_set.delete(photo)
               selection.read.should_not include(photo)
             end
+
+            it "invokes #on_delete callbacks" do
+              deleted = nil
+              selection.on_delete do |tuple|
+                deleted = tuple
+              end
+
+              photos_set.delete(photo)
+              deleted.should == photo
+            end
+
+            it "#releases the deleted Tuple" do
+              photo.should be_retained_by(selection)
+              photos_set.delete(photo)
+              photo.should_not be_retained_by(selection)
+            end
           end
 
           context "when the Tuple does not match the #predicate" do
@@ -407,6 +365,13 @@ module Unison
               selection.read.should_not include(photo)
               photos_set.delete(photo)
               selection.read.should_not include(photo)
+            end
+
+            it "does not invoke #on_delete callbacks" do
+              selection.on_delete do |tuple|
+                raise "Don't call me"
+              end
+              photos_set.delete(photo)
             end
           end
         end

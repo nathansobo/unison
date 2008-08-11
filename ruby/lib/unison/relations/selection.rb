@@ -53,8 +53,7 @@ module Unison
         operand_subscriptions.push(
           operand.on_delete do |deleted|
             if predicate.eval(deleted)
-              tuples.delete(deleted)
-              delete_subscription_node.call(deleted)
+              delete(deleted)
             end
           end
         )
@@ -68,12 +67,18 @@ module Unison
                 insert(tuple)
               end
             else
-              tuples.delete(tuple)
-              delete_subscription_node.call(tuple)
+              delete(tuple)
             end
           end
         )
       end
+
+      def delete(tuple)
+        tuple.release(self)
+        tuples.delete(tuple)
+        delete_subscription_node.call(tuple)
+      end
+
 
       def destroy
         predicate_subscription.destroy
