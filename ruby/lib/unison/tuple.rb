@@ -51,11 +51,11 @@ module Unison
     attr_reader :signals, :update_subscription_node
 
     def attribute_for(attribute_or_name)
+      unless relation.has_attribute?(attribute_or_name)
+        raise ArgumentError, "Attribute #{attribute_or_name.inspect} must be part of the Tuple's Relation"
+      end
       case attribute_or_name
       when Attribute
-        unless relation.has_attribute?(attribute_or_name)
-          raise ArgumentError, "Attribute must be part of the Tuple's Relation"
-        end
         attribute_or_name
       when Symbol
         relation[attribute_or_name]

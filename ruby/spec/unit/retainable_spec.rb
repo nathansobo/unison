@@ -28,7 +28,7 @@ module Unison
         retainable = Relations::Set.new(:test)
         mock.proxy(retainable).after_first_retain
         retainable.retain(Object.new)
-        
+
         dont_allow(retainable).after_first_retain
         retainable.retain(Object.new)
       end
@@ -98,6 +98,28 @@ module Unison
         it "calls #destroy on itself" do
           mock.proxy(retainable).destroy
           retainable.release(retainer)
+        end
+      end
+    end
+
+    describe "#retained?" do
+      before do
+        @retainable = Relations::Set.new(:test)
+      end
+
+      context "when retainable has been retained" do
+        before do
+          retainable.retain(Object.new)
+        end
+
+        it "returns true" do
+          retainable.should be_retained
+        end
+      end
+
+      context "when retainable has not been retained" do
+        it "returns false" do
+          retainable.should_not be_retained
         end
       end
     end

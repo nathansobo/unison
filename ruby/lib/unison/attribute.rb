@@ -25,6 +25,10 @@ module Unison
       relation.equal?(other.relation) && name == other.name
     end
 
+    def to_arel
+      relation.to_arel[name]
+    end
+
     protected
     def convert_to_integer(value)
       Integer(value)

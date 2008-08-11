@@ -8,16 +8,17 @@ module Unison
         super()
         @operand_subscriptions = []
         @operand, @predicate = operand, predicate
-        @tuples = initial_read
       end
 
-      def size
-        read.size
+      def to_sql
+        to_arel.to_sql
+      end
+
+      def to_arel
+        operand.to_arel.where(predicate.to_arel)
       end
 
       protected
-      attr_reader :tuples
-
       def initial_read
         operand.read.select do |tuple|
           predicate.eval(tuple)
@@ -25,6 +26,7 @@ module Unison
       end
 
       def after_first_retain
+        super
         @predicate_subscription =
           predicate.on_update do
             new_tuples = initial_read

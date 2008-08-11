@@ -1,16 +1,60 @@
 require "rubygems"
 require "spec"
-$LOAD_PATH.push("#{File.dirname(__FILE__)}/../lib")
+dir = File.dirname(__FILE__)
+$LOAD_PATH.push("#{dir}/../lib")
 require "unison"
 
 # TODO: BT/NS - Remove dependency on ActiveSupport
 require "test/unit"
 require "active_support"
+require "#{dir}/spec_helpers/be_like"
+
+connection = Sequel.sqlite
+Unison.origin = Unison::Repository.new(connection)
+connection.create_table :users do
+  column :id, :integer
+  column :name, :string
+  column :hobby, :string
+end
+
+connection.create_table :life_goals do
+  column :id, :integer
+  column :user_id, :integer
+end
+
+connection.create_table :friendships do
+  column :id, :integer
+  column :from_id, :integer
+  column :to_id, :integer
+end
+
+connection.create_table :profiles do
+  column :id, :integer
+  column :owner_id, :integer
+end
+
+connection.create_table :photos do
+  column :id, :integer
+  column :name, :string
+  column :user_id, :integer
+end
+
+connection.create_table :accounts do
+  column :id, :integer
+  column :name, :string
+  column :user_id, :integer
+  column :deactivated_at, :string
+end
 
 Spec::Runner.configure do |config|
   config.mock_with :rr
   
   config.before do
+    users = connection[:users]
+    users.delete
+    users << {:id => 11, :name => "Buffington", :hobby => "Bots"}
+    users << {:id => 12, :name => "Keefa", :hobby => "Begging"}
+
     Object.class_eval do
       const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:users)
@@ -18,66 +62,52 @@ Spec::Runner.configure do |config|
         attribute_accessor :id, :integer
         attribute_accessor :name, :string
         attribute_accessor :hobby, :string
-        attribute_accessor :best_friend_id, :integer
 
-        relates_to_n :photos do
-          Photo.where(Photo[:user_id].eq(self[:id]))
+        has_many :photos
+
+        has_one :profile, :foreign_key => :owner_id
+        has_one :profile_alias, :class_name => :Profile, :foreign_key => :owner_id
+
+        has_one :life_goal
+        has_many :accounts
+        has_one :active_account, :class_name => :Account do |account|
+          accounts.where(Account.active?)
+        end
+        has_many :active_accounts, :class_name => :Account do |accounts|
+          accounts.where(Account.active?)
         end
 
-
-        has_one :profile
-        relates_to_n :accounts do
-          select_n(Account)
-        end
-        relates_to_n :active_accounts do
-          select_n(Account).where(Account.active?)
-        end
-
-#        relates_to_1 :best_friend do
-#          select_1(User, :foreign_key => :best_friend_id)
-#        end
-
-        relates_to_n :target_friendships do
-          select_n(Friendship, :foreign_key => :target_id)
-        end
-
-        relates_to_n :source_friendships do
-          select_n(Friendship, :foreign_key => :source_id)
-        end
+        has_many :to_friendships, :foreign_key => :to_id, :class_name => :Friendship
+        has_many :from_friendships, :foreign_key => :from_id, :class_name => :Friendship
       end)
 
-      const_set(:Friendship, Class.new(Unison::PrimitiveTuple::Base) do
-        member_of Unison::Relations::Set.new(:friendships)
+      const_set(:LifeGoal, Class.new(Unison::PrimitiveTuple::Base) do
+        member_of Unison::Relations::Set.new(:life_goals)
         attribute_accessor :id, :integer
-        attribute_accessor :source_id, :integer
-        attribute_accessor :target_id, :integer
-
-#        relates_to_1 :source do
-#          select_1(User, :foreign_key => :source_id)
-#        end
-
-#        relates_to_1 :target do
-#          select_1(User, :foreign_key => :target_id)
-#        end
-      end)
-
-      const_set(:Profile, Class.new(Unison::PrimitiveTuple::Base) do
-        member_of Unison::Relations::Set.new(:profiles)
-        attribute_reader :id, :integer
         attribute_accessor :user_id, :integer
 
         belongs_to :user
       end)
 
-      const_set(:LifeGoal, Class.new(Unison::PrimitiveTuple::Base) do
-        member_of Unison::Relations::Set.new(:life_goals)
-        attribute :id, :integer
-        attribute :owner_id, :integer
+      const_set(:Friendship, Class.new(Unison::PrimitiveTuple::Base) do
+        member_of Unison::Relations::Set.new(:friendships)
+        attribute_accessor :id, :integer
+        attribute_accessor :from_id, :integer
+        attribute_accessor :to_id, :integer
 
-#        relates_to_1 do
-#          select_1_parent(User, :owner_id)
-#        end
-        belongs_to :user
+        belongs_to :from, :class_name => :User
+        belongs_to :to, :class_name => :User
+      end)
+
+      const_set(:Profile, Class.new(Unison::PrimitiveTuple::Base) do
+        member_of Unison::Relations::Set.new(:profiles)
+        attribute_reader :id, :integer
+        attribute_accessor :owner_id, :integer
+
+        belongs_to :owner, :class_name => :User
+        belongs_to :yoga_owner, :class_name => :User, :foreign_key => :owner_id do |owner|
+          owner.where(User[:hobby].eq("Yoga"))
+        end
       end)
 
       const_set(:Photo, Class.new(Unison::PrimitiveTuple::Base) do
@@ -86,9 +116,7 @@ Spec::Runner.configure do |config|
         attribute :user_id, :integer
         attribute :name, :string
 
-        relates_to_1(:user) do
-          User.where(User[:id].eq(self[:user_id]))
-        end
+        belongs_to :user
       end)
 
       const_set(:Account, Class.new(Unison::PrimitiveTuple::Base) do
@@ -104,23 +132,27 @@ Spec::Runner.configure do |config|
         attribute :user_id, :integer
         attribute :name, :string
         attribute_accessor :deactivated_at, :datetime
-        belongs_to :user
+        belongs_to :owner, :foreign_key => :user_id, :class_name => :User
       end)
     end
 
-    users_set.insert(User.new(:id => 1, :name => "Nathan", :hobby => "Yoga", :best_friend_id => 2))
-    users_set.insert(User.new(:id => 2, :name => "Corey", :hobby => "Drugs & Art & Burning Man", :best_friend_id => 3))
-    users_set.insert(User.new(:id => 3, :name => "Ross", :hobby => "Manicorn", :best_friend_id => 1))
+    users_set.insert(User.new(:id => 1, :name => "Nathan", :hobby => "Yoga"))
+    users_set.insert(User.new(:id => 2, :name => "Corey", :hobby => "Drugs & Art & Burning Man"))
+    users_set.insert(User.new(:id => 3, :name => "Ross", :hobby => "Manicorn"))
 
-    friendships_set.insert(Friendship.new(:id => 1, :target_id => 2, :source_id => 1))
-    friendships_set.insert(Friendship.new(:id => 2, :target_id => 3, :source_id => 1))
-    friendships_set.insert(Friendship.new(:id => 2, :target_id => 1, :source_id => 2))
-    friendships_set.insert(Friendship.new(:id => 2, :target_id => 3, :source_id => 2))
-    friendships_set.insert(Friendship.new(:id => 2, :target_id => 1, :source_id => 3))
+    life_goals_set.insert(LifeGoal.new(:id => 1, :user_id => 1))
+    life_goals_set.insert(LifeGoal.new(:id => 2, :user_id => 2))
+    life_goals_set.insert(LifeGoal.new(:id => 3, :user_id => 3))
 
-    profiles_set.insert(Profile.new(:id => 1, :user_id => 1))
-    profiles_set.insert(Profile.new(:id => 2, :user_id => 2))
-    profiles_set.insert(Profile.new(:id => 3, :user_id => 3))
+    friendships_set.insert(Friendship.new(:id => 1, :to_id => 2, :from_id => 1))
+    friendships_set.insert(Friendship.new(:id => 2, :to_id => 3, :from_id => 1))
+    friendships_set.insert(Friendship.new(:id => 3, :to_id => 1, :from_id => 2))
+    friendships_set.insert(Friendship.new(:id => 4, :to_id => 3, :from_id => 2))
+    friendships_set.insert(Friendship.new(:id => 5, :to_id => 1, :from_id => 3))
+
+    profiles_set.insert(Profile.new(:id => 1, :owner_id => 1))
+    profiles_set.insert(Profile.new(:id => 2, :owner_id => 2))
+    profiles_set.insert(Profile.new(:id => 3, :owner_id => 3))
 
     photos_set.insert(Photo.new(:id => 1, :user_id => 1, :name => "Photo 1"))
     photos_set.insert(Photo.new(:id => 2, :user_id => 1, :name => "Photo 2"))
@@ -134,8 +166,8 @@ Spec::Runner.configure do |config|
   config.after do
     Object.class_eval do
       remove_const :User
-      remove_const :Friendship
       remove_const :LifeGoal
+      remove_const :Friendship
       remove_const :Profile
       remove_const :Photo
       remove_const :Account
@@ -148,6 +180,10 @@ class Spec::ExampleGroup
 
   def users_set
     User.relation
+  end
+
+  def life_goals_set
+    LifeGoal.relation
   end
 
   def friendships_set
@@ -164,6 +200,14 @@ class Spec::ExampleGroup
 
   def accounts_set
     Account.relation
+  end
+
+  def origin
+    Unison.origin
+  end
+
+  def connection
+    origin.connection
   end
 end
 

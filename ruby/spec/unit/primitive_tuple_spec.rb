@@ -16,14 +16,14 @@ module Unison
 
         describe ".attribute" do
           it "delegates to .relation" do
-            mock.proxy(User.relation).attribute(:nick_name, :string)
+            mock.proxy(User.relation).has_attribute(:nick_name, :string)
             User.attribute(:nick_name, :string)
           end
         end
 
         describe ".attribute_reader" do
           it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).attribute(:nick_name, :string)
+            mock.proxy(User.relation).has_attribute(:nick_name, :string)
             User.attribute_reader(:nick_name, :string)
           end
 
@@ -42,7 +42,7 @@ module Unison
 
         describe ".attribute_writer" do
           it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).attribute(:nick_name, :string)
+            mock.proxy(User.relation).has_attribute(:nick_name, :string)
             User.attribute_writer(:nick_name, :string)
           end
 
@@ -62,7 +62,7 @@ module Unison
 
         describe ".attribute_accessor" do
           it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).attribute(:nick_name, :string).at_least(1)
+            mock.proxy(User.relation).has_attribute(:nick_name, :string).at_least(1)
             User.attribute_accessor(:nick_name, :string)
           end
 
@@ -98,6 +98,133 @@ module Unison
           end
         end
 
+        describe ".has_many" do
+          attr_reader :user
+          before do
+            @user = User.find(1)
+          end
+
+          it "does not create a singleton Selection" do
+            user.photos.should_not be_singleton
+          end
+
+          it "creates a reader method with the given name" do
+            user.should respond_to(:photos)
+          end
+
+          describe ":foreign_key option" do
+            context "when not passed :foreign_key" do
+              describe "the reader method" do
+                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                  user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
+                end
+              end
+            end
+
+            context "when passed a :foreign_key option" do
+              describe "the reader method" do
+                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                  user.to_friendships.should == Friendship.where(Friendship[:to_id].eq(user[:id]))
+                end
+              end
+            end
+          end
+
+          describe ":class_name option" do
+            context "when not passed a :class_name option" do
+              it "chooses the target Relation by singularizing and classifying the given name" do
+                user.photos.operand.should == Photo.relation
+              end
+            end
+
+            context "when passed a :class_name option" do
+              it "uses the #relation of the class with the given name as the target Relation" do
+                user.to_friendships.operand.should == Friendship.relation
+              end
+            end
+          end
+
+          describe "customization block" do
+            context "when not passed a block" do
+              it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
+              end
+            end
+
+            context "when passed a block" do
+              describe "the reader method" do
+                it "returns the result of the default Selection yielded to the block" do
+                  user.active_accounts.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
+                end
+              end
+            end
+          end
+        end
+
+        describe ".has_one" do
+          attr_reader :user
+          before do
+            @user = User.find(1)
+          end
+
+          it "creates a singleton Selection" do
+            user.profile.should be_singleton
+          end
+
+          it "creates a reader method with the given name" do
+            user.should respond_to(:profile)
+          end
+
+          describe ":foreign_key option" do
+            context "when not passed :foreign_key" do
+              describe "the reader method" do
+                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                  user.life_goal.should == LifeGoal.where(LifeGoal[:user_id].eq(user[:id]))
+                end
+              end
+            end
+
+            context "when passed a :foreign_key option" do
+              describe "the reader method" do
+                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                  user.profile.should == Profile.where(Profile[:owner_id].eq(user[:id]))
+                end
+              end
+            end
+          end
+
+          describe ":class_name option" do
+            context "when not passed a :class_name option" do
+              it "chooses the target Relation by singularizing and classifying the given name" do
+                user.profile.operand.should == Profile.relation
+              end
+            end
+
+            context "when passed a :class_name option" do
+              it "uses the #relation of the class with the given name as the target Relation" do
+                user.profile_alias.operand.should == Profile.relation
+              end
+            end
+          end
+
+          describe "customization block" do
+            context "when not passed a block" do
+              it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
+              end
+            end
+
+            context "when passed a block" do
+              describe "the reader method" do
+                it "returns the result of the default Selection yielded to the block" do
+                  user.active_account.should be_singleton
+                  user.active_account.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
+                end
+              end
+            end
+          end
+        end
+
         describe ".belongs_to" do
           attr_reader :profile, :user
           before do
@@ -106,8 +233,63 @@ module Unison
           end
 
           it "creates a singleton Selection on the target Set where the target's id matches the instance's foreign key" do
-            profile.user.should be_singleton
-            profile.user.should == user
+            profile.owner.should be_singleton
+            profile.owner.should == user
+          end
+
+          it "creates a reader method with the given name" do
+            profile.should respond_to(:owner)
+          end
+
+          describe ":foreign_key option" do
+            context "when not passed :foreign_key" do
+              describe "the reader method" do
+                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                  friendship = Friendship.find(1)
+                  friendship.from.should == user
+                end
+              end
+            end
+
+            context "when passed a :foreign_key option" do
+              describe "the reader method" do
+                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                  account = Account.find(1)
+                  account.owner.should == user
+                end
+              end
+            end
+          end
+
+          describe ":class_name option" do
+            context "when not passed a :class_name option" do
+              it "chooses the target Relation by singularizing and classifying the given name" do
+                photo = Photo.find(1)
+                photo.user.operand.should == User.relation
+              end
+            end
+
+            context "when passed a :class_name option" do
+              it "uses the #relation of the class with the given name as the target Relation" do
+                profile.owner.operand.should == User.relation
+              end
+            end
+          end
+
+          describe "customization block" do
+            context "when not passed a block" do
+              it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                profile.owner.should == user
+              end
+            end
+
+            context "when passed a block" do
+              describe "the reader method" do
+                it "returns the result of the default Selection yielded to the block" do
+                  profile.yoga_owner.should == User.where(User[:id].eq(profile[:owner_id])).where(User[:hobby].eq("Yoga"))
+                end
+              end
+            end
           end
         end
 
@@ -145,20 +327,14 @@ module Unison
             tuple[:name].should == "Nathan"
           end
 
-          it "instantiates and retains its #instance_relations" do
+          it "instantiates its #instance_relations" do
             relations = tuple.send(:instance_relations)
             relations.should_not be_empty
-            relations.each do |relation_name, relation|
-              tuple.send(relation_name).should be_retained_by(tuple)
-            end
           end
 
-          it "instantiates and retains its #singleton_instance_relations" do
+          it "instantiates its #singleton_instance_relations" do
             relations = tuple.send(:singleton_instance_relations)
             relations.should_not be_empty
-            relations.each do |relation_name, relation|
-              tuple.send(relation_name).should be_retained_by(tuple)
-            end
           end
         end
 
@@ -235,31 +411,6 @@ module Unison
               end.should raise_error(ArgumentError)
             end
           end
-
-          describe ".on_update" do
-            context "when the Signal#attribute value is changed" do
-              it "invokes the block" do
-                on_update_arguments = nil
-                user.signal(:name).on_update do |user, old_value, new_value|
-                  on_update_arguments = [user, old_value, new_value]
-                end
-
-                old_name = user[:name]
-                user[:name] = "Wilhelm"
-                on_update_arguments.should == [user, old_name, "Wilhelm"]
-              end
-            end
-
-            context "when another Attribute value is changed" do
-              it "does not invoke the block" do
-                user.signal(:name).on_update do |user, old_value, new_value|
-                  raise "I should not be Invoked"
-                end
-
-                user[:id] = 100
-              end
-            end
-          end
         end
 
         describe "#bind" do
@@ -311,19 +462,19 @@ module Unison
           end
         end
 
-        describe "#select_n" do
+        describe "#select_children" do
           attr_reader :user
           before do
             @user = User.find(1)
           end
 
           it "does not create a singleton Selection" do
-            user.select_n(Account).should_not be_singleton
+            user.select_children(Account).should_not be_singleton
           end
 
           context "when passed a Tuple" do
             it "creates a Selection on the target Set where the foreign key matches the instances' id" do
-              accounts = user.select_n(Account)
+              accounts = user.select_children(Account)
               accounts.should_not be_empty
               accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
             end
@@ -331,7 +482,7 @@ module Unison
 
           context "when passed a Relation" do
             it "creates a Selection on the target Relation where the foreign key matches the instances' id" do
-              accounts = user.select_n(Account.relation)
+              accounts = user.select_children(Account.relation)
               accounts.should_not be_empty
               accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
             end
@@ -339,45 +490,42 @@ module Unison
 
           context "when passed :foreign_key option" do
             it "returns the Tuples in the relation that match the instance's foreign_key value" do
-              target_friendships = user.select_n(Friendship, :foreign_key => :target_id)
-              target_friendships.should_not be_empty
-              target_friendships.should == friendships_set.where(
-                friendships_set[:target_id].eq(user[:id])
+              to_friendships = user.select_children(Friendship, :foreign_key => :to_id)
+              to_friendships.should_not be_empty
+              to_friendships.should == friendships_set.where(
+                friendships_set[:to_id].eq(user[:id])
               )
             end
           end
         end
 
-        describe "#select_1_child" do
+        describe "#select_child" do
           attr_reader :user
           before do
             @user = User.find(1)
           end
 
           it "creates a singleton Selection on the target Set where the target Set id matches the instance's default foreign key attribute value" do
-            profile = user.select_1_child(Profile)
+            profile = user.select_child(Account)
             profile.should be_singleton
-            profile.should == Profile.find(1)
+            profile.should == Account.find(1)
           end
 
           context "when passed :foreign_key option" do
             it "creates a singleton Selection on the target Set where the target Set id matches the instance's passed in foreign_key attribute value" do
-              best_friend = user.select_1_child(User, :foreign_key => :best_friend_id)
-              best_friend.should_not be_nil
-              best_friend.should == users_set.where(users_set[:best_friend_id].eq(user[:id])).treat_as_singleton
+              profile = user.select_child(Profile, :foreign_key => :owner_id)
+              profile.should_not be_nil
+              profile.should == profiles_set.where(profiles_set[:owner_id].eq(user[:id])).singleton
             end
           end
         end
 
-        describe "#select_1_parent" do
-
+        describe "#select_parent" do
           context "when passed a :foreign_key" do
             it "creates a singleton Selection on the target Set where the instance id matches the target Set's passed in foreign_key attribute value" do
-              user = User.find(1)
-
-              best_friend = user.select_1_parent(User, :foreign_key => :best_friend_id)
-              best_friend.should_not be_nil
-              best_friend.should == User.find(user.best_friend_id)
+              friendship = Friendship.find(1)
+              from_user = friendship.select_parent(User, :foreign_key => :from_id)
+              from_user.should == User.find(friendship.from_id)
             end
           end
         end
@@ -400,14 +548,6 @@ module Unison
               update_args.should == [[tuple.relation[:id], old_value, new_value]]
             end
           end
-
-          context "when an attribute is not changed" do
-            it "does not invoke the block"
-          end
-        end
-
-        describe "#delete" do
-          it "releases all of its instance Relations"
         end
       end
     end

@@ -13,6 +13,22 @@ module Unison
         @delete_subscription_node = SubscriptionNode.new
         @tuple_update_subscription_node = SubscriptionNode.new
         @singleton = false
+        @tuples = nil
+      end
+
+      def [](index)
+        case index
+        when Symbol
+          attribute(index)
+        when Integer
+          delegate_to_read(:[], index)
+        else
+          raise ArgumentError, "[] does not support #{index.inspect} as an argument"
+        end
+      end
+
+      def find(id)
+        where(self[:id].eq(id)).singleton
       end
 
       def where(predicate)
@@ -20,14 +36,14 @@ module Unison
       end
 
       def read
-        tuples
+        retained?? tuples : initial_read
       end
 
       def nil?
         singleton?? read.first.nil? : false
       end
 
-      def treat_as_singleton
+      def singleton
         @singleton = true
         self
       end
@@ -37,23 +53,26 @@ module Unison
       end
 
       def on_insert(&block)
+        raise "Relation must be retained" unless retained?
         insert_subscription_node.subscribe(&block)
       end
 
       def on_delete(&block)
+        raise "Relation must be retained" unless retained?
         delete_subscription_node.subscribe(&block)
       end
 
       def on_tuple_update(&block)
+        raise "Relation must be retained" unless retained?
         tuple_update_subscription_node.subscribe(&block)
       end
 
       def inspect
-        "<#{self.class} @insert_subscription_node.length=#{insert_subscription_node.length} @delete_subscription_node.length=#{delete_subscription_node.length} @tuple_update_subscription_node.length=#{tuple_update_subscription_node.length}>"
+        "<#{self.class}:#{object_id} @insert_subscription_node.length=#{insert_subscription_node.length} @delete_subscription_node.length=#{delete_subscription_node.length} @tuple_update_subscription_node.length=#{tuple_update_subscription_node.length}>"
       end
 
       def ==(other)
-        if other.is_a?(self.class)
+        if other.is_a?(Relation)
           read == other.read
         else
           method_missing(:==, other)
@@ -61,9 +80,38 @@ module Unison
       end
 
       protected
-      attr_reader :tuples, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+      attr_reader :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+
+      def tuples
+        raise "Relation must be retained in order to refer to memoized tuples" unless retained?
+        return @tuples if @tuples
+        @tuples = []
+        initial_read.each do |tuple|
+          insert(tuple)
+        end
+        @tuples
+      end
+
+      def insert(tuple)
+        raise "Relation must be retained" unless retained?
+        tuples.push(tuple)
+        insert_subscription_node.call(tuple)
+        tuple
+      end
+
+      def after_first_retain
+        tuples
+      end
+
+      def initial_read
+        raise NotImplementedError
+      end
 
       def method_missing(method_name, *args, &block)
+        delegate_to_read(method_name, *args, &block)
+      end
+
+      def delegate_to_read(method_name, *args, &block)
         if singleton?
           read.first.send(method_name, *args, &block)
         else

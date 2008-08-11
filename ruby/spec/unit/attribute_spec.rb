@@ -4,8 +4,9 @@ module Unison
   describe Attribute do
     attr_reader :relation, :attribute
     before do
-      @relation = Relations::Set.new(:user)
+      @relation = Relations::Set.new(:users)
       @attribute = Attribute.new(relation, :name, :string)
+      relation.attributes[attribute.name] = attribute
     end
 
     describe "#initialize" do
@@ -134,13 +135,28 @@ module Unison
     end
 
     describe "predicate constructors" do
-      describe "eq" do
+      describe "#eq" do
         it "returns an instance of Predicates::Eq with the attribute and the argument as its operands" do
           predicate = attribute.eq(1)
           predicate.should be_an_instance_of(Predicates::Eq)
           predicate.operand_1.should == attribute
           predicate.operand_2.should == 1
         end
+      end
+    end
+    
+    describe "#to_arel" do
+      before do
+        @relation = users_set
+        @attribute = Attribute.new(relation, :name, :string)
+      end
+      
+      it "returns the Arel::Attribute with the same #name from #relation.to_arel" do
+        attribute.to_arel.should == attribute.relation.to_arel[attribute.name]
+      end
+      
+      it "when called repeatedly, returns the same Arel::Attribute instance" do
+        attribute.to_arel.object_id.should == attribute.to_arel.object_id
       end
     end
   end

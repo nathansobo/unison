@@ -10,9 +10,42 @@ module Unison
         @selection = Selection.new(operand, predicate)
       end
 
-      context "after #retain has been called" do
+      describe "#to_sql" do
+        context "when #operand is a Set" do
+          before do
+            @selection = users_set.where(users_set[:id].eq(1))
+          end
+
+          it "returns 'select #operand where #predicate'" do
+            selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby` FROM `users` WHERE `users`.`id` = 1")
+          end
+        end
+
+        context "when #operand is a Selection" do
+          before do
+            @selection = users_set.where(users_set[:id].eq(1)).where(users_set[:name].eq("Nathan"))
+          end
+
+          it "returns 'select #operand where #predicate'" do
+            selection.to_sql.should be_like("
+              SELECT `users`.`id`, `users`.`name`, `users`.`hobby`
+              FROM `users`
+              WHERE `users`.`id` = 1 AND `users`.`name` = 'Nathan'
+            ")
+          end
+        end
+      end
+
+      describe "#to_arel" do
+        it "returns an Arel representation of the relation" do
+          selection.to_arel.should == operand.to_arel.where(predicate.to_arel)
+        end
+      end
+
+      context "after #retain and #read have been called" do
         before do
           selection.retain(Object.new)
+          selection.read
         end
 
         describe "#initialize" do
@@ -225,6 +258,7 @@ module Unison
               selection.on_insert do |tuple|
                 on_insert_tuple = tuple
               end
+              selection.read.should_not include(photo)
 
               photo[:user_id] = 1
               on_insert_tuple.should == photo

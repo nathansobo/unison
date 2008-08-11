@@ -10,6 +10,26 @@ module Unison
         @projection = Projection.new(operand, attributes)
       end
 
+      describe "#to_sql" do
+        it "returns select attributes from operand" do
+          projection.to_sql.should be_like("
+            SELECT `users`.`id`, `users`.`name`, `users`.`hobby`
+            FROM `users`
+            INNER JOIN `photos`
+            ON `photos`.`user_id` = `users`.`id`"
+          )
+        end
+      end
+
+      describe "#to_arel" do
+        it "returns an Arel representation of the relation" do
+          projection.to_arel.should == Arel::Project.new(
+            operand.to_arel,
+            *users_set.to_arel.attributes
+          )
+        end
+      end
+
       context "after #retain has been called" do
         before do
           projection.retain(Object.new)
@@ -75,7 +95,7 @@ module Unison
                 before do
                   @user = User.create(:id => 100, :name => "Brian")
                   @photo_1 = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-                  @photo_2 = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 101")
+                  @photo_2 = Photo.create(:id => 101, :user_id => user[:id], :name => "Photo 101")
                   projection.read.should include(user)
                 end
 

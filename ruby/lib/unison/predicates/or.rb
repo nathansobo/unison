@@ -2,8 +2,14 @@ module Unison
   module Predicates
     class Or < CompositePredicate
       def eval(tuple)
-        child_predicates.any? do |child_predicate|
-          child_predicate.eval(tuple)
+        operands.any? do |operand|
+          operand.eval(tuple)
+        end
+      end
+
+      def to_arel
+        operands.inject(nil) do |acc, operand|
+          acc ? acc.or(operand.to_arel) : operand.to_arel
         end
       end
     end

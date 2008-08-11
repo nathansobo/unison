@@ -8,12 +8,19 @@ module Unison
         super()
         @operand, @attributes = operand, attributes
         @operand_subscriptions = []
-        @tuples = initial_read
         @last_update = nil
       end
 
+      def to_sql
+        to_arel.to_sql
+      end
+
+      def to_arel
+        Arel::Project.new( operand.to_arel, *attributes.to_arel.attributes )
+      end
+
       protected
-      attr_reader :tuples, :last_update, :operand_subscriptions
+      attr_reader :last_update, :operand_subscriptions
 
       def initial_read
         operand.read.map do |tuple|
@@ -22,6 +29,7 @@ module Unison
       end
 
       def after_first_retain
+        super
         operand_subscriptions.push(
           operand.on_insert do |created|
             restricted = created[attributes]

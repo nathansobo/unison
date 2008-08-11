@@ -6,24 +6,23 @@ module Unison
       attr_accessor :relation
 
       def member_of(relation)
-        @relation = relation
-        relation.retain(self)
+        @relation = relation.retain(self)
         relation.tuple_class = self
       end
 
       def attribute(name, type)
-        relation.attribute(name, type)
+        relation.has_attribute(name, type)
       end
 
       def attribute_reader(name, type)
-        attribute = relation.attribute(name, type)
+        attribute = relation.has_attribute(name, type)
         define_method(name) do
           self[attribute]
         end
       end
 
       def attribute_writer(name, type)
-        attribute = relation.attribute(name, type)
+        attribute = relation.has_attribute(name, type)
         define_method("#{name}=") do |value|
           self[attribute] = value
         end
@@ -44,27 +43,27 @@ module Unison
         attr_reader name
       end
 
+      def has_many(name, options={})
+        relates_to_n(name) do
+          class_name = options[:class_name] || name.to_s.singularize.classify
+          target_relation = class_name.to_s.constantize.relation
+          select_children(target_relation, :foreign_key => options[:foreign_key])
+        end
+      end
+
       def has_one(name, options={})
         relates_to_1(name) do
-          options[:class_name] ||= name.to_s.classify
-          self.class.foreign_key_selection self, options
+          class_name = options[:class_name] || name.to_s.classify
+          select_child class_name.to_s.constantize, options
         end
       end
 
-      def belongs_to(name)
+      def belongs_to(name, options = {})
         relates_to_1(name) do
-          target_class = name.to_s.classify.constantize
-          target_relation = target_class.relation
-          foreign_key = :"#{name}_id"
-          target_relation.where(target_relation[:id].eq(self[foreign_key]))
+          class_name = options[:class_name] || name.to_s.classify
+          foreign_key = options[:foreign_key] || :"#{name}_id"
+          select_parent(class_name.to_s.constantize.relation, :foreign_key => foreign_key)
         end
-      end
-
-      def foreign_key_selection(instance, options={})
-        target_class = options[:class_name].constantize
-        target_relation = target_class.relation
-        foreign_key = :"#{name.underscore}_id"
-        target_relation.where(target_relation[foreign_key].eq(instance[:id]))
       end
 
       def create(attributes)
@@ -89,7 +88,6 @@ module Unison
     def initialize(attributes={})
       super()
       @signals = {}
-      @primitive = true
       @attributes = attributes
       attributes.each do |attribute, value|
         self[attribute] = value
@@ -97,16 +95,13 @@ module Unison
 
       instance_relations.each do |name, proc|
         relation = instance_eval(&proc)
-        relation.retain(self)
         instance_variable_set("@#{name}", relation)
       end
 
       singleton_instance_relations.each do |name, definition|
-        relation = instance_eval(&definition)
-        relation.retain(self)
-        relation.treat_as_singleton
+        relation = instance_eval(&definition).singleton
         instance_variable_set("@#{name}", relation)
-      end      
+      end
     end
 
     def [](attribute)
@@ -117,7 +112,6 @@ module Unison
       attribute = attribute_for(attribute_or_symbol)
       old_value = attributes[attribute]
       attributes[attribute] = value
-      signals[attribute].trigger_on_update(old_value, value) if signals[attribute]
       update_subscription_node.call(attribute, old_value, value)
       value
     end
@@ -135,19 +129,19 @@ module Unison
       false
     end
 
-    def select_n(target_relation, options={})
-      foreign_key = options[:foreign_key] || :"#{self.class.name.underscore}_id"
+    def select_children(target_relation, options={})
+      foreign_key = options[:foreign_key] || :"#{self.class.name.to_s.underscore}_id"
       target_relation.where(target_relation[foreign_key].eq(self[:id]))
     end
 
-    def select_1_child(target_relation, options={})
-      foreign_key = options[:foreign_key] || :"#{self.class.name.underscore}_id"
-      target_relation.where(target_relation[foreign_key].eq(self[:id])).treat_as_singleton
+    def select_child(target_relation, options={})
+      foreign_key = options[:foreign_key] || :"#{self.class.name.to_s.underscore}_id"
+      target_relation.where(target_relation[foreign_key].eq(self[:id])).singleton
     end
 
-    def select_1_parent(target_relation, options={})
-      foreign_key = options[:foreign_key] || :"#{target_relation.name.underscore}_id"
-      target_relation.where(target_relation[:id].eq(self[foreign_key])).treat_as_singleton
+    def select_parent(target_relation, options={})
+      foreign_key = options[:foreign_key] || :"#{target_relation.name.to_s.singularize.underscore}_id"
+      target_relation.where(target_relation[:id].eq(self[foreign_key])).singleton
     end
 
     def signal(attribute_or_symbol)
