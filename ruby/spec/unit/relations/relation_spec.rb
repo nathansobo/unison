@@ -190,7 +190,7 @@ module Unison
             end
           end
 
-          it "memoizes the result of #initial_read" do
+          it "memoizes the result of #initial_read in #tuples" do
             stub(relation).initial_read {[]}
 
             relation.retain(Object.new)

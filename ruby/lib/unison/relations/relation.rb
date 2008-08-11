@@ -84,11 +84,6 @@ module Unison
 
       def tuples
         raise "Relation must be retained in order to refer to memoized tuples" unless retained?
-        return @tuples if @tuples
-        @tuples = []
-        initial_read.each do |tuple|
-          insert(tuple)
-        end
         @tuples
       end
 
@@ -100,7 +95,7 @@ module Unison
       end
 
       def after_first_retain
-        tuples
+        @tuples = initial_read
       end
 
       def initial_read

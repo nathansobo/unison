@@ -75,11 +75,7 @@ module Unison
       attr_reader :signals
 
       def initial_read
-        raise "Set needs at least one Attribute to perform an initial_read" if attributes.empty? 
-        Unison.origin.pull(self)
-      end
-
-      def after_first_retain
+        []
       end
     end
   end

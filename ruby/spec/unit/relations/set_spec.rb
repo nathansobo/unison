@@ -100,10 +100,14 @@ module Unison
           end
 
           context "when an Tuple with the same #id exists in the Set" do
+            before do
+              set.insert(set.tuple_class.new(:id => 1))
+            end
+
             it "raises an ArgumentError" do
-              set.find(11).should_not be_nil
+              set.find(1).should_not be_nil
               lambda do
-                set.insert(set.tuple_class.new(:id => 11))
+                set.insert(set.tuple_class.new(:id => 1))
               end.should raise_error(ArgumentError)
             end
           end
@@ -168,50 +172,16 @@ module Unison
       end
 
       describe "#read" do
-        context "when #retained?" do
-          before do
-            set.should be_retained
-            class << set
-              public :tuples
-            end
-          end
-
-          it "returns all Tuples in the Set" do
-            set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
-            set.insert(set.tuple_class.new(:id => 2, :name => "Alissa"))
-            set.read.should == set.tuples
+        before do
+          class << set
+            public :tuples
           end
         end
 
-        context "when not #retained?" do
-          before do
-            @set = Set.new(:users)
-            set.should_not be_retained
-          end
-          
-          context "when #attributes is not empty" do
-            before do
-              set.has_attribute(:id, :integer)
-              set.has_attribute(:name, :string)
-              set.attributes.should_not be_empty
-            end
-
-            it "returns all Tuples from a database query of the table" do
-              set.read.should == origin.pull(set)
-            end
-          end
-
-          context "when #attributes is empty" do
-            before do
-              set.attributes.should be_empty
-            end
-
-            it "raises an error" do
-              lambda do
-                set.read
-              end.should raise_error
-            end
-          end
+        it "returns all Tuples in the Set" do
+          set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
+          set.insert(set.tuple_class.new(:id => 2, :name => "Alissa"))
+          set.read.should == set.tuples
         end
       end
 
@@ -277,45 +247,6 @@ module Unison
             set.attributes.each do |attribute_name, attribute|
               set.to_arel[attribute_name].should_not be_nil
             end
-          end
-        end
-      end
-
-      describe "#tuples" do
-        context "when #retained?" do
-          before do
-            @set = Set.new(:users).retain(Object.new)
-            set.has_attribute(:id, :integer)
-            set.has_attribute(:name, :string)
-            set.has_attribute(:hobby, :string)
-            class << set
-              public :tuples, :initial_read
-            end
-            set.initial_read.should_not be_empty
-          end
-
-          it "#inserts each of the Tuples returned by #initial_read" do
-            initial_read = set.initial_read
-            initial_read.each do |tuple|
-              mock.proxy(set).insert(tuple)
-            end
-            set.tuples.length.should == initial_read.length
-          end
-        end
-
-        context "when not #retained?" do
-          before do
-            @set = Set.new(:users).where(Predicates::Eq.new(true, true))
-            set.should_not be_retained
-            class << set
-              public :tuples
-            end
-          end
-
-          it "raises an Error" do
-            lambda do
-              set.tuples
-            end.should raise_error
           end
         end
       end
