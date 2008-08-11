@@ -10,6 +10,13 @@ module Unison
         @selection = Selection.new(operand, predicate)
       end
 
+      describe "#initialize" do
+        it "sets the #operand and #predicate" do
+          selection.operand.should == photos_set
+          predicate.should == photos_set[:user_id].eq(1)
+        end
+      end
+
       describe "#to_sql" do
         context "when #operand is a Set" do
           before do
@@ -42,18 +49,12 @@ module Unison
         end
       end
 
-      context "after #retain and #read have been called" do
+      context "after #retain has been called" do
         before do
           selection.retain(Object.new)
           selection.read
         end
 
-        describe "#initialize" do
-          it "sets the #operand and #predicate" do
-            selection.operand.should == photos_set
-            predicate.should == photos_set[:user_id].eq(1)
-          end
-        end
 
         describe "#read" do
           it "returns all tuples in its #operand for which its #predicate returns true" do
@@ -339,7 +340,7 @@ module Unison
           end
         end
 
-        context "when a Tuple is deleted into the #operand" do
+        context "when a Tuple is deleted from the #operand" do
           context "when the Tuple matches the #predicate" do
             attr_reader :photo
             before do
@@ -389,6 +390,8 @@ module Unison
             selection.operand_subscriptions.should_not be_empty
             operand.should be_retained_by(selection)
           end
+
+          it "retains the Tuples inserted by initial_read"
         end
       end
     end

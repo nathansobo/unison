@@ -95,7 +95,10 @@ module Unison
       end
 
       def after_first_retain
-        @tuples = initial_read
+        @tuples = []
+        initial_read.each do |tuple|
+          insert(tuple)
+        end
       end
 
       def initial_read

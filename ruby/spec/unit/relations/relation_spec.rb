@@ -190,8 +190,14 @@ module Unison
             end
           end
 
-          it "memoizes the result of #initial_read in #tuples" do
-            stub(relation).initial_read {[]}
+          it "inserts each of the results of #initial_read" do
+
+            user_1 = users_set.find(1)
+            user_2 = users_set.find(2)
+
+            stub(relation).initial_read {[user_1, user_2]}
+            mock.proxy(relation).insert(user_1).ordered
+            mock.proxy(relation).insert(user_2).ordered
 
             relation.retain(Object.new)
 
