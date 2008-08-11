@@ -391,7 +391,13 @@ module Unison
             operand.should be_retained_by(selection)
           end
 
-          it "retains the Tuples inserted by initial_read"
+          it "retains the Tuples inserted by initial_read" do
+            selection.retain(Object.new)
+            selection.should_not be_empty
+            selection.each do |tuple|
+              tuple.should be_retained_by(selection)
+            end
+          end
         end
       end
     end

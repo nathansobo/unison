@@ -89,6 +89,7 @@ module Unison
 
       def insert(tuple)
         raise "Relation must be retained" unless retained?
+        tuple.retain(self)
         tuples.push(tuple)
         insert_subscription_node.call(tuple)
         tuple
