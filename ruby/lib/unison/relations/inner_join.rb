@@ -18,6 +18,12 @@ module Unison
         operand_1.to_arel.join(operand_2.to_arel).on(predicate.to_arel)
       end
 
+      def attribute(name)
+        return operand_1.attribute(name) if operand_1.has_attribute?(name)
+        return operand_2.attribute(name) if operand_2.has_attribute?(name)
+        raise ArgumentError, "Attribute with name #{name.inspect} is not defined on this Relation"
+      end
+
       protected
       attr_reader :operand_1_subscriptions, :operand_2_subscriptions
 
@@ -99,10 +105,7 @@ module Unison
       end
 
       def insert_if_predicate_matches(compound_tuple)
-        if predicate.eval(compound_tuple)
-          tuples.push(compound_tuple)
-          insert_subscription_node.call(compound_tuple)
-        end
+        insert(compound_tuple) if predicate.eval(compound_tuple)
       end
 
       def delete_if_member_of_compound_tuple(operand, tuple)

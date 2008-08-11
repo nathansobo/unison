@@ -23,7 +23,7 @@ module Unison
         end
       end
 
-      describe "#attribute" do
+      describe "#has_attribute" do
         context "when an Attribute with the same name has not already been added" do
           it "adds an Attribute to the Set by the given name" do
             set = Set.new(:user)
@@ -78,16 +78,16 @@ module Unison
         end
       end
 
-      describe "#[]" do
+      describe "#attribute" do
         it "retrieves the Set's Attribute by the given name" do
-          set[:id].should == Attribute.new(set, :id, :integer)
-          set[:name].should == Attribute.new(set, :name, :string)
+          set.attribute(:id).should == Attribute.new(set, :id, :integer)
+          set.attribute(:name).should == Attribute.new(set, :name, :string)
         end
         
         context "when no Attribute with the passed-in name is defined" do
           it "raises an ArgumentError" do
             lambda do
-              set[:i_dont_exist]
+              set.attribute(:i_dont_exist)
             end.should raise_error(ArgumentError)
           end
         end

@@ -191,7 +191,6 @@ module Unison
           end
 
           it "inserts each of the results of #initial_read" do
-
             user_1 = users_set.find(1)
             user_2 = users_set.find(2)
 
