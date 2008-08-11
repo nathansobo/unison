@@ -226,6 +226,22 @@ module Unison
               photos_set.insert(photo)
               selection.read.should include(photo)
             end
+
+            it "invokes #on_insert callbacks" do
+              on_insert_tuple = nil
+              selection.on_insert do |tuple|
+                on_insert_tuple = tuple
+              end
+
+              photos_set.insert(photo)
+              on_insert_tuple.should == photo
+            end
+
+            it "is #retained by the Selection" do
+              photo.should_not be_retained_by(selection)
+              photos_set.insert(photo)
+              photo.should be_retained_by(selection)              
+            end
           end
 
           context "when the Tuple does not match the #predicate" do
@@ -238,6 +254,19 @@ module Unison
               selection.read.should_not include(photo)
               photos_set.insert(photo)
               selection.read.should_not include(photo)
+            end
+
+            it "does not invoke #on_insert callbacks" do
+              selection.on_insert do |tuple|
+                raise "Don't call me"
+              end
+              photos_set.insert(photo)
+            end
+
+            it "is not #retained by the Selection" do
+              photo.should_not be_retained_by(selection)
+              photos_set.insert(photo)
+              photo.should_not be_retained_by(selection)
             end
           end
         end
@@ -254,7 +283,7 @@ module Unison
               selection.read.should include(photo)
             end
 
-            it "invokes the #on_insert event" do
+            it "invokes #on_insert callbacks" do
               on_insert_tuple = nil
               selection.on_insert do |tuple|
                 on_insert_tuple = tuple
@@ -263,6 +292,12 @@ module Unison
 
               photo[:user_id] = 1
               on_insert_tuple.should == photo
+            end
+
+            it "is #retained by the Selection" do
+              photo.should_not be_retained_by(selection)
+              photo[:user_id] = 1
+              photo.should be_retained_by(selection)              
             end
           end
 
@@ -279,6 +314,12 @@ module Unison
               end
 
               photo[:user_id] = 3
+            end
+
+            it "is not #retained by the Selection" do
+              photo.should_not be_retained_by(selection)
+              photo[:user_id] = 3
+              photo.should_not be_retained_by(selection)              
             end
           end
         end

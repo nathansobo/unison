@@ -45,8 +45,7 @@ module Unison
         operand_subscriptions.push(
           operand.on_insert do |created|
             if predicate.eval(created)
-              tuples.push(created)
-              insert_subscription_node.call(created)
+              insert(created)
             end
           end
         )
@@ -66,8 +65,7 @@ module Unison
               if tuples.include?(tuple)
                 tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
               else
-                tuples.push(tuple)
-                insert_subscription_node.call(tuple)
+                insert(tuple)
               end
             else
               tuples.delete(tuple)
