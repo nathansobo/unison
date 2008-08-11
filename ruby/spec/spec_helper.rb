@@ -112,9 +112,9 @@ Spec::Runner.configure do |config|
 
       const_set(:Photo, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:photos)
-        attribute :id, :integer
-        attribute :user_id, :integer
-        attribute :name, :string
+        attribute_accessor :id, :integer
+        attribute_accessor :user_id, :integer
+        attribute_accessor :name, :string
 
         belongs_to :user
       end)
@@ -128,9 +128,9 @@ Spec::Runner.configure do |config|
           end
         end
 
-        attribute :id, :integer
-        attribute :user_id, :integer
-        attribute :name, :string
+        attribute_accessor :id, :integer
+        attribute_accessor :user_id, :integer
+        attribute_accessor :name, :string
         attribute_accessor :deactivated_at, :datetime
         belongs_to :owner, :foreign_key => :user_id, :class_name => :User
       end)
