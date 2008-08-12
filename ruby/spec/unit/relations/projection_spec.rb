@@ -8,7 +8,6 @@ module Unison
         @operand = InnerJoin.new(users_set, photos_set, photos_set[:user_id].eq(users_set[:id]))
         @attributes = users_set
         @projection = Projection.new(operand, attributes)
-
       end
 
       describe "#initialize" do
@@ -41,6 +40,16 @@ module Unison
       context "after #retain has been called" do
         before do
           projection.retain(Object.new)
+        end
+
+        describe "#merge" do
+          it "calls #merge on the Set that is the source of #attributes" do
+            tuple = User.new(:id => 100, :name => "Jan")
+            mock.proxy(attributes).merge([tuple])
+            attributes.should_not include(tuple)
+            projection.merge([tuple])
+            attributes.should include(tuple)
+          end
         end
 
         context "when the a Tuple is inserted into the #operand" do

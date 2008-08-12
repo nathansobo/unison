@@ -19,6 +19,10 @@ module Unison
         Arel::Project.new( operand.to_arel, *attributes.to_arel.attributes )
       end
 
+      def merge(tuples)
+        attributes.merge(tuples)
+      end
+
       protected
       attr_reader :last_update, :operand_subscriptions
 
