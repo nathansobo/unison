@@ -23,7 +23,7 @@ module Unison
       attr_reader :last_update, :operand_subscriptions
 
       def initial_read
-        operand.read.map do |tuple|
+        operand.tuples.map do |tuple|
           tuple[attributes]
         end.uniq
       end

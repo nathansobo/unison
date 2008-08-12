@@ -21,7 +21,7 @@ module Unison
       end
 
       describe "#initialize" do
-        it "sets #tuples to an array of the given operands" do
+        it "sets #nested_tuples to an array of the given operands" do
           tuple.nested_tuples.should == [nested_tuple_1, nested_tuple_2]
         end
       end

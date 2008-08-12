@@ -35,12 +35,12 @@ module Unison
         Selection.new(self, predicate)
       end
 
-      def read
-        retained?? tuples : initial_read
+      def tuples
+        retained?? @tuples : initial_read
       end
 
       def nil?
-        singleton?? read.first.nil? : false
+        singleton?? tuples.first.nil? : false
       end
 
       def singleton
@@ -73,7 +73,7 @@ module Unison
 
       def ==(other)
         if other.is_a?(Relation)
-          read == other.read
+          tuples == other.tuples
         else
           method_missing(:==, other)
         end
@@ -81,11 +81,6 @@ module Unison
 
       protected
       attr_reader :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
-
-      def tuples
-        raise "Relation must be retained in order to refer to memoized tuples" unless retained?
-        @tuples
-      end
 
       def insert(tuple)
         raise "Relation must be retained" unless retained?
@@ -119,9 +114,9 @@ module Unison
 
       def delegate_to_read(method_name, *args, &block)
         if singleton?
-          read.first.send(method_name, *args, &block)
+          tuples.first.send(method_name, *args, &block)
         else
-          read.send(method_name, *args, &block)
+          tuples.send(method_name, *args, &block)
         end
       end
     end

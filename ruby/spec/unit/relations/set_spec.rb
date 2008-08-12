@@ -99,12 +99,12 @@ module Unison
             set.should be_retained
           end
 
-          it "adds the given Tuple to the results of #read" do
+          it "adds the given Tuple to the results of #tuples" do
             tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
             lambda do
               set.insert(tuple).should == tuple
             end.should change {set.size}.by(1)
-            set.read.should include(tuple)
+            set.tuples.should include(tuple)
           end
 
           it "does not #retain the inserted Tuple" do
@@ -156,9 +156,9 @@ module Unison
           it "removes the Tuple from the Set" do
             tuple = set.tuple_class.create(:id => 1, :name => "Nathan")
 
-            set.read.should include(tuple)
+            set.tuples.should include(tuple)
             set.delete(tuple)
-            set.read.should_not include(tuple)
+            set.tuples.should_not include(tuple)
           end
         end
 
@@ -166,7 +166,7 @@ module Unison
           attr_reader :tuple_not_in_set
           before do
             @tuple_not_in_set = set.tuple_class.new(:id => 100, :name => "Nathan")
-            set.read.should_not include(tuple_not_in_set)
+            set.tuples.should_not include(tuple_not_in_set)
           end
           
           it "raises an Error" do
@@ -174,20 +174,6 @@ module Unison
               set.delete(tuple_not_in_set)
             end.should raise_error(ArgumentError)
           end
-        end
-      end
-
-      describe "#read" do
-        before do
-          class << set
-            public :tuples
-          end
-        end
-
-        it "returns all Tuples in the Set" do
-          set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
-          set.insert(set.tuple_class.new(:id => 2, :name => "Alissa"))
-          set.read.should == set.tuples
         end
       end
 
@@ -226,7 +212,7 @@ module Unison
             eached_tuples.push(tuple)
           end
           eached_tuples.should_not be_empty
-          eached_tuples.should == set.read
+          eached_tuples.should == set.tuples
         end
       end
 

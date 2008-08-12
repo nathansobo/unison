@@ -49,24 +49,24 @@ module Unison
               end
 
               it "inserts the Tuple restricted by #attributes into itself" do
-                projection.read.should_not include(user)
+                projection.tuples.should_not include(user)
                 lambda do
                   Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-                end.should change{projection.read.length}.by(1)
-                projection.read.should include(user)
+                end.should change{projection.tuples.length}.by(1)
+                projection.tuples.should include(user)
               end
             end
 
             context "when the inserted Tuple restricted by #attributes is in the Projection" do
               before do
-                @user = projection.read.first
-                projection.read.should include(user)
+                @user = projection.tuples.first
+                projection.tuples.should include(user)
               end
 
               it "does not insert the Tuple restricted by #attributes" do
                 lambda do
                   Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-                end.should_not change{projection.read.length}
+                end.should_not change{projection.tuples.length}
               end
             end
           end
@@ -79,14 +79,14 @@ module Unison
                 before do
                   @user = User.create(:id => 100, :name => "Brian")
                   @photo = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-                  projection.read.should include(user)
+                  projection.tuples.should include(user)
                 end
 
                 it "removes the Tuple restricted by #attributes" do
                   lambda do
                     users_set.delete(user)
-                  end.should change{projection.read.length}.by(-1)
-                  projection.read.should_not include(user)
+                  end.should change{projection.tuples.length}.by(-1)
+                  projection.tuples.should_not include(user)
                 end
               end
 
@@ -96,14 +96,14 @@ module Unison
                   @user = User.create(:id => 100, :name => "Brian")
                   @photo_1 = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
                   @photo_2 = Photo.create(:id => 101, :user_id => user[:id], :name => "Photo 101")
-                  projection.read.should include(user)
+                  projection.tuples.should include(user)
                 end
 
-                it "does not remove the Tuple restricted by #attributes from the Tuples returned by #read" do
+                it "does not remove the Tuple restricted by #attributes from the Tuples returned by #tuples" do
                   lambda do
                     photos_set.delete(photo_1)
-                  end.should_not change{projection.read.length}
-                  projection.read.should include(user)
+                  end.should_not change{projection.tuples.length}
+                  projection.tuples.should include(user)
                 end
               end
             end
@@ -111,14 +111,14 @@ module Unison
             context "when the deleted Tuple restricted by #attributes is not in the Projection" do
               before do
                 @user = User.create(:id => 100, :name => "Brian")
-                projection.read.should_not include(user)
+                projection.tuples.should_not include(user)
               end
 
               it "does not remove the Tuple restricted by #attributes" do
                 lambda do
                   users_set.delete(user)
-                end.should_not change{projection.read.length}
-                projection.read.should_not include(user)
+                end.should_not change{projection.tuples.length}
+                projection.tuples.should_not include(user)
               end
             end
           end
@@ -126,9 +126,9 @@ module Unison
           context "when a Tuple is updated in the #operand" do
             attr_reader :operand_compound_tuple, :operand_projected_tuple, :projected_tuple, :attribute
             before do
-              @operand_compound_tuple = operand.read.first
+              @operand_compound_tuple = operand.tuples.first
               @operand_projected_tuple = operand_compound_tuple[users_set]
-              @projected_tuple = projection.read.find do |tuple|
+              @projected_tuple = projection.tuples.find do |tuple|
                 tuple == operand_projected_tuple
               end
               @attribute = users_set[:name]
@@ -137,14 +137,14 @@ module Unison
             context "and the updated Attribute is in #attributes" do
               attr_reader :old_value, :new_value
               before do
-                operand.read.select do |tuple|
+                operand.tuples.select do |tuple|
                   tuple[users_set] == operand_projected_tuple
                 end.size.should be > 1
                 @old_value = operand_projected_tuple[:name]
                 @new_value = "Joe"
               end
 
-              it "updates the projected Tuple's value in #read" do
+              it "updates the projected Tuple's value in #tuples" do
                 operand_projected_tuple[:name] = new_value
                 projected_tuple[:name].should == "Joe"
               end
@@ -161,7 +161,7 @@ module Unison
               context "when the same Attribute on a different Tuple is subsequently updated from the same old value to the same new value" do
                 attr_reader :another_compound_tuple, :another_projected_tuple
                 before do
-                  @another_compound_tuple = operand.read.find do |tuple|
+                  @another_compound_tuple = operand.tuples.find do |tuple|
                     tuple[users_set] != projected_tuple
                   end
                   @another_projected_tuple = another_compound_tuple[users_set]
@@ -220,12 +220,6 @@ module Unison
           end
         end
 
-        describe "#read" do
-          it "returns a set restricted to #attributes from the #operand" do
-            projection.read.should == operand.read.map {|tuple| tuple[attributes]}.uniq
-          end
-        end
-
         describe "#after_last_release" do
           before do
             projection.retain(Object.new)
@@ -255,7 +249,7 @@ module Unison
           context "when the inserted Tuple restricted by #attributes is already in the relation" do
             before do
               @user = User.find(1)
-              projection.read.should include(user)
+              projection.tuples.should include(user)
             end
 
             it "will not invoke the block when tuples are inserted" do
@@ -270,7 +264,7 @@ module Unison
           context "when the inserted Tuple restricted by #attributes is not in the relation" do
             before do
               @user = User.create(:id => 100, :name => "Brian")
-              projection.read.should_not include(user)
+              projection.tuples.should_not include(user)
             end
 
             it "will invoke the block when tuples are inserted" do
@@ -294,7 +288,7 @@ module Unison
               before do
                 @user = User.create(:id => 100, :name => "Brian")
                 @photo = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-                projection.read.should include(user)
+                projection.tuples.should include(user)
               end
 
               it "invokes the block" do
@@ -314,7 +308,7 @@ module Unison
                 @user = User.create(:id => 100, :name => "Brian")
                 @photo_1 = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
                 @photo_2 = Photo.create(:id => 101, :user_id => user[:id], :name => "Photo 101")
-                projection.read.should include(user)
+                projection.tuples.should include(user)
               end
 
               it "does not invoke the block" do
@@ -329,7 +323,7 @@ module Unison
           context "when the deleted Tuple restricted by #attributes is not in the relation" do
             before do
               @user = User.create(:id => 100, :name => "Brian")
-              projection.read.should_not include(user)
+              projection.tuples.should_not include(user)
             end
 
             it "does not invoke the block" do
@@ -348,6 +342,12 @@ module Unison
             operand.should_not be_retained_by(projection)
             projection.retain Object.new
             operand.should be_retained_by(projection)
+          end
+        end
+
+        describe "#tuples" do
+          it "returns a set restricted to #attributes from the #operand" do
+            projection.tuples.should == operand.tuples.map {|tuple| tuple[attributes]}.uniq
           end
         end
       end

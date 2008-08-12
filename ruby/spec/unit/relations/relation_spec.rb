@@ -18,9 +18,9 @@ module Unison
         end
 
         context "when passed an Integer" do
-          it "returns the result of #read.[]" do
+          it "returns the result of #tuples.[]" do
             relation[1].should_not be_nil
-            relation[1].should == relation.read[1]
+            relation[1].should == relation.tuples[1]
           end
         end
 
@@ -51,29 +51,29 @@ module Unison
 
       describe "#nil?" do
         context "when the Relation is a singleton" do
-          context "when #read.first is nil" do
+          context "when #tuples.first is nil" do
             it "returns true" do
               selection = users_set.where(users_set[:id].eq(100))
               selection.singleton
 
-              selection.read.first.should be_nil
+              selection.tuples.first.should be_nil
               selection.should be_nil
             end
           end
 
-          context "when #read.first is not nil" do
+          context "when #tuples.first is not nil" do
             it "returns false" do
               selection = users_set.where(users_set[:id].eq(1))
               selection.singleton
 
-              selection.read.first.should_not be_nil
+              selection.tuples.first.should_not be_nil
               selection.should_not be_nil
             end
           end
         end
 
         context "when the Relation is not a singleton" do
-          it "always returns false even when #read is empty" do
+          it "always returns false even when #tuples is empty" do
             users_set.where(users_set[:id].eq(1)).should_not be_nil
             users_set.where(users_set[:id].eq(100)).should be_empty
             users_set.where(users_set[:id].eq(100)).should_not be_nil
@@ -118,10 +118,10 @@ module Unison
 
         context "when passed a different Set" do
           attr_reader :other_relation
-          context "with the same result of #read" do
+          context "with the same result of #tuples" do
             before do
               @other_relation = relation.where(Predicates::Eq.new(true, true))
-              relation.read.should == other_relation.read
+              relation.tuples.should == other_relation.tuples
             end
 
             it "returns true" do
@@ -129,12 +129,12 @@ module Unison
             end
           end
 
-          context "with the a different result of #read" do
+          context "with the a different result of #tuples" do
             before do
               predicate = users_set[:id].eq(1)
               @other_relation = relation.where(predicate)
               other_relation.should_not be_empty
-              relation.read.should_not == other_relation.read
+              relation.tuples.should_not == other_relation.tuples
             end
 
             it "returns false" do
@@ -143,14 +143,26 @@ module Unison
           end
         end
 
-        context "when an Array == to #read" do
+        context "when an Array == to #tuples" do
           it "returns true" do
-            relation.should == relation.read
+            relation.should == relation.tuples
           end
         end
       end
 
-      describe "#read" do
+
+      context "when #retained?" do
+        before do
+          @relation = users_set.where(Predicates::Eq.new(true, true)).retain(Object.new)
+          class << relation
+            public :tuples, :initial_read
+          end
+        end
+
+      end
+
+
+      describe "#tuples" do
         context "when the Relation is not retained" do
           before do
             @relation = Relations::Set.new(:unretained_set)
@@ -158,24 +170,21 @@ module Unison
             relation.should_not be_retained
           end
 
-          it "returns the result of #initial_read without calling #tuples" do
-            dont_allow(relation).tuples
+          it "returns the result of #initial_read" do
             mock(relation).initial_read {[:initial, :read, :result]}
-            relation.read.should == [:initial, :read, :result]
+            relation.tuples.should == [:initial, :read, :result]
           end
         end
 
         context "when the Relation is retained" do
           before do
             @relation = users_set
-            class << relation
-              public :tuples
-            end
             relation.should be_retained
           end
 
-          it "returns the result of #tuples" do
-            relation.read.should == relation.tuples
+          it "returns the contents of @tuples without calling #initial_read" do
+            dont_allow(relation).initial_read
+            relation.tuples.should_not be_empty
           end
         end
       end
@@ -202,39 +211,6 @@ module Unison
 
             relation.tuples.should == relation.initial_read
             relation.tuples.object_id.should == relation.tuples.object_id
-          end
-        end
-      end
-
-      describe "#tuples" do
-        attr_reader :relation
-
-        context "when #retained?" do
-          before do
-            @relation = users_set.where(Predicates::Eq.new(true, true)).retain(Object.new)
-            class << relation
-              public :tuples, :initial_read
-            end
-          end
-
-          it "returns the result of #initial_read" do
-            relation.tuples.should == relation.initial_read
-          end
-        end
-
-        context "when not #retained?" do
-          before do
-            @relation = Set.new(:users).where(Predicates::Eq.new(true, true))
-            relation.should_not be_retained
-            class << relation
-              public :tuples
-            end
-          end
-
-          it "raises an Error" do
-            lambda do
-              relation.tuples
-            end.should raise_error
           end
         end
       end
@@ -321,7 +297,7 @@ module Unison
               arguments.push [tuple, attribute, old_value, new_value]
             end
 
-            user = relation.read.first
+            user = relation.tuples.first
             old_name = user[:name]
             user[:name] = "Another Name"
             arguments.should == [[user, users_set[:name], old_name, "Another Name"]]

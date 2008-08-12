@@ -20,7 +20,7 @@ module Unison
 
       protected
       def initial_read
-        operand.read.select do |tuple|
+        operand.tuples.select do |tuple|
           predicate.eval(tuple)
         end
       end

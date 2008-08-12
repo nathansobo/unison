@@ -20,7 +20,7 @@ module Topics
       exposed_relations.each do |relation_name|
         relation = relation_from_name(relation_name)
         class_name = nil
-        relation.read.each do |tuple|
+        relation.tuples.each do |tuple|
           class_name ||= tuple.class.basename
           hash[class_name] ||= {}
           hash[class_name][tuple[:id].to_s] = new_client_representation_for(tuple, class_name)

@@ -52,23 +52,12 @@ module Unison
       context "after #retain has been called" do
         before do
           selection.retain(Object.new)
-          selection.read
-        end
-
-
-        describe "#read" do
-          it "returns all tuples in its #operand for which its #predicate returns true" do
-            tuples = selection.read
-            tuples.size.should == 2
-            tuples.each do |tuple|
-              tuple[:user_id].should == 1
-            end
-          end
+          selection.tuples
         end
 
         describe "#size" do
           it "returns the number of tuples in the relation" do
-            selection.size.should == selection.read.size
+            selection.size.should == selection.tuples.size
           end
         end
 
@@ -115,14 +104,14 @@ module Unison
             @user = User.find(1)
             @predicate = photos_set[:user_id].eq(user.signal(:id))
             @selection = Selection.new(photos_set, predicate).retain(Object.new)
-            @old_photos = selection.read.dup
+            @old_photos = selection.tuples.dup
             @new_photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
           end
 
-          it "reloads the contents of #read" do
-            selection.read.should_not == [new_photo]
+          it "reloads the contents of #tuples" do
+            selection.tuples.should_not == [new_photo]
             user[:id] = 100
-            selection.read.should == [new_photo]
+            selection.tuples.should == [new_photo]
           end
 
           it "invokes #on_insert callbacks for Tuples inserted into the Relation" do
@@ -151,10 +140,10 @@ module Unison
               predicate.eval(photo).should be_true
             end
 
-            it "is added to the objects returned by #read" do
-              selection.read.should_not include(photo)
+            it "is added to the objects returned by #tuples" do
+              selection.tuples.should_not include(photo)
               photos_set.insert(photo)
-              selection.read.should include(photo)
+              selection.tuples.should include(photo)
             end
 
             it "invokes #on_insert callbacks" do
@@ -180,10 +169,10 @@ module Unison
               predicate.eval(photo).should be_false
             end
 
-            it "is not added to the objects returned by #read" do
-              selection.read.should_not include(photo)
+            it "is not added to the objects returned by #tuples" do
+              selection.tuples.should_not include(photo)
               photos_set.insert(photo)
-              selection.read.should_not include(photo)
+              selection.tuples.should_not include(photo)
             end
 
             it "does not invoke #on_insert callbacks" do
@@ -207,10 +196,10 @@ module Unison
           end
 
           context "when the update causes the Tuple to match the #predicate" do
-            it "adds the Tuple to the result of #read" do
-              selection.read.should_not include(photo)
+            it "adds the Tuple to the result of #tuples" do
+              selection.tuples.should_not include(photo)
               photo[:user_id] = 1
-              selection.read.should include(photo)
+              selection.tuples.should include(photo)
             end
 
             it "invokes #on_insert callbacks" do
@@ -218,7 +207,7 @@ module Unison
               selection.on_insert do |tuple|
                 on_insert_tuple = tuple
               end
-              selection.read.should_not include(photo)
+              selection.tuples.should_not include(photo)
 
               photo[:user_id] = 1
               on_insert_tuple.should == photo
@@ -232,10 +221,10 @@ module Unison
           end
 
           context "when the update does not cause the Tuple to match the #predicate" do
-            it "does not add the Tuple into the result of #read" do
-              selection.read.should_not include(photo)
+            it "does not add the Tuple into the result of #tuples" do
+              selection.tuples.should_not include(photo)
               photo[:user_id] = 3
-              selection.read.should_not include(photo)
+              selection.tuples.should_not include(photo)
             end
 
             it "does not invoke the #on_insert event" do
@@ -256,14 +245,14 @@ module Unison
 
         context "when a Tuple that matches the #predicate in the #operand is updated" do
           before do
-            @photo = selection.read.first
+            @photo = selection.tuples.first
           end
 
           context "when the update causes the Tuple to not match the #predicate" do
-            it "removes the Tuple from the result of #read" do
-              selection.read.should include(photo)
+            it "removes the Tuple from the result of #tuples" do
+              selection.tuples.should include(photo)
               photo[:user_id] = 3
-              selection.read.should_not include(photo)
+              selection.tuples.should_not include(photo)
             end
 
             it "invokes the on_delete event" do
@@ -284,12 +273,12 @@ module Unison
           end
 
           context "when the Tuple continues to match the #predicate after the update" do
-            it "does not change the size of the result of #read" do
-              selection.read.should include(photo)
+            it "does not change the size of the result of #tuples" do
+              selection.tuples.should include(photo)
               lambda do
                 photo[:name] = "New Name"
-              end.should_not change {selection.read.size}
-              selection.read.should include(photo)
+              end.should_not change {selection.tuples.size}
+              selection.tuples.should include(photo)
             end
 
             it "invokes the #on_tuple_update event" do
@@ -327,14 +316,14 @@ module Unison
           context "when the Tuple matches the #predicate" do
             attr_reader :photo
             before do
-              @photo = selection.read.first
+              @photo = selection.tuples.first
               predicate.eval(photo).should be_true
             end
 
-            it "is deleted from the objects returned by #read" do
-              selection.read.should include(photo)
+            it "is deleted from the objects returned by #tuples" do
+              selection.tuples.should include(photo)
               photos_set.delete(photo)
-              selection.read.should_not include(photo)
+              selection.tuples.should_not include(photo)
             end
 
             it "invokes #on_delete callbacks" do
@@ -361,10 +350,10 @@ module Unison
               predicate.eval(photo).should be_false
             end
 
-            it "is not deleted from the objects returned by #read" do
-              selection.read.should_not include(photo)
+            it "is not deleted from the objects returned by #tuples" do
+              selection.tuples.should_not include(photo)
               photos_set.delete(photo)
-              selection.read.should_not include(photo)
+              selection.tuples.should_not include(photo)
             end
 
             it "does not invoke #on_delete callbacks" do
@@ -402,6 +391,16 @@ module Unison
             selection.should_not be_empty
             selection.each do |tuple|
               tuple.should be_retained_by(selection)
+            end
+          end
+        end
+
+        describe "#tuples" do
+          it "returns all tuples in its #operand for which its #predicate returns true" do
+            tuples = selection.tuples
+            tuples.size.should == 2
+            tuples.each do |tuple|
+              tuple[:user_id].should == 1
             end
           end
         end
