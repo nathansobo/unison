@@ -82,6 +82,14 @@ module Unison
         end
       end
 
+      describe "#merge" do
+        it "raises a NotImplementedError" do
+          lambda do
+            join.merge([])
+          end.should raise_error(NotImplementedError)
+        end
+      end
+
       context "after #retain has been called" do
         before do
           join.retain(Object.new)

@@ -24,6 +24,10 @@ module Unison
         raise ArgumentError, "Attribute with name #{name.inspect} is not defined on this Relation"
       end
 
+      def merge(tuples)
+        raise NotImplementedError
+      end
+
       protected
       attr_reader :operand_1_subscriptions, :operand_2_subscriptions
 
