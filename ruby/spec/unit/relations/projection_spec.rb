@@ -5,7 +5,7 @@ module Unison
     describe Projection do
       attr_reader :operand, :projection, :attributes
       before do
-        @operand = InnerJoin.new(users_set, photos_set, photos_set[:user_id].eq(users_set[:id]))
+        @operand = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id]))
         @attributes = users_set
         @projection = Projection.new(operand, attributes)
       end
