@@ -54,6 +54,35 @@ module Unison
         end
       end
 
+      describe "#after_first_retain" do
+        it "#retains the #nested_tuples" do
+          tuple.refcount.should == 0
+          nested_tuple_1.should_not be_retained_by(tuple)
+          nested_tuple_2.should_not be_retained_by(tuple)
+
+          tuple.retain(Object.new)
+
+          nested_tuple_1.should be_retained_by(tuple)
+          nested_tuple_2.should be_retained_by(tuple)
+        end
+      end
+
+      describe "#destroy" do
+        it "#releases the #nested_tuples" do
+          retainer = Object.new
+          tuple.retain(retainer)
+          nested_tuple_1.should be_retained_by(tuple)
+          nested_tuple_2.should be_retained_by(tuple)
+
+          tuple.release(retainer)
+          tuple.refcount.should == 0
+
+          nested_tuple_1.should_not be_retained_by(tuple)
+          nested_tuple_2.should_not be_retained_by(tuple)
+        end
+      end
+
+
       describe "#==" do
         attr_reader :other_tuple
         context "when other Tuple#nested_tuples == #nested_tuples" do

@@ -35,9 +35,21 @@ module Unison
       true
     end
 
-    public
     class Base
       include CompoundTuple
+    end
+
+    protected
+    def after_first_retain
+      nested_tuples.each do |tuple|
+        tuple.retain(self)
+      end
+    end
+
+    def destroy
+      nested_tuples.each do |tuple|
+        tuple.release(self)
+      end
     end
   end
 end
