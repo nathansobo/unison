@@ -157,8 +157,7 @@ module Unison
           end
 
           context "for Tuples that match both the old and new Predicates" do
-            # TODO: no predicate types currently exist that could allow a tuple to match two different predicates.
-            # Come back to this when we have inequality operators.  (JN/NS)
+            # TODO: JN/NS - No predicate types currently exist that could allow a tuple to match two different predicates.
             it "keeps the Tuples in the set"
             it "does not invoke #on_insert callbacks for the Tuples"
             it "does not invoke #on_delete callbacks for the Tuples"

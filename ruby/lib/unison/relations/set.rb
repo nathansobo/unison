@@ -65,6 +65,12 @@ module Unison
         tuple
       end
 
+      def merge(tuples)
+        tuples.each do |tuple|
+          insert(tuple) if find(tuple[:id]).nil?
+        end
+      end
+
       def to_sql
         to_arel.to_sql
       end

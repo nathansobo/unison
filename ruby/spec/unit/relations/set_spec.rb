@@ -202,17 +202,24 @@ module Unison
         end
       end
 
-      describe "#each" do
-        it "iterates over all Tuples in the Set" do
-          set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
-          set.insert(set.tuple_class.new(:id => 2, :name => "Alissa"))
-
-          eached_tuples = []
-          set.each do |tuple|
-            eached_tuples.push(tuple)
+      describe "#merge" do
+        context "when passed some Tuples that have the same id as Tuples already in the Set and some that don't" do
+          attr_reader :in_set, :not_in_set, :tuples
+          before do
+            set.tuple_class.create(:id => 1, :name => "Wil")
+            @in_set = set.tuple_class.new(:id => 1, :name => "Kunal")
+            @not_in_set = set.tuple_class.new(:id => 2, :name => "Nathan")
+            set.find(in_set[:id]).should_not be_nil
+            set.find(not_in_set[:id]).should be_nil
+            @tuples = [in_set, not_in_set]
           end
-          eached_tuples.should_not be_empty
-          eached_tuples.should == set.tuples
+
+          it "inserts the Tuples whose id's do not correspond to existing Tuples and does not attempt to insert others" do
+            mock.proxy(set).insert(not_in_set)
+            dont_allow(set).insert(in_set)
+            set.merge(tuples)
+            set.should include(not_in_set)
+          end
         end
       end
 
