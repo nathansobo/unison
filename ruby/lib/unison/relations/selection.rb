@@ -15,6 +15,10 @@ module Unison
         operand.merge(tuples)
       end
 
+      def tuple_class
+        operand.tuple_class
+      end
+
       def to_sql
         to_arel.to_sql
       end

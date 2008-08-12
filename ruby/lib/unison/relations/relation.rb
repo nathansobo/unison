@@ -35,6 +35,10 @@ module Unison
         Selection.new(self, predicate)
       end
 
+      def join(operand_2)
+        PartialJoin.new(self, operand_2)
+      end
+
       def tuples
         retained?? @tuples : initial_read
       end

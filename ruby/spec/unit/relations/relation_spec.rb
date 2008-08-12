@@ -49,6 +49,13 @@ module Unison
         end
       end
 
+      describe "#join" do
+        it "returns an object that responds to #on to construct an InnerJoin" do
+          expected_join = InnerJoin.new(users_set, photos_set, users_set[:id].eq(photos_set[:user_id]))
+          users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id])).should == expected_join
+        end
+      end
+
       describe "#nil?" do
         context "when the Relation is a singleton" do
           context "when #tuples.first is nil" do

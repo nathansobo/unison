@@ -23,6 +23,7 @@ require "#{dir}/unison/primitive_tuple"
 require "#{dir}/unison/compound_tuple"
 require "#{dir}/unison/subscription"
 require "#{dir}/unison/subscription_node"
+require "#{dir}/unison/partial_join"
 
 module Unison
   class << self

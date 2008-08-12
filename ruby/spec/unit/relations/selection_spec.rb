@@ -17,6 +17,12 @@ module Unison
         end
       end
 
+      describe "#tuple_class" do
+        it "delegates to its #operand" do
+          selection.tuple_class.should == operand.tuple_class
+        end
+      end
+
       describe "#to_sql" do
         context "when #operand is a Set" do
           before do
