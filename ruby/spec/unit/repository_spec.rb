@@ -22,7 +22,15 @@ module Unison
 
       context "when passed a Projection" do
         it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#to_sql" do
-          
+
+          pending "Relation#project"
+          projection = users_set \
+                         .join(photos_set) \
+                           .on(users_set[:id].eq(photos_set[:user_id])) \
+                         .project(photos_set)
+
+
+
         end
       end
     end

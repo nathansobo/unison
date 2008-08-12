@@ -36,7 +36,11 @@ module Unison
       end
 
       def join(operand_2)
-        PartialJoin.new(self, operand_2)
+        PartialInnerJoin.new(self, operand_2)
+      end
+
+      def project(attributes)
+        Projection.new(self, attributes)
       end
 
       def tuples

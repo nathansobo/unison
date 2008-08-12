@@ -50,9 +50,16 @@ module Unison
       end
 
       describe "#join" do
-        it "returns an object that responds to #on to construct an InnerJoin" do
+        it "returns a PartialInnerJoin with the argument as #operand_2 and the receiver as #operand_1" do
           expected_join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
           users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id])).should == expected_join
+        end
+      end
+
+      describe "#project" do
+        it "returns a Projection with the receiver as #operand and the argument as #attributes" do
+          join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
+          join.project(photos_set).should == Projection.new(join, photos_set)
         end
       end
 
