@@ -31,7 +31,7 @@ module Unison
         end        
       end
 
-      def destroy
+      def after_last_release
         child_predicate_subscriptions.each do |subscription|
           subscription.destroy
         end

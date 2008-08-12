@@ -46,7 +46,7 @@ module Unison
       end
     end
 
-    def destroy
+    def after_last_release
       nested_tuples.each do |tuple|
         tuple.release(self)
       end

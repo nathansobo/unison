@@ -62,10 +62,10 @@ module Unison
           end
         end
 
-        describe "#destroy" do
+        describe "#after_last_release" do
           it "unsubscribes from and releases #operands" do
             operands = predicate.operands.dup
-            predicate.send(:destroy)
+            predicate.send(:after_last_release)
 
             child_predicate_without_signal.send(:update_subscription_node).should be_empty
             child_predicate_with_signal.send(:update_subscription_node).should be_empty

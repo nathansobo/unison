@@ -608,7 +608,7 @@ module Unison
           end
         end
 
-        describe "#destroy" do
+        describe "#after_last_release" do
           before do
             join.retain(Object.new)
           end
@@ -628,7 +628,7 @@ module Unison
               operand_2.subscriptions.should include(subscription)
             end
 
-            join.send(:destroy)
+            join.send(:after_last_release)
 
             operand_1.should_not be_retained_by(join)
             operand_2.should_not be_retained_by(join)
@@ -644,7 +644,7 @@ module Unison
 
           it "releases its #predicate" do
             predicate.should be_retained_by(join)
-            join.send(:destroy)
+            join.send(:after_last_release)
             predicate.should_not be_retained_by(join)
           end
         end

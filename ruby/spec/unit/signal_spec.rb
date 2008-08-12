@@ -32,27 +32,27 @@ module Unison
           end
         end
 
-        describe "#destroy" do
+        describe "#after_last_release" do
           it "releases its Tuple" do
             signal.retain(Object.new)
             user.should be_retained_by(signal)
-            signal.send(:destroy)
+            signal.send(:after_last_release)
             user.should_not be_retained_by(signal)
           end
 
           context "when the Signal is registered in Tuple#signals[#attribute]" do
             it "removes itself from its Tuple#signals hash" do
               user.send(:signals)[users_set[:name]].should == signal
-              signal.send(:destroy)
+              signal.send(:after_last_release)
               user.send(:signals)[users_set[:name]].should be_nil
             end
           end
 
           context "when Signal is not registered in Tuple#signals[#attribute]" do
             it "removes itself from its Tuple#signals hash" do
-              signal.send(:destroy)
+              signal.send(:after_last_release)
               lambda do
-                signal.send(:destroy)
+                signal.send(:after_last_release)
               end.should raise_error
             end
           end

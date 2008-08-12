@@ -72,7 +72,7 @@ module Unison
           end
         end
 
-        describe "#destroy" do
+        describe "#after_last_release" do
           it "unsubscribes from and releases its #operand" do
             operand.extend AddSubscriptionsMethodToRelation
             selection.operand_subscriptions.should_not be_empty
@@ -82,7 +82,7 @@ module Unison
               operand.subscriptions.should include(subscription)
             end
 
-            selection.send(:destroy)
+            selection.send(:after_last_release)
 
             operand.should_not be_retained_by(selection)
             selection.operand_subscriptions.each do |subscription|
@@ -102,7 +102,7 @@ module Unison
             predicate.should be_retained_by(selection)
             predicate.update_subscription_node.should include(selection.predicate_subscription)
 
-            selection.send(:destroy)
+            selection.send(:after_last_release)
 
             predicate.should_not be_retained_by(selection)
             predicate.update_subscription_node.should_not include(selection.predicate_subscription)

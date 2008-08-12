@@ -67,7 +67,7 @@ module Unison
         end
       end
 
-      describe "#destroy" do
+      describe "#after_last_release" do
         it "#releases the #nested_tuples" do
           retainer = Object.new
           tuple.retain(retainer)

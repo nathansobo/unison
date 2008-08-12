@@ -226,7 +226,7 @@ module Unison
           end
         end
 
-        describe "#destroy" do
+        describe "#after_last_release" do
           before do
             projection.retain(Object.new)
           end
@@ -240,7 +240,7 @@ module Unison
               operand.subscriptions.should include(subscription)
             end
 
-            projection.send(:destroy)
+            projection.send(:after_last_release)
 
             operand.should_not be_retained_by(projection)
             projection.send(:operand_subscriptions).should_not be_empty

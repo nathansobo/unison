@@ -92,7 +92,7 @@ module Unison
         )
       end
 
-      def destroy
+      def after_last_release
         operand_1_subscriptions.each do |subscription|
           subscription.destroy
         end
