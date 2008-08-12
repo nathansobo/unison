@@ -5,7 +5,7 @@ module Unison
       @connection = connection
     end
 
-    def pull(relation)
+    def fetch(relation)
       connection[relation.to_sql].map do |record|
         relation.tuple_class.new(record)
       end
