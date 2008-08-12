@@ -138,6 +138,19 @@ module Unison
               users_set.insert(user)
               join.should_not include(expected_tuple)
             end
+
+            it "does not invoke the #on_insert callback" do
+              join.on_insert do |tuple|
+                raise "I should not be invoked"
+              end
+              users_set.insert(user)
+            end
+
+            it "does not retain the CompoundTuple" do
+              join.find(user.id).should be_nil
+              users_set.insert(user)
+              join.find(user.id).should be_nil
+            end
           end
         end
 
@@ -191,6 +204,19 @@ module Unison
               join.should_not include(expected_tuple)
               photos_set.insert(photo)
               join.should_not include(expected_tuple)
+            end
+
+            it "does not invoke the #on_insert callback" do
+              join.on_insert do |tuple|
+                raise "I should not be invoked"
+              end
+              photos_set.insert(photo)
+            end
+
+            it "does not retain the CompoundTuple" do
+              join.find(user.id).should be_nil
+              photos_set.insert(photo)
+              join.find(user.id).should be_nil
             end
           end
         end
@@ -277,6 +303,13 @@ module Unison
                 compound_tuples.each do |compound_tuple|
                   deleted.should include(compound_tuple)
                 end
+              end
+
+              it "releases the CompoundTuple" do
+                compound_tuple = join.find(user.id).read.first
+                compound_tuple.should be_retained_by(join)
+                user[:id] = 100
+                compound_tuple.should_not be_retained_by(join)
               end
             end
 
@@ -389,6 +422,15 @@ module Unison
                 photo[:user_id] = 100
                 deleted.should == [compound_tuple]
               end
+
+              it "releases the CompoundTuple" do
+                compound_tuple = join.where(photos_set[:id].eq(photo.id)).first
+                compound_tuple.should be_retained_by(join)
+
+                photo[:user_id] = 100
+
+                compound_tuple.should_not be_retained_by(join)
+              end
             end
 
             context "and the compound Tuple continues to match the #predicate after the update" do
@@ -438,6 +480,23 @@ module Unison
               users_set.delete(user)
               join.should_not include(compound_tuple)
             end
+
+            it "invokes the #on_delete callback" do
+              deleted = nil
+              join.on_delete do |deleted_tuple|
+                deleted = deleted_tuple
+              end
+
+              users_set.delete(user)
+              deleted.should == compound_tuple
+            end
+
+            it "#releases the Tuple" do
+              compound_tuple = join.find(user.id).read.first
+              compound_tuple.should be_retained_by(join)
+              users_set.delete(user)
+              compound_tuple.should_not be_retained_by(join)
+            end
           end
 
           context "is not a member of a compound Tuple that matches the #predicate" do
@@ -453,6 +512,13 @@ module Unison
               lambda do
                 users_set.delete(user)
               end.should_not change{join.length}
+            end
+
+            it "does not invoke the #on_delete callback" do
+              join.on_delete do |deleted_tuple|
+                raise "I should not be invoked"
+              end
+              users_set.delete(user)
             end
           end
         end
@@ -474,6 +540,23 @@ module Unison
               photos_set.delete(photo)
               join.should_not include(compound_tuple)
             end
+
+            it "invokes the #on_delete callback" do
+              deleted = nil
+              join.on_delete do |deleted_tuple|
+                deleted = deleted_tuple
+              end
+
+              photos_set.delete(photo)
+              deleted.should == compound_tuple
+            end
+
+            it "#releases the Tuple" do
+              compound_tuple = join.where(photos_set[:id].eq(photo[:id])).first
+              compound_tuple.should be_retained_by(join)
+              photos_set.delete(photo)
+              compound_tuple.should_not be_retained_by(join)
+            end
           end
 
           context "is not a member of a compound Tuple that matches the #predicate" do
@@ -489,6 +572,13 @@ module Unison
               lambda do
                 photos_set.delete(photo)
               end.should_not change{join.length}
+            end
+
+            it "does not invoke the #on_delete callback" do
+              join.on_delete do |deleted_tuple|
+                raise "I should not be invoked"
+              end
+              photos_set.delete(photo)
             end
           end
         end
@@ -559,136 +649,65 @@ module Unison
           end
         end
 
-        describe "#on_insert" do
-          context "when a Tuple is inserted into #operand_1" do
-            attr_reader :photo
+        describe "#find_compound_tuple" do
+          attr_reader :photo, :user
 
-            context "when the inserted Tuple creates a compound Tuple that matches the #predicate" do
-              before do
-                @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-              end
+          context "when #tuples contains a CompoundTuple that contains both of the arguments" do
+            before do
+              @user = User.create(:id => 100, :name => "Brian")
+              @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
 
-              it "invokes the block" do
-                inserted = nil
-                join.on_insert do |tuple|
-                  inserted = tuple
-                end
-                user = User.create(:id => 100, :name => "Brian")
-
-                predicate.eval(inserted).should be_true
-                inserted[photos_set].should == photo
-                inserted[users_set].should == user
-              end
+              join.read.any? do |compound_tuple|
+                compound_tuple[users_set] == user &&
+                  compound_tuple[photos_set] == photo
+              end.should be_true
             end
 
-            context "when the inserted Tuple creates a compound Tuple that does not match the #predicate" do
-              it "does not invoke the block" do
-                join.on_insert do |tuple|
-                  raise "I should not be invoked"
-                end
-                User.create(:id => 100, :name => "Brian")
-              end
+            it "returns the CompoundTuple" do
+              compound_tuple = join.send(:find_compound_tuple, user, photo)
+              compound_tuple[users_set].should == user
+              compound_tuple[photos_set].should == photo
             end
           end
 
-          context "when a Tuple is inserted into #operand_2" do
-            context "when the inserted Tuple creates a compound Tuple that matches the #predicate" do
-              it "invokes the block" do
-                inserted = nil
-                join.on_insert do |tuple|
-                  inserted = tuple
-                end
-                photo = Photo.create(:id => 100, :user_id => 1, :name => "Photo 100")
+          context "when #tuples only contains a CompoundTuple that contains the first argument" do
+            before do
+              @user = User.find(1)
+              @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
 
-                predicate.eval(inserted).should be_true
-                inserted[photos_set].should == photo
-                inserted[users_set].should == User.find(1)
-              end
+              join.read.any? do |compound_tuple|
+                compound_tuple[users_set] == user &&
+                  compound_tuple[photos_set] == photo
+              end.should be_false
+
+              join.read.any? do |compound_tuple|
+                compound_tuple[users_set] == user
+              end.should be_true
             end
 
-            context "when the inserted Tuple creates a compound Tuple that does not match the #predicate" do
-              it "does not invoke the block" do
-                join.on_insert do |tuple|
-                  raise "I should not be invoked"
-                end
-                Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-              end
-            end
-          end
-        end
 
-        describe "#on_delete" do
-          context "when a Tuple is deleted from #operand_1" do
-            attr_reader :compound_tuple, :user
-            context "when the deleted Tuple is a member of a compound Tuple that matches the #predicate" do
-              before do
-                @compound_tuple = join.first
-                compound_tuple.should_not be_nil
-                @user = compound_tuple[users_set]
-              end
-
-              it "invokes the block" do
-                deleted = nil
-                join.on_delete do |deleted_tuple|
-                  deleted = deleted_tuple
-                end
-
-                users_set.delete(user)
-                deleted.should == compound_tuple
-              end
-            end
-
-            context "when the deleted Tuple is not a member of a compound Tuple that matches the #predicate" do
-              before do
-                @user = User.create(:id => 100, :name => "Brian")
-                join.all? do |compound_tuple|
-                  compound_tuple[users_set] != user
-                end.should be_true
-              end
-
-              it "does not invoke the block" do
-                join.on_delete do |deleted_tuple|
-                  raise "I should not be invoked"
-                end
-                users_set.delete(user)
-              end
+            it "returns nil" do
+              join.send(:find_compound_tuple, user, photo).should be_nil
             end
           end
 
-          context "when a Tuple is deleted from #operand_2" do
-            attr_reader :compound_tuple, :photo
-            context "when the deleted Tuple is a member of a compound Tuple that matches the #predicate" do
-              before do
-                @compound_tuple = join.first
-                compound_tuple.should_not be_nil
-                @photo = compound_tuple[photos_set]
-              end
+          context "when #tuples only contains a CompoundTuple that contains the second argument" do
+            before do
+              @user = User.create(:id => 100, :name => "Brian")
+              @photo = Photo.find(1)
 
-              it "invokes the block" do
-                deleted = nil
-                join.on_delete do |deleted_tuple|
-                  deleted = deleted_tuple
-                end
+              join.read.any? do |compound_tuple|
+                compound_tuple[users_set] == user &&
+                  compound_tuple[photos_set] == photo
+              end.should be_false
 
-                photos_set.delete(photo)
-                deleted.should == compound_tuple
-              end
+              join.read.any? do |compound_tuple|
+                compound_tuple[photos_set] == photo
+              end.should be_true
             end
 
-            context "when the deleted Tuple is not a member of a compound Tuple that matches the #predicate" do
-              before do
-                @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-                join.all? do |compound_tuple|
-                  compound_tuple[photos_set] != photo
-                end.should be_true
-              end
-
-              it "does not invoke the block" do
-                join.on_delete do |deleted_tuple|
-                  raise "I should not be invoked"
-                end
-                photos_set.delete(photo)
-              end
+            it "returns nil" do
+              join.send(:find_compound_tuple, user, photo).should be_nil
             end
           end
         end

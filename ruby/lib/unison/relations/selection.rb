@@ -73,13 +73,6 @@ module Unison
         )
       end
 
-      def delete(tuple)
-        tuple.release(self)
-        tuples.delete(tuple)
-        delete_subscription_node.call(tuple)
-      end
-
-
       def destroy
         predicate_subscription.destroy
         operand_subscriptions.each do |subscription|

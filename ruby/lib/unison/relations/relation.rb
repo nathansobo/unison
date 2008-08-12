@@ -95,6 +95,13 @@ module Unison
         tuple
       end
 
+      def delete(tuple)
+        tuple.release(self)
+        tuples.delete(tuple)
+        delete_subscription_node.call(tuple)
+        tuple
+      end
+
       def after_first_retain
         @tuples = []
         initial_read.each do |tuple|
