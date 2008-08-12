@@ -99,37 +99,70 @@ module Unison
         end
 
         context "when the #predicate is updated" do
-          attr_reader :user, :new_photo, :old_photos
+          attr_reader :user, :new_photos, :old_photos
           before do
             @user = User.find(1)
             @predicate = photos_set[:user_id].eq(user.signal(:id))
             @selection = Selection.new(photos_set, predicate).retain(Object.new)
             @old_photos = selection.tuples.dup
-            @new_photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+            old_photos.length.should == 2
+            @new_photos = [ Photo.create(:id => 100, :user_id => 100, :name => "Photo 100"),
+                            Photo.create(:id => 101, :user_id => 100, :name => "Photo 101") ]
           end
 
-          it "reloads the contents of #tuples" do
-            selection.tuples.should_not == [new_photo]
-            user[:id] = 100
-            selection.tuples.should == [new_photo]
-          end
-
-          it "invokes #on_insert callbacks for Tuples inserted into the Relation" do
-            inserted_photos = []
-            selection.on_insert do |photo|
-              inserted_photos.push photo
+          context "for Tuples that match the new Predicate but not the old one" do
+            it "inserts the Tuples in the set" do
+              new_photos.each{|tuple| selection.tuples.should_not include(tuple)}
+              user[:id] = 100
+              new_photos.each{|tuple| selection.tuples.should include(tuple)}
             end
-            user[:id] = 100
-            inserted_photos.should == [new_photo]
+
+            it "invokes #on_insert callbacks for the inserted Tuples" do
+              inserted_tuples = []
+              selection.on_insert do |tuple|
+                inserted_tuples << tuple
+              end
+              user[:id] = 100
+              inserted_tuples.should == new_photos
+            end
+
+            it "#retains inserted Tuples" do
+              new_photos.each{|tuple| tuple.should_not be_retained_by(selection)}
+              user[:id] = 100
+              new_photos.each{|tuple| tuple.should be_retained_by(selection)}
+            end
           end
 
-          it "invokes #on_delete callbacks for Tuples deleted from the Relation" do
-            deleted_photos = []
-            selection.on_delete do |photo|
-              deleted_photos.push photo
+          context "for Tuples that matched the old Predicate but not the new one" do
+            it "deletes the Tuples from the set" do
+              old_photos.each{|tuple| selection.tuples.should include(tuple)}
+              user[:id] = 100
+              old_photos.each{|tuple| selection.tuples.should_not include(tuple)}
             end
-            user[:id] = 100
-            deleted_photos.should == old_photos
+
+            it "invokes #on_delete callbacks for the deleted Tuples" do
+              deleted_tuples = []
+              selection.on_delete do |tuple|
+                deleted_tuples << tuple
+              end
+              user[:id] = 100
+              deleted_tuples.should == old_photos
+            end
+
+            it "#releases deleted Tuples"  do
+              old_photos.each{|tuple| tuple.should be_retained_by(selection)}
+              user[:id] = 100
+              old_photos.each{|tuple| tuple.should_not be_retained_by(selection)}
+            end
+          end
+
+          context "for Tuples that match both the old and new Predicates" do
+            # TODO: no predicate types currently exist that could allow a tuple to match two different predicates.
+            # Come back to this when we have inequality operators.  (JN/NS)
+            it "keeps the Tuples in the set"
+            it "does not invoke #on_insert callbacks for the Tuples"
+            it "does not invoke #on_delete callbacks for the Tuples"
+            it "continues to #retain the Tuples"
           end
         end
 

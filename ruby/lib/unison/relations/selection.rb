@@ -32,14 +32,8 @@ module Unison
             new_tuples = initial_read
             deleted_tuples = tuples - new_tuples
             inserted_tuples = new_tuples - tuples
-            tuples.clear
-            tuples.concat initial_read
-            deleted_tuples.each do |deleted_tuple|
-              delete_subscription_node.call(deleted_tuple)
-            end
-            inserted_tuples.each do |inserted_tuple|
-              insert_subscription_node.call(inserted_tuple)
-            end
+            deleted_tuples.each{|tuple| delete(tuple)}
+            inserted_tuples.each{|tuple| insert(tuple)}
           end
 
         operand_subscriptions.push(
