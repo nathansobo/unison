@@ -33,6 +33,20 @@ module Unison
         end
       end
 
+      describe "#pull" do
+        it "#merges the results of #fetch on the given Repository" do
+          origin = Unison.origin
+
+          new_users = origin.fetch(users_set)
+          mock.proxy(origin).fetch(users_set)
+          mock.proxy(users_set).merge(new_users)
+
+          new_users.each { |user| users_set.find(user.id).should be_nil }
+          users_set.pull(origin)
+          new_users.each { |user| users_set.find(user.id).should_not be_nil }
+        end
+      end
+
       describe "#find" do
         it "returns a singleton Selection with id equal to the passed in id" do
           users_set.find(1).should == users_set.where(users_set[:id].eq(1))

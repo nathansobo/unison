@@ -27,6 +27,10 @@ module Unison
         end
       end
 
+      def pull(repository)
+        merge(repository.fetch(self))
+      end
+
       def find(id)
         where(self[:id].eq(id)).singleton
       end
