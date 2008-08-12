@@ -10,6 +10,11 @@ module Unison
         @operand, @predicate = operand, predicate
       end
 
+      def merge(tuples)
+        raise "Relation must be retained" unless retained?
+        operand.merge(tuples)
+      end
+
       def to_sql
         to_arel.to_sql
       end

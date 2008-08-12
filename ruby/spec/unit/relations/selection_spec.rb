@@ -55,6 +55,19 @@ module Unison
           selection.tuples
         end
 
+        describe "#merge" do
+          it "calls #merge on the #operand" do
+            tuple = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
+            operand.find(tuple[:id]).should be_nil
+            operand.should_not include(tuple)
+            mock.proxy(operand).merge([tuple])
+
+            selection.merge([tuple])
+
+            operand.should include(tuple)
+          end
+        end
+
         describe "#size" do
           it "returns the number of tuples in the relation" do
             selection.size.should == selection.tuples.size
@@ -434,6 +447,14 @@ module Unison
             tuples.each do |tuple|
               tuple[:user_id].should == 1
             end
+          end
+        end
+
+        describe "#merge" do
+          it "raises an Exception" do
+            lambda do
+              selection.merge([Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")])
+            end.should raise_error
           end
         end
       end
