@@ -56,11 +56,10 @@ module Unison
 
       describe "#after_first_retain" do
         it "#retains the #nested_tuples" do
-          tuple.refcount.should == 0
           nested_tuple_1.should_not be_retained_by(tuple)
           nested_tuple_2.should_not be_retained_by(tuple)
 
-          tuple.retain(Object.new)
+          tuple.send(:after_first_retain)
 
           nested_tuple_1.should be_retained_by(tuple)
           nested_tuple_2.should be_retained_by(tuple)
@@ -69,14 +68,11 @@ module Unison
 
       describe "#after_last_release" do
         it "#releases the #nested_tuples" do
-          retainer = Object.new
-          tuple.retain(retainer)
+          tuple.retain(Object.new)
           nested_tuple_1.should be_retained_by(tuple)
           nested_tuple_2.should be_retained_by(tuple)
 
-          tuple.release(retainer)
-          tuple.refcount.should == 0
-
+          tuple.send(:after_last_release)
           nested_tuple_1.should_not be_retained_by(tuple)
           nested_tuple_2.should_not be_retained_by(tuple)
         end
