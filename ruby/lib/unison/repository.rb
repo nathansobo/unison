@@ -6,6 +6,7 @@ module Unison
     end
 
     def fetch(relation)
+      raise NotImplementedError if relation.is_a?(Relations::InnerJoin)
       connection[relation.to_sql].map do |record|
         relation.tuple_class.new(record)
       end

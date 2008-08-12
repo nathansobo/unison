@@ -30,6 +30,15 @@ module Unison
           origin.fetch(projection).should == origin.fetch(photos_set)
         end
       end
+
+      context "when passed an InnerJoin" do
+        it "raises a NotImplementedError" do
+          join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
+          lambda do
+            origin.fetch(join)
+          end.should raise_error(NotImplementedError)
+        end
+      end
     end
   end
 end
