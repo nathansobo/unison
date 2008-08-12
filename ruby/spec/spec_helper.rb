@@ -55,6 +55,12 @@ Spec::Runner.configure do |config|
     users << {:id => 11, :name => "Buffington", :hobby => "Bots"}
     users << {:id => 12, :name => "Keefa", :hobby => "Begging"}
 
+    photos = connection[:photos]
+    photos.delete
+    photos << {:id => 11, :user_id => 11, :name => "Photo of Buffington."}
+    photos << {:id => 12, :user_id => 11, :name => "Another photo of Buffington. This one is bad."}
+    photos << {:id => 13, :user_id => 12, :name => "Photo of Keefa in a dog fight."}
+
     Object.class_eval do
       const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:users)

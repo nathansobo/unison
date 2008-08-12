@@ -17,6 +17,13 @@ module Unison
         end
       end
 
+      describe "#tuple_class" do
+        it "delegates to #attributes" do
+          projection.tuple_class.should == attributes.tuple_class
+        end
+      end
+
+
       describe "#to_sql" do
         it "returns select attributes from operand" do
           projection.to_sql.should be_like("

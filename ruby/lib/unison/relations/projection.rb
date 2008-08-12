@@ -19,6 +19,10 @@ module Unison
         Arel::Project.new( operand.to_arel, *attributes.to_arel.attributes )
       end
 
+      def tuple_class
+        attributes.tuple_class
+      end
+
       def merge(tuples)
         attributes.merge(tuples)
       end
