@@ -11,7 +11,7 @@ module Unison
       end
 
       describe "#initialize" do
-        it "sets the #operand and #predicate" do
+        it "composed_sets the #operand and #predicate" do
           selection.operand.should == photos_set
           predicate.should == photos_set[:user_id].eq(1)
         end
@@ -33,7 +33,7 @@ module Unison
 
         context "when the Selection contains PrimitiveTuples" do
           before do
-            selection.sets.length.should == 1
+            selection.composed_sets.length.should == 1
           end
 
           it "calls #push on the given Repository with self" do
@@ -47,7 +47,7 @@ module Unison
           before do
             @selection = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id])).where(users_set[:id].eq(1))
             selection.should_not be_empty
-            selection.sets.length.should == 2
+            selection.composed_sets.length.should == 2
           end
 
           it "pushes a Projection of each Set represented in the Selection to the given Repository" do
@@ -103,9 +103,9 @@ module Unison
         end
       end
 
-      describe "#sets" do
+      describe "#composed_sets" do
         it "delegates to its #operand" do
-          selection.sets.should == operand.sets
+          selection.composed_sets.should == operand.composed_sets
         end
       end
 

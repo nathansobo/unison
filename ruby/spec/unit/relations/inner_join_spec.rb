@@ -12,7 +12,7 @@ module Unison
       end
 
       describe "#initialize" do
-        it "sets #operand_1, #operand_2, and #predicate" do
+        it "composed_sets #operand_1, #operand_2, and #predicate" do
           join.operand_1.should == users_set
           join.operand_2.should == photos_set
           predicate.should == photos_set[:user_id].eq(users_set[:id])
@@ -48,8 +48,8 @@ module Unison
           origin.connection[:photos].delete
         end
 
-        context "when #sets.size == 2" do
-          it "pushes a Projection of both Sets represented in the InnerJoin to the given Repository" do
+        context "when #composed_sets.size == 2" do
+          it "pushes a Projection of both composed_sets represented in the InnerJoin to the given Repository" do
             users_projection = join.project(users_set)
             photos_projection = join.project(photos_set)
 
@@ -63,13 +63,13 @@ module Unison
           end
         end
 
-        context "when #sets.size == 3" do
+        context "when #composed_sets.size == 3" do
           before do
             @join = join.join(cameras_set).on(photos_set[:camera_id].eq(cameras_set[:id]))
-            join.sets.size.should == 3
+            join.composed_sets.size.should == 3
           end
 
-          it "pushes a Projection of the three Sets represented in the InnerJoin to the given Repository" do
+          it "pushes a Projection of the three composed_sets represented in the InnerJoin to the given Repository" do
             users_projection = join.project(users_set)
             photos_projection = join.project(photos_set)
             cameras_projection = join.project(cameras_set)
@@ -102,10 +102,10 @@ module Unison
         end
       end
 
-      describe "#sets" do
+      describe "#composed_sets" do
         context "when the operands contain PrimitiveTuples" do
-          it "returns the union of the #sets of the operands" do
-            join.sets.should == operand_1.sets + operand_2.sets
+          it "returns the union of the #composed_sets of the operands" do
+            join.composed_sets.should == operand_1.composed_sets + operand_2.composed_sets
           end
         end
 
@@ -114,8 +114,8 @@ module Unison
             @join = join.join(cameras_set).on(photos_set[:camera_id].eq(cameras_set[:id]))
           end
 
-          it "returns the union of the #sets of the operands" do
-            join.sets.should == [users_set, photos_set, cameras_set]
+          it "returns the union of the #composed_sets of the operands" do
+            join.composed_sets.should == [users_set, photos_set, cameras_set]
           end
         end
       end

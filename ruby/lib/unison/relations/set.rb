@@ -54,7 +54,7 @@ module Unison
         self
       end
 
-      def sets
+      def composed_sets
         [self]
       end
 

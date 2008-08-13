@@ -11,7 +11,7 @@ module Unison
       end
 
       describe "#initialize" do
-        it "sets #operand and #projected_set" do
+        it "composed_sets #operand and #projected_set" do
           projection.operand.should == operand
           projection.projected_set.should == projected_set
         end
@@ -63,9 +63,9 @@ module Unison
         end
       end
 
-      describe "#sets" do
+      describe "#composed_sets" do
         it "delegates to #operand " do
-          projection.sets.should == operand.sets
+          projection.composed_sets.should == operand.composed_sets
         end
       end
 

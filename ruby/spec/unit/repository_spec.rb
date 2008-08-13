@@ -46,7 +46,7 @@ module Unison
       end
 
       context "when passed a Relation that contains PrimitiveTuples" do
-        it "inserts all new? PrimitiveTuples and sets #new? to false on them" do
+        it "inserts all new? PrimitiveTuples and composed_sets #new? to false on them" do
           photos_set.size.should be > 1
           photos_set.all? {|tuple| tuple.new?}.should be_true
 

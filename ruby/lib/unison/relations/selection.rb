@@ -31,8 +31,8 @@ module Unison
         operand.set
       end
 
-      def sets
-        operand.sets
+      def composed_sets
+        operand.composed_sets
       end
 
       protected

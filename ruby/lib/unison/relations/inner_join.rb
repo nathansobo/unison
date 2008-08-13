@@ -26,8 +26,8 @@ module Unison
         raise NotImplementedError
       end
 
-      def sets
-        operand_1.sets + operand_2.sets
+      def composed_sets
+        operand_1.composed_sets + operand_2.composed_sets
       end
 
       def attribute(name)

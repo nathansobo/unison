@@ -33,7 +33,7 @@ module Unison
 
       def push(repository)
         if compound?
-          sets.each do |component_set|
+          composed_sets.each do |component_set|
             repository.push(self.project(component_set))
           end
         else
@@ -62,7 +62,7 @@ module Unison
       end
 
       def compound?
-        sets.size > 1
+        composed_sets.size > 1
       end
 
       def tuple

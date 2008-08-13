@@ -337,7 +337,7 @@ module Unison
             relations.should_not be_empty
           end
 
-          it "sets new? to true" do
+          it "composed_sets new? to true" do
             tuple.should be_new
           end
 
@@ -352,7 +352,7 @@ module Unison
               user.id.should == 100
             end
 
-            it "if no #id is provided, sets :id to a generated guid" do
+            it "if no #id is provided, composed_sets :id to a generated guid" do
               user = User.create(:name => "Obama")
               user.id.should_not be_nil
             end
@@ -430,14 +430,14 @@ module Unison
         end
 
         describe "#[]=" do
-          it "sets the value for an Attribute defined on the set of the Tuple class" do
+          it "composed_sets the value for an Attribute defined on the set of the Tuple class" do
             tuple[User.set[:id]] = 2
             tuple[User.set[:id]].should == 2
             tuple[User.set[:name]] = "Corey"
             tuple[User.set[:name]].should == "Corey"
           end
 
-          it "sets the value for a Symbol corresponding to a name of an Attribute defined on the #set of the Tuple class" do
+          it "composed_sets the value for a Symbol corresponding to a name of an Attribute defined on the #set of the Tuple class" do
             tuple[:id] = 2
             tuple[:id].should == 2
             tuple[:name] = "Corey"
