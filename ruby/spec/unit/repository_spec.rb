@@ -42,28 +42,15 @@ module Unison
 
     describe "#push" do
       context "when passed a Relation other than InnerJoin" do
-        it "inserts all new? PrimitiveTuples" do
-          pending "PrimitiveTuple#primitive_attributes" do
-            selection = photos_set.where(photos_set[:user_id].eq(1))
-            selection.size.should be > 1
-            selection.all? {|tuple| tuple.new?}.should be_true
+        it "inserts all new? PrimitiveTuples and sets #new? to false on them" do
+          selection = photos_set.where(photos_set[:user_id].eq(1))
+          selection.size.should be > 1
+          selection.all? {|tuple| tuple.new?}.should be_true
 
-            origin.fetch(selection).should be_empty
-            origin.push(selection)
-            origin.fetch(selection).should == selection
-          end
-        end
-        
-        it "sets #new? to false on all new PrimitiveTuples" do
-          pending "PrimitiveTuple#primitive_attributes" do
-            selection = photos_set.where(photos_set[:user_id].eq(1))
-            selection.size.should be > 1
-            selection.all? {|tuple| tuple.new?}.should be_true
-
-            origin.push(selection)
-
-            selection.any? {|tuple| tuple.new?}.should be_false
-          end
+          origin.fetch(selection).should be_empty
+          origin.push(selection)
+          origin.fetch(selection).should == selection.tuples
+          selection.any? {|tuple| tuple.new?}.should be_false
         end
       end
 

@@ -17,7 +17,7 @@ module Unison
 
       table = connection[relation.set.name]
       relation.each do |tuple|
-        table << tuple.primitive_attributes
+        table << tuple.attributes
         tuple.persisted
       end
     end
