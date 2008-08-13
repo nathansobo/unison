@@ -44,6 +44,10 @@ module Unison
           raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on this Set")
       end
 
+      def set
+        self
+      end
+
       def insert(tuple)
         raise "Relation must be retained" unless retained?
         raise ArgumentError, "Passed in Tuple's relation must be #{self}" unless tuple.relation == self

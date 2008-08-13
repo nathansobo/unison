@@ -27,6 +27,10 @@ module Unison
         operand.to_arel.where(predicate.to_arel)
       end
 
+      def set
+        operand.set
+      end
+
       protected
       def initial_read
         operand.tuples.select do |tuple|

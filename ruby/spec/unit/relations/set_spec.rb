@@ -93,6 +93,12 @@ module Unison
         end
       end
 
+      describe "#set" do
+        it "returns self" do
+          set.set.should == set
+        end
+      end
+
       describe "#insert" do
         context "when #retained?" do
           before do

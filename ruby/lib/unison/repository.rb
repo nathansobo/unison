@@ -14,7 +14,10 @@ module Unison
 
     def push(relation)
       raise NotImplementedError if relation.is_a?(Relations::InnerJoin)
+
+      table = connection[relation.set.name]
       relation.each do |tuple|
+        table << tuple.primitive_attributes
         tuple.persisted
       end
     end

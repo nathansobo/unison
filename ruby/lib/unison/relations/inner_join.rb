@@ -18,6 +18,10 @@ module Unison
         operand_1.to_arel.join(operand_2.to_arel).on(predicate.to_arel)
       end
 
+      def set
+        raise NotImplementedError
+      end
+
       def attribute(name)
         return operand_1.attribute(name) if operand_1.has_attribute?(name)
         return operand_2.attribute(name) if operand_2.has_attribute?(name)

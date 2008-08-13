@@ -27,6 +27,10 @@ module Unison
         attributes.merge(tuples)
       end
 
+      def set
+        attributes
+      end
+
       protected
       attr_reader :last_update, :operand_subscriptions
 

@@ -40,6 +40,14 @@ module Unison
         end
       end
 
+      describe "#set" do
+        it "raises a NotImplementedError" do
+          lambda do
+            join.set
+          end.should raise_error(NotImplementedError)
+       end
+      end
+
       describe "#attribute" do
         attr_reader :name
 

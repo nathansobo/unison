@@ -55,6 +55,12 @@ module Unison
         end
       end
 
+      describe "#set" do
+        it "delegates to its #operand" do
+          selection.set.should == operand.set
+        end
+      end
+
       context "after #retain has been called" do
         before do
           selection.retain(Object.new)
