@@ -35,7 +35,7 @@ module Unison
     attr_writer :origin
 
     attr_writer :test_mode
-    def test_mode
+    def test_mode?
       @test_mode ||= false
     end
   end

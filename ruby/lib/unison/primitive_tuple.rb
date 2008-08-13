@@ -89,7 +89,7 @@ module Unison
       super()
       @signals = {}
 
-      if attributes[:id] && !Unison.test_mode
+      if attributes[:id] && !Unison.test_mode?
         raise "You can only assign the :id attribute in test mode"
       end
       attributes[:id] ||= Guid.new.to_s 

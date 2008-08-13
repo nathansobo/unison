@@ -342,9 +342,9 @@ module Unison
           end
 
 
-          context "when Unison.test_mode is true" do
+          context "when Unison.test_mode? is true" do
             before do
-              Unison.test_mode.should be_true
+              Unison.test_mode?.should be_true
             end
 
             it "if an #id is provided, honors it" do
@@ -358,7 +358,7 @@ module Unison
             end
           end
 
-          context "when Unison.test_mode is false" do
+          context "when Unison.test_mode? is false" do
             before do
               Unison.test_mode = false
             end
