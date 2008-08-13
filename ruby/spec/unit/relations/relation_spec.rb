@@ -47,6 +47,23 @@ module Unison
         end
       end
 
+      describe "#compound?" do
+        context "when #sets.size == 1" do
+          it "returns true" do
+            users_set.sets.size.should == 1
+            users_set.should_not be_compound
+          end
+        end
+
+        context "when #sets.size is > 1" do
+          it "returns false" do
+            join = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id]))
+            join.sets.size.should == 2
+            join.should be_compound
+          end
+        end
+      end
+
       describe "#find" do
         context "when a Tuple with the given #id is in the Relation" do
           before do

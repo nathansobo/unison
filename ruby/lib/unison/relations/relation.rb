@@ -51,6 +51,10 @@ module Unison
         retained?? @tuples : initial_read
       end
 
+      def compound?
+        sets.size > 1
+      end
+
       def tuple
         raise "Relation must be singleton to call #tuple" unless singleton?
         tuples.first
