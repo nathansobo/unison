@@ -19,16 +19,6 @@ module Unison
         operand.tuple_class
       end
 
-      def push(repository)
-        if sets.size == 1
-          repository.push(self)
-        else
-          sets.each do |component_set|
-            repository.push(self.project(component_set))
-          end
-        end
-      end
-
       def to_sql
         to_arel.to_sql
       end

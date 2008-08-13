@@ -31,6 +31,16 @@ module Unison
         merge(repository.fetch(self))
       end
 
+      def push(repository)
+        if compound?
+          sets.each do |component_set|
+            repository.push(self.project(component_set))
+          end
+        else
+          repository.push(self)
+        end
+      end
+
       def find(id)
         where(self[:id].eq(id)).first
       end

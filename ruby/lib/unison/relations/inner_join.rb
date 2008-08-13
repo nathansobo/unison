@@ -18,12 +18,6 @@ module Unison
         operand_1.to_arel.join(operand_2.to_arel).on(predicate.to_arel)
       end
 
-      def push(repository)
-        sets.each do |component_set|
-          repository.push(self.project(component_set))
-        end
-      end
-
       def compound?
         true
       end
