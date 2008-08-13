@@ -119,6 +119,14 @@ module Unison
       value
     end
 
+    def attributes
+      attributes = {}
+      attribute_values.each do |attribute, value|
+        attributes[attribute.name] = value
+      end
+      attributes          
+    end
+
     def ==(other)
       return false unless other.is_a?(PrimitiveTuple)
       attribute_values == other.send(:attribute_values)

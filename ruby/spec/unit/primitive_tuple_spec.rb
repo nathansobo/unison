@@ -411,6 +411,18 @@ module Unison
           end
         end
 
+        describe "#attributes" do
+          it "returns the #attribute_values, keyed by the name of their corresponding Attribute" do
+            expected_attributes = {}
+            tuple.send(:attribute_values).each do |attribute, value|
+              expected_attributes[attribute.name] = value
+            end
+            expected_attributes.should_not be_empty
+
+            tuple.attributes.should == expected_attributes
+          end
+        end
+
         describe "#signal" do
           attr_reader :user, :signal
           before do
