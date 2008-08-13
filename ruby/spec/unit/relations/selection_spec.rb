@@ -23,6 +23,48 @@ module Unison
         end
       end
 
+      describe "#push" do
+        attr_reader :origin
+        before do
+          @origin = Unison.origin
+          origin.connection[:users].delete
+          origin.connection[:photos].delete
+        end
+
+        context "when the Selection contains PrimitiveTuples" do
+          before do
+            selection.sets.length.should == 1
+          end
+
+          it "calls #push on the given Repository with self" do
+            origin.fetch(selection).should be_empty
+            selection.push(origin)
+            origin.fetch(selection).should == selection.tuples
+          end
+        end
+
+        context "when the Selection contains CompoundTuples" do
+          before do
+            @selection = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id])).where(users_set[:id].eq(1))
+            selection.should_not be_empty
+            selection.sets.length.should == 2
+          end
+
+          it "pushes a Projection of each Set represented in the Selection to the given Repository" do
+            users_projection = selection.project(users_set)
+            photos_projection = selection.project(photos_set)
+            mock.proxy(origin).push(users_projection)
+            mock.proxy(origin).push(photos_projection)
+
+            origin.fetch(users_projection).should be_empty
+            origin.fetch(photos_projection).should be_empty
+            selection.push(origin)
+            origin.fetch(users_projection).should == users_projection.tuples
+            origin.fetch(photos_projection).should == photos_projection.tuples
+          end
+        end
+      end
+
       describe "#to_sql" do
         context "when #operand is a Set" do
           before do
