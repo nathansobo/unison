@@ -44,6 +44,10 @@ module Unison
           raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on this Set")
       end
 
+      def push(repository)
+        repository.push(self)
+      end
+
       def set
         self
       end

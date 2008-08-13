@@ -93,6 +93,14 @@ module Unison
         end
       end
 
+      describe "#push" do
+        it "calls #push with self on the given Repository" do
+          origin = Unison.origin
+          mock.proxy(origin).push(set)
+          set.push(origin)
+        end
+      end
+
       describe "#set" do
         it "returns self" do
           set.set.should == set
