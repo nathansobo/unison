@@ -70,8 +70,6 @@ module Unison
           end
 
           it "pushes a Projection of the three Sets represented in the InnerJoin to the given Repository" do
-            pending "[] working properly on CompoundTuples"
-            
             users_projection = join.project(users_set)
             photos_projection = join.project(photos_set)
             cameras_projection = join.project(cameras_set)

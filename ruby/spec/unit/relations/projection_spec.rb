@@ -341,7 +341,6 @@ module Unison
         end
 
         describe "#tuples" do
-
           context "when #attributes is one of the immediate operands of #operand" do
             it "returns the unique set of PrimitiveTuples corresponding to #attributes from the #operand" do
               projection.tuples.should == operand.tuples.map {|tuple| tuple[attributes]}.uniq
@@ -351,11 +350,11 @@ module Unison
           context "when #attributes is an operand of an operand of #operand" do
             before do
               @attributes = cameras_set
-              @projection = operand.join(cameras_set).on(photos_set[:camera_id].eq(cameras_set[:id])).project(attributes)
+              @operand = operand.join(cameras_set).on(photos_set[:camera_id].eq(cameras_set[:id]))
+              @projection = operand.project(attributes)
             end
 
             it "returns the unique set of PrimitiveTuples corresponding to #attributes from the #operand" do
-              pending "[] working properly on CompoundTuples"
               projection.tuples.should == operand.tuples.map {|tuple| tuple[attributes]}.uniq
             end
           end
