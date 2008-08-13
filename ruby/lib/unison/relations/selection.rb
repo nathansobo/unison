@@ -31,6 +31,10 @@ module Unison
         operand.set
       end
 
+      def sets
+        operand.sets
+      end
+
       protected
       def initial_read
         operand.tuples.select do |tuple|

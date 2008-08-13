@@ -22,6 +22,10 @@ module Unison
         raise NotImplementedError
       end
 
+      def sets
+        operand_1.sets + operand_2.sets
+      end
+
       def attribute(name)
         return operand_1.attribute(name) if operand_1.has_attribute?(name)
         return operand_2.attribute(name) if operand_2.has_attribute?(name)

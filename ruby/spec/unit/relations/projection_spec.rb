@@ -50,6 +50,14 @@ module Unison
         end
       end
 
+      describe "#sets" do
+        it "returns [#attributes]" do
+          projection.sets.should == [attributes]
+        end
+      end
+
+
+
       context "after #retain has been called" do
         before do
           projection.retain(Object.new)

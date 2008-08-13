@@ -48,6 +48,10 @@ module Unison
         self
       end
 
+      def sets
+        [self]
+      end
+
       def insert(tuple)
         raise "Relation must be retained" unless retained?
         raise ArgumentError, "Passed in Tuple's relation must be #{self}" unless tuple.relation == self

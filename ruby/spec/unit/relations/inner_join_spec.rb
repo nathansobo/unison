@@ -26,7 +26,7 @@ module Unison
       describe "#to_sql" do
         it "returns 'select #operand_1 inner join #operand_2 on #predicate'" do
           join.to_sql.should be_like("
-            SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `photos`.`id`, `photos`.`user_id`, `photos`.`name`
+            SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `photos`.`id`, `photos`.`user_id`, `photos`.`camera_id`, `photos`.`name`
             FROM `users`
             INNER JOIN `photos`
             ON `photos`.`user_id` = `users`.`id`
@@ -45,7 +45,25 @@ module Unison
           lambda do
             join.set
           end.should raise_error(NotImplementedError)
-       end
+        end
+      end
+
+      describe "#sets" do
+        context "when the operands contain PrimitiveTuples" do
+          it "returns the union of the #sets of the operands" do
+            join.sets.should == operand_1.sets + operand_2.sets
+          end
+        end
+
+        context "when one of operands contains CompoundTuples" do
+          before do
+            @join = join.join(cameras_set).on(photos_set[:camera_id].eq(cameras_set[:id]))
+          end
+
+          it "returns the union of the #sets of the operands" do
+            join.sets.should == [users_set, photos_set, cameras_set]
+          end
+        end
       end
 
       describe "#attribute" do
