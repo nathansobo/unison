@@ -62,6 +62,13 @@ module Unison
         end
       end
 
+      describe "#compound?" do
+        it "returns true" do
+          join.should be_compound
+        end
+      end
+
+
       describe "#set" do
         it "raises a NotImplementedError" do
           lambda do

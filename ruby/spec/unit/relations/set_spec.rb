@@ -93,6 +93,12 @@ module Unison
         end
       end
 
+      describe "#compound?" do
+        it "returns false" do
+          set.should_not be_compound
+        end
+      end
+
       describe "#push" do
         it "calls #push with self on the given Repository" do
           origin = Unison.origin

@@ -48,6 +48,10 @@ module Unison
         repository.push(self)
       end
 
+      def compound?
+        false
+      end
+
       def set
         self
       end

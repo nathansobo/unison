@@ -24,6 +24,10 @@ module Unison
         end
       end
 
+      def compound?
+        true
+      end
+
       def set
         raise NotImplementedError
       end
