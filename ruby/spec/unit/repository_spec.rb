@@ -62,6 +62,5 @@ module Unison
         end
       end
     end
-
   end
 end
