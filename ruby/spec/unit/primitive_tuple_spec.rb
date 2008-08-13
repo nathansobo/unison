@@ -472,10 +472,10 @@ module Unison
             end
           end
 
-          context "when other Tuple#attributes == #attributes" do
+          context "when other Tuple#attribute_values == #attribute_values" do
             before do
               @other_tuple = User.new(:id => 1, :name => "Nathan")
-              other_tuple.attributes.should == tuple.attributes
+              other_tuple.send(:attribute_values).should == tuple.send(:attribute_values)
             end
 
             it "returns true" do
@@ -486,7 +486,7 @@ module Unison
           context "when other Tuple#attributes != #attributes" do
             before do
               @other_tuple = User.new(:id => 100, :name => "Nathan's Clone")
-              other_tuple.attributes.should_not == tuple.attributes
+              other_tuple.send(:attribute_values).should_not == tuple.send(:attribute_values)
             end
 
             it "returns false" do

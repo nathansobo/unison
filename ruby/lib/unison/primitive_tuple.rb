@@ -83,18 +83,15 @@ module Unison
       a_module.extend ClassMethods
     end
 
-    attr_reader :attributes
-
     def initialize(attributes={})
       super()
       @signals = {}
+      @attribute_values = {}
 
       if attributes[:id] && !Unison.test_mode?
         raise "You can only assign the :id attribute in test mode"
       end
       attributes[:id] ||= Guid.new.to_s 
-      @attributes = attributes
-
       attributes.each do |attribute, value|
         self[attribute] = value
       end
@@ -111,20 +108,20 @@ module Unison
     end
 
     def [](attribute)
-      attributes[attribute_for(attribute)]
+      attribute_values[attribute_for(attribute)]
     end    
 
     def []=(attribute_or_symbol, value)
       attribute = attribute_for(attribute_or_symbol)
-      old_value = attributes[attribute]
-      attributes[attribute] = value
+      old_value = attribute_values[attribute]
+      attribute_values[attribute] = value
       update_subscription_node.call(attribute, old_value, value)
       value
     end
 
     def ==(other)
       return false unless other.is_a?(PrimitiveTuple)
-      attributes == other.attributes
+      attribute_values == other.send(:attribute_values)
     end
     
     def primitive?
@@ -156,6 +153,8 @@ module Unison
     end
 
     protected
+    attr_reader :attribute_values    
+
     def instance_relations
       self.class.send(:instance_relations)
     end
