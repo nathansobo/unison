@@ -3,23 +3,23 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
 module Unison
   module Relations
     describe Projection do
-      attr_reader :operand, :projection, :attributes
+      attr_reader :operand, :projection, :projected_set
       before do
         @operand = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id]))
-        @attributes = users_set
-        @projection = Projection.new(operand, attributes)
+        @projected_set = users_set
+        @projection = Projection.new(operand, projected_set)
       end
 
       describe "#initialize" do
-        it "sets #operand and #attributes" do
+        it "sets #operand and #projected_set" do
           projection.operand.should == operand
-          projection.attributes.should == attributes
+          projection.projected_set.should == projected_set
         end
       end
 
       describe "#tuple_class" do
-        it "delegates to #attributes" do
-          projection.tuple_class.should == attributes.tuple_class
+        it "delegates to #projected_set" do
+          projection.tuple_class.should == projected_set.tuple_class
         end
       end
 
@@ -58,8 +58,8 @@ module Unison
       end
 
       describe "#set" do
-        it "returns #attributes" do
-          projection.set.should == attributes
+        it "returns #projected_set" do
+          projection.set.should == projected_set
         end
       end
 
@@ -75,23 +75,23 @@ module Unison
         end
 
         describe "#merge" do
-          it "calls #merge on the Set that is the source of #attributes" do
+          it "calls #merge on the #projected_set" do
             tuple = User.new(:id => 100, :name => "Jan")
-            mock.proxy(attributes).merge([tuple])
-            attributes.should_not include(tuple)
+            mock.proxy(projected_set).merge([tuple])
+            projected_set.should_not include(tuple)
             projection.merge([tuple])
-            attributes.should include(tuple)
+            projected_set.should include(tuple)
           end
         end
 
         context "when the a Tuple is inserted into the #operand" do
           attr_reader :user
-          context "when the inserted Tuple restricted by #attributes is not in the Projection" do
+          context "when the inserted Tuple restricted by #projected_set is not in the Projection" do
             before do
               @user = User.create(:id => 100, :name => "Brian")
             end
 
-            it "inserts the Tuple restricted by #attributes into itself" do
+            it "inserts the Tuple restricted by #projected_set into itself" do
               projection.tuples.should_not include(user)
               lambda do
                 Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
@@ -110,13 +110,13 @@ module Unison
             end
           end
 
-          context "when the inserted Tuple restricted by #attributes is in the Projection" do
+          context "when the inserted Tuple restricted by #projected_set is in the Projection" do
             before do
               @user = projection.tuples.first
               projection.tuples.should include(user)
             end
 
-            it "does not insert the Tuple restricted by #attributes" do
+            it "does not insert the Tuple restricted by #projected_set" do
               lambda do
                 Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
               end.should_not change{projection.tuples.length}
@@ -135,8 +135,8 @@ module Unison
         context "when a Tuple is deleted from the #operand" do
           attr_reader :user
           
-          context "when the deleted Tuple restricted by #attributes is in the Projection" do
-            context "and no other identical Tuple restricted by #attributes is in the operand" do
+          context "when the deleted Tuple restricted by #projected_set is in the Projection" do
+            context "and no other identical Tuple restricted by #projected_set is in the operand" do
               attr_reader :photo
               before do
                 @user = User.create(:id => 100, :name => "Brian")
@@ -144,14 +144,14 @@ module Unison
                 projection.tuples.should include(user)
               end
 
-              it "removes the Tuple restricted by #attributes" do
+              it "removes the Tuple restricted by #projected_set" do
                 lambda do
                   users_set.delete(user)
                 end.should change{projection.tuples.length}.by(-1)
                 projection.tuples.should_not include(user)
               end
 
-              it "invokes #on_delete callbacks with the deleted Tuple restricted by #attributes" do
+              it "invokes #on_delete callbacks with the deleted Tuple restricted by #projected_set" do
                 deleted = nil
                 projection.on_delete do |tuple|
                   deleted = tuple
@@ -162,7 +162,7 @@ module Unison
               end
             end
 
-            context "and another identical Tuple restricted by #attributes is in the operand" do
+            context "and another identical Tuple restricted by #projected_set is in the operand" do
               attr_reader :photo_1, :photo_2
               before do
                 @user = User.create(:id => 100, :name => "Brian")
@@ -171,7 +171,7 @@ module Unison
                 projection.tuples.should include(user)
               end
 
-              it "does not remove the Tuple restricted by #attributes from the Tuples returned by #tuples" do
+              it "does not remove the Tuple restricted by #projected_set from the Tuples returned by #tuples" do
                 lambda do
                   photos_set.delete(photo_1)
                 end.should_not change{projection.tuples.length}
@@ -188,20 +188,20 @@ module Unison
             end
           end
 
-          context "when the deleted Tuple restricted by #attributes is not in the Projection" do
+          context "when the deleted Tuple restricted by #projected_set is not in the Projection" do
             before do
               @user = User.create(:id => 100, :name => "Brian")
               projection.tuples.should_not include(user)
             end
 
-            it "does not remove the Tuple restricted by #attributes" do
+            it "does not remove the Tuple restricted by #projected_set" do
               lambda do
                 users_set.delete(user)
               end.should_not change{projection.tuples.length}
               projection.tuples.should_not include(user)
             end
 
-            it "does not invoke #on_delete callbacks with the Tuple restricted by #attributes" do
+            it "does not invoke #on_delete callbacks with the Tuple restricted by #projected_set" do
               projection.on_delete do |tuple|
                 raise "I should not be invoked"
               end
@@ -221,7 +221,7 @@ module Unison
             @attribute = users_set[:name]
           end
 
-          context "and the updated Attribute is in #attributes" do
+          context "and the updated Attribute is in #projected_set" do
             attr_reader :old_value, :new_value
             before do
               operand.tuples.select do |tuple|
@@ -291,7 +291,7 @@ module Unison
             end
           end
 
-          context "and the updated Attribute is not in #attributes" do
+          context "and the updated Attribute is not in #projected_set" do
             attr_reader :photo
             before do
               @photo = operand_compound_tuple[photos_set]
@@ -341,21 +341,21 @@ module Unison
         end
 
         describe "#tuples" do
-          context "when #attributes is one of the immediate operands of #operand" do
-            it "returns the unique set of PrimitiveTuples corresponding to #attributes from the #operand" do
-              projection.tuples.should == operand.tuples.map {|tuple| tuple[attributes]}.uniq
+          context "when #projected_set is one of the immediate operands of #operand" do
+            it "returns the unique set of PrimitiveTuples corresponding to #projected_set from the #operand" do
+              projection.tuples.should == operand.tuples.map {|tuple| tuple[projected_set]}.uniq
             end
           end
 
-          context "when #attributes is an operand of an operand of #operand" do
+          context "when #projected_set is an operand of an operand of #operand" do
             before do
-              @attributes = cameras_set
+              @projected_set = cameras_set
               @operand = operand.join(cameras_set).on(photos_set[:camera_id].eq(cameras_set[:id]))
-              @projection = operand.project(attributes)
+              @projection = operand.project(projected_set)
             end
 
-            it "returns the unique set of PrimitiveTuples corresponding to #attributes from the #operand" do
-              projection.tuples.should == operand.tuples.map {|tuple| tuple[attributes]}.uniq
+            it "returns the unique set of PrimitiveTuples corresponding to #projected_set from the #operand" do
+              projection.tuples.should == operand.tuples.map {|tuple| tuple[projected_set]}.uniq
             end
           end
         end

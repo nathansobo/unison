@@ -1,12 +1,12 @@
 module Unison
   module Relations
     class Projection < Relation
-      attr_reader :operand, :attributes
+      attr_reader :operand, :projected_set
       retains :operand
 
-      def initialize(operand, attributes)
+      def initialize(operand, projected_set)
         super()
-        @operand, @attributes = operand, attributes
+        @operand, @projected_set = operand, projected_set
         @operand_subscriptions = []
         @last_update = nil
       end
@@ -16,15 +16,15 @@ module Unison
       end
 
       def to_arel
-        Arel::Project.new( operand.to_arel, *attributes.to_arel.attributes )
+        Arel::Project.new( operand.to_arel, *projected_set.to_arel.attributes )
       end
 
       def tuple_class
-        attributes.tuple_class
+        projected_set.tuple_class
       end
 
       def merge(tuples)
-        attributes.merge(tuples)
+        projected_set.merge(tuples)
       end
 
       def push(repository)
@@ -32,7 +32,7 @@ module Unison
       end
       
       def set
-        attributes
+        projected_set
       end
 
       def sets
@@ -44,7 +44,7 @@ module Unison
 
       def initial_read
         operand.tuples.map do |tuple|
-          tuple[attributes]
+          tuple[projected_set]
         end.uniq
       end
 
@@ -52,7 +52,7 @@ module Unison
         super
         operand_subscriptions.push(
           operand.on_insert do |created|
-            restricted = created[attributes]
+            restricted = created[projected_set]
             unless tuples.include?(restricted)
               tuples.push(restricted)
               insert_subscription_node.call(restricted)
@@ -62,7 +62,7 @@ module Unison
 
         operand_subscriptions.push(
           operand.on_delete do |deleted|
-            restricted = deleted[attributes]
+            restricted = deleted[projected_set]
             unless initial_read.include?(restricted)
               tuples.delete(restricted)
               delete_subscription_node.call(restricted)
@@ -72,9 +72,9 @@ module Unison
 
         operand_subscriptions.push(
           operand.on_tuple_update do |updated, attribute, old_value, new_value|
-            restricted = updated[attributes]
+            restricted = updated[projected_set]
             # TODO: BT/NS - Make sure that this condition is sufficient for nested composite Tuples
-            if attributes.has_attribute?(attribute) && last_update != [restricted, attribute, old_value, new_value]
+            if projected_set.has_attribute?(attribute) && last_update != [restricted, attribute, old_value, new_value]
               @last_update = [restricted, attribute, old_value, new_value]
               tuple_update_subscription_node.call(restricted, attribute, old_value, new_value)
             end
