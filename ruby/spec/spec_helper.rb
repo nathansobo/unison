@@ -50,6 +50,8 @@ Spec::Runner.configure do |config|
   config.mock_with :rr
   
   config.before do
+    Unison.test_mode = true
+
     users = connection[:users]
     users.delete
     users << {:id => 11, :name => "Buffington", :hobby => "Bots"}
@@ -59,7 +61,7 @@ Spec::Runner.configure do |config|
     photos.delete
     photos << {:id => 11, :user_id => 11, :name => "Photo of Buffington."}
     photos << {:id => 12, :user_id => 11, :name => "Another photo of Buffington. This one is bad."}
-    photos << {:id => 13, :user_id => 12, :name => "Photo of Keefa in a dog fight."}
+    photos << {:id => 13, :user_id => 12, :name => "Photo of Keefa in a dog fight. She's totally kicking Teddy's ass."}
 
     Object.class_eval do
       const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do

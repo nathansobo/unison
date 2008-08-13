@@ -4,13 +4,6 @@ module Unison
   describe Tuple do
     attr_reader :tuple_class, :tuple
 
-    describe "#initialize" do
-      it "sets new? to true" do
-        user = User.create(:id => 100, :name => "Obama")
-        user.should be_new
-      end
-    end
-
     describe ".[]" do
       it "delegates to .relation" do
         mock.proxy(User.relation)[:name]

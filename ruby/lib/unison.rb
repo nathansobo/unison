@@ -5,6 +5,7 @@ require "arel"
 require "collections"
 require "rubygems"
 require "sequel"
+require "guid"
 
 # TODO: Make a better fix
 class String
@@ -32,5 +33,10 @@ module Unison
       @origin
     end
     attr_writer :origin
+
+    attr_writer :test_mode
+    def test_mode
+      @test_mode ||= false
+    end
   end
 end

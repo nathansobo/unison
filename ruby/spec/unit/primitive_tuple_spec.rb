@@ -336,6 +336,39 @@ module Unison
             relations = tuple.send(:singleton_instance_relations)
             relations.should_not be_empty
           end
+
+          it "sets new? to true" do
+            tuple.should be_new
+          end
+
+
+          context "when Unison.test_mode is true" do
+            before do
+              Unison.test_mode.should be_true
+            end
+
+            it "if an #id is provided, honors it" do
+              user = User.create(:id => 100, :name => "Obama")
+              user.id.should == 100
+            end
+
+            it "if no #id is provided, sets :id to a generated guid" do
+              user = User.create(:name => "Obama")
+              user.id.should_not be_nil
+            end
+          end
+
+          context "when Unison.test_mode is false" do
+            before do
+              Unison.test_mode = false
+            end
+
+            it "if an #id is provided, raises an error" do
+              lambda do
+                User.create(:id => 100, :name => "Obama")
+              end.should raise_error
+            end
+          end
         end
 
         describe "#compound?" do

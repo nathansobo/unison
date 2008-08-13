@@ -88,7 +88,13 @@ module Unison
     def initialize(attributes={})
       super()
       @signals = {}
+
+      if attributes[:id] && !Unison.test_mode
+        raise "You can only assign the :id attribute in test mode"
+      end
+      attributes[:id] ||= Guid.new.to_s 
       @attributes = attributes
+
       attributes.each do |attribute, value|
         self[attribute] = value
       end
