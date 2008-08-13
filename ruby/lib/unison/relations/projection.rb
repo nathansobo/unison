@@ -28,7 +28,7 @@ module Unison
       end
 
       def push(repository)
-        repository.push(self)
+        operand.push(repository)
       end
       
       def set

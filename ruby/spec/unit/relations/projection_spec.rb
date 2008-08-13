@@ -45,10 +45,15 @@ module Unison
       end
 
       describe "#push" do
-        it "calls #push with self on the given Repository" do
+        it "delegates to #operand" do
           origin = Unison.origin
-          mock.proxy(origin).push(projection)
+          origin.connection[:photos].delete
+          origin.connection[:users].delete
+          
+          mock.proxy(operand).push(origin)
+          origin.fetch(projection).should be_empty
           projection.push(origin)
+          origin.fetch(projection).should == projection.tuples
         end
       end
 
