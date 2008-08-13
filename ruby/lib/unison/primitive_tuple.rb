@@ -1,6 +1,7 @@
 module Unison
   module PrimitiveTuple
     include Tuple
+    include Enumerable
     module ClassMethods
       include Tuple::ClassMethods
       attr_accessor :relation
