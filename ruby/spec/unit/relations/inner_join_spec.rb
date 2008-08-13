@@ -40,6 +40,30 @@ module Unison
         end
       end
 
+      describe "#push" do
+        attr_reader :origin
+        before do
+          @origin = Unison.origin
+          origin.connection[:users].delete
+          origin.connection[:photos].delete
+        end
+
+        it "pushes a Projection of each Set represented in the InnerJoin to the given Repository" do
+          pending "Projection enforcing uniqueness" do
+            users_projection = join.project(users_set)
+            photos_projection = join.project(photos_set)
+
+            mock.proxy(origin).push(users_projection)
+            mock.proxy(origin).push(photos_projection)
+
+            join.push(origin)
+
+            users_projection.pull(origin).should == users_projection.tuples
+            users_projection.pull(origin).should == photos_projection.tuples
+          end
+        end
+      end
+
       describe "#set" do
         it "raises a NotImplementedError" do
           lambda do

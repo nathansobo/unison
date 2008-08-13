@@ -45,7 +45,7 @@ module Unison
         Unison.origin.connection[:photos].delete
       end
 
-      context "when passed a non-compound Relation" do
+      context "when passed a Relation that contains PrimitiveTuples" do
         it "inserts all new? PrimitiveTuples and sets #new? to false on them" do
           photos_set.size.should be > 1
           photos_set.all? {|tuple| tuple.new?}.should be_true
@@ -57,10 +57,9 @@ module Unison
         end
       end
 
-      context "when passed a compound Relation" do
+      context "when passed a Relation that contains CompoundTuples" do
         it "raises an Exception" do
           join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
-          join.should be_compound
           lambda do
             origin.push(join)
           end.should raise_error

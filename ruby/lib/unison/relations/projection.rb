@@ -36,7 +36,7 @@ module Unison
       end
 
       def sets
-        [attributes]
+        operand.sets
       end
 
       protected

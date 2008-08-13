@@ -69,10 +69,6 @@ module Unison
         @singleton
       end
 
-      def compound?
-        sets.size > 1
-      end
-
       def on_insert(&block)
         raise "Relation must be retained" unless retained?
         insert_subscription_node.subscribe(&block)

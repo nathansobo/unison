@@ -59,12 +59,10 @@ module Unison
       end
 
       describe "#sets" do
-        it "returns [#attributes]" do
-          projection.sets.should == [attributes]
+        it "delegates to #operand " do
+          projection.sets.should == operand.sets
         end
       end
-
-
 
       context "after #retain has been called" do
         before do
