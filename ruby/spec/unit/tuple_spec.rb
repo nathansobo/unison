@@ -6,7 +6,7 @@ module Unison
 
     describe ".[]" do
       it "delegates to .relation" do
-        mock.proxy(User.relation)[:name]
+        mock.proxy(User.set)[:name]
         User[:name]
       end
     end
@@ -14,14 +14,14 @@ module Unison
     describe ".where" do
       it "delegates to .relation" do
         predicate = User[:name].eq("Nathan")
-        mock.proxy(User.relation).where(User[:name].eq("Nathan"))
+        mock.proxy(User.set).where(User[:name].eq("Nathan"))
         User.where(User[:name].eq("Nathan"))
       end
     end
 
     describe ".find" do
       it "delegates to #find on the #relation" do
-        User.find(1).should == User.relation.find(1)
+        User.find(1).should == User.set.find(1)
       end
     end
 

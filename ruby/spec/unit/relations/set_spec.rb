@@ -19,7 +19,7 @@ module Unison
         it "sets the #tuple_class of the Set to a subclass of Tuple::Base, and sets its #relation to itself" do
           tuple_class = set.tuple_class
           tuple_class.superclass.should == PrimitiveTuple::Base
-          tuple_class.relation.should == set
+          tuple_class.set.should == set
         end
       end
 
@@ -158,7 +158,7 @@ module Unison
 
           it "when the Set is not the passed in object's #relation, raises an ArgumentError" do
             incorrect_tuple = Profile.find(1)
-            incorrect_tuple.relation.should_not == set
+            incorrect_tuple.set.should_not == set
 
             lambda do
               set.insert(incorrect_tuple)

@@ -5,15 +5,15 @@ module Unison
     module ClassMethods
       include Retainable::ClassMethods
       def [](attribute)
-        relation[attribute]
+        set[attribute]
       end
 
       def where(predicate)
-        relation.where(predicate)
+        set.where(predicate)
       end
 
       def find(id)
-        relation.find(id)
+        set.find(id)
       end
 
       def basename
@@ -39,8 +39,8 @@ module Unison
       @new
     end
     
-    def relation
-      self.class.relation
+    def set
+      self.class.set
     end
 
     def bind(expression)
@@ -60,14 +60,14 @@ module Unison
     attr_reader :signals, :update_subscription_node
 
     def attribute_for(attribute_or_name)
-      unless relation.has_attribute?(attribute_or_name)
-        raise ArgumentError, "Attribute #{attribute_or_name.inspect} must be part of the Tuple's Relation"
+      unless set.has_attribute?(attribute_or_name)
+        raise ArgumentError, "Attribute #{attribute_or_name.inspect} must be part of the Tuple's Set"
       end
       case attribute_or_name
       when Attribute
         attribute_or_name
       when Symbol
-        relation[attribute_or_name]
+        set[attribute_or_name]
       else
         raise ArgumentError, "attribute_for only accepts an Attribute or Symbol"
       end

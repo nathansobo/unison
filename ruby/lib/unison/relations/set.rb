@@ -12,7 +12,7 @@ module Unison
       def tuple_class
         @tuple_class ||= begin
           tuple_class = Class.new(Unison::PrimitiveTuple::Base)
-          tuple_class.relation = self
+          tuple_class.set = self
           tuple_class
         end
       end
@@ -60,7 +60,7 @@ module Unison
 
       def insert(tuple)
         raise "Relation must be retained" unless retained?
-        raise ArgumentError, "Passed in Tuple's relation must be #{self}" unless tuple.relation == self
+        raise ArgumentError, "Passed in PrimitiveTuple's #set must be #{self}" unless tuple.set == self
         unless find(tuple[:id]).nil?
           raise ArgumentError, "Tuple with id #{tuple[:id]} already exists in this Set"
         end

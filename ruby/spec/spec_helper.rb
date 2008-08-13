@@ -212,31 +212,31 @@ class Spec::ExampleGroup
   include Unison
 
   def users_set
-    User.relation
+    User.set
   end
 
   def life_goals_set
-    LifeGoal.relation
+    LifeGoal.set
   end
 
   def friendships_set
-    Friendship.relation
+    Friendship.set
   end
 
   def profiles_set
-    Profile.relation
+    Profile.set
   end
 
   def photos_set
-    Photo.relation
+    Photo.set
   end
 
   def cameras_set
-    Camera.relation
+    Camera.set
   end
 
   def accounts_set
-    Account.relation
+    Account.set
   end
 
   def origin
