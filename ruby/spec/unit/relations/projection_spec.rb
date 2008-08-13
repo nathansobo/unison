@@ -44,6 +44,14 @@ module Unison
         end
       end
 
+      describe "#push" do
+        it "calls #push with self on the given Repository" do
+          origin = Unison.origin
+          mock.proxy(origin).push(projection)
+          projection.push(origin)
+        end
+      end
+
       describe "#set" do
         it "returns #attributes" do
           projection.set.should == attributes

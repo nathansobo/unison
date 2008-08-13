@@ -27,6 +27,10 @@ module Unison
         attributes.merge(tuples)
       end
 
+      def push(repository)
+        repository.push(self)
+      end
+      
       def set
         attributes
       end
