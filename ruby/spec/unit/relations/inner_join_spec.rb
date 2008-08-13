@@ -48,17 +48,44 @@ module Unison
           origin.connection[:photos].delete
         end
 
-        it "pushes a Projection of each Set represented in the InnerJoin to the given Repository" do
-          users_projection = join.project(users_set)
-          photos_projection = join.project(photos_set)
+        context "when #sets.size == 2" do
+          it "pushes a Projection of both Sets represented in the InnerJoin to the given Repository" do
+            users_projection = join.project(users_set)
+            photos_projection = join.project(photos_set)
 
-          mock.proxy(origin).push(users_projection)
-          mock.proxy(origin).push(photos_projection)
+            mock.proxy(origin).push(users_projection)
+            mock.proxy(origin).push(photos_projection)
 
-          join.push(origin)
+            join.push(origin)
 
-          users_projection.pull(origin).should == users_projection.tuples
-          photos_projection.pull(origin).should == photos_projection.tuples
+            users_projection.pull(origin).should == users_projection.tuples
+            photos_projection.pull(origin).should == photos_projection.tuples
+          end
+        end
+
+        context "when #sets.size == 3" do
+          before do
+            @join = join.join(cameras_set).on(photos_set[:camera_id].eq(cameras_set[:id]))
+            join.sets.size.should == 3
+          end
+
+          it "pushes a Projection of the three Sets represented in the InnerJoin to the given Repository" do
+            pending "[] working properly on CompoundTuples"
+            
+            users_projection = join.project(users_set)
+            photos_projection = join.project(photos_set)
+            cameras_projection = join.project(cameras_set)
+
+            mock.proxy(origin).push(users_projection)
+            mock.proxy(origin).push(photos_projection)
+            mock.proxy(origin).push(cameras_projection)
+
+            join.push(origin)
+
+            users_projection.pull(origin).should == users_projection.tuples
+            photos_projection.pull(origin).should == photos_projection.tuples
+            cameras_projection.pull(origin).should == cameras_projection.tuples
+          end
         end
       end
 

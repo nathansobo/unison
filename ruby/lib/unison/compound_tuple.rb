@@ -16,11 +16,17 @@ module Unison
 
     def [](attribute)
       nested_tuples.each do |tuple|
-        return tuple if tuple.relation == attribute
-        return tuple[attribute] if tuple.relation.has_attribute?(attribute)
+        return tuple[attribute] if tuple.has_attribute?(attribute)
       end
       raise ArgumentError, "Attribute #{attribute} not found"
     end
+
+    def has_attribute?(attribute)
+      nested_tuples.each do |tuple|
+        return true if tuple.has_attribute?(attribute)
+      end
+      false
+    end    
 
     def ==(other)
       return false unless other.is_a?(CompoundTuple)

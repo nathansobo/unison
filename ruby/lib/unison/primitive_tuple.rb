@@ -109,7 +109,12 @@ module Unison
     end
 
     def [](attribute)
-      attribute_values[attribute_for(attribute)]
+      if attribute.is_a?(Relations::Set)
+        raise "#attribute is only defined for Attribute's of this Tuple's #relation or its #relation itself" unless attribute == relation
+        self
+      else
+        attribute_values[attribute_for(attribute)]
+      end
     end    
 
     def []=(attribute_or_symbol, value)
@@ -118,6 +123,10 @@ module Unison
       attribute_values[attribute] = value
       update_subscription_node.call(attribute, old_value, value)
       value
+    end
+
+    def has_attribute?(attribute)
+      relation.has_attribute?(attribute)
     end
 
     def attributes

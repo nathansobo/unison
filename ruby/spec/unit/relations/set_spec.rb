@@ -76,6 +76,10 @@ module Unison
           set.should have_attribute(:name)
           set.should_not have_attribute(:bogus)
         end
+
+        it "when passed the Set itself, returns true" do
+          set.should have_attribute(set)
+        end
       end
 
       describe "#attribute" do

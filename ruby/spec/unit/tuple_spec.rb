@@ -10,7 +10,7 @@ module Unison
         User[:name]
       end
     end
-
+    
     describe ".where" do
       it "delegates to .relation" do
         predicate = User[:name].eq("Nathan")
@@ -43,6 +43,5 @@ module Unison
         user.should_not be_new
       end
     end
-
   end
 end

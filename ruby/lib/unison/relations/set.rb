@@ -30,12 +30,14 @@ module Unison
         end
       end
 
-      def has_attribute?(attribute_or_symbol)
-        case attribute_or_symbol
+      def has_attribute?(candidate_attribute)
+        case candidate_attribute
+        when Set
+          return self == candidate_attribute
         when Attribute
-          attributes.detect {|name, attribute| attribute == attribute_or_symbol}
+          attributes.detect {|name, attribute| candidate_attribute == attribute}
         when Symbol
-          attributes[attribute_or_symbol] ? true : false
+          attributes[candidate_attribute] ? true : false
         end
       end
 

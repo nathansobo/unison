@@ -39,17 +39,72 @@ module Unison
       end
 
       describe "#[]" do
-        context "when passed an Attribute" do
-          it "retrieves the value of an Attribute from the appropriate nested Tuple" do
-            tuple[users_set[:id]].should == nested_tuple_1[users_set[:id]]
-            tuple[photos_set[:id]].should == nested_tuple_2[photos_set[:id]]
+        context "when the #nested_tuples are PrimitiveTuples" do
+          context "when passed an Attribute of a nested PrimitiveTuple" do
+            it "retrieves the value from the PrimitiveTuple" do
+              tuple[users_set[:id]].should == nested_tuple_1[users_set[:id]]
+              tuple[photos_set[:id]].should == nested_tuple_2[photos_set[:id]]
+            end
+          end
+
+          context "when passed a Relation" do
+            it "retrieves the first nested Tuple belonging to that Relation" do
+              tuple[users_set].should == nested_tuple_1
+              tuple[photos_set].should == nested_tuple_2
+            end
           end
         end
 
+        context "when one of #nested_tuples is itself a CompoundTuple" do
+          attr_reader :nested_tuple_3
+          before do
+            @nested_tuple_1 = User.new(:id => 1, :name => "Damon")
+            @nested_tuple_2 = Photo.new(:id => 1, :name => "Silly Photo", :user_id => 1, :camera_id => 1)
+            @nested_tuple_3 = Camera.new(:id => 1, :name => "Lomo")
+            @tuple = CompoundTuple::Base.new(CompoundTuple::Base.new(nested_tuple_1, nested_tuple_2), nested_tuple_3)
+          end
+
+          context "when passed an Attribute of a doubly-nested PrimitiveTuple" do
+            it "retrieves the value from the PrimitiveTuple" do
+              tuple[users_set[:id]].should == nested_tuple_1[users_set[:id]]
+              tuple[photos_set[:id]].should == nested_tuple_2[photos_set[:id]]
+              tuple[cameras_set[:id]].should == nested_tuple_3[cameras_set[:id]]
+            end
+          end
+
+          context "when passed a Relation" do
+            it "retrieves the first nested PrimitiveTuple belonging to that relation" do
+              tuple[users_set].should == nested_tuple_1
+              tuple[photos_set].should == nested_tuple_2
+              tuple[cameras_set].should == nested_tuple_3
+            end
+          end
+        end
+      end
+
+      describe "#has_attribute?" do
         context "when passed a Relation" do
-          it "retrieves the first nested Tuple belonging to that Relation" do
-            tuple[users_set].should == nested_tuple_1
-            tuple[photos_set].should == nested_tuple_2
+          it "returns true if #has_attribute? on any nested Tuple returns true" do
+            tuple.should have_attribute(users_set)
+            tuple.should have_attribute(photos_set)
+            tuple.should_not have_attribute(cameras_set)
+          end
+        end
+
+        context "when passed an Attribute" do
+          it "returns true if #has_attribute? on any nested Tuple returns true" do
+            tuple.should have_attribute(users_set[:id])
+            tuple.should have_attribute(photos_set[:id])
+            nested_tuple_1.should_not have_attribute(cameras_set[:id])
+            tuple.should_not have_attribute(cameras_set[:id])
+          end
+        end
+
+        context "when passed a Symbol" do
+          it "returns true if #has_attribute? on any nested Tuple returns true" do
+            tuple.should have_attribute(:id)
+            tuple.should have_attribute(:user_id)
+            tuple.should_not have_attribute(:bullcrap)
           end
         end
       end
@@ -77,7 +132,6 @@ module Unison
           nested_tuple_2.should_not be_retained_by(tuple)
         end
       end
-
 
       describe "#==" do
         attr_reader :other_tuple

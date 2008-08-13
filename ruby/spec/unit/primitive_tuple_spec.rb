@@ -384,14 +384,48 @@ module Unison
         end
 
         describe "#[]" do
-          it "retrieves the value for an Attribute defined on the relation of the Tuple class" do
-            tuple[User.relation[:id]].should == 1
-            tuple[User.relation[:name]].should == "Nathan"
+          context "when passed an Attribute defined on #relation" do
+            it "returns the value" do
+              tuple[User.relation[:id]].should == 1
+              tuple[User.relation[:name]].should == "Nathan"
+            end
           end
 
-          it "retrieves the value for a Symbol corresponding to a name of an Attribute defined on the relation of the Tuple class" do
-            tuple[:id].should == 1
-            tuple[:name].should == "Nathan"
+          context "when passed an Attribute defined on a different #relation" do
+            it "raises an exception" do
+              lambda do
+                tuple[photos_set[:id]]
+              end.should raise_error
+            end
+          end
+
+          context "when passed #relation" do
+            it "returns self" do
+              tuple[tuple.relation].should == tuple
+            end
+          end
+
+          context "when passed a Symbol corresponding to a name of an Attribute defined on #relation" do
+            it "returns the value" do
+              tuple[:id].should == 1
+              tuple[:name].should == "Nathan"
+            end
+          end
+
+          context "when passed a Symbol that does not correspond to a name of an Attribute defined on #relation" do
+            it "raises an exception" do
+              lambda do
+                tuple[:fantasmic]
+              end.should raise_error
+            end
+          end
+
+          context "when passed a Relation != to #relation" do
+            it "raises an exception" do
+              lambda do
+                tuple[photos_set]
+              end.should raise_error
+            end
           end
         end
 
@@ -408,6 +442,12 @@ module Unison
             tuple[:id].should == 2
             tuple[:name] = "Corey"
             tuple[:name].should == "Corey"
+          end
+        end
+
+        describe "#has_attribute?" do
+          it "delegates to #relation" do
+            tuple.has_attribute?(:id).should == tuple.relation.has_attribute?(:id)
           end
         end
 
