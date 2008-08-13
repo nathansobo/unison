@@ -1,8 +1,8 @@
 --- 
 format: 1
 handler: 
-  commit: aeb09afd73cf188c6aee22bf4dd0f1beb937ac22
+  commit: a89c68caf4531f866204ccb84f245e6e83f486d6
   branch: HEAD
-repository_url: git://github.com/nkallen/arel.git
 lock: 
+repository_url: git://github.com/grockit/arel.git
 repository_class: Piston::Git::Repository

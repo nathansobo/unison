@@ -23,7 +23,7 @@ module Arel
             .group(@relation[:id])        \
             .alias                        \
           .to_sql.should be_like("
-            SELECT `users`.`id`
+            SELECT DISTINCT `users`.`id`
             FROM `users`
             WHERE `users`.`id` = 1
             ORDER BY `users`.`id`

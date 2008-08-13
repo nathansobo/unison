@@ -10,15 +10,21 @@ module Arel
     alias_method :to_s, :to_sql
     
     def select_sql
+      if projection? && attributes.all? {|attribute| attribute.instance_of?(Attribute)}
+        distinct = "DISTINCT"
+      else
+        distinct = "        "
+      end
+
       [
-        "SELECT     #{attributes.collect { |a| a.to_sql(Sql::SelectClause.new(self)) }.join(', ')}",
-        "FROM       #{table_sql(Sql::TableReference.new(self))}",
-        (joins(self)                                                                                    unless joins(self).blank? ),
-        ("WHERE     #{wheres   .collect { |w| w.to_sql(Sql::WhereClause.new(self)) }.join("\n\tAND ")}" unless wheres.blank?      ),
-        ("ORDER BY  #{orders   .collect { |o| o.to_sql(Sql::OrderClause.new(self)) }.join(', ')}"       unless orders.blank?      ),
-        ("GROUP BY  #{groupings.collect { |g| g.to_sql(Sql::GroupClause.new(self)) }.join(', ')}"       unless groupings.blank?   ),
-        ("LIMIT     #{taken}"                                                                           unless taken.blank?       ),
-        ("OFFSET    #{skipped}"                                                                         unless skipped.blank?     )
+        "SELECT #{distinct} #{attributes.collect { |a| a.to_sql(Sql::SelectClause.new(self)) }.join(', ')}",
+        "FROM            #{table_sql(Sql::TableReference.new(self))}",
+        (joins(self)                                                                                           unless joins(self).blank? ),
+        ("WHERE          #{wheres   .collect { |w| w.to_sql(Sql::WhereClause.new(self)) }.join("\n\tAND ")}" unless wheres.blank?      ),
+        ("ORDER BY       #{orders   .collect { |o| o.to_sql(Sql::OrderClause.new(self)) }.join(', ')}"       unless orders.blank?      ),
+        ("GROUP BY       #{groupings.collect { |g| g.to_sql(Sql::GroupClause.new(self)) }.join(', ')}"       unless groupings.blank?   ),
+        ("LIMIT          #{taken}"                                                                           unless taken.blank?       ),
+        ("OFFSET         #{skipped}"                                                                         unless skipped.blank?     )
       ].compact.join("\n")
     end
     

@@ -49,18 +49,16 @@ module Unison
         end
 
         it "pushes a Projection of each Set represented in the InnerJoin to the given Repository" do
-          pending "Projection enforcing uniqueness" do
-            users_projection = join.project(users_set)
-            photos_projection = join.project(photos_set)
+          users_projection = join.project(users_set)
+          photos_projection = join.project(photos_set)
 
-            mock.proxy(origin).push(users_projection)
-            mock.proxy(origin).push(photos_projection)
+          mock.proxy(origin).push(users_projection)
+          mock.proxy(origin).push(photos_projection)
 
-            join.push(origin)
+          join.push(origin)
 
-            users_projection.pull(origin).should == users_projection.tuples
-            users_projection.pull(origin).should == photos_projection.tuples
-          end
+          users_projection.pull(origin).should == users_projection.tuples
+          photos_projection.pull(origin).should == photos_projection.tuples
         end
       end
 

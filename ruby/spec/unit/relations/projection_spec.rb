@@ -27,7 +27,7 @@ module Unison
       describe "#to_sql" do
         it "returns select attributes from operand" do
           projection.to_sql.should be_like("
-            SELECT `users`.`id`, `users`.`name`, `users`.`hobby`
+            SELECT DISTINCT `users`.`id`, `users`.`name`, `users`.`hobby`
             FROM `users`
             INNER JOIN `photos`
             ON `photos`.`user_id` = `users`.`id`"
@@ -336,7 +336,7 @@ module Unison
         end
 
         describe "#tuples" do
-          it "returns a set restricted to #attributes from the #operand" do
+          it "returns the unique set of PrimitiveTuples corresponding to #attributes from the #operand" do
             projection.tuples.should == operand.tuples.map {|tuple| tuple[attributes]}.uniq
           end
         end

@@ -21,7 +21,7 @@ module Arel
       describe 'when given an attribute' do
         it "manufactures sql with a limited select clause" do
           Project.new(@relation, @attribute).to_sql.should be_like("
-            SELECT `users`.`id`
+            SELECT DISTINCT `users`.`id`
             FROM `users`
           ")
         end
@@ -34,7 +34,7 @@ module Arel
         
         it "manufactures sql with scalar selects" do
           Project.new(@relation, @scalar_relation).to_sql.should be_like("
-            SELECT (SELECT `users`.`name` FROM `users`) AS `users` FROM `users`
+            SELECT (SELECT DISTINCT `users`.`name` FROM `users`) AS `users` FROM `users`
           ")
         end
       end
@@ -68,6 +68,12 @@ module Arel
         it "obtains" do
           Project.new(@relation, @attribute.sum).should be_externalizable
         end
+      end
+    end
+
+    describe '#projection?' do
+      it "returns true" do
+        Project.new(@relation, @attribute).should be_projection
       end
     end
   end

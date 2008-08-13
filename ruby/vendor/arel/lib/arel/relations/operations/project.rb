@@ -15,5 +15,15 @@ module Arel
     def externalizable?
       attributes.any?(&:aggregation?) or relation.externalizable?
     end
+
+    def projection?
+      true
+    end
+  end
+
+  class Relation
+    def projection?
+      false
+    end
   end
 end
