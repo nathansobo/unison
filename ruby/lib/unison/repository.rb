@@ -13,7 +13,7 @@ module Unison
     end
 
     def push(relation)
-      raise NotImplementedError if relation.is_a?(Relations::InnerJoin)
+      raise "You cannot push compound Relations" if relation.compound?
 
       table = connection[relation.set.name]
       relation.each do |tuple|
