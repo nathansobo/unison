@@ -21,7 +21,6 @@ module Unison
 
     describe ".find" do
       it "delegates to #find on the #relation" do
-        pending
         User.find(1).should == User.relation.find(1)
       end
     end

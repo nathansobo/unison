@@ -48,9 +48,26 @@ module Unison
       end
 
       describe "#find" do
-        it "returns a singleton Selection with id equal to the passed in id" do
-          users_set.find(1).should == users_set.where(users_set[:id].eq(1))
-          users_set.find(1).should be_singleton
+        context "when a Tuple with the given #id is in the Relation" do
+          before do
+            users_set.where(users_set[:id].eq(1)).should_not be_empty
+          end
+
+          it "returns that Tuple" do
+            user = users_set.find(1)
+            user[:id].should == 1
+          end
+        end
+
+        context "when no Tuple with the given #id is in the Relation" do
+          before do
+            users_set.where(users_set[:id].eq(100)).should be_empty
+          end
+
+          it "returns that Tuple" do
+            user = users_set.find(100)
+            user.should be_nil
+          end
         end
       end
 

@@ -135,7 +135,7 @@ module Unison
             it "retains the CompoundTuple" do
               join.find(user.id).should be_nil
               users_set.insert(user)
-              join.find(user.id).tuples.first.should be_retained_by(join)
+              join.find(user.id).should be_retained_by(join)
             end
           end
 
@@ -322,7 +322,7 @@ module Unison
               end
 
               it "releases the CompoundTuple" do
-                compound_tuple = join.find(user.id).tuples.first
+                compound_tuple = join.find(user.id)
                 compound_tuple.should be_retained_by(join)
                 user[:id] = 100
                 compound_tuple.should_not be_retained_by(join)
@@ -508,7 +508,7 @@ module Unison
             end
 
             it "#releases the Tuple" do
-              compound_tuple = join.find(user.id).tuples.first
+              compound_tuple = join.find(user.id)
               compound_tuple.should be_retained_by(join)
               users_set.delete(user)
               compound_tuple.should_not be_retained_by(join)

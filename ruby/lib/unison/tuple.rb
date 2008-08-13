@@ -13,7 +13,7 @@ module Unison
       end
 
       def find(id)
-        relation.where(relation[:id].eq(id)).first
+        relation.find(id)
       end
 
       def basename
