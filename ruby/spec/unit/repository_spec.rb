@@ -41,31 +41,19 @@ module Unison
     end
 
     describe "#push" do
-
-      context "when passed a Set" do
-        it "inserts all new? PrimitiveTuples and sets #new? to false on them" do
-          pending "get PrimitiveTuple#<=> working so we can sort to compare" do
-            photos_set.size.should be > 1
-            photos_set.all? {|tuple| tuple.new?}.should be_true
-
-            persisted_photos = origin.fetch(photos_set)
-            origin.push(photos_set)
-            origin.fetch(photos_set).should == photos_set.tuples + persisted_photos
-            photos_set.any? {|tuple| tuple.new?}.should be_false
-          end
-        end
+      before do
+        Unison.origin.connection[:photos].delete
       end
 
-      context "when passed a Selection" do
+      context "when passed a Relation that contains PrimitiveTuples" do
         it "inserts all new? PrimitiveTuples and sets #new? to false on them" do
-          selection = photos_set.where(photos_set[:user_id].eq(1))
-          selection.size.should be > 1
-          selection.all? {|tuple| tuple.new?}.should be_true
+          photos_set.size.should be > 1
+          photos_set.all? {|tuple| tuple.new?}.should be_true
 
-          origin.fetch(selection).should be_empty
-          origin.push(selection)
-          origin.fetch(selection).should == selection.tuples
-          selection.any? {|tuple| tuple.new?}.should be_false
+          origin.fetch(photos_set).should be_empty
+          origin.push(photos_set)
+          origin.fetch(photos_set).sort.should == photos_set.tuples
+          photos_set.any? {|tuple| tuple.new?}.should be_false
         end
       end
 
