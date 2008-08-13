@@ -11,5 +11,12 @@ module Unison
         relation.tuple_class.new(record)
       end
     end
+
+    def push(relation)
+      raise NotImplementedError if relation.is_a?(Relations::InnerJoin)
+      relation.each do |tuple|
+        tuple.persisted
+      end
+    end
   end
 end

@@ -28,6 +28,15 @@ module Unison
 
     def initialize
       @update_subscription_node = SubscriptionNode.new
+      @new = true
+    end
+
+    def persisted
+      @new = false
+    end
+
+    def new?
+      @new
     end
     
     def relation

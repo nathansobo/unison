@@ -4,6 +4,13 @@ module Unison
   describe Tuple do
     attr_reader :tuple_class, :tuple
 
+    describe "#initialize" do
+      it "sets new? to true" do
+        user = User.create(:id => 100, :name => "Obama")
+        user.should be_new
+      end
+    end
+
     describe ".[]" do
       it "delegates to .relation" do
         mock.proxy(User.relation)[:name]
@@ -34,5 +41,17 @@ module Unison
         tuple_class.basename.should == "Baz"
       end
     end
+
+    describe "#persisted" do
+      it "if new? is true, sets it to false" do
+        user = User.find(1)
+        user.should be_new
+        user.persisted
+        user.should_not be_new
+        user.persisted
+        user.should_not be_new
+      end
+    end
+
   end
 end
