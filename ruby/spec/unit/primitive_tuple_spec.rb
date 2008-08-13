@@ -7,7 +7,7 @@ module Unison
 
       describe "Class Methods" do
         describe ".member_of" do
-          it "associates the Tuple class with a relation and vice-versa" do
+          it "associates the Tuple class with a Set and vice-versa" do
             users_set = User.set
             users_set.name.should == :users
             users_set.tuple_class.should == User
@@ -76,7 +76,7 @@ module Unison
         end
         
         describe ".relates_to_n" do
-          it "creates an instance method representing the given relation" do
+          it "creates an instance method representing the given Relation" do
             user = User.find(1)
             user.photos.should == photos_set.where(photos_set[:user_id].eq(1))
           end
@@ -138,7 +138,7 @@ module Unison
             end
 
             context "when passed a :class_name option" do
-              it "uses the #relation of the class with the given name as the target Relation" do
+              it "uses the #set of the class with the given name as the target Relation" do
                 user.to_friendships.operand.should == Friendship.set
               end
             end
@@ -201,7 +201,7 @@ module Unison
             end
 
             context "when passed a :class_name option" do
-              it "uses the #relation of the class with the given name as the target Relation" do
+              it "uses the #set of the class with the given name as the target Relation" do
                 user.profile_alias.operand.should == Profile.set
               end
             end
@@ -270,7 +270,7 @@ module Unison
             end
 
             context "when passed a :class_name option" do
-              it "uses the #relation of the class with the given name as the target Relation" do
+              it "uses the #set of the class with the given name as the target Relation" do
                 profile.owner.operand.should == User.set
               end
             end
@@ -294,7 +294,7 @@ module Unison
         end
 
         describe ".create" do
-          it "instantiates an instance of the Tuple with the given attributes and inserts it into its .relation, then returns it" do
+          it "instantiates an instance of the Tuple with the given attributes and inserts it into its .set, then returns it" do
             User.find(100).should be_nil
             user = User.create(:id => 100, :name => "Ernie")
             User.find(100).should == user
@@ -322,7 +322,7 @@ module Unison
             @tuple = User.new(:id => 1, :name => "Nathan")
           end
 
-          it "assigns a hash of attribute-value pairs corresponding to its relation" do
+          it "assigns a hash of attribute-value pairs corresponding to its Relation" do
             tuple[:id].should == 1
             tuple[:name].should == "Nathan"
           end
