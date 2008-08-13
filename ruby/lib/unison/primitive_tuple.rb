@@ -131,7 +131,11 @@ module Unison
       return false unless other.is_a?(PrimitiveTuple)
       attribute_values == other.send(:attribute_values)
     end
-    
+
+    def <=>(other)
+      self[:id] <=> other[:id]
+    end
+
     def primitive?
       true
     end
@@ -158,6 +162,10 @@ module Unison
     def signal(attribute_or_symbol)
       attribute = attribute_for(attribute_or_symbol)
       signals[attribute] ||= Signal.new(self, attribute)
+    end
+
+    def inspect
+      "<#{self.class.name} #attributes=#{attributes.inspect}>"
     end
 
     protected

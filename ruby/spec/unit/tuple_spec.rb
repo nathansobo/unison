@@ -20,10 +20,9 @@ module Unison
     end
 
     describe ".find" do
-      it "when passed an integer, returns the first Tuple whose :id =='s it" do
-        user = User.find(1)
-        user.should be_an_instance_of(User)
-        user[users_set[:id]].should == 1
+      it "delegates to #find on the #relation" do
+        pending
+        User.find(1).should == User.relation.find(1)
       end
     end
 

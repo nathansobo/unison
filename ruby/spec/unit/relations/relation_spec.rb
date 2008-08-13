@@ -133,6 +133,34 @@ module Unison
         end
       end
 
+      describe "#tuple" do
+        before do
+          @relation = users_set.where(users_set[:id].eq(1))
+        end
+
+        context "when singleton? is true" do
+          before do
+            relation.singleton
+          end
+
+          it "returns #tuples.first" do
+            relation.tuple.should == relation.tuples.first
+          end
+        end
+
+        context "when singleton? is false" do
+          before do
+            relation.should_not be_singleton
+          end
+
+          it "raises an Exception" do
+            lambda do
+              relation.tuple
+            end.should raise_error
+          end
+        end
+      end
+
       describe "#==" do
         before do
           @relation = users_set.where(Predicates::Eq.new(true, true))

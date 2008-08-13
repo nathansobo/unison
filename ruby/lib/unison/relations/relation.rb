@@ -51,6 +51,11 @@ module Unison
         retained?? @tuples : initial_read
       end
 
+      def tuple
+        raise "Relation must be singleton to call #tuple" unless singleton?
+        tuples.first
+      end
+
       def nil?
         singleton?? tuples.first.nil? : false
       end

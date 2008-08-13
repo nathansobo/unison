@@ -423,6 +423,17 @@ module Unison
           end
         end
 
+        describe "#<=>" do
+          it "sorts on the :id attribute" do
+            tuple_1 = Photo.find(1)
+            tuple_2 = Photo.find(2)
+
+            (tuple_1 <=> tuple_2).should == -1
+            (tuple_2 <=> tuple_1).should == 1
+            (tuple_1 <=> tuple_1).should == 0
+          end
+        end
+
         describe "#signal" do
           attr_reader :user, :signal
           before do
