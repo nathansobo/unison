@@ -33,6 +33,20 @@ module Unison
         end
       end
 
+      describe "#compound?" do
+        context "when #sets.size is > 1" do
+          it "returns true" do
+            users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id])).should be_compound
+          end
+        end
+
+        context "when #sets.size == 1" do
+          it "returns false" do
+            users_set.should_not be_compound
+          end
+        end
+      end
+
       describe "#pull" do
         it "#merges the results of #fetch on the given Repository" do
           origin = Unison.origin
