@@ -30,9 +30,9 @@ module Unison
       context "when passed a Projection" do
         it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#to_sql" do
           projection = users_set \
-.join(photos_set) \
-.on(users_set[:id].eq(photos_set[:user_id])) \
-.project(photos_set)
+            .join(photos_set) \
+            .on(users_set[:id].eq(photos_set[:user_id])) \
+            .project(photos_set)
 
           origin.fetch(projection).should == origin.fetch(photos_set)
         end
@@ -52,7 +52,7 @@ module Unison
       context "when passed a Relation that contains PrimitiveTuples" do
         context "with PrimitiveTuples that are new?" do
           before do
-            Unison.origin.connection[:photos].delete
+            origin.connection[:photos].delete
           end
 
           it "inserts all new? PrimitiveTuples and sets #new? to false on them" do

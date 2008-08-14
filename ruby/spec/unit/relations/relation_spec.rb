@@ -35,8 +35,6 @@ module Unison
 
       describe "#pull" do
         it "#merges the results of #fetch on the given Repository" do
-          origin = Unison.origin
-
           new_users = origin.fetch(users_set)
           mock.proxy(origin).fetch(users_set)
           mock.proxy(users_set).merge(new_users)

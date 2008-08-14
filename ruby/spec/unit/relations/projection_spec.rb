@@ -46,7 +46,6 @@ module Unison
 
       describe "#push" do
         it "delegates to #operand" do
-          origin = Unison.origin
           origin.connection[:photos].delete
           origin.connection[:users].delete
           

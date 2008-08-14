@@ -24,9 +24,7 @@ module Unison
       end
 
       describe "#push" do
-        attr_reader :origin
         before do
-          @origin = Unison.origin
           origin.connection[:users].delete
           origin.connection[:photos].delete
         end
