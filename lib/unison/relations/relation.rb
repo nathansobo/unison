@@ -27,20 +27,51 @@ module Unison
         end
       end
 
+      def pull(repository)
+        merge(repository.fetch(self))
+      end
+
+      def push(repository)
+        if compound?
+          composed_sets.each do |component_set|
+            repository.push(self.project(component_set))
+          end
+        else
+          repository.push(self)
+        end
+      end
+
       def find(id)
-        where(self[:id].eq(id)).singleton
+        where(self[:id].eq(id)).first
       end
 
       def where(predicate)
         Selection.new(self, predicate)
       end
 
-      def read
-        retained?? tuples : initial_read
+      def join(operand_2)
+        PartialInnerJoin.new(self, operand_2)
+      end
+
+      def project(attributes)
+        Projection.new(self, attributes)
+      end
+
+      def tuples
+        retained?? @tuples : initial_read
+      end
+
+      def compound?
+        composed_sets.size > 1
+      end
+
+      def tuple
+        raise "Relation must be singleton to call #tuple" unless singleton?
+        tuples.first
       end
 
       def nil?
-        singleton?? read.first.nil? : false
+        singleton?? tuples.first.nil? : false
       end
 
       def singleton
@@ -73,34 +104,35 @@ module Unison
 
       def ==(other)
         if other.is_a?(Relation)
-          read == other.read
+          tuples == other.tuples
         else
-          delegate_to_read(:==, other)
+          method_missing(:==, other)
         end
       end
 
       protected
       attr_reader :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
 
-      def tuples
-        raise "Relation must be retained in order to refer to memoized tuples" unless retained?
-        return @tuples if @tuples
-        @tuples = []
-        initial_read.each do |tuple|
-          insert(tuple)
-        end
-        @tuples
-      end
-
       def insert(tuple)
         raise "Relation must be retained" unless retained?
+        tuple.retain(self)
         tuples.push(tuple)
         insert_subscription_node.call(tuple)
         tuple
       end
 
+      def delete(tuple)
+        tuple.release(self)
+        tuples.delete(tuple)
+        delete_subscription_node.call(tuple)
+        tuple
+      end
+
       def after_first_retain
-        tuples
+        @tuples = []
+        initial_read.each do |tuple|
+          insert(tuple)
+        end
       end
 
       def initial_read
@@ -113,9 +145,9 @@ module Unison
 
       def delegate_to_read(method_name, *args, &block)
         if singleton?
-          read.first.send(method_name, *args, &block)
+          tuples.first.send(method_name, *args, &block)
         else
-          read.send(method_name, *args, &block)
+          tuples.send(method_name, *args, &block)
         end
       end
     end
