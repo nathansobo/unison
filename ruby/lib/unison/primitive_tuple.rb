@@ -86,6 +86,8 @@ module Unison
 
     def initialize(attributes={})
       super()
+      @new = true
+      @dirty = false
       @signals = {}
       @attribute_values = {}
 
@@ -117,12 +119,15 @@ module Unison
       end
     end    
 
-    def []=(attribute_or_symbol, value)
+    def []=(attribute_or_symbol, new_value)
       attribute = attribute_for(attribute_or_symbol)
       old_value = attribute_values[attribute]
-      attribute_values[attribute] = value
-      update_subscription_node.call(attribute, old_value, value)
-      value
+      if old_value != new_value
+        attribute_values[attribute] = new_value
+        update_subscription_node.call(attribute, old_value, new_value)
+        @dirty = true unless new?
+      end
+      new_value
     end
 
     def has_attribute?(attribute)
@@ -136,6 +141,24 @@ module Unison
       end
       attributes          
     end
+
+    def persisted
+      @new = false
+      @dirty = false
+      self
+    end
+
+    def new?
+      @new
+    end
+
+    def dirty?
+      @dirty
+    end
+
+    def set
+      self.class.set
+    end    
 
     def ==(other)
       return false unless other.is_a?(PrimitiveTuple)

@@ -341,6 +341,9 @@ module Unison
             tuple.should be_new
           end
 
+          it "sets dirty? to true" do
+            tuple.should_not be_dirty
+          end
 
           context "when Unison.test_mode? is true" do
             before do
@@ -430,18 +433,98 @@ module Unison
         end
 
         describe "#[]=" do
-          it "sets the value for an Attribute defined on the set of the Tuple class" do
-            tuple[User.set[:id]] = 2
-            tuple[User.set[:id]].should == 2
-            tuple[User.set[:name]] = "Corey"
-            tuple[User.set[:name]].should == "Corey"
+          context "when the passed in value is different than the original value" do
+            attr_reader :new_value
+            before do
+              @new_value = "Corey"
+              tuple[:name].should_not == new_value
+            end
+
+            it "sets the value for an Attribute defined on the set of the Tuple class" do
+              tuple[User.set[:id]] = 2
+              tuple[User.set[:id]].should == 2
+              tuple[User.set[:name]] = new_value
+              tuple[User.set[:name]].should == new_value
+            end
+
+            it "sets the value for a Symbol corresponding to a name of an Attribute defined on the #set of the Tuple class" do
+              tuple[:id] = 2
+              tuple[:id].should == 2
+              tuple[:name] = new_value
+              tuple[:name].should == new_value
+            end
+
+            it "invokes #on_update Subscriptions" do
+              update_args = []
+              tuple.on_update do |attribute, old_value, new_value|
+                update_args.push [attribute, old_value, new_value]
+              end
+
+              old_value = tuple[:id]
+              new_value = tuple[:id] + 1
+              tuple[:id] = new_value
+              update_args.should == [[tuple.set[:id], old_value, new_value]]
+            end
+
+            context "when not new? and not dirty?" do
+              it "sets dirty? to true" do
+                tuple.persisted.should_not be_new
+                tuple.should_not be_dirty
+
+                tuple[:name] = new_value
+                tuple.should be_dirty
+              end
+            end
+
+            context "when new? and not dirty?" do
+              it "does not set dirty? to true" do
+                tuple.should be_new
+                tuple.should_not be_dirty
+                
+                tuple[:name] = new_value
+                tuple.should_not be_dirty
+              end
+            end
           end
 
-          it "sets the value for a Symbol corresponding to a name of an Attribute defined on the #set of the Tuple class" do
-            tuple[:id] = 2
-            tuple[:id].should == 2
-            tuple[:name] = "Corey"
-            tuple[:name].should == "Corey"
+          context "when the passed in value is the same than the original value" do
+            it "does not invoke #on_update Subscriptions" do
+              tuple.on_update do |attribute, old_value, new_value|
+                raise "Dont call me"
+              end
+              
+              tuple[:name] = tuple[:name]
+            end
+
+            context "when not new? and not dirty?" do
+              it "does not set dirty? to true" do
+                tuple.persisted.should_not be_new
+                tuple.should_not be_dirty
+
+                tuple[:name] = tuple[:name]
+                tuple.should_not be_dirty
+              end
+            end
+          end
+        end
+
+        describe "#persisted" do
+          it "sets new? to false" do
+            tuple.should be_new
+            tuple.persisted
+            tuple.should_not be_new
+          end
+
+          it "sets dirty? to false" do
+            tuple.persisted
+            tuple[:name] = "#{tuple[:name]} with addition"
+            tuple.should be_dirty
+            tuple.persisted
+            tuple.should_not be_dirty
+          end
+
+          it "returns self" do
+            tuple.persisted.should == tuple
           end
         end
 
@@ -629,20 +712,6 @@ module Unison
         describe "#on_update" do
           it "returns a Subscription" do
             tuple.on_update {}.class.should == Subscription
-          end
-
-          context "when an attribute is changed" do
-            it "invokes the block when the Tuple is updated" do
-              update_args = []
-              tuple.on_update do |attribute, old_value, new_value|
-                update_args.push [attribute, old_value, new_value]
-              end
-
-              old_value = tuple[:id]
-              new_value = tuple[:id] + 1
-              tuple[:id] = new_value
-              update_args.should == [[tuple.set[:id], old_value, new_value]]
-            end
           end
         end
       end
