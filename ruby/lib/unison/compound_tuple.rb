@@ -1,6 +1,7 @@
 module Unison
   module CompoundTuple
     include Tuple
+    attr_reader :nested_tuples
 
     module ClassMethods
       include Tuple::ClassMethods

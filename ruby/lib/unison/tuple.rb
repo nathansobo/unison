@@ -24,8 +24,6 @@ module Unison
       mod.extend(ClassMethods)
     end
 
-    attr_reader :nested_tuples
-
     def initialize
       @update_subscription_node = SubscriptionNode.new
     end
@@ -44,7 +42,7 @@ module Unison
     end
 
     protected
-    attr_reader :signals, :update_subscription_node
+    attr_reader :update_subscription_node
 
     def attribute_for(attribute_or_name)
       unless set.has_attribute?(attribute_or_name)

@@ -84,6 +84,8 @@ module Unison
       a_module.extend ClassMethods
     end
 
+    attr_reader :signals
+
     def initialize(attributes={})
       super()
       @new = true
