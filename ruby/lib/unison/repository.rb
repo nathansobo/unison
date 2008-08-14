@@ -16,7 +16,11 @@ module Unison
       raise "You cannot push Relations that contain CompoundTuples" if relation.is_a?(Relations::InnerJoin)
       table = connection[relation.set.name]
       relation.each do |tuple|
-        table << tuple.attributes
+        if tuple.new?
+          table << tuple.attributes
+        elsif tuple.dirty?
+          table.filter("id=?", tuple.id).update(tuple.attributes)
+        end
         tuple.persisted
       end
     end
