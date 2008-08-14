@@ -12,7 +12,7 @@ module Unison
       end
 
       describe "#initialize" do
-        it "composed_sets #operand_1, #operand_2, and #predicate" do
+        it "sets #operand_1, #operand_2, and #predicate" do
           join.operand_1.should == users_set
           join.operand_2.should == photos_set
           predicate.should == photos_set[:user_id].eq(users_set[:id])

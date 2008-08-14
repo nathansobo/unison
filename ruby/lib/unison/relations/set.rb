@@ -81,7 +81,7 @@ module Unison
 
       def merge(tuples)
         tuples.each do |tuple|
-          insert(tuple) if find(tuple[:id]).nil?
+          insert(tuple) unless find(tuple[:id])
         end
       end
 

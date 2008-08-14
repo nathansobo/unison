@@ -34,7 +34,7 @@ module Unison
     end
 
     describe "#persisted" do
-      it "if new? is true, composed_sets it to false" do
+      it "if new? is true, sets it to false" do
         user = User.find(1)
         user.should be_new
         user.persisted

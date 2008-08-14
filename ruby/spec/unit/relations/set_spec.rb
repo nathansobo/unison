@@ -12,11 +12,11 @@ module Unison
       end
 
       describe "#initialize" do
-        it "composed_sets the name of the set" do
+        it "sets the name of the set" do
           set.name.should == :users
 
         end
-        it "composed_sets the #tuple_class of the Set to a subclass of Tuple::Base, and composed_sets its #relation to itself" do
+        it "sets the #tuple_class of the Set to a subclass of Tuple::Base, and sets its #relation to itself" do
           tuple_class = set.tuple_class
           tuple_class.superclass.should == PrimitiveTuple::Base
           tuple_class.set.should == set

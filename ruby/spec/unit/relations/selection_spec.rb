@@ -11,7 +11,7 @@ module Unison
       end
 
       describe "#initialize" do
-        it "composed_sets the #operand and #predicate" do
+        it "sets the #operand and #predicate" do
           selection.operand.should == photos_set
           predicate.should == photos_set[:user_id].eq(1)
         end

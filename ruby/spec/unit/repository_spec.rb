@@ -46,7 +46,7 @@ module Unison
       end
 
       context "when passed a Relation that contains PrimitiveTuples" do
-        it "inserts all new? PrimitiveTuples and composed_sets #new? to false on them" do
+        it "inserts all new? PrimitiveTuples and sets #new? to false on them" do
           photos_set.size.should be > 1
           photos_set.all? {|tuple| tuple.new?}.should be_true
 
@@ -54,6 +54,18 @@ module Unison
           origin.push(photos_set)
           origin.fetch(photos_set).sort.should == photos_set.tuples
           photos_set.any? {|tuple| tuple.new?}.should be_false
+        end
+
+        it "updates all dirty? PrimitiveTuples and sets #dirty? to false on them" do
+          pending("get dirty? working") do
+            photos_set.size.should be > 1
+            photos_set.all? {|tuple| tuple.dirty?}.should be_true
+
+            origin.fetch(photos_set).should be_empty
+            origin.push(photos_set)
+            origin.fetch(photos_set).sort.should == photos_set.tuples
+            photos_set.any? {|tuple| tuple.new?}.should be_false
+          end
         end
       end
 
