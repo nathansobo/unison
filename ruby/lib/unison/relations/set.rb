@@ -61,7 +61,7 @@ module Unison
       def insert(tuple)
         raise "Relation must be retained" unless retained?
         raise ArgumentError, "Passed in PrimitiveTuple's #set must be #{self}" unless tuple.set == self
-        unless find(tuple[:id]).nil?
+        if find(tuple[:id])
           raise ArgumentError, "Tuple with id #{tuple[:id]} already exists in this Set"
         end
         tuples.push(tuple)
