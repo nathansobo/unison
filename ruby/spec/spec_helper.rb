@@ -37,6 +37,12 @@ connection.create_table :photos do
   column :id, :integer
   column :name, :string
   column :user_id, :integer
+  column :camera_id, :integer
+end
+
+connection.create_table :cameras do
+  column :id, :integer
+  column :name, :string
 end
 
 connection.create_table :accounts do
@@ -50,10 +56,24 @@ Spec::Runner.configure do |config|
   config.mock_with :rr
   
   config.before do
+    Unison.test_mode = true
+
     users = connection[:users]
     users.delete
     users << {:id => 11, :name => "Buffington", :hobby => "Bots"}
     users << {:id => 12, :name => "Keefa", :hobby => "Begging"}
+
+    photos = connection[:photos]
+    photos.delete
+    photos << {:id => 11, :user_id => 11, :name => "Photo of Buffington.", :camera_id => 10}
+    photos << {:id => 12, :user_id => 11, :name => "Another photo of Buffington. This one is bad.", :camera_id => 10}
+    photos << {:id => 13, :user_id => 12, :name => "Photo of Keefa in a dog fight. She's totally kicking Teddy's ass.", :camera_id => 11}
+
+    cameras = connection[:cameras]
+    cameras.delete
+    cameras << {:id => 11, :name => "Nikon D50"}
+    cameras << {:id => 12, :name => "Sony CyberShot"}
+
 
     Object.class_eval do
       const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do
@@ -112,11 +132,21 @@ Spec::Runner.configure do |config|
 
       const_set(:Photo, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:photos)
-        attribute :id, :integer
-        attribute :user_id, :integer
-        attribute :name, :string
+        attribute_accessor :id, :integer
+        attribute_accessor :user_id, :integer
+        attribute_accessor :camera_id, :integer
+        attribute_accessor :name, :string
 
         belongs_to :user
+        belongs_to :camera
+      end)
+
+      const_set(:Camera, Class.new(Unison::PrimitiveTuple::Base) do
+        member_of Unison::Relations::Set.new(:cameras)
+        attribute_accessor :id, :integer
+        attribute_accessor :name, :string
+
+        has_many :photos
       end)
 
       const_set(:Account, Class.new(Unison::PrimitiveTuple::Base) do
@@ -128,9 +158,9 @@ Spec::Runner.configure do |config|
           end
         end
 
-        attribute :id, :integer
-        attribute :user_id, :integer
-        attribute :name, :string
+        attribute_accessor :id, :integer
+        attribute_accessor :user_id, :integer
+        attribute_accessor :name, :string
         attribute_accessor :deactivated_at, :datetime
         belongs_to :owner, :foreign_key => :user_id, :class_name => :User
       end)
@@ -154,13 +184,15 @@ Spec::Runner.configure do |config|
     profiles_set.insert(Profile.new(:id => 2, :owner_id => 2))
     profiles_set.insert(Profile.new(:id => 3, :owner_id => 3))
 
-    photos_set.insert(Photo.new(:id => 1, :user_id => 1, :name => "Photo 1"))
-    photos_set.insert(Photo.new(:id => 2, :user_id => 1, :name => "Photo 2"))
-    photos_set.insert(Photo.new(:id => 3, :user_id => 2, :name => "Photo 3"))
+    photos_set.insert(Photo.new(:id => 1, :user_id => 1, :name => "Photo 1", :camera_id => 1))
+    photos_set.insert(Photo.new(:id => 2, :user_id => 1, :name => "Photo 2", :camera_id => 1))
+    photos_set.insert(Photo.new(:id => 3, :user_id => 2, :name => "Photo 3", :camera_id => 1))
 
     accounts_set.insert(Account.new(:id => 1, :user_id => 1, :name => "Account 1", :deactivated_at => nil))
     accounts_set.insert(Account.new(:id => 2, :user_id => 1, :name => "Account 2", :deactivated_at => nil))
     accounts_set.insert(Account.new(:id => 3, :user_id => 2, :name => "Account 3", :deactivated_at => Time.utc(2008, 8, 2)))
+
+    cameras_set.insert(Camera.new(:id => 1, :name => "Minolta XD-11"))
   end
 
   config.after do
@@ -170,6 +202,7 @@ Spec::Runner.configure do |config|
       remove_const :Friendship
       remove_const :Profile
       remove_const :Photo
+      remove_const :Camera
       remove_const :Account
     end
   end
@@ -179,27 +212,31 @@ class Spec::ExampleGroup
   include Unison
 
   def users_set
-    User.relation
+    User.set
   end
 
   def life_goals_set
-    LifeGoal.relation
+    LifeGoal.set
   end
 
   def friendships_set
-    Friendship.relation
+    Friendship.set
   end
 
   def profiles_set
-    Profile.relation
+    Profile.set
   end
 
   def photos_set
-    Photo.relation
+    Photo.set
+  end
+
+  def cameras_set
+    Camera.set
   end
 
   def accounts_set
-    Account.relation
+    Account.set
   end
 
   def origin

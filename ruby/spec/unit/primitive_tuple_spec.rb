@@ -7,23 +7,23 @@ module Unison
 
       describe "Class Methods" do
         describe ".member_of" do
-          it "associates the Tuple class with a relation and vice-versa" do
-            users_set = User.relation
+          it "associates the Tuple class with a Set and vice-versa" do
+            users_set = User.set
             users_set.name.should == :users
             users_set.tuple_class.should == User
           end
         end
 
         describe ".attribute" do
-          it "delegates to .relation" do
-            mock.proxy(User.relation).has_attribute(:nick_name, :string)
+          it "delegates to .set" do
+            mock.proxy(User.set).has_attribute(:nick_name, :string)
             User.attribute(:nick_name, :string)
           end
         end
 
         describe ".attribute_reader" do
-          it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).has_attribute(:nick_name, :string)
+          it "creates an attribute on the .set" do
+            mock.proxy(User.set).has_attribute(:nick_name, :string)
             User.attribute_reader(:nick_name, :string)
           end
 
@@ -41,8 +41,8 @@ module Unison
         end
 
         describe ".attribute_writer" do
-          it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).has_attribute(:nick_name, :string)
+          it "creates an attribute on the .set" do
+            mock.proxy(User.set).has_attribute(:nick_name, :string)
             User.attribute_writer(:nick_name, :string)
           end
 
@@ -61,8 +61,8 @@ module Unison
         end
 
         describe ".attribute_accessor" do
-          it "creates an attribute on the .relation" do
-            mock.proxy(User.relation).has_attribute(:nick_name, :string).at_least(1)
+          it "creates an attribute on the .set" do
+            mock.proxy(User.set).has_attribute(:nick_name, :string).at_least(1)
             User.attribute_accessor(:nick_name, :string)
           end
 
@@ -76,7 +76,7 @@ module Unison
         end
         
         describe ".relates_to_n" do
-          it "creates an instance method representing the given relation" do
+          it "creates an instance method representing the given Relation" do
             user = User.find(1)
             user.photos.should == photos_set.where(photos_set[:user_id].eq(1))
           end
@@ -133,13 +133,13 @@ module Unison
           describe ":class_name option" do
             context "when not passed a :class_name option" do
               it "chooses the target Relation by singularizing and classifying the given name" do
-                user.photos.operand.should == Photo.relation
+                user.photos.operand.should == Photo.set
               end
             end
 
             context "when passed a :class_name option" do
-              it "uses the #relation of the class with the given name as the target Relation" do
-                user.to_friendships.operand.should == Friendship.relation
+              it "uses the #set of the class with the given name as the target Relation" do
+                user.to_friendships.operand.should == Friendship.set
               end
             end
           end
@@ -196,13 +196,13 @@ module Unison
           describe ":class_name option" do
             context "when not passed a :class_name option" do
               it "chooses the target Relation by singularizing and classifying the given name" do
-                user.profile.operand.should == Profile.relation
+                user.profile.operand.should == Profile.set
               end
             end
 
             context "when passed a :class_name option" do
-              it "uses the #relation of the class with the given name as the target Relation" do
-                user.profile_alias.operand.should == Profile.relation
+              it "uses the #set of the class with the given name as the target Relation" do
+                user.profile_alias.operand.should == Profile.set
               end
             end
           end
@@ -265,13 +265,13 @@ module Unison
             context "when not passed a :class_name option" do
               it "chooses the target Relation by singularizing and classifying the given name" do
                 photo = Photo.find(1)
-                photo.user.operand.should == User.relation
+                photo.user.operand.should == User.set
               end
             end
 
             context "when passed a :class_name option" do
-              it "uses the #relation of the class with the given name as the target Relation" do
-                profile.owner.operand.should == User.relation
+              it "uses the #set of the class with the given name as the target Relation" do
+                profile.owner.operand.should == User.set
               end
             end
           end
@@ -294,7 +294,7 @@ module Unison
         end
 
         describe ".create" do
-          it "instantiates an instance of the Tuple with the given attributes and inserts it into its .relation, then returns it" do
+          it "instantiates an instance of the Tuple with the given attributes and inserts it into its .set, then returns it" do
             User.find(100).should be_nil
             user = User.create(:id => 100, :name => "Ernie")
             User.find(100).should == user
@@ -322,7 +322,7 @@ module Unison
             @tuple = User.new(:id => 1, :name => "Nathan")
           end
 
-          it "assigns a hash of attribute-value pairs corresponding to its relation" do
+          it "assigns a hash of attribute-value pairs corresponding to its Relation" do
             tuple[:id].should == 1
             tuple[:name].should == "Nathan"
           end
@@ -335,6 +335,39 @@ module Unison
           it "instantiates its #singleton_instance_relations" do
             relations = tuple.send(:singleton_instance_relations)
             relations.should_not be_empty
+          end
+
+          it "composed_sets new? to true" do
+            tuple.should be_new
+          end
+
+
+          context "when Unison.test_mode? is true" do
+            before do
+              Unison.test_mode?.should be_true
+            end
+
+            it "if an #id is provided, honors it" do
+              user = User.create(:id => 100, :name => "Obama")
+              user.id.should == 100
+            end
+
+            it "if no #id is provided, composed_sets :id to a generated guid" do
+              user = User.create(:name => "Obama")
+              user.id.should_not be_nil
+            end
+          end
+
+          context "when Unison.test_mode? is false" do
+            before do
+              Unison.test_mode = false
+            end
+
+            it "if an #id is provided, raises an error" do
+              lambda do
+                User.create(:id => 100, :name => "Obama")
+              end.should raise_error
+            end
           end
         end
 
@@ -351,30 +384,93 @@ module Unison
         end
 
         describe "#[]" do
-          it "retrieves the value for an Attribute defined on the relation of the Tuple class" do
-            tuple[User.relation[:id]].should == 1
-            tuple[User.relation[:name]].should == "Nathan"
+          context "when passed an Attribute defined on #relation" do
+            it "returns the value" do
+              tuple[User.set[:id]].should == 1
+              tuple[User.set[:name]].should == "Nathan"
+            end
           end
 
-          it "retrieves the value for a Symbol corresponding to a name of an Attribute defined on the relation of the Tuple class" do
-            tuple[:id].should == 1
-            tuple[:name].should == "Nathan"
+          context "when passed an Attribute defined on a different #set" do
+            it "raises an exception" do
+              lambda do
+                tuple[photos_set[:id]]
+              end.should raise_error
+            end
+          end
+
+          context "when passed #set" do
+            it "returns self" do
+              tuple[tuple.set].should == tuple
+            end
+          end
+
+          context "when passed a Symbol corresponding to a name of an Attribute defined on #set" do
+            it "returns the value" do
+              tuple[:id].should == 1
+              tuple[:name].should == "Nathan"
+            end
+          end
+
+          context "when passed a Symbol that does not correspond to a name of an Attribute defined on #set" do
+            it "raises an exception" do
+              lambda do
+                tuple[:fantasmic]
+              end.should raise_error
+            end
+          end
+
+          context "when passed a Relation != to #set" do
+            it "raises an exception" do
+              lambda do
+                tuple[photos_set]
+              end.should raise_error
+            end
           end
         end
 
         describe "#[]=" do
-          it "sets the value for an Attribute defined on the relation of the Tuple class" do
-            tuple[User.relation[:id]] = 2
-            tuple[User.relation[:id]].should == 2
-            tuple[User.relation[:name]] = "Corey"
-            tuple[User.relation[:name]].should == "Corey"
+          it "composed_sets the value for an Attribute defined on the set of the Tuple class" do
+            tuple[User.set[:id]] = 2
+            tuple[User.set[:id]].should == 2
+            tuple[User.set[:name]] = "Corey"
+            tuple[User.set[:name]].should == "Corey"
           end
 
-          it "sets the value for a Symbol corresponding to a name of an Attribute defined on the relation of the Tuple class" do
+          it "composed_sets the value for a Symbol corresponding to a name of an Attribute defined on the #set of the Tuple class" do
             tuple[:id] = 2
             tuple[:id].should == 2
             tuple[:name] = "Corey"
             tuple[:name].should == "Corey"
+          end
+        end
+
+        describe "#has_attribute?" do
+          it "delegates to #set" do
+            tuple.has_attribute?(:id).should == tuple.set.has_attribute?(:id)
+          end
+        end
+
+        describe "#attributes" do
+          it "returns the #attribute_values, keyed by the name of their corresponding Attribute" do
+            expected_attributes = {}
+            tuple.send(:attribute_values).each do |attribute, value|
+              expected_attributes[attribute.name] = value
+            end
+            expected_attributes.should_not be_empty
+
+            tuple.attributes.should == expected_attributes
+          end
+        end
+
+        describe "#<=>" do
+          it "sorts on the :id attribute" do
+            tuple_1 = Photo.find(1)
+            tuple_2 = Photo.find(2)
+
+            (tuple_1 <=> tuple_2).should == -1
+            (tuple_2 <=> tuple_1).should == 1
+            (tuple_1 <=> tuple_1).should == 0
           end
         end
 
@@ -415,9 +511,9 @@ module Unison
 
         describe "#bind" do
           context "when passed in expression is an Attribute" do
-            it "retrieves the value for an Attribute defined on the relation of the Tuple class" do
-              tuple.bind(User.relation[:id]).should == 1
-              tuple.bind(User.relation[:name]).should == "Nathan"
+            it "retrieves the value for an Attribute defined on the set of the Tuple class" do
+              tuple.bind(User.set[:id]).should == 1
+              tuple.bind(User.set[:name]).should == "Nathan"
             end
           end
 
@@ -439,10 +535,10 @@ module Unison
             end
           end
 
-          context "when other Tuple#attributes == #attributes" do
+          context "when other Tuple#attribute_values == #attribute_values" do
             before do
               @other_tuple = User.new(:id => 1, :name => "Nathan")
-              other_tuple.attributes.should == tuple.attributes
+              other_tuple.send(:attribute_values).should == tuple.send(:attribute_values)
             end
 
             it "returns true" do
@@ -453,7 +549,7 @@ module Unison
           context "when other Tuple#attributes != #attributes" do
             before do
               @other_tuple = User.new(:id => 100, :name => "Nathan's Clone")
-              other_tuple.attributes.should_not == tuple.attributes
+              other_tuple.send(:attribute_values).should_not == tuple.send(:attribute_values)
             end
 
             it "returns false" do
@@ -482,14 +578,14 @@ module Unison
 
           context "when passed a Relation" do
             it "creates a Selection on the target Relation where the foreign key matches the instances' id" do
-              accounts = user.select_children(Account.relation)
+              accounts = user.select_children(Account.set)
               accounts.should_not be_empty
               accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
             end
           end
 
           context "when passed :foreign_key option" do
-            it "returns the Tuples in the relation that match the instance's foreign_key value" do
+            it "returns the Tuples in the set that match the instance's foreign_key value" do
               to_friendships = user.select_children(Friendship, :foreign_key => :to_id)
               to_friendships.should_not be_empty
               to_friendships.should == friendships_set.where(
@@ -545,7 +641,7 @@ module Unison
               old_value = tuple[:id]
               new_value = tuple[:id] + 1
               tuple[:id] = new_value
-              update_args.should == [[tuple.relation[:id], old_value, new_value]]
+              update_args.should == [[tuple.set[:id], old_value, new_value]]
             end
           end
         end

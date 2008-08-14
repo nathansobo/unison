@@ -10,7 +10,7 @@ module Unison
     end
 
     describe "#initialize" do
-      it "Relations::Sets the #relation and #name" do
+      it "sets the #relation and #name" do
         attribute.relation.should == relation
         attribute.name.should == :name
       end

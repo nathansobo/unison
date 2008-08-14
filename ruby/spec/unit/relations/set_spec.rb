@@ -12,18 +12,18 @@ module Unison
       end
 
       describe "#initialize" do
-        it "sets the name of the set" do
+        it "composed_sets the name of the set" do
           set.name.should == :users
 
         end
-        it "sets the #tuple_class of the Set to a subclass of Tuple::Base, and sets its #relation to itself" do
+        it "composed_sets the #tuple_class of the Set to a subclass of Tuple::Base, and composed_sets its #relation to itself" do
           tuple_class = set.tuple_class
           tuple_class.superclass.should == PrimitiveTuple::Base
-          tuple_class.relation.should == set
+          tuple_class.set.should == set
         end
       end
 
-      describe "#attribute" do
+      describe "#has_attribute" do
         context "when an Attribute with the same name has not already been added" do
           it "adds an Attribute to the Set by the given name" do
             set = Set.new(:user)
@@ -76,20 +76,50 @@ module Unison
           set.should have_attribute(:name)
           set.should_not have_attribute(:bogus)
         end
+
+        it "when passed the Set itself, returns true" do
+          set.should have_attribute(set)
+        end
       end
 
-      describe "#[]" do
+      describe "#attribute" do
         it "retrieves the Set's Attribute by the given name" do
-          set[:id].should == Attribute.new(set, :id, :integer)
-          set[:name].should == Attribute.new(set, :name, :string)
+          set.attribute(:id).should == Attribute.new(set, :id, :integer)
+          set.attribute(:name).should == Attribute.new(set, :name, :string)
         end
         
         context "when no Attribute with the passed-in name is defined" do
           it "raises an ArgumentError" do
             lambda do
-              set[:i_dont_exist]
+              set.attribute(:i_dont_exist)
             end.should raise_error(ArgumentError)
           end
+        end
+      end
+
+      describe "#compound?" do
+        it "returns false" do
+          set.should_not be_compound
+        end
+      end
+
+      describe "#push" do
+        it "calls #push with self on the given Repository" do
+          origin = Unison.origin
+          mock.proxy(origin).push(set)
+          set.push(origin)
+        end
+      end
+
+      describe "#set" do
+        it "returns self" do
+          set.set.should == set
+        end
+      end
+
+      describe "#composed_sets" do
+        it "returns [self]" do
+          set.composed_sets.should == [set]
         end
       end
 
@@ -97,6 +127,20 @@ module Unison
         context "when #retained?" do
           before do
             set.should be_retained
+          end
+
+          it "adds the given Tuple to the results of #tuples" do
+            tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+            lambda do
+              set.insert(tuple).should == tuple
+            end.should change {set.size}.by(1)
+            set.tuples.should include(tuple)
+          end
+
+          it "does not #retain the inserted Tuple" do
+            tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+            set.insert(tuple)
+            tuple.should_not be_retained_by(set)
           end
 
           context "when an Tuple with the same #id exists in the Set" do
@@ -112,17 +156,9 @@ module Unison
             end
           end
 
-          it "adds tuples to the Set and the added tuples" do
-            tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
-            lambda do
-              set.insert(tuple).should == tuple
-            end.should change {set.size}.by(1)
-            set.read.should include(tuple)
-          end
-
-          it "when self is not the passed in object's #relation, raises an ArgumentError" do
+          it "when the Set is not the passed in object's #relation, raises an ArgumentError" do
             incorrect_tuple = Profile.find(1)
-            incorrect_tuple.relation.should_not == set
+            incorrect_tuple.set.should_not == set
 
             lambda do
               set.insert(incorrect_tuple)
@@ -150,9 +186,9 @@ module Unison
           it "removes the Tuple from the Set" do
             tuple = set.tuple_class.create(:id => 1, :name => "Nathan")
 
-            set.read.should include(tuple)
+            set.tuples.should include(tuple)
             set.delete(tuple)
-            set.read.should_not include(tuple)
+            set.tuples.should_not include(tuple)
           end
         end
 
@@ -160,7 +196,7 @@ module Unison
           attr_reader :tuple_not_in_set
           before do
             @tuple_not_in_set = set.tuple_class.new(:id => 100, :name => "Nathan")
-            set.read.should_not include(tuple_not_in_set)
+            set.tuples.should_not include(tuple_not_in_set)
           end
           
           it "raises an Error" do
@@ -168,20 +204,6 @@ module Unison
               set.delete(tuple_not_in_set)
             end.should raise_error(ArgumentError)
           end
-        end
-      end
-
-      describe "#read" do
-        before do
-          class << set
-            public :tuples
-          end
-        end
-
-        it "returns all Tuples in the Set" do
-          set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
-          set.insert(set.tuple_class.new(:id => 2, :name => "Alissa"))
-          set.read.should == set.tuples
         end
       end
 
@@ -210,17 +232,24 @@ module Unison
         end
       end
 
-      describe "#each" do
-        it "iterates over all Tuples in the Set" do
-          set.insert(set.tuple_class.new(:id => 1, :name => "Nathan"))
-          set.insert(set.tuple_class.new(:id => 2, :name => "Alissa"))
-
-          eached_tuples = []
-          set.each do |tuple|
-            eached_tuples.push(tuple)
+      describe "#merge" do
+        context "when passed some Tuples that have the same id as Tuples already in the Set and some that don't" do
+          attr_reader :in_set, :not_in_set, :tuples
+          before do
+            set.tuple_class.create(:id => 1, :name => "Wil")
+            @in_set = set.tuple_class.new(:id => 1, :name => "Kunal")
+            @not_in_set = set.tuple_class.new(:id => 2, :name => "Nathan")
+            set.find(in_set[:id]).should_not be_nil
+            set.find(not_in_set[:id]).should be_nil
+            @tuples = [in_set, not_in_set]
           end
-          eached_tuples.should_not be_empty
-          eached_tuples.should == set.read
+
+          it "inserts the Tuples whose id's do not correspond to existing Tuples and does not attempt to insert others" do
+            mock.proxy(set).insert(not_in_set)
+            dont_allow(set).insert(in_set)
+            set.merge(tuples)
+            set.should include(not_in_set)
+          end
         end
       end
 

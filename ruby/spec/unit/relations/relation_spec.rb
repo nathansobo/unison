@@ -18,9 +18,9 @@ module Unison
         end
 
         context "when passed an Integer" do
-          it "returns the result of #read.[]" do
+          it "returns the result of #tuples.[]" do
             relation[1].should_not be_nil
-            relation[1].should == relation.read[1]
+            relation[1].should == relation.tuples[1]
           end
         end
 
@@ -33,10 +33,58 @@ module Unison
         end
       end
 
+      describe "#pull" do
+        it "#merges the results of #fetch on the given Repository" do
+          origin = Unison.origin
+
+          new_users = origin.fetch(users_set)
+          mock.proxy(origin).fetch(users_set)
+          mock.proxy(users_set).merge(new_users)
+
+          new_users.each { |user| users_set.find(user.id).should be_nil }
+          users_set.pull(origin)
+          new_users.each { |user| users_set.find(user.id).should_not be_nil }
+        end
+      end
+
+      describe "#compound?" do
+        context "when #composed_sets.size == 1" do
+          it "returns true" do
+            users_set.composed_sets.size.should == 1
+            users_set.should_not be_compound
+          end
+        end
+
+        context "when #composed_sets.size is > 1" do
+          it "returns false" do
+            join = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id]))
+            join.composed_sets.size.should == 2
+            join.should be_compound
+          end
+        end
+      end
+
       describe "#find" do
-        it "returns a singleton Selection with id equal to the passed in id" do
-          users_set.find(1).should == users_set.where(users_set[:id].eq(1))
-          users_set.find(1).should be_singleton
+        context "when a Tuple with the given #id is in the Relation" do
+          before do
+            users_set.where(users_set[:id].eq(1)).should_not be_empty
+          end
+
+          it "returns that Tuple" do
+            user = users_set.find(1)
+            user[:id].should == 1
+          end
+        end
+
+        context "when no Tuple with the given #id is in the Relation" do
+          before do
+            users_set.where(users_set[:id].eq(100)).should be_empty
+          end
+
+          it "returns that Tuple" do
+            user = users_set.find(100)
+            user.should be_nil
+          end
         end
       end
 
@@ -49,31 +97,45 @@ module Unison
         end
       end
 
+      describe "#join" do
+        it "returns a PartialInnerJoin with the argument as #operand_2 and the receiver as #operand_1" do
+          expected_join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
+          users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id])).should == expected_join
+        end
+      end
+
+      describe "#project" do
+        it "returns a Projection with the receiver as #operand and the argument as #attributes" do
+          join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
+          join.project(photos_set).should == Projection.new(join, photos_set)
+        end
+      end
+
       describe "#nil?" do
         context "when the Relation is a singleton" do
-          context "when #read.first is nil" do
+          context "when #tuples.first is nil" do
             it "returns true" do
               selection = users_set.where(users_set[:id].eq(100))
               selection.singleton
 
-              selection.read.first.should be_nil
+              selection.tuples.first.should be_nil
               selection.should be_nil
             end
           end
 
-          context "when #read.first is not nil" do
+          context "when #tuples.first is not nil" do
             it "returns false" do
               selection = users_set.where(users_set[:id].eq(1))
               selection.singleton
 
-              selection.read.first.should_not be_nil
+              selection.tuples.first.should_not be_nil
               selection.should_not be_nil
             end
           end
         end
 
         context "when the Relation is not a singleton" do
-          it "always returns false even when #read is empty" do
+          it "always returns false even when #tuples is empty" do
             users_set.where(users_set[:id].eq(1)).should_not be_nil
             users_set.where(users_set[:id].eq(100)).should be_empty
             users_set.where(users_set[:id].eq(100)).should_not be_nil
@@ -105,6 +167,34 @@ module Unison
         end
       end
 
+      describe "#tuple" do
+        before do
+          @relation = users_set.where(users_set[:id].eq(1))
+        end
+
+        context "when singleton? is true" do
+          before do
+            relation.singleton
+          end
+
+          it "returns #tuples.first" do
+            relation.tuple.should == relation.tuples.first
+          end
+        end
+
+        context "when singleton? is false" do
+          before do
+            relation.should_not be_singleton
+          end
+
+          it "raises an Exception" do
+            lambda do
+              relation.tuple
+            end.should raise_error
+          end
+        end
+      end
+
       describe "#==" do
         before do
           @relation = users_set.where(Predicates::Eq.new(true, true))
@@ -118,10 +208,10 @@ module Unison
 
         context "when passed a different Set" do
           attr_reader :other_relation
-          context "with the same result of #read" do
+          context "with the same result of #tuples" do
             before do
               @other_relation = relation.where(Predicates::Eq.new(true, true))
-              relation.read.should == other_relation.read
+              relation.tuples.should == other_relation.tuples
             end
 
             it "returns true" do
@@ -129,12 +219,12 @@ module Unison
             end
           end
 
-          context "with the a different result of #read" do
+          context "with the a different result of #tuples" do
             before do
               predicate = users_set[:id].eq(1)
               @other_relation = relation.where(predicate)
               other_relation.should_not be_empty
-              relation.read.should_not == other_relation.read
+              relation.tuples.should_not == other_relation.tuples
             end
 
             it "returns false" do
@@ -143,14 +233,26 @@ module Unison
           end
         end
 
-        context "when an Array == to #read" do
+        context "when an Array == to #tuples" do
           it "returns true" do
-            relation.should == relation.read
+            relation.should == relation.tuples
           end
         end
       end
 
-      describe "#read" do
+
+      context "when #retained?" do
+        before do
+          @relation = users_set.where(Predicates::Eq.new(true, true)).retain(Object.new)
+          class << relation
+            public :tuples, :initial_read
+          end
+        end
+
+      end
+
+
+      describe "#tuples" do
         context "when the Relation is not retained" do
           before do
             @relation = Relations::Set.new(:unretained_set)
@@ -158,24 +260,21 @@ module Unison
             relation.should_not be_retained
           end
 
-          it "returns the result of #initial_read without calling #tuples" do
-            dont_allow(relation).tuples
+          it "returns the result of #initial_read" do
             mock(relation).initial_read {[:initial, :read, :result]}
-            relation.read.should == [:initial, :read, :result]
+            relation.tuples.should == [:initial, :read, :result]
           end
         end
 
         context "when the Relation is retained" do
           before do
             @relation = users_set
-            class << relation
-              public :tuples
-            end
             relation.should be_retained
           end
 
-          it "returns the result of #tuples" do
-            relation.read.should == relation.tuples
+          it "returns the contents of @tuples without calling #initial_read" do
+            dont_allow(relation).initial_read
+            relation.tuples.should_not be_empty
           end
         end
       end
@@ -190,46 +289,18 @@ module Unison
             end
           end
 
-          it "memoizes the result of #initial_read in #tuples" do
-            stub(relation).initial_read {[]}
+          it "inserts each of the results of #initial_read" do
+            user_1 = users_set.find(1)
+            user_2 = users_set.find(2)
+
+            stub(relation).initial_read {[user_1, user_2]}
+            mock.proxy(relation).insert(user_1).ordered
+            mock.proxy(relation).insert(user_2).ordered
 
             relation.retain(Object.new)
 
             relation.tuples.should == relation.initial_read
             relation.tuples.object_id.should == relation.tuples.object_id
-          end
-        end
-      end
-
-      describe "#tuples" do
-        attr_reader :relation
-
-        context "when #retained?" do
-          before do
-            @relation = users_set.where(Predicates::Eq.new(true, true)).retain(Object.new)
-            class << relation
-              public :tuples, :initial_read
-            end
-          end
-
-          it "returns the result of #initial_read" do
-            relation.tuples.should == relation.initial_read
-          end
-        end
-
-        context "when not #retained?" do
-          before do
-            @relation = Set.new(:users).where(Predicates::Eq.new(true, true))
-            relation.should_not be_retained
-            class << relation
-              public :tuples
-            end
-          end
-
-          it "raises an Error" do
-            lambda do
-              relation.tuples
-            end.should raise_error
           end
         end
       end
@@ -316,7 +387,7 @@ module Unison
               arguments.push [tuple, attribute, old_value, new_value]
             end
 
-            user = relation.read.first
+            user = relation.tuples.first
             old_name = user[:name]
             user[:name] = "Another Name"
             arguments.should == [[user, users_set[:name], old_name, "Another Name"]]

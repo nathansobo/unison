@@ -5,6 +5,7 @@ require "arel"
 require "collections"
 require "rubygems"
 require "sequel"
+require "guid"
 
 # TODO: Make a better fix
 class String
@@ -23,6 +24,7 @@ require "#{dir}/unison/primitive_tuple"
 require "#{dir}/unison/compound_tuple"
 require "#{dir}/unison/subscription"
 require "#{dir}/unison/subscription_node"
+require "#{dir}/unison/partial_inner_join"
 
 module Unison
   class << self
@@ -31,5 +33,10 @@ module Unison
       @origin
     end
     attr_writer :origin
+
+    attr_writer :test_mode
+    def test_mode?
+      @test_mode ||= false
+    end
   end
 end

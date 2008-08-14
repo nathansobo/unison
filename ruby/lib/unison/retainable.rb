@@ -29,7 +29,7 @@ module Unison
 
     def release(retainer)
       retainers.delete(retainer.object_id)
-      destroy if refcount == 0
+      after_last_release if refcount == 0
     end
 
     def refcount
@@ -53,7 +53,7 @@ module Unison
       
     end
 
-    def destroy
+    def after_last_release
 
     end    
   end

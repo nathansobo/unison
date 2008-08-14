@@ -80,10 +80,10 @@ module Unison
       end
 
       context "when #refcount becomes > 0" do
-        it "does not call #destroy on itself" do
+        it "does not call #after_last_release on itself" do
           retainable.retain(Object.new)
           retainable.refcount.should be > 1
-          dont_allow(retainable).destroy
+          dont_allow(retainable).after_last_release
           retainable.release(retainer)
         end
       end
@@ -95,8 +95,8 @@ module Unison
           retainable.refcount.should == 1
         end
 
-        it "calls #destroy on itself" do
-          mock.proxy(retainable).destroy
+        it "calls #after_last_release on itself" do
+          mock.proxy(retainable).after_last_release
           retainable.release(retainer)
         end
       end

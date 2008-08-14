@@ -12,7 +12,7 @@ module Unison
       def tuple_class
         @tuple_class ||= begin
           tuple_class = Class.new(Unison::PrimitiveTuple::Base)
-          tuple_class.relation = self
+          tuple_class.set = self
           tuple_class
         end
       end
@@ -30,12 +30,14 @@ module Unison
         end
       end
 
-      def has_attribute?(attribute_or_symbol)
-        case attribute_or_symbol
+      def has_attribute?(candidate_attribute)
+        case candidate_attribute
+        when Set
+          return self == candidate_attribute
         when Attribute
-          attributes.detect {|name, attribute| attribute == attribute_or_symbol}
+          attributes.detect {|name, attribute| candidate_attribute == attribute}
         when Symbol
-          attributes[attribute_or_symbol] ? true : false
+          attributes[candidate_attribute] ? true : false
         end
       end
 
@@ -44,12 +46,26 @@ module Unison
           raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on this Set")
       end
 
+      def compound?
+        false
+      end
+
+      def set
+        self
+      end
+
+      def composed_sets
+        [self]
+      end
+
       def insert(tuple)
-        raise ArgumentError, "Passed in Tuple's relation must be #{self}" unless tuple.relation == self
+        raise "Relation must be retained" unless retained?
+        raise ArgumentError, "Passed in PrimitiveTuple's #set must be #{self}" unless tuple.set == self
         unless find(tuple[:id]).nil?
           raise ArgumentError, "Tuple with id #{tuple[:id]} already exists in this Set"
         end
-        tuple = super
+        tuples.push(tuple)
+        insert_subscription_node.call(tuple)
         tuple.on_update do |attribute, old_value, new_value|
           tuple_update_subscription_node.call tuple, attribute, old_value, new_value
         end
@@ -61,6 +77,12 @@ module Unison
         tuples.delete(tuple)
         delete_subscription_node.call(tuple)
         tuple
+      end
+
+      def merge(tuples)
+        tuples.each do |tuple|
+          insert(tuple) if find(tuple[:id]).nil?
+        end
       end
 
       def to_sql

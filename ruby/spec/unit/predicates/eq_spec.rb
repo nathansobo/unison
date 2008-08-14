@@ -52,14 +52,14 @@ module Unison
           end
         end
 
-        describe "#destroy" do
+        describe "#after_last_release" do
           context "when #operand_1 and #operand_2 are not Signals" do
             before do
               @predicate = Eq.new("Nathan", "Nathan")
             end
 
             it "does not raise an error" do
-              predicate.send(:destroy)
+              predicate.send(:after_last_release)
             end
           end
 
@@ -72,7 +72,7 @@ module Unison
             end
 
             it "unsubscribes from and releases #operand_1" do
-              predicate.send(:destroy)
+              predicate.send(:after_last_release)
               operand.send(:update_subscription_node).should be_empty
               operand.should_not be_retained_by(predicate)
             end
@@ -87,7 +87,7 @@ module Unison
             end
 
             it "unsubscribes from and releases #operand_1" do
-              predicate.send(:destroy)
+              predicate.send(:after_last_release)
               operand.should_not be_retained_by(predicate)
               operand.send(:update_subscription_node).should be_empty
             end

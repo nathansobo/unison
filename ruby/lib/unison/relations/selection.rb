@@ -10,6 +10,15 @@ module Unison
         @operand, @predicate = operand, predicate
       end
 
+      def merge(tuples)
+        raise "Relation must be retained" unless retained?
+        operand.merge(tuples)
+      end
+
+      def tuple_class
+        operand.tuple_class
+      end
+
       def to_sql
         to_arel.to_sql
       end
@@ -18,9 +27,17 @@ module Unison
         operand.to_arel.where(predicate.to_arel)
       end
 
+      def set
+        operand.set
+      end
+
+      def composed_sets
+        operand.composed_sets
+      end
+
       protected
       def initial_read
-        operand.read.select do |tuple|
+        operand.tuples.select do |tuple|
           predicate.eval(tuple)
         end
       end
@@ -32,21 +49,14 @@ module Unison
             new_tuples = initial_read
             deleted_tuples = tuples - new_tuples
             inserted_tuples = new_tuples - tuples
-            tuples.clear
-            tuples.concat initial_read
-            deleted_tuples.each do |deleted_tuple|
-              delete_subscription_node.call(deleted_tuple)
-            end
-            inserted_tuples.each do |inserted_tuple|
-              insert_subscription_node.call(inserted_tuple)
-            end
+            deleted_tuples.each{|tuple| delete(tuple)}
+            inserted_tuples.each{|tuple| insert(tuple)}
           end
 
         operand_subscriptions.push(
           operand.on_insert do |created|
             if predicate.eval(created)
-              tuples.push(created)
-              insert_subscription_node.call(created)
+              insert(created)
             end
           end
         )
@@ -54,8 +64,7 @@ module Unison
         operand_subscriptions.push(
           operand.on_delete do |deleted|
             if predicate.eval(deleted)
-              tuples.delete(deleted)
-              delete_subscription_node.call(deleted)
+              delete(deleted)
             end
           end
         )
@@ -66,18 +75,16 @@ module Unison
               if tuples.include?(tuple)
                 tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
               else
-                tuples.push(tuple)
-                insert_subscription_node.call(tuple)
+                insert(tuple)
               end
             else
-              tuples.delete(tuple)
-              delete_subscription_node.call(tuple)
+              delete(tuple)
             end
           end
         )
       end
 
-      def destroy
+      def after_last_release
         predicate_subscription.destroy
         operand_subscriptions.each do |subscription|
           subscription.destroy
