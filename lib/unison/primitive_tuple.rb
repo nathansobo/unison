@@ -46,7 +46,7 @@ module Unison
 
       def has_many(name, options={})
         relates_to_n(name) do
-          class_name = options[:class_name] || name.to_s.singularize.classify
+          class_name = options[:class_name] || name.to_s.classify
           target_relation = class_name.to_s.constantize.set
           select_children(target_relation, :foreign_key => options[:foreign_key])
         end
