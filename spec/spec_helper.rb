@@ -97,8 +97,11 @@ Spec::Runner.configure do |config|
           accounts.where(Account.active?)
         end
 
-        has_many :to_friendships, :foreign_key => :to_id, :class_name => :Friendship
-        has_many :from_friendships, :foreign_key => :from_id, :class_name => :Friendship
+        has_many :friendships_to_me, :foreign_key => :to_id, :class_name => :Friendship
+        has_many :fans, :through => :friendships_to_me, :class_name => :User, :foreign_key => :from_id
+
+        has_many :friendships_from_me, :foreign_key => :from_id, :class_name => :Friendship
+        has_many :heroes, :through => :friendships_from_me, :class_name => :User, :foreign_key => :to_id
       end)
 
       const_set(:LifeGoal, Class.new(Unison::PrimitiveTuple::Base) do

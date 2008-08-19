@@ -48,7 +48,18 @@ module Unison
         relates_to_n(name) do
           class_name = options[:class_name] || name.to_s.classify
           target_relation = class_name.to_s.constantize.set
-          select_children(target_relation, :foreign_key => options[:foreign_key])
+          if options[:through]
+            through_relation = self.send(options[:through])
+            through_relation.
+              join(target_relation).
+              on(
+                through_relation.operand[options[:foreign_key]].
+                  eq(target_relation[:id])
+              ).
+              project(target_relation)
+          else
+            select_children(target_relation, :foreign_key => options[:foreign_key])
+          end
         end
       end
 

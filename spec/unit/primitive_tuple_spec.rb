@@ -124,7 +124,7 @@ module Unison
             context "when passed a :foreign_key option" do
               describe "the reader method" do
                 it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
-                  user.to_friendships.should == Friendship.where(Friendship[:to_id].eq(user[:id]))
+                  user.friendships_to_me.should == Friendship.where(Friendship[:to_id].eq(user[:id]))
                 end
               end
             end
@@ -139,7 +139,7 @@ module Unison
 
             context "when passed a :class_name option" do
               it "uses the #set of the class with the given name as the target Relation" do
-                user.to_friendships.operand.should == Friendship.set
+                user.friendships_to_me.operand.should == Friendship.set
               end
             end
           end
@@ -155,6 +155,18 @@ module Unison
               describe "the reader method" do
                 it "returns the result of the default Selection yielded to the block" do
                   user.active_accounts.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
+                end
+              end
+            end
+          end
+
+          describe ":through option" do
+            context "when passed :through, :class_name, and :foreign_key options" do
+              it "returns a Projection of the target Relation of an InnerJoin with the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                user.fans.should == user.friendships_to_me.join(User.set).on(Friendship[:from_id].eq(User[:id])).project(User.set)
+                user.fans.should_not be_empty
+                user.fans.each do |fan|
+                  fan.heroes.should include(user)
                 end
               end
             end
@@ -669,9 +681,9 @@ module Unison
 
           context "when passed :foreign_key option" do
             it "returns the Tuples in the set that match the instance's foreign_key value" do
-              to_friendships = user.select_children(Friendship, :foreign_key => :to_id)
-              to_friendships.should_not be_empty
-              to_friendships.should == friendships_set.where(
+              friendships_to_me = user.select_children(Friendship, :foreign_key => :to_id)
+              friendships_to_me.should_not be_empty
+              friendships_to_me.should == friendships_set.where(
                 friendships_set[:to_id].eq(user[:id])
               )
             end
