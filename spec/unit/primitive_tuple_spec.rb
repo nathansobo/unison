@@ -162,12 +162,20 @@ module Unison
 
           describe ":through option" do
             context "when passed :through, :class_name, and :foreign_key options" do
-              it "returns a Projection of the target Relation of an InnerJoin with the target Relation where the foreign key Attribute Eq's the instance's #id" do
+              it "returns a Projection, where its #operand is associated with the passed in :class_name using the provided :foreign_key, of the InnerJoin on the through Relation" do
                 user.fans.should == user.friendships_to_me.join(User.set).on(Friendship[:from_id].eq(User[:id])).project(User.set)
                 user.fans.should_not be_empty
+                user.fans.sort_by(&:id).should == user.friendships_to_me.map {|friendship| friendship.from.tuples.first}.uniq.sort_by(&:id)
                 user.fans.each do |fan|
                   fan.heroes.should include(user)
                 end
+              end
+            end
+
+            context "when passed :through" do
+              it "returns a Projection, where its #operand and :foreign_key are inferred from the relation" do
+                user.cameras.should_not be_empty
+                user.cameras.sort_by(&:id).should == user.photos.map {|photo| photo.camera.tuples.first}.uniq.sort_by(&:id)
               end
             end
           end

@@ -102,6 +102,8 @@ Spec::Runner.configure do |config|
 
         has_many :friendships_from_me, :foreign_key => :from_id, :class_name => :Friendship
         has_many :heroes, :through => :friendships_from_me, :class_name => :User, :foreign_key => :to_id
+
+        has_many :cameras, :through => :photos
       end)
 
       const_set(:LifeGoal, Class.new(Unison::PrimitiveTuple::Base) do

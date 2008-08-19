@@ -50,10 +50,11 @@ module Unison
           target_relation = class_name.to_s.constantize.set
           if options[:through]
             through_relation = self.send(options[:through])
+            foreign_key = options[:foreign_key] || :"#{target_relation.name.to_s.singularize.underscore}_id"
             through_relation.
               join(target_relation).
               on(
-                through_relation.operand[options[:foreign_key]].
+                through_relation.operand[foreign_key].
                   eq(target_relation[:id])
               ).
               project(target_relation)
@@ -191,13 +192,15 @@ module Unison
     end
 
     def select_children(target_relation, options={})
-      foreign_key = options[:foreign_key] || :"#{self.class.name.to_s.underscore}_id"
-      target_relation.where(target_relation[foreign_key].eq(self[:id]))
+      target_relation.where(
+        target_relation[child_foreign_key_from_options(options)].eq(self[:id])
+      )
     end
 
     def select_child(target_relation, options={})
-      foreign_key = options[:foreign_key] || :"#{self.class.name.to_s.underscore}_id"
-      target_relation.where(target_relation[foreign_key].eq(self[:id])).singleton
+      target_relation.where(
+        target_relation[child_foreign_key_from_options(options)].eq(self[:id])
+      ).singleton
     end
 
     def select_parent(target_relation, options={})
@@ -215,7 +218,11 @@ module Unison
     end
 
     protected
-    attr_reader :attribute_values    
+    attr_reader :attribute_values
+
+    def child_foreign_key_from_options(options)
+      options[:foreign_key] || :"#{self.class.name.to_s.underscore}_id"
+    end
 
     def instance_relations
       self.class.send(:instance_relations)
