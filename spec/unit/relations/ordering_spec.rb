@@ -23,6 +23,18 @@ module Unison
         end
       end
 
+      describe "#set" do
+        it "delegates to its #operand" do
+          ordering.set.should == operand.set
+        end
+      end
+
+      describe "#composed_sets" do
+        it "delegates to its #operand" do
+          ordering.composed_sets.should == operand.composed_sets
+        end
+      end
+
       describe "when #retained?" do
         before do
           ordering.retain(Object.new)

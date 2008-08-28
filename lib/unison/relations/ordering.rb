@@ -2,7 +2,6 @@ module Unison
   module Relations
     class Ordering < Relation
       attr_reader :operand, :attribute, :operand_subscriptions
-
       retains :operand
 
       def initialize(operand, attribute)
@@ -18,6 +17,14 @@ module Unison
 
       def tuple_class
         operand.tuple_class
+      end
+
+      def set
+        operand.set
+      end
+
+      def composed_sets
+        operand.composed_sets
       end
 
       protected
