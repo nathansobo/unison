@@ -1,12 +1,12 @@
 module Unison
   module Relations
     class Selection < Relation
-      attr_reader :operand, :predicate, :operand_subscriptions, :predicate_subscription
+      attr_reader :operand, :predicate, :subscriptions
       retains :operand, :predicate
 
       def initialize(operand, predicate)
         super()
-        @operand_subscriptions = []
+        @subscriptions = []
         @operand, @predicate = operand, predicate
       end
 
@@ -30,6 +30,12 @@ module Unison
       def composed_sets
         operand.composed_sets
       end
+      
+      def subscribed_to?(subscription_node)
+        subscriptions.any? do |subscription|
+          subscription_node.include?(subscription)
+        end
+      end
 
       protected
       def initial_read
@@ -40,7 +46,7 @@ module Unison
 
       def after_first_retain
         super
-        @predicate_subscription =
+        subscriptions.push(
           predicate.on_update do
             new_tuples = initial_read
             deleted_tuples = tuples - new_tuples
@@ -48,8 +54,8 @@ module Unison
             deleted_tuples.each{|tuple| delete(tuple)}
             inserted_tuples.each{|tuple| insert(tuple)}
           end
-
-        operand_subscriptions.push(
+        )
+        subscriptions.push(
           operand.on_insert do |inserted|
             if predicate.eval(inserted)
               insert(inserted)
@@ -57,7 +63,7 @@ module Unison
           end
         )
 
-        operand_subscriptions.push(
+        subscriptions.push(
           operand.on_delete do |deleted|
             if predicate.eval(deleted)
               delete(deleted)
@@ -65,7 +71,7 @@ module Unison
           end
         )
 
-        operand_subscriptions.push(
+       subscriptions.push(
           operand.on_tuple_update do |tuple, attribute, old_value, new_value|
             if predicate.eval(tuple)
               if tuples.include?(tuple)
@@ -81,8 +87,7 @@ module Unison
       end
 
       def after_last_release
-        predicate_subscription.destroy
-        operand_subscriptions.each do |subscription|
+        subscriptions.each do |subscription|
           subscription.destroy
         end
         predicate.release self

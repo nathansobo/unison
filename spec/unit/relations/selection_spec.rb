@@ -22,6 +22,20 @@ module Unison
           selection.tuple_class.should == operand.tuple_class
         end
       end
+      
+      describe "#subscribed_to?" do
+        it "when passed a SubscriptionNode to which the Selection is subscribed, returns true" do
+          class << predicate
+            public :update_subscription_node
+          end
+          selection.retained_by(Object.new)
+          
+          predicate.update_subscription_node.any? do |subscription|
+            selection.subscriptions.include?(subscription)
+          end.should be_true
+          selection.should be_subscribed_to(predicate.update_subscription_node)
+        end
+      end
 
       describe "#push" do
         before do
@@ -128,32 +142,31 @@ module Unison
 
         describe "#after_last_release" do
           it "unsubscribes from and releases its #operand" do
-            selection.operand_subscriptions.should_not be_empty
+            selection.subscriptions.should_not be_empty
             operand.should be_retained_by(selection)
 
-            selection.operand_subscriptions.each do |subscription|
-              operand.subscriptions.should include(subscription)
+            selection.subscriptions.each do |subscription|
+              operand.all_subscriptions.should include(subscription)
             end
 
             selection.send(:after_last_release)
 
             operand.should_not be_retained_by(selection)
-            selection.operand_subscriptions.each do |subscription|
-              operand.subscriptions.should_not include(subscription)
+            selection.subscriptions.each do |subscription|
+              operand.all_subscriptions.should_not include(subscription)
             end
           end
 
           it "unsubscribes from and releases its #predicate" do
             class << selection
-              public :predicate_subscription
+              public :subscriptions
             end
             class << predicate
               public :update_subscription_node
             end
 
-            selection.predicate_subscription.should_not be_nil
+            selection.should be_subscribed_to(predicate.update_subscription_node)
             predicate.should be_retained_by(selection)
-            predicate.update_subscription_node.should include(selection.predicate_subscription)
 
             selection.send(:after_last_release)
 
