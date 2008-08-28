@@ -74,7 +74,7 @@ module Unison
           end
         end
 
-        describe "#after_last_release?" do
+        describe "#after_last_release" do
           it "unsubscribes from and releases its #operand" do
             class << ordering
               public :after_last_release
@@ -95,8 +95,19 @@ module Unison
             end
           end
         end
-      end
 
+        describe "#merge" do
+          it "calls #merge on the #operand" do
+            tuple = User.new(:name => "Gottlob", :hobby => "Number Theory")
+            operand.find(tuple[:id]).should be_nil
+            mock.proxy(operand).merge([tuple])
+            
+            ordering.merge([tuple])
+
+            operand.should include(tuple)
+          end
+        end
+      end
 
       describe "when not #retained?" do
         describe "#after_first_retain" do
@@ -124,6 +135,14 @@ module Unison
             tuples_in_expected_order = operand.tuples.sort_by {|tuple| tuple[attribute]}
             tuples_in_expected_order.should_not == operand.tuples
             ordering.tuples.should == tuples_in_expected_order
+          end
+        end
+
+        describe "#merge" do
+          it "raises an Exception" do
+            lambda do
+              ordering.merge([User.new(:name => "Bertrand", :hobby => "Analytic Philosophy")])
+            end.should raise_error
           end
         end
       end

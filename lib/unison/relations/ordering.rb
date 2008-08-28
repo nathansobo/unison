@@ -11,6 +11,11 @@ module Unison
         @operand_subscriptions = []
       end
 
+      def merge(tuples)
+        raise "Relation must be retained" unless retained?
+        operand.merge(tuples)
+      end
+
       def tuple_class
         operand.tuple_class
       end
