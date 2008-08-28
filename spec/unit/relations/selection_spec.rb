@@ -107,7 +107,7 @@ module Unison
         end
       end
 
-      context "after #retain has been called" do
+      context "when #retained?" do
         before do
           selection.retain(Object.new)
           selection.tuples
@@ -462,8 +462,12 @@ module Unison
         end
       end
 
-      context "before #retain has been called" do
-        describe "#retain" do
+      context "when not #retained?" do
+        describe "#after_first_retain" do
+          before do
+            mock.proxy(selection).after_first_retain
+          end
+
           it "retains and subscribes to its #predicate" do
             selection.predicate_subscription.should be_nil
             predicate.should_not be_retained_by(selection)

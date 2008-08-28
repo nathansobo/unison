@@ -68,7 +68,7 @@ module Unison
         end
       end
 
-      context "after #retain has been called" do
+      context "when #retained?" do
         before do
           projection.retain(Object.new)
         end
@@ -329,9 +329,11 @@ module Unison
         end
       end
 
-      context "before #retain has been called" do
-        describe "#retain" do
+      context "when not #retained?" do
+        describe "#after_first_retain" do
           it "retains its #operand" do
+            mock.proxy(projection).after_first_retain
+
             operand.should_not be_retained_by(projection)
             projection.retain Object.new
             operand.should be_retained_by(projection)

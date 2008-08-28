@@ -23,7 +23,7 @@ module Unison
         end        
       end
 
-      context "after #retain is called" do
+      context "when #retained?" do
         before do
           predicate.retain(Object.new)
         end
@@ -75,9 +75,10 @@ module Unison
         end
       end
 
-      context "before #retain is called" do
-        describe "#retain" do
+      context "when not #retained?" do
+        describe "#after_first_retain" do
           it "retains its #operands" do
+            mock.proxy(predicate).after_first_retain
             child_predicate_without_signal.should_not be_retained_by(predicate)
             child_predicate_with_signal.should_not be_retained_by(predicate)
             predicate.send(:child_predicate_subscriptions).should be_empty

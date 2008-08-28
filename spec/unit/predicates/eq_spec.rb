@@ -14,7 +14,7 @@ module Unison
         end
       end
 
-      context "after #retain is called" do
+      context "when #retained?" do
         before do
           @predicate = Eq.new(users_set[:name], "Nathan")
           predicate.retain(Object.new)
@@ -147,8 +147,8 @@ module Unison
         end
       end
 
-      context "before #retain is called" do
-        describe "#retain" do
+      context "when not #retained?" do
+        describe "#after_first_retain" do
           context "when #operand_1 is a Signal" do
             attr_reader :user, :operand
             before do
@@ -158,6 +158,7 @@ module Unison
             end
 
             it "#retains and #subscribes to #on_update on the Signal" do
+              mock.proxy(predicate).after_first_retain
               operand.should_not be_retained_by(predicate)
               predicate.send(:operand_subscriptions).should be_empty
 
@@ -176,6 +177,7 @@ module Unison
             end
 
             it "#retains and #subscribes to #on_update on the Signal" do
+              mock.proxy(predicate).after_first_retain
               operand.should_not be_retained_by(predicate)
               predicate.send(:operand_subscriptions).should be_empty
 

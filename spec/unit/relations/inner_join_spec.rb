@@ -168,7 +168,7 @@ module Unison
         end
       end
 
-      context "after #retain has been called" do
+      context "when #retained?" do
         before do
           join.retain(Object.new)
         end
@@ -771,9 +771,11 @@ module Unison
         end
       end
 
-      context "before #retain has been called" do
-        describe "#retain" do
+      context "when not #retained?" do
+        describe "#after_first_retain" do
           it "retains the operands and #predicate" do
+            mock.proxy(join).after_first_retain
+            
             join.operand_1.should_not be_retained_by(join)
             join.operand_2.should_not be_retained_by(join)
             join.predicate.should_not be_retained_by(join)

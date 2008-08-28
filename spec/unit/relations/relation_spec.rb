@@ -283,29 +283,29 @@ module Unison
         end
       end
 
-      describe "#retain" do
-        context "when invoked for the first time" do
-          attr_reader :relation
-          before do
-            @relation = users_set.where(Predicates::Eq.new(true, true))
-            class << relation
-              public :tuples, :initial_read
-            end
+      describe "#after_first_retain" do
+        attr_reader :relation
+        before do
+          @relation = users_set.where(Predicates::Eq.new(true, true))
+          class << relation
+            public :tuples, :initial_read
           end
+        end
 
-          it "inserts each of the results of #initial_read" do
-            user_1 = users_set.find(1)
-            user_2 = users_set.find(2)
+        it "inserts each of the results of #initial_read" do
+          mock.proxy(relation).after_first_retain
 
-            stub(relation).initial_read {[user_1, user_2]}
-            mock.proxy(relation).insert(user_1).ordered
-            mock.proxy(relation).insert(user_2).ordered
+          user_1 = users_set.find(1)
+          user_2 = users_set.find(2)
 
-            relation.retain(Object.new)
+          stub(relation).initial_read {[user_1, user_2]}
+          mock.proxy(relation).insert(user_1).ordered
+          mock.proxy(relation).insert(user_2).ordered
 
-            relation.tuples.should == relation.initial_read
-            relation.tuples.object_id.should == relation.tuples.object_id
-          end
+          relation.retain(Object.new)
+
+          relation.tuples.should == relation.initial_read
+          relation.tuples.object_id.should == relation.tuples.object_id
         end
       end
 
