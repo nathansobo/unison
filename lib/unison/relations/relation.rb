@@ -16,6 +16,10 @@ module Unison
         @tuples = nil
       end
 
+      def to_sql
+        to_arel.to_sql
+      end
+
       def [](index)
         case index
         when Symbol

@@ -17,6 +17,22 @@ module Unison
         end
       end
 
+      describe "#to_sql" do
+        it "returns the operand's SQL ordered by the #attribute" do
+          ordering.to_sql.should be_like(<<-SQL)
+            SELECT          `users`.`id`, `users`.`name`, `users`.`hobby`
+            FROM            `users`
+            ORDER BY       `users`.`name`
+          SQL
+        end
+      end
+
+      describe "#to_arel" do
+        it "returns an Arel representation of the relation" do
+          ordering.to_arel.should == operand.to_arel.order(attribute.to_arel)
+        end
+      end
+
       describe "#tuple_class" do
         it "delegates to its #operand" do
           ordering.tuple_class.should == operand.tuple_class

@@ -11,10 +11,6 @@ module Unison
         @last_update = nil
       end
 
-      def to_sql
-        to_arel.to_sql
-      end
-
       def to_arel
         Arel::Project.new( operand.to_arel, *projected_set.to_arel.attributes )
       end

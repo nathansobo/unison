@@ -85,10 +85,6 @@ module Unison
         end
       end
 
-      def to_sql
-        to_arel.to_sql
-      end
-
       def to_arel
         @arel ||= Arel::Table.new(name, Adapters::Arel::Engine.new(self))
       end

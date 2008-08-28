@@ -15,6 +15,10 @@ module Unison
         operand.merge(tuples)
       end
 
+      def to_arel
+        operand.to_arel.order(attribute.to_arel)
+      end
+
       def tuple_class
         operand.tuple_class
       end
