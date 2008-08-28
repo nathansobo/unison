@@ -675,9 +675,6 @@ module Unison
           end
 
           it "unsubscribes from and releases its operands" do
-            operand_1.extend AddSubscriptionsMethodToRelation
-            operand_2.extend AddSubscriptionsMethodToRelation
-
             operand_1.should be_retained_by(join)
             operand_2.should be_retained_by(join)
             join.send(:operand_1_subscriptions).should_not be_empty

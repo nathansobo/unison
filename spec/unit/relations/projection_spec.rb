@@ -311,7 +311,6 @@ module Unison
           end
 
           it "unsubscribes from and releases its #operand" do
-            operand.extend AddSubscriptionsMethodToRelation
             operand.should be_retained_by(projection)
 
             projection.send(:operand_subscriptions).should_not be_empty

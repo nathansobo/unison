@@ -11,6 +11,10 @@ module Unison
         @operand_subscriptions = []
       end
 
+      def tuple_class
+        operand.tuple_class
+      end
+
       protected
 
       def after_first_retain
@@ -25,6 +29,14 @@ module Unison
             delete(inserted)
           end
         )
+      end
+
+      def after_last_release
+        super
+        operand_subscriptions.each do |subscription|
+          subscription.destroy
+        end
+        operand.release self
       end
 
       def add_to_tuples(tuple_to_add)

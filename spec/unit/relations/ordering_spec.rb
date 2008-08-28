@@ -10,6 +10,19 @@ module Unison
         @ordering = Ordering.new(operand, attribute)
       end
 
+      describe "#initialize" do
+        it "sets the #operand and #attribute" do
+          ordering.operand.should == operand
+          ordering.attribute.should == attribute
+        end
+      end
+
+      describe "#tuple_class" do
+        it "delegates to its #operand" do
+          ordering.tuple_class.should == operand.tuple_class
+        end
+      end
+
       describe "when #retained?" do
         before do
           ordering.retain(Object.new)
@@ -32,27 +45,50 @@ module Unison
             ordering.tuples.should_not include(user_to_delete)
           end
         end
+
+        describe "#after_last_release?" do
+          it "unsubscribes from and releases its #operand" do
+            class << ordering
+              public :after_last_release
+            end
+
+            ordering.operand_subscriptions.should_not be_empty
+            operand.should be_retained_by(ordering)
+
+            ordering.operand_subscriptions.each do |subscription|
+              operand.subscriptions.should include(subscription)
+            end
+
+            ordering.after_last_release
+
+            operand.should_not be_retained_by(ordering)
+            ordering.operand_subscriptions.each do |subscription|
+              operand.subscriptions.should_not include(subscription)
+            end
+          end
+        end
       end
 
 
       describe "when not #retained?" do
-        describe "#retain" do
+        describe "#after_first_retain" do
           it "retains and subscribes to its #operand" do
             ordering.operand_subscriptions.should be_empty
             operand.should_not be_retained_by(ordering)
 
+            mock.proxy(ordering).after_first_retain
             ordering.retain(Object.new)
             ordering.operand_subscriptions.should_not be_empty
             operand.should be_retained_by(ordering)
           end
 
-#          it "retains the Tuples inserted by initial_read" do
-#            selection.retain(Object.new)
-#            selection.should_not be_empty
-#            selection.each do |tuple|
-#              tuple.should be_retained_by(selection)
-#            end
-#          end
+          it "retains the Tuples inserted by initial_read" do
+            ordering.retain(Object.new)
+            ordering.should_not be_empty
+            ordering.each do |tuple|
+              tuple.should be_retained_by(ordering)
+            end
+          end
         end
 
         describe "#tuples" do

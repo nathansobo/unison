@@ -13,7 +13,7 @@ module Unison
       describe "#initialize" do
         it "sets the #operand and #predicate" do
           selection.operand.should == photos_set
-          predicate.should == photos_set[:user_id].eq(1)
+          selection.predicate.should == predicate
         end
       end
 
@@ -126,15 +126,8 @@ module Unison
           end
         end
 
-        describe "#size" do
-          it "returns the number of tuples in the relation" do
-            selection.size.should == selection.tuples.size
-          end
-        end
-
         describe "#after_last_release" do
           it "unsubscribes from and releases its #operand" do
-            operand.extend AddSubscriptionsMethodToRelation
             selection.operand_subscriptions.should_not be_empty
             operand.should be_retained_by(selection)
 

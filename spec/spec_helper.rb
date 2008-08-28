@@ -253,7 +253,7 @@ class Spec::ExampleGroup
   end
 end
 
-module AddSubscriptionsMethodToRelation
+class Unison::Relations::Relation
   def subscriptions
     insert_subscription_node + delete_subscription_node + tuple_update_subscription_node
   end
