@@ -46,6 +46,34 @@ module Unison
           end
         end
 
+        describe "when a Tuple is updated in the #operand" do
+          describe "when the updated Attribute is the sort #attribute for the ordering" do
+            it "relocates the updated Tuple in accordance with the ordering" do
+              tuple_to_update = ordering.first
+              tuple_to_update[attribute] = "Zarathustra"
+
+              expected_tuples = operand.tuples.sort_by {|tuple| tuple[attribute]}
+              ordering.tuples.should == expected_tuples          
+            end
+          end
+
+          it "triggers the on_tuple_update event" do
+            arguments = []
+            ordering.on_tuple_update do |tuple, attribute, old_value, new_value|
+              arguments.push [tuple, attribute, old_value, new_value]
+            end
+
+            tuple_to_update = operand.first
+            old_value = tuple_to_update[attribute]
+            new_value = "Marcel"
+            new_value.should_not == old_value
+
+            tuple_to_update[attribute] = new_value
+
+            arguments.should == [[tuple_to_update, attribute, old_value, new_value]]
+          end
+        end
+
         describe "#after_last_release?" do
           it "unsubscribes from and releases its #operand" do
             class << ordering

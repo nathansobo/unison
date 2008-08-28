@@ -29,6 +29,12 @@ module Unison
             delete(inserted)
           end
         )
+        operand_subscriptions.push(
+          operand.on_tuple_update do |tuple, attribute, old_value, new_value|
+            reorder_tuples
+            tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
+          end
+        )
       end
 
       def after_last_release
@@ -41,6 +47,10 @@ module Unison
 
       def add_to_tuples(tuple_to_add)
         super
+        reorder_tuples
+      end
+
+      def reorder_tuples
         tuples.sort! {|tuple_a, tuple_b| tuple_a[attribute] <=> tuple_b[attribute]}
       end
 

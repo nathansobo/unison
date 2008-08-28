@@ -181,7 +181,7 @@ module Unison
               new_photos.each{|tuple| selection.tuples.should include(tuple)}
             end
 
-            it "invokes #on_insert callbacks for the inserted Tuples" do
+            it "triggers the on_insert event" do
               inserted_tuples = []
               selection.on_insert do |tuple|
                 inserted_tuples << tuple
@@ -351,7 +351,7 @@ module Unison
               selection.tuples.should_not include(photo)
             end
 
-            it "invokes the on_delete event" do
+            it "triggers the on_delete event" do
               on_delete_tuple = nil
               selection.on_delete do |tuple|
                 on_delete_tuple = tuple
@@ -377,7 +377,7 @@ module Unison
               selection.tuples.should include(photo)
             end
 
-            it "invokes the #on_tuple_update event" do
+            it "triggers the on_tuple_update event" do
               arguments = []
               selection.on_tuple_update do |tuple, attribute, old_value, new_value|
                 arguments.push [tuple, attribute, old_value, new_value]
@@ -389,7 +389,7 @@ module Unison
               arguments.should == [[photo, photos_set[:name], old_value, new_value]]
             end
 
-            it "does not invoke the #on_insert or #on_delete event" do
+            it "does not trigger the on_insert or on_delete event" do
               selection.on_insert do |tuple|
                 raise "Dont call me"
               end
@@ -422,7 +422,7 @@ module Unison
               selection.tuples.should_not include(photo)
             end
 
-            it "invokes #on_delete callbacks" do
+            it "triggers the on_delete event" do
               deleted = nil
               selection.on_delete do |tuple|
                 deleted = tuple
