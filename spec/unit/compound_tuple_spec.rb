@@ -123,7 +123,7 @@ module Unison
 
       describe "#after_last_release" do
         it "#releases the #nested_tuples" do
-          tuple.retain(Object.new)
+          tuple.retained_by(Object.new)
           nested_tuple_1.should be_retained_by(tuple)
           nested_tuple_2.should be_retained_by(tuple)
 

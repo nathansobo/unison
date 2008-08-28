@@ -17,7 +17,7 @@ module Unison
       context "when #retained?" do
         before do
           @predicate = Eq.new(users_set[:name], "Nathan")
-          predicate.retain(Object.new)
+          predicate.retained_by(Object.new)
         end
 
         describe "#eval" do
@@ -103,7 +103,7 @@ module Unison
             attr_reader :user, :operand, :operand_subscription
             before do
               @user = User.find(1)
-              @predicate = Eq.new(user.signal(:name), "Nathan").retain(Object.new)
+              @predicate = Eq.new(user.signal(:name), "Nathan").retained_by(Object.new)
               @operand = predicate.operand_1
               operand_subscriptions = predicate.send(:operand_subscriptions)
               operand_subscriptions.length.should == 1
@@ -127,7 +127,7 @@ module Unison
             attr_reader :user, :operand
             before do
               @user = User.find(1)
-              @predicate = Eq.new("Nathan", user.signal(:name)).retain(Object.new)
+              @predicate = Eq.new("Nathan", user.signal(:name)).retained_by(Object.new)
               @operand = predicate.operand_2
               operand_subscriptions = predicate.send(:operand_subscriptions)
             end
@@ -162,7 +162,7 @@ module Unison
               operand.should_not be_retained_by(predicate)
               predicate.send(:operand_subscriptions).should be_empty
 
-              predicate.retain(Object.new)
+              predicate.retained_by(Object.new)
               operand.should be_retained_by(predicate)
               predicate.send(:operand_subscriptions).should_not be_empty
             end
@@ -181,7 +181,7 @@ module Unison
               operand.should_not be_retained_by(predicate)
               predicate.send(:operand_subscriptions).should be_empty
 
-              predicate.retain(Object.new)
+              predicate.retained_by(Object.new)
               operand.should be_retained_by(predicate)
               predicate.send(:operand_subscriptions).should_not be_empty
             end

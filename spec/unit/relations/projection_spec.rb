@@ -70,7 +70,7 @@ module Unison
 
       context "when #retained?" do
         before do
-          projection.retain(Object.new)
+          projection.retained_by(Object.new)
         end
 
         describe "#merge" do
@@ -307,7 +307,7 @@ module Unison
 
         describe "#after_last_release" do
           before do
-            projection.retain(Object.new)
+            projection.retained_by(Object.new)
           end
 
           it "unsubscribes from and releases its #operand" do
@@ -335,7 +335,7 @@ module Unison
             mock.proxy(projection).after_first_retain
 
             operand.should_not be_retained_by(projection)
-            projection.retain Object.new
+            projection.retained_by Object.new
             operand.should be_retained_by(projection)
           end
         end

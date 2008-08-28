@@ -25,7 +25,7 @@ module Unison
 
       context "when #retained?" do
         before do
-          predicate.retain(Object.new)
+          predicate.retained_by(Object.new)
         end
 
         describe "#==" do
@@ -83,7 +83,7 @@ module Unison
             child_predicate_with_signal.should_not be_retained_by(predicate)
             predicate.send(:child_predicate_subscriptions).should be_empty
 
-            predicate.retain(Object.new)
+            predicate.retained_by(Object.new)
             child_predicate_without_signal.should be_retained_by(predicate)
             child_predicate_with_signal.should be_retained_by(predicate)
             predicate.send(:child_predicate_subscriptions).should_not be_empty

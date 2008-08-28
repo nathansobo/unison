@@ -94,7 +94,7 @@ module Unison
 
       describe "when #retained?" do
         before do
-          ordering.retain(Object.new)
+          ordering.retained_by(Object.new)
         end
 
         describe "when a Tuple is inserted into the #operand" do
@@ -185,13 +185,13 @@ module Unison
             operand.should_not be_retained_by(ordering)
 
             mock.proxy(ordering).after_first_retain
-            ordering.retain(Object.new)
+            ordering.retained_by(Object.new)
             ordering.operand_subscriptions.should_not be_empty
             operand.should be_retained_by(ordering)
           end
 
           it "retains the Tuples inserted by initial_read" do
-            ordering.retain(Object.new)
+            ordering.retained_by(Object.new)
             ordering.should_not be_empty
             ordering.each do |tuple|
               tuple.should be_retained_by(ordering)

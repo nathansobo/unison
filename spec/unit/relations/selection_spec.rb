@@ -109,7 +109,7 @@ module Unison
 
       context "when #retained?" do
         before do
-          selection.retain(Object.new)
+          selection.retained_by(Object.new)
           selection.tuples
         end
 
@@ -167,7 +167,7 @@ module Unison
           before do
             @user = User.find(1)
             @predicate = photos_set[:user_id].eq(user.signal(:id))
-            @selection = Selection.new(photos_set, predicate).retain(Object.new)
+            @selection = Selection.new(photos_set, predicate).retained_by(Object.new)
             @old_photos = selection.tuples.dup
             old_photos.length.should == 2
             @new_photos = [ Photo.create(:id => 100, :user_id => 100, :name => "Photo 100"),
@@ -225,7 +225,7 @@ module Unison
             it "keeps the Tuples in the set"
             it "does not invoke #on_insert callbacks for the Tuples"
             it "does not invoke #on_delete callbacks for the Tuples"
-            it "continues to #retain the Tuples"
+            it "continues to retain the Tuples"
           end
         end
 
@@ -472,7 +472,7 @@ module Unison
             selection.predicate_subscription.should be_nil
             predicate.should_not be_retained_by(selection)
 
-            selection.retain(Object.new)
+            selection.retained_by(Object.new)
             selection.predicate_subscription.should_not be_nil
             predicate.should be_retained_by(selection)
           end
@@ -481,13 +481,13 @@ module Unison
             selection.operand_subscriptions.should be_empty
             operand.should_not be_retained_by(selection)
 
-            selection.retain(Object.new)
+            selection.retained_by(Object.new)
             selection.operand_subscriptions.should_not be_empty
             operand.should be_retained_by(selection)
           end
 
           it "retains the Tuples inserted by initial_read" do
-            selection.retain(Object.new)
+            selection.retained_by(Object.new)
             selection.should_not be_empty
             selection.each do |tuple|
               tuple.should be_retained_by(selection)

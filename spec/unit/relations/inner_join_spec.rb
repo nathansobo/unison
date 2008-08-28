@@ -170,7 +170,7 @@ module Unison
 
       context "when #retained?" do
         before do
-          join.retain(Object.new)
+          join.retained_by(Object.new)
         end
 
         context "when a Tuple inserted into #operand_1" do
@@ -671,7 +671,7 @@ module Unison
 
         describe "#after_last_release" do
           before do
-            join.retain(Object.new)
+            join.retained_by(Object.new)
           end
 
           it "unsubscribes from and releases its operands" do
@@ -780,7 +780,7 @@ module Unison
             join.operand_2.should_not be_retained_by(join)
             join.predicate.should_not be_retained_by(join)
 
-            join.retain(Object.new)
+            join.retained_by(Object.new)
             join.operand_1.should be_retained_by(join)
             join.operand_2.should be_retained_by(join)
             join.predicate.should be_retained_by(join)

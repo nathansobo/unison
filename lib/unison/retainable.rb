@@ -15,12 +15,12 @@ module Unison
       mod.extend ClassMethods
     end
 
-    def retain(retainer)
+    def retained_by(retainer)
       raise ArgumentError, "Object #{retainer.inspect} has already retained this Object" if retained_by?(retainer)
       retainers[retainer.object_id] = retainer
       if refcount == 1
         self.class.send(:children_to_retain).each do |retainable_name|
-          send(retainable_name).retain(self)
+          send(retainable_name).retained_by(self)
         end
         after_first_retain
       end

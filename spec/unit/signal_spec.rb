@@ -16,9 +16,9 @@ module Unison
         end
       end
 
-      context "after #retain is called" do
+      context "when #retained?" do
         before do
-          signal.retain(Object.new)
+          signal.retained_by(Object.new)
         end
 
         it "retains its Tuple" do
@@ -34,7 +34,7 @@ module Unison
 
         describe "#after_last_release" do
           it "releases its Tuple" do
-            signal.retain(Object.new)
+            signal.retained_by(Object.new)
             user.should be_retained_by(signal)
             signal.send(:after_last_release)
             user.should_not be_retained_by(signal)
@@ -93,13 +93,15 @@ module Unison
         end
       end
 
-      context "before #retain is called" do
-        describe "#retain" do
+      context "wheretained_by#retained?" do
+        describe "#after_first_retain" do
           it "retains and subscribes to its Tuple" do
+            mock.proxy(signal).after_first_retain
+
             user.should_not be_retained_by(signal)
             signal.send(:tuple_subscription).should be_nil
 
-            signal.retain(Object.new)
+            signal.retained_by(Object.new)
             user.should be_retained_by(signal)
             signal.send(:tuple_subscription).should_not be_nil
           end

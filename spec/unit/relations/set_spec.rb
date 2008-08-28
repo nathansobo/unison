@@ -8,7 +8,7 @@ module Unison
         @set = Set.new(:users)
         set.has_attribute(:id, :integer)
         set.has_attribute(:name, :string)
-        set.retain(Object.new)
+        set.retained_by(Object.new)
       end
 
       describe "#initialize" do
@@ -136,7 +136,7 @@ module Unison
             set.tuples.should include(tuple)
           end
 
-          it "does not #retain the inserted Tuple" do
+          it "does not retain the inserted Tuple" do
             tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
             set.insert(tuple)
             tuple.should_not be_retained_by(set)

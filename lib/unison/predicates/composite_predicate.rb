@@ -22,7 +22,7 @@ module Unison
 
       def after_first_retain
         operands.each do |child_predicate|
-          child_predicate.retain(self)
+          child_predicate.retained_by(self)
           child_predicate_subscriptions.push(
             child_predicate.on_update do
               update_subscription_node.call

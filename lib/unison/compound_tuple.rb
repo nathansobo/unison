@@ -49,7 +49,7 @@ module Unison
     protected
     def after_first_retain
       nested_tuples.each do |tuple|
-        tuple.retain(self)
+        tuple.retained_by(self)
       end
     end
 
