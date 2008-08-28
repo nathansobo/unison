@@ -109,6 +109,12 @@ module Unison
         end
       end
 
+      describe "#order_by" do
+        it "returns an Ordering with the receiver as #operand and the argument as #attribute" do
+          users_set.order_by(users_set[:name]).should == Ordering.new(users_set, users_set[:name])
+        end
+      end
+
       describe "#nil?" do
         context "when the Relation is a singleton" do
           context "when #tuples.first is nil" do

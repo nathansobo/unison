@@ -45,6 +45,47 @@ module Unison
         end
       end
 
+      describe "#push" do
+        before do
+          origin.connection[:users].delete
+          origin.connection[:photos].delete
+        end
+
+        context "when the Ordering contains PrimitiveTuples" do
+          before do
+            ordering.composed_sets.length.should == 1
+          end
+
+          it "calls #push on the given Repository with self" do
+            origin.fetch(ordering).should be_empty
+            ordering.push(origin)
+            origin.fetch(ordering).should == ordering.tuples
+          end
+        end
+
+        context "when the Ordering contains CompoundTuples" do
+          before do
+            @ordering = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id])).order_by(users_set[:name])
+            ordering.should_not be_empty
+            ordering.composed_sets.length.should == 2
+          end
+
+          it "pushes a Projection of each Set represented in the Ordering to the given Repository" do
+            users_projection = ordering.project(users_set)
+            photos_projection = ordering.project(photos_set)
+            mock.proxy(origin).push(users_projection)
+            mock.proxy(origin).push(photos_projection)
+
+            origin.fetch(users_projection).should be_empty
+            origin.fetch(photos_projection).should be_empty
+            ordering.push(origin)
+            origin.fetch(users_projection).should == users_projection.tuples
+            origin.fetch(photos_projection).should == photos_projection.tuples
+          end
+        end
+      end
+
+
       describe "#composed_sets" do
         it "delegates to its #operand" do
           ordering.composed_sets.should == operand.composed_sets
