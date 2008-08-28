@@ -204,7 +204,7 @@ module Unison
               old_photos.each{|tuple| selection.tuples.should_not include(tuple)}
             end
 
-            it "invokes #on_delete callbacks for the deleted Tuples" do
+            it "triggers the on_delete event for the deleted Tuples" do
               deleted_tuples = []
               selection.on_delete do |tuple|
                 deleted_tuples << tuple
@@ -223,8 +223,8 @@ module Unison
           context "for Tuples that match both the old and new Predicates" do
             # TODO: JN/NS - No predicate types currently exist that could allow a tuple to match two different predicates.
             it "keeps the Tuples in the set"
-            it "does not invoke #on_insert callbacks for the Tuples"
-            it "does not invoke #on_delete callbacks for the Tuples"
+            it "does not trigger the on_insert event for the Tuples"
+            it "does not trigger the on_delete event for the Tuples"
             it "continues to retain the Tuples"
           end
         end
@@ -242,7 +242,7 @@ module Unison
               selection.tuples.should include(photo)
             end
 
-            it "invokes #on_insert callbacks" do
+            it "triggers the on_insert event" do
               on_insert_tuple = nil
               selection.on_insert do |tuple|
                 on_insert_tuple = tuple
@@ -271,7 +271,7 @@ module Unison
               selection.tuples.should_not include(photo)
             end
 
-            it "does not invoke #on_insert callbacks" do
+            it "does not trigger the on_insert event" do
               selection.on_insert do |tuple|
                 raise "Don't call me"
               end
@@ -298,7 +298,7 @@ module Unison
               selection.tuples.should include(photo)
             end
 
-            it "invokes #on_insert callbacks" do
+            it "triggers the on_insert event" do
               on_insert_tuple = nil
               selection.on_insert do |tuple|
                 on_insert_tuple = tuple
@@ -323,7 +323,7 @@ module Unison
               selection.tuples.should_not include(photo)
             end
 
-            it "does not invoke the #on_insert event" do
+            it "does not trigger the on_insert event" do
               selection.on_insert do |tuple|
                 raise "Dont call me"
               end
@@ -452,7 +452,7 @@ module Unison
               selection.tuples.should_not include(photo)
             end
 
-            it "does not invoke #on_delete callbacks" do
+            it "does not trigger the on_delete event" do
               selection.on_delete do |tuple|
                 raise "Don't call me"
               end

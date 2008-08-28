@@ -474,7 +474,7 @@ module Unison
               tuple[:name].should == new_value
             end
 
-            it "invokes #on_update Subscriptions" do
+            it "triggers the on_update event" do
               update_args = []
               tuple.on_update do |attribute, old_value, new_value|
                 update_args.push [attribute, old_value, new_value]
@@ -508,7 +508,7 @@ module Unison
           end
 
           context "when the passed in value is the same than the original value" do
-            it "does not invoke #on_update Subscriptions" do
+            it "does not trigger the on_update event" do
               tuple.on_update do |attribute, old_value, new_value|
                 raise "Dont call me"
               end

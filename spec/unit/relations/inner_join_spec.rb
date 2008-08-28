@@ -190,7 +190,7 @@ module Unison
               join.should include(expected_tuple)
             end
 
-            it "invokes the #on_insert event" do
+            it "triggers the on_insert event" do
               inserted = nil
               join.on_insert do |tuple|
                 inserted = tuple
@@ -225,7 +225,7 @@ module Unison
               join.should_not include(expected_tuple)
             end
 
-            it "does not invoke the #on_insert callback" do
+            it "does not trigger the on_insert event" do
               join.on_insert do |tuple|
                 raise "I should not be invoked"
               end
@@ -257,7 +257,7 @@ module Unison
               join.should include(expected_tuple)
             end
 
-            it "invokes the #on_insert event" do
+            it "trigger the on_insert event" do
               inserted = nil
               join.on_insert do |tuple|
                 inserted = tuple
@@ -292,7 +292,7 @@ module Unison
               join.should_not include(expected_tuple)
             end
 
-            it "does not invoke the #on_insert callback" do
+            it "does not trigger the on_insert event" do
               join.on_insert do |tuple|
                 raise "I should not be invoked"
               end
@@ -323,7 +323,7 @@ module Unison
                 join.should include(expected_compound_tuple)
               end
 
-              it "invokes the #on_insert event" do
+              it "triggers the on_insert event" do
                 inserted = nil
                 join.on_insert do |tuple|
                   inserted = tuple
@@ -349,7 +349,7 @@ module Unison
                 join.should_not include(expected_compound_tuple)
               end
 
-              it "does not invoke the #on_insert event" do
+              it "does not trigger the on_insert event" do
                 join.on_insert do |tuple|
                   raise "Do not call me"
                 end
@@ -379,7 +379,7 @@ module Unison
                 end
               end
 
-              it "invokes the on_delete event" do
+              it "triggers the on_delete event" do
                 deleted = []
                 join.on_delete do |tuple|
                   deleted.push tuple
@@ -407,7 +407,7 @@ module Unison
                 end
               end
 
-              it "invokes the #on_tuple_update event for the compound Tuple" do
+              it "triggers the on_tuple_update event for the compound Tuple" do
                 updated = []
                 join.on_tuple_update do |tuple, attribute, old_value, new_value|
                   updated.push [tuple, attribute, old_value, new_value]
@@ -420,7 +420,7 @@ module Unison
                 end
               end
 
-              it "does not invoke the #on_insert or #on_delete event" do
+              it "does not trigger the on_insert or on_delete event" do
                 join.on_insert do |tuple|
                   raise "Dont call me"
                 end
@@ -449,7 +449,7 @@ module Unison
                 join.should include(expected_compound_tuple)
               end
 
-              it "invokes the #on_insert event" do
+              it "triggers the on_insert event" do
                 inserted = nil
                 join.on_insert do |tuple|
                   inserted = tuple
@@ -475,7 +475,7 @@ module Unison
                 join.should_not include(expected_compound_tuple)
               end
 
-              it "does not invoke the #on_insert event" do
+              it "does not trigger the on_insert event" do
                 join.on_insert do |tuple|
                   raise "Do not call me"
                 end
@@ -500,7 +500,7 @@ module Unison
                 join.should_not include(compound_tuple)
               end
 
-              it "invokes the on_delete event" do
+              it "triggers the on_delete event" do
                 deleted = []
                 join.on_delete do |tuple|
                   deleted.push tuple
@@ -525,7 +525,7 @@ module Unison
                 join.should include(compound_tuple)
               end
 
-              it "invokes the #on_tuple_update event for the compound Tuple" do
+              it "triggers the on_tuple_update event for the CompoundTuple" do
                 updated = []
                 join.on_tuple_update do |tuple, attribute, old_value, new_value|
                   updated.push [tuple, attribute, old_value, new_value]
@@ -536,7 +536,7 @@ module Unison
                 updated.should == [[compound_tuple, photos_set[:name], old_value, new_value]]
               end
 
-              it "does not invoke the #on_insert or #on_delete event" do
+              it "does not trigger the on_insert or on_delete event" do
                 join.on_insert do |tuple|
                   raise "Dont call me"
                 end
@@ -567,7 +567,7 @@ module Unison
               join.should_not include(compound_tuple)
             end
 
-            it "invokes the #on_delete callback" do
+            it "triggers the on_delete event" do
               deleted = nil
               join.on_delete do |deleted_tuple|
                 deleted = deleted_tuple
@@ -600,7 +600,7 @@ module Unison
               end.should_not change{join.length}
             end
 
-            it "does not invoke the #on_delete callback" do
+            it "does not trigger the on_delete event" do
               join.on_delete do |deleted_tuple|
                 raise "I should not be invoked"
               end
@@ -627,7 +627,7 @@ module Unison
               join.should_not include(compound_tuple)
             end
 
-            it "invokes the #on_delete callback" do
+            it "triggers the on_delete event" do
               deleted = nil
               join.on_delete do |deleted_tuple|
                 deleted = deleted_tuple
@@ -660,7 +660,7 @@ module Unison
               end.should_not change{join.length}
             end
 
-            it "does not invoke the #on_delete callback" do
+            it "does not trigger the on_delete event" do
               join.on_delete do |deleted_tuple|
                 raise "I should not be invoked"
               end

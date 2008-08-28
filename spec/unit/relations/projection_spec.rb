@@ -98,7 +98,7 @@ module Unison
               projection.tuples.should include(user)
             end
 
-            it "invokes #on_insert callbacks" do
+            it "triggers the on_insert event" do
               inserted = nil
               projection.on_insert do |tuple|
                 inserted = tuple
@@ -121,7 +121,7 @@ module Unison
               end.should_not change{projection.tuples.length}
             end
 
-            it "does not invoke #on_insert callbacks" do
+            it "does not trigger the on_insert event" do
               projection.on_insert do |tuple|
                 raise "I should not be called"
               end
@@ -150,7 +150,7 @@ module Unison
                 projection.tuples.should_not include(user)
               end
 
-              it "invokes #on_delete callbacks with the deleted Tuple restricted by #projected_set" do
+              it "triggers the on_delete event with the deleted Tuple restricted by #projected_set" do
                 deleted = nil
                 projection.on_delete do |tuple|
                   deleted = tuple
@@ -177,7 +177,7 @@ module Unison
                 projection.tuples.should include(user)
               end
 
-              it "does not invoke #on_delete callbacks" do
+              it "does not trigger the on_delete event" do
                 projection.on_delete do |tuple|
                   raise "I should not be invoked"
                 end
@@ -200,7 +200,7 @@ module Unison
               projection.tuples.should_not include(user)
             end
 
-            it "does not invoke #on_delete callbacks with the Tuple restricted by #projected_set" do
+            it "does not trigger the on_delete event with the Tuple restricted by #projected_set" do
               projection.on_delete do |tuple|
                 raise "I should not be invoked"
               end
