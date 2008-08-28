@@ -54,9 +54,9 @@ module Unison
           end
 
         operand_subscriptions.push(
-          operand.on_insert do |created|
-            if predicate.eval(created)
-              insert(created)
+          operand.on_insert do |inserted|
+            if predicate.eval(inserted)
+              insert(inserted)
             end
           end
         )
