@@ -244,7 +244,6 @@ module Unison
         end
       end
 
-
       context "when #retained?" do
         before do
           @relation = users_set.where(Predicates::Eq.new(true, true)).retained_by(Object.new)
@@ -254,7 +253,6 @@ module Unison
         end
 
       end
-
 
       describe "#tuples" do
         context "when the Relation is not retained" do
@@ -395,6 +393,14 @@ module Unison
             old_name = user[:name]
             user[:name] = "Another Name"
             arguments.should == [[user, users_set[:name], old_name, "Another Name"]]
+          end
+        end
+      end
+
+      describe "an Array of Relations" do
+        describe ".flatten" do
+          it "reduces to an Array of all the Relations' #tuples" do
+            [users_set, photos_set].flatten.should == (users_set.tuples + photos_set.tuples)
           end
         end
       end

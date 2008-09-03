@@ -89,7 +89,10 @@ Spec::Runner.configure do |config|
         attribute_accessor :name, :string
 
         has_many :users
-#        has_many :photos, :through => :users
+        has_many :photos, :through => :users
+
+        has_many :friendships_from_users, :through => :users, :foreign_key => :from_id, :class_name => "Friendship"
+        has_many :friendships_to_users, :through => :users, :foreign_key => :to_id, :class_name => "Friendship"
       end)
 
       const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do

@@ -118,6 +118,8 @@ module Unison
         end
       end
 
+      alias_method :to_ary, :tuples
+
       protected
       attr_reader :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
 
