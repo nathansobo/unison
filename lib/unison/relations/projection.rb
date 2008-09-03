@@ -1,6 +1,6 @@
 module Unison
   module Relations
-    class Projection < Relation
+    class Projection < CompositeRelation
       attr_reader :operand, :projected_set
       retains :operand
 
@@ -33,14 +33,6 @@ module Unison
 
       def composed_sets
         operand.composed_sets
-      end
-
-      def has_attribute?(attribute)
-        projected_set.has_attribute?(attribute)
-      end
-
-      def attribute(attribute_name)
-        projected_set.attribute(attribute_name)
       end
 
       def inspect

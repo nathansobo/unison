@@ -1,6 +1,6 @@
 module Unison
   module Relations
-    class Ordering < Relation
+    class Ordering < CompositeRelation
       attr_reader :operand, :order_by_attribute, :operand_subscriptions
       retains :operand
 
@@ -29,14 +29,6 @@ module Unison
 
       def composed_sets
         operand.composed_sets
-      end
-
-      def attribute(attribute_name)
-        operand.attribute(attribute_name)
-      end
-
-      def has_attribute?(attribute)
-        operand.has_attribute?(attribute)
       end
 
       def inspect

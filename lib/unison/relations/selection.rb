@@ -1,6 +1,6 @@
 module Unison
   module Relations
-    class Selection < Relation
+    class Selection < CompositeRelation
       attr_reader :operand, :predicate, :operand_subscriptions, :predicate_subscription
       retains :operand, :predicate
 
@@ -29,14 +29,6 @@ module Unison
 
       def composed_sets
         operand.composed_sets
-      end
-
-      def has_attribute?(attribute)
-        operand.has_attribute?(attribute)
-      end
-
-      def attribute(attribute_name)
-        operand.attribute(attribute_name)
       end
 
       def inspect
