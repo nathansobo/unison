@@ -7,7 +7,6 @@ module Unison
       def initialize(operand, projected_set)
         super()
         @operand, @projected_set = operand, projected_set
-        @operand_subscriptions = []
         @last_update = nil
       end
 
@@ -40,7 +39,7 @@ module Unison
       end
 
       protected
-      attr_reader :last_update, :operand_subscriptions
+      attr_reader :last_update
 
       def initial_read
         operand.tuples.map do |tuple|
@@ -80,13 +79,6 @@ module Unison
             end
           end
         )
-      end
-
-      def after_last_release
-        operand_subscriptions.each do |subscription|
-          subscription.destroy
-        end
-        operand.release(self)
       end
     end
   end

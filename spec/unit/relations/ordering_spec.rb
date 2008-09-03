@@ -161,7 +161,7 @@ module Unison
         describe "#after_last_release" do
           it "unsubscribes from and releases its #operand" do
             class << ordering
-              public :after_last_release
+              public :after_last_release, :operand_subscriptions
             end
 
             ordering.operand_subscriptions.should_not be_empty
@@ -196,6 +196,7 @@ module Unison
       describe "when not #retained?" do
         describe "#after_first_retain" do
           it "retains and subscribes to its #operand" do
+            class << ordering; public :operand_subscriptions; end
             ordering.operand_subscriptions.should be_empty
             operand.should_not be_retained_by(ordering)
 

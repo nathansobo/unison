@@ -144,6 +144,7 @@ module Unison
 
         describe "#after_last_release" do
           it "unsubscribes from and releases its #operand" do
+            class << selection; public :operand_subscriptions; end
             selection.operand_subscriptions.should_not be_empty
             operand.should be_retained_by(selection)
 
@@ -494,6 +495,7 @@ module Unison
           end
 
           it "retains and subscribes to its #operand" do
+            class << selection; public :operand_subscriptions; end
             selection.operand_subscriptions.should be_empty
             operand.should_not be_retained_by(selection)
 

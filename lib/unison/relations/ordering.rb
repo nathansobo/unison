@@ -1,13 +1,12 @@
 module Unison
   module Relations
     class Ordering < CompositeRelation
-      attr_reader :operand, :order_by_attribute, :operand_subscriptions
+      attr_reader :operand, :order_by_attribute
       retains :operand
 
       def initialize(operand, order_by_attribute)
         super()
         @operand, @order_by_attribute = operand, order_by_attribute
-        @operand_subscriptions = []
       end
 
       def merge(tuples)
@@ -55,14 +54,6 @@ module Unison
             tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
           end
         )
-      end
-
-      def after_last_release
-        super
-        operand_subscriptions.each do |subscription|
-          subscription.destroy
-        end
-        operand.release self
       end
 
       def add_to_tuples(tuple_to_add)

@@ -41,6 +41,10 @@ module Unison
       protected
       attr_reader :operand_1_subscriptions, :operand_2_subscriptions
 
+      def operand_subscriptions
+        operand_1_subscriptions + operand_2_subscriptions
+      end
+
       def after_first_retain
         super
         operand_1_subscriptions.push(
@@ -107,14 +111,7 @@ module Unison
       end
 
       def after_last_release
-        operand_1_subscriptions.each do |subscription|
-          subscription.destroy
-        end
-        operand_2_subscriptions.each do |subscription|
-          subscription.destroy
-        end
-        operand_1.release(self)
-        operand_2.release(self)
+        super
         predicate.release(self)
       end
 

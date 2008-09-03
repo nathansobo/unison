@@ -1,12 +1,11 @@
 module Unison
   module Relations
     class Selection < CompositeRelation
-      attr_reader :operand, :predicate, :operand_subscriptions, :predicate_subscription
+      attr_reader :operand, :predicate, :predicate_subscription
       retains :operand, :predicate
 
       def initialize(operand, predicate)
         super()
-        @operand_subscriptions = []
         @operand, @predicate = operand, predicate
       end
 
@@ -85,12 +84,9 @@ module Unison
       end
 
       def after_last_release
+        super
         predicate_subscription.destroy
-        operand_subscriptions.each do |subscription|
-          subscription.destroy
-        end
         predicate.release self
-        operand.release self
       end
     end
   end
