@@ -43,7 +43,7 @@ module Unison
 
       def attribute(attribute_name)
         attributes[attribute_name] ||
-          raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on this Set")
+          raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on Set with name #{name.inspect}.")
       end
 
       def compound?
