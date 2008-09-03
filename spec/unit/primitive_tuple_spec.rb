@@ -38,6 +38,33 @@ module Unison
             user = User.new
             user.should_not respond_to(:nick_name=)
           end
+          
+          describe ":default option" do
+            context "when a :default is supplied" do
+              it "defaults the value to the supplied default value" do
+                User.attribute_reader(:nick_name, :string, :default => "jumbo")
+                User.new.nick_name.should == "jumbo"
+                User.new(:nick_name => "shorty").nick_name.should == "shorty"
+              end
+
+              context "when default value is false" do
+                it "defaults the attribute value to false" do
+                  User.attribute_reader(:is_awesome, :boolean, :default => false)
+                  User.new.is_awesome.should be_false
+                  User.new(:is_awesome => true).is_awesome.should be_true
+                end
+              end
+            end
+
+            context "when a :default is not supplied" do
+              it "does not default the value" do
+                User.attribute_reader(:nick_name, :string)
+                User.new.nick_name.should be_nil
+                User.new(:nick_name => "shorty").nick_name.should == "shorty"
+              end
+            end
+          end
+
         end
 
         describe ".attribute_writer" do
@@ -58,6 +85,32 @@ module Unison
             user = User.new
             user.should_not respond_to(:nick_name)
           end
+
+          describe ":default option" do
+            context "when a :default is supplied" do
+              it "defaults the value to the supplied default value" do
+                User.attribute_writer(:nick_name, :string, :default => "jumbo")
+                User.new[:nick_name].should == "jumbo"
+                User.new(:nick_name => "shorty")[:nick_name].should == "shorty"
+              end
+
+              context "when default value is false" do
+                it "defaults the attribute value to false" do
+                  User.attribute_reader(:is_awesome, :boolean, :default => false)
+                  User.new[:is_awesome].should be_false
+                  User.new(:is_awesome => true)[:is_awesome].should be_true
+                end
+              end
+            end
+
+            context "when a :default is not supplied" do
+              it "does not default the value" do
+                User.attribute_reader(:nick_name, :string)
+                User.new[:nick_name].should be_nil
+                User.new(:nick_name => "shorty")[:nick_name].should == "shorty"
+              end
+            end
+          end
         end
 
         describe ".attribute_accessor" do
@@ -72,6 +125,32 @@ module Unison
             user.nick_name = "Jane"
             user.nick_name.should == "Jane"
             user[:nick_name].should == "Jane"
+          end
+
+          describe ":default option" do
+            context "when a :default is supplied" do
+              it "defaults the value to the supplied default value" do
+                User.attribute_reader(:nick_name, :string, :default => "jumbo")
+                User.new.nick_name.should == "jumbo"
+                User.new(:nick_name => "shorty").nick_name.should == "shorty"
+              end
+
+              context "when default value is false" do
+                it "defaults the attribute value to false" do
+                  User.attribute_reader(:is_awesome, :boolean, :default => false)
+                  User.new.is_awesome.should be_false
+                  User.new(:is_awesome => true).is_awesome.should be_true
+                end
+              end
+            end
+
+            context "when a :default is not supplied" do
+              it "does not default the value" do
+                User.attribute_reader(:nick_name, :string)
+                User.new.nick_name.should be_nil
+                User.new(:nick_name => "shorty").nick_name.should == "shorty"
+              end
+            end
           end
         end
         
@@ -732,6 +811,18 @@ module Unison
         describe "#on_update" do
           it "returns a Subscription" do
             tuple.on_update {}.class.should == Subscription
+          end
+        end
+
+        describe "#initialize_attribute_values" do
+          it "transforms Symbol keys into their corresponding Attribute objects" do
+            user = User.new
+            class << user; public :initialize_attribute_values; end
+
+            dont_allow(user).__send__(:[]=, :name, "Einstein")
+            mock.proxy(user).__send__(:[]=, User[:name], "Einstein")
+            stub.proxy(user).__send__(:[]=, anything, anything)
+            user.initialize_attribute_values(:name => "Einstein")
           end
         end
       end

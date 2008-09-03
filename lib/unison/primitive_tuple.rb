@@ -11,27 +11,35 @@ module Unison
         set.tuple_class = self
       end
 
-      def attribute(name, type)
-        set.has_attribute(name, type)
+      def default_attribute_values
+        @default_attribute_values ||= {}
       end
 
-      def attribute_reader(name, type)
+      def attribute(name, type, options={})
         attribute = set.has_attribute(name, type)
+        if options.has_key?(:default)
+          default_attribute_values[attribute] = options[:default]
+        end
+        attribute
+      end
+
+      def attribute_reader(name, type, options={})
+        attribute = self.attribute(name, type, options)
         define_method(name) do
           self[attribute]
         end
       end
 
-      def attribute_writer(name, type)
-        attribute = set.has_attribute(name, type)
+      def attribute_writer(name, type, options={})
+        attribute = self.attribute(name, type, options)
         define_method("#{name}=") do |value|
           self[attribute] = value
         end
       end
 
-      def attribute_accessor(name, type)
-        attribute_reader(name, type)
-        attribute_writer(name, type)
+      def attribute_accessor(name, type, options={})
+        attribute_reader(name, type, options)
+        attribute_writer(name, type, options)
       end
 
       def relates_to_n(name, &definition)
@@ -98,20 +106,17 @@ module Unison
 
     attr_reader :signals
 
-    def initialize(attributes={})
+    def initialize(initial_attributes={})
       super()
       @new = true
       @dirty = false
       @signals = {}
       @attribute_values = {}
 
-      if attributes[:id] && !Unison.test_mode?
-        raise "You can only assign the :id attribute in test mode"
-      end
-      attributes[:id] ||= Guid.new.to_s 
-      attributes.each do |attribute, value|
-        self[attribute] = value
-      end
+      initialize_attribute_values(initial_attributes)
+#      initialize_attribute_values(
+#        default_attribute_values.merge(normalize_attribute_keys(initial_attribute_values))
+#      )
 
       instance_relations.each do |name, proc|
         relation = instance_eval(&proc)
@@ -219,6 +224,31 @@ module Unison
 
     protected
     attr_reader :attribute_values
+
+    def initialize_attribute_values(initial_attributes)
+      initial_attributes = default_attribute_values.merge(
+        convert_symbol_keys_to_attributes(initial_attributes)
+      )
+      if initial_attributes[set[:id]] && !Unison.test_mode?
+        raise "You can only assign the :id attribute in test mode"
+      end
+      initial_attributes[set[:id]] ||= Guid.new.to_s
+      initial_attributes.each do |attribute, value|
+        self[attribute] = value
+      end
+    end
+
+    def convert_symbol_keys_to_attributes(attributes)
+      attributes.inject({}) do |normalized_hash, pair|
+        key, value = pair
+        normalized_hash[set[key]] = value
+        normalized_hash
+      end
+    end    
+
+    def default_attribute_values
+      self.class.default_attribute_values
+    end
 
     def child_foreign_key_from_options(options)
       options[:foreign_key] || :"#{self.class.name.to_s.underscore}_id"
