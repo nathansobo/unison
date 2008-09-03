@@ -1,6 +1,6 @@
 module Unison
   module Relations
-    class InnerJoin < Relation
+    class InnerJoin < CompositeRelation
       attr_reader :operand_1, :operand_2, :predicate
       retains :operand_1, :operand_2, :predicate
       
@@ -9,6 +9,10 @@ module Unison
         @operand_1, @operand_2, @predicate = operand_1, operand_2, predicate
         @operand_1_subscriptions, @operand_2_subscriptions = [], []
       end
+      
+      def operands
+        [operand_1, operand_2]
+      end  
 
       def to_arel
         operand_1.to_arel.join(operand_2.to_arel).on(predicate.to_arel)
@@ -26,28 +30,8 @@ module Unison
         operand_1.composed_sets + operand_2.composed_sets
       end
 
-      def attribute(name)
-        return operand_1.attribute(name) if operand_1.has_attribute?(name)
-        return operand_2.attribute(name) if operand_2.has_attribute?(name)
-        raise ArgumentError, "Attribute with name #{name.inspect} is not defined on this Relation"
-      end
-
       def merge(tuples)
         raise NotImplementedError
-      end
-
-      def attribute(attribute_name)
-        if operand_1.has_attribute?(attribute_name)
-          operand_1.attribute(attribute_name)
-        elsif operand_2.has_attribute?(attribute_name)
-          operand_2.attribute(attribute_name)
-        else
-          raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on #{inspect}.")
-        end
-      end
-
-      def has_attribute?(attribute)
-        operand_1.has_attribute?(attribute) || operand_2.has_attribute?(attribute)
       end
 
       def inspect
