@@ -6,14 +6,14 @@ module Unison
     end
 
     def fetch(relation)
-      raise NotImplementedError, "You cannot fetch Relations that contain CompoundTuples" if relation.is_a?(Relations::InnerJoin)
+      raise NotImplementedError, "You cannot fetch Relations that contain CompositeTuples" if relation.is_a?(Relations::InnerJoin)
       connection[relation.to_sql].map do |record|
         relation.tuple_class.new(record).persisted
       end
     end
 
     def push(relation)
-      raise "You cannot push Relations that contain CompoundTuples" if relation.is_a?(Relations::InnerJoin)
+      raise "You cannot push Relations that contain CompositeTuples" if relation.is_a?(Relations::InnerJoin)
       table = connection[relation.set.name]
       relation.each do |tuple|
         if tuple.new?

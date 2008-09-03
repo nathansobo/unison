@@ -106,7 +106,7 @@ module Unison
           end
         end
 
-        context "when one of operands contains CompoundTuples" do
+        context "when one of operands contains CompositeTuples" do
           before do
             @join = join.join(cameras_set).on(photos_set[:camera_id].eq(cameras_set[:id]))
           end
@@ -222,14 +222,14 @@ module Unison
           context "when the inserted Tuple creates a compound Tuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
-              @tuple_class = CompoundTuple::Base
+              @tuple_class = CompositeTuple::Base
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.new(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
               predicate.eval(expected_tuple).should be_true
             end
 
-            it "adds the CompoundTuple to the result of #tuples" do
+            it "adds the CompositeTuple to the result of #tuples" do
               join.should_not include(expected_tuple)
               users_set.insert(user)
               join.should include(expected_tuple)
@@ -247,7 +247,7 @@ module Unison
               inserted[users_set].should == user
             end
 
-            it "retains the CompoundTuple" do
+            it "retains the CompositeTuple" do
               join.find(user.id).should be_nil
               users_set.insert(user)
               join.find(user.id).should be_retained_by(join)
@@ -257,7 +257,7 @@ module Unison
           context "when the inserted Tuple creates a compound Tuple that does not match the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
-              @tuple_class = CompoundTuple::Base
+              @tuple_class = CompositeTuple::Base
               @photo = Photo.create(:id => 100, :user_id => 999, :name => "Photo 100")
               @user = User.new(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
@@ -277,7 +277,7 @@ module Unison
               users_set.insert(user)
             end
 
-            it "does not retain the CompoundTuple" do
+            it "does not retain the CompositeTuple" do
               join.find(user.id).should be_nil
               users_set.insert(user)
               join.find(user.id).should be_nil
@@ -289,7 +289,7 @@ module Unison
           context "when the inserted Tuple creates a compound Tuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
-              @tuple_class = CompoundTuple::Base
+              @tuple_class = CompositeTuple::Base
               @photo = Photo.new(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
@@ -314,7 +314,7 @@ module Unison
               inserted[users_set].should == user
             end
             
-            it "retains the CompoundTuple" do
+            it "retains the CompositeTuple" do
               join.where(photos_set[:id].eq(photo[:id])).should be_empty
               photos_set.insert(photo)
               join.where(photos_set[:id].eq(photo[:id])).first.should be_retained_by(join)
@@ -324,7 +324,7 @@ module Unison
           context "when the inserted Tuple creates a compound Tuple that does not match the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
-              @tuple_class = CompoundTuple::Base
+              @tuple_class = CompositeTuple::Base
               @photo = Photo.new(:id => 100, :user_id => 999, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @expected_tuple = tuple_class.new(user, photo)
@@ -344,7 +344,7 @@ module Unison
               photos_set.insert(photo)
             end
 
-            it "does not retain the CompoundTuple" do
+            it "does not retain the CompositeTuple" do
               join.find(user.id).should be_nil
               photos_set.insert(photo)
               join.find(user.id).should be_nil
@@ -358,7 +358,7 @@ module Unison
             before do
               @user = users_set.tuples.first
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-              @expected_compound_tuple = CompoundTuple::Base.new(user, photo)
+              @expected_compound_tuple = CompositeTuple::Base.new(user, photo)
             end
 
             context "when the update causes a compound Tuple to match the #predicate" do
@@ -380,7 +380,7 @@ module Unison
                 inserted[users_set].should == user
               end
 
-              it "retains the CompoundTuple" do
+              it "retains the CompositeTuple" do
                 join.where(photos_set[:id].eq(photo[:id])).should be_empty
                 user[:id] = photo[:user_id]
                 join.where(photos_set[:id].eq(photo[:id])).tuples.first.should be_retained_by(join)
@@ -436,7 +436,7 @@ module Unison
                 end
               end
 
-              it "releases the CompoundTuple" do
+              it "releases the CompositeTuple" do
                 compound_tuple = join.find(user.id)
                 compound_tuple.should be_retained_by(join)
                 user[:id] = 100
@@ -484,7 +484,7 @@ module Unison
             before do
               @user = users_set.tuples.first
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-              @expected_compound_tuple = CompoundTuple::Base.new(user, photo)
+              @expected_compound_tuple = CompositeTuple::Base.new(user, photo)
             end
 
             context "when the update causes a compound Tuple to match the #predicate" do
@@ -506,7 +506,7 @@ module Unison
                 inserted[users_set].should == user
               end
 
-              it "retains the CompoundTuple" do
+              it "retains the CompositeTuple" do
                 join.where(photos_set[:id].eq(photo[:id])).should be_empty
                 photo[:user_id] = user[:id]
                 join.where(photos_set[:id].eq(photo[:id])).first.should be_retained_by(join)
@@ -554,7 +554,7 @@ module Unison
                 deleted.should == [compound_tuple]
               end
 
-              it "releases the CompoundTuple" do
+              it "releases the CompositeTuple" do
                 compound_tuple = join.where(photos_set[:id].eq(photo.id)).first
                 compound_tuple.should be_retained_by(join)
 
@@ -570,7 +570,7 @@ module Unison
                 join.should include(compound_tuple)
               end
 
-              it "triggers the on_tuple_update event for the CompoundTuple" do
+              it "triggers the on_tuple_update event for the CompositeTuple" do
                 updated = []
                 join.on_tuple_update do |tuple, attribute, old_value, new_value|
                   updated.push [tuple, attribute, old_value, new_value]
@@ -599,7 +599,7 @@ module Unison
           context "is a member of a compound Tuple that matches the #predicate" do
             attr_reader :photo, :compound_tuple
             before do
-              @tuple_class = CompoundTuple::Base
+              @tuple_class = CompositeTuple::Base
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @compound_tuple = join.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
@@ -632,7 +632,7 @@ module Unison
 
           context "is not a member of a compound Tuple that matches the #predicate" do
             before do
-              @tuple_class = CompoundTuple::Base
+              @tuple_class = CompositeTuple::Base
               @user = User.create(:id => 100, :name => "Brian")
               join.any? do |compound_tuple|
                 compound_tuple[users_set] == user
@@ -659,7 +659,7 @@ module Unison
           context "is a member of a compound Tuple that matches the #predicate" do
             attr_reader :user, :compound_tuple
             before do
-              @tuple_class = CompoundTuple::Base
+              @tuple_class = CompositeTuple::Base
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               @user = User.create(:id => 100, :name => "Brian")
               @compound_tuple = join.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
@@ -692,7 +692,7 @@ module Unison
 
           context "is not a member of a compound Tuple that matches the #predicate" do
             before do
-              @tuple_class = CompoundTuple::Base
+              @tuple_class = CompositeTuple::Base
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
               join.any? do |compound_tuple|
                 compound_tuple[photos_set] == photo
@@ -755,7 +755,7 @@ module Unison
         describe "#find_compound_tuple" do
           attr_reader :photo, :user
 
-          context "when #tuples contains a CompoundTuple that contains both of the arguments" do
+          context "when #tuples contains a CompositeTuple that contains both of the arguments" do
             before do
               @user = User.create(:id => 100, :name => "Brian")
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
@@ -766,14 +766,14 @@ module Unison
               end.should be_true
             end
 
-            it "returns the CompoundTuple" do
+            it "returns the CompositeTuple" do
               compound_tuple = join.send(:find_compound_tuple, user, photo)
               compound_tuple[users_set].should == user
               compound_tuple[photos_set].should == photo
             end
           end
 
-          context "when #tuples only contains a CompoundTuple that contains the first argument" do
+          context "when #tuples only contains a CompositeTuple that contains the first argument" do
             before do
               @user = User.find(1)
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
@@ -794,7 +794,7 @@ module Unison
             end
           end
 
-          context "when #tuples only contains a CompoundTuple that contains the second argument" do
+          context "when #tuples only contains a CompositeTuple that contains the second argument" do
             before do
               @user = User.create(:id => 100, :name => "Brian")
               @photo = Photo.find(1)

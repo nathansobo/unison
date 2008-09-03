@@ -41,7 +41,7 @@ module Unison
           end
         end
 
-        context "when the Selection contains CompoundTuples" do
+        context "when the Selection contains CompositeTuples" do
           before do
             @selection = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id])).where(users_set[:id].eq(1))
             selection.should_not be_empty

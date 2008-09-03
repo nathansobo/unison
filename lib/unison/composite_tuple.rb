@@ -1,5 +1,5 @@
 module Unison
-  module CompoundTuple
+  module CompositeTuple
     include Tuple
     attr_reader :nested_tuples
 
@@ -30,7 +30,7 @@ module Unison
     end    
 
     def ==(other)
-      return false unless other.is_a?(CompoundTuple)
+      return false unless other.is_a?(CompositeTuple)
       nested_tuples == other.nested_tuples
     end
 
@@ -43,7 +43,7 @@ module Unison
     end
 
     class Base
-      include CompoundTuple
+      include CompositeTuple
     end
 
     protected

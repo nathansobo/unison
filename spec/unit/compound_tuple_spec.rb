@@ -1,13 +1,13 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
-  module CompoundTuple
+  module CompositeTuple
     describe Base do
       attr_reader :tuple_class, :tuple
 
       describe ".basename" do
         it "returns the last segment of name" do
-          tuple_class = Class.new(CompoundTuple::Base)
+          tuple_class = Class.new(CompositeTuple::Base)
           stub(tuple_class).name {"Foo::Bar::Baz"}
           tuple_class.basename.should == "Baz"
         end
@@ -17,7 +17,7 @@ module Unison
       before do
         @nested_tuple_1 = User.new(:id => 1, :name => "Damon")
         @nested_tuple_2 = Photo.new(:id => 1, :name => "Silly Photo", :user_id => 1)
-        @tuple = CompoundTuple::Base.new(nested_tuple_1, nested_tuple_2)
+        @tuple = CompositeTuple::Base.new(nested_tuple_1, nested_tuple_2)
       end
 
       describe "#initialize" do
@@ -55,13 +55,13 @@ module Unison
           end
         end
 
-        context "when one of #nested_tuples is itself a CompoundTuple" do
+        context "when one of #nested_tuples is itself a CompositeTuple" do
           attr_reader :nested_tuple_3
           before do
             @nested_tuple_1 = User.new(:id => 1, :name => "Damon")
             @nested_tuple_2 = Photo.new(:id => 1, :name => "Silly Photo", :user_id => 1, :camera_id => 1)
             @nested_tuple_3 = Camera.new(:id => 1, :name => "Lomo")
-            @tuple = CompoundTuple::Base.new(CompoundTuple::Base.new(nested_tuple_1, nested_tuple_2), nested_tuple_3)
+            @tuple = CompositeTuple::Base.new(CompositeTuple::Base.new(nested_tuple_1, nested_tuple_2), nested_tuple_3)
           end
 
           context "when passed an Attribute of a doubly-nested PrimitiveTuple" do
@@ -137,7 +137,7 @@ module Unison
         attr_reader :other_tuple
         context "when other Tuple#nested_tuples == #nested_tuples" do
           before do
-            @other_tuple = CompoundTuple::Base.new(nested_tuple_1, nested_tuple_2)
+            @other_tuple = CompositeTuple::Base.new(nested_tuple_1, nested_tuple_2)
             other_tuple.nested_tuples.should == tuple.nested_tuples
           end
 
@@ -148,7 +148,7 @@ module Unison
 
         context "when other Tuple#attributes != #attributes" do
           before do
-            @other_tuple = CompoundTuple::Base.new(User.new(:id => 100, :name => "Ross"), Photo.new(:id => 100, :name => "Super Photo", :user_id => 100))
+            @other_tuple = CompositeTuple::Base.new(User.new(:id => 100, :name => "Ross"), Photo.new(:id => 100, :name => "Super Photo", :user_id => 100))
             other_tuple.nested_tuples.should_not == tuple.nested_tuples
           end
 

@@ -62,7 +62,7 @@ module Unison
         operand_1_subscriptions.push(
           operand_1.on_insert do |operand_1_tuple|
             operand_2.each do |operand_2_tuple|
-              insert_if_predicate_matches CompoundTuple::Base.new(operand_1_tuple, operand_2_tuple)
+              insert_if_predicate_matches CompositeTuple::Base.new(operand_1_tuple, operand_2_tuple)
             end
           end
         )
@@ -70,7 +70,7 @@ module Unison
         operand_2_subscriptions.push(
           operand_2.on_insert do |operand_2_tuple|
             operand_1.each do |operand_1_tuple|
-              insert_if_predicate_matches CompoundTuple::Base.new(operand_1_tuple, operand_2_tuple)
+              insert_if_predicate_matches CompositeTuple::Base.new(operand_1_tuple, operand_2_tuple)
             end
           end
         )
@@ -98,7 +98,7 @@ module Unison
                   delete(compound_tuple)
                 end
               else
-                insert_if_predicate_matches(CompoundTuple::Base.new(operand_1_tuple, operand_2_tuple))
+                insert_if_predicate_matches(CompositeTuple::Base.new(operand_1_tuple, operand_2_tuple))
               end
             end
           end
@@ -115,7 +115,7 @@ module Unison
                   delete(compound_tuple)
                 end
               else
-                insert_if_predicate_matches(CompoundTuple::Base.new(operand_1_tuple, operand_2_tuple))
+                insert_if_predicate_matches(CompositeTuple::Base.new(operand_1_tuple, operand_2_tuple))
               end
             end
           end
@@ -154,7 +154,7 @@ module Unison
         tuples = []
         operand_1.each do |tuple_1|
           operand_2.each do |tuple_2|
-            tuples.push(CompoundTuple::Base.new(tuple_1, tuple_2))
+            tuples.push(CompositeTuple::Base.new(tuple_1, tuple_2))
           end
         end
         tuples

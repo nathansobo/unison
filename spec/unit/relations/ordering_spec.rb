@@ -63,7 +63,7 @@ module Unison
           end
         end
 
-        context "when the Ordering contains CompoundTuples" do
+        context "when the Ordering contains CompositeTuples" do
           before do
             @ordering = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id])).order_by(users_set[:name])
             ordering.should_not be_empty

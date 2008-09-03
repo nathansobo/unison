@@ -101,7 +101,7 @@ module Unison
         end
       end
 
-      context "when passed a Relation that contains CompoundTuples" do
+      context "when passed a Relation that contains CompositeTuples" do
         it "raises an Exception" do
           join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
           lambda do
