@@ -31,6 +31,10 @@ module Unison
         operand.composed_sets
       end
 
+      def has_attribute?(attribute)
+        operand.has_attribute?(attribute)
+      end
+
       protected
 
       def after_first_retain

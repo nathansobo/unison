@@ -59,6 +59,13 @@ module Unison
           if options[:through]
             through_relation = self.send(options[:through])
             foreign_key = options[:foreign_key] || :"#{target_relation.name.to_s.singularize.underscore}_id"
+#            if through_relation.has_attribute?(foreign_key)
+#              foreign_key_owner = through_relation
+#              primary_key_owner = target_relation
+#            elsif target_relation.has_attribute?(foreign_key)
+#              foreign_key_owner = target_relation
+#              primary_key_owner = through_relation
+#            end
             through_relation.
               join(target_relation).
               on(

@@ -1,4 +1,4 @@
-require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
+require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 
 module Unison
   module Relations
@@ -23,11 +23,10 @@ module Unison
         end
       end
 
-
       describe "#to_sql" do
         it "returns select attributes from operand" do
           projection.to_sql.should be_like("
-            SELECT DISTINCT `users`.`id`, `users`.`name`, `users`.`hobby`
+            SELECT DISTINCT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`
             FROM `users`
             INNER JOIN `photos`
             ON `photos`.`user_id` = `users`.`id`"
@@ -65,6 +64,15 @@ module Unison
       describe "#composed_sets" do
         it "delegates to #operand " do
           projection.composed_sets.should == operand.composed_sets
+        end
+      end
+
+      describe "#has_attribute?" do
+        it "delegates to the #projected_set" do
+          projected_set.has_attribute?(:id).should be_true
+          mock.proxy(projected_set).has_attribute?(:id)
+          
+          projection.has_attribute?(:id).should be_true
         end
       end
 

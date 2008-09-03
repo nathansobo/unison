@@ -1,4 +1,4 @@
-require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
+require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 
 module Unison
   module Relations
@@ -70,7 +70,7 @@ module Unison
           end
 
           it "returns 'select #operand where #predicate'" do
-            selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby` FROM `users` WHERE `users`.`id` = 1")
+            selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id` FROM `users` WHERE `users`.`id` = 1")
           end
         end
 
@@ -81,7 +81,7 @@ module Unison
 
           it "returns 'select #operand where #predicate'" do
             selection.to_sql.should be_like("
-              SELECT `users`.`id`, `users`.`name`, `users`.`hobby`
+              SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`
               FROM `users`
               WHERE `users`.`id` = 1 AND `users`.`name` = 'Nathan'
             ")
@@ -104,6 +104,14 @@ module Unison
       describe "#composed_sets" do
         it "delegates to its #operand" do
           selection.composed_sets.should == operand.composed_sets
+        end
+      end
+
+      describe "#has_attribute?" do
+        it "delegates to #operand" do
+          operand.has_attribute?(:id).should be_true
+          mock.proxy(operand).has_attribute?(:id)
+          selection.has_attribute?(:id).should be_true
         end
       end
 

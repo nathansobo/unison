@@ -1,4 +1,4 @@
-require File.expand_path("#{File.dirname(__FILE__)}/../spec_helper")
+require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
   module PrimitiveTuple
@@ -241,20 +241,42 @@ module Unison
 
           describe ":through option" do
             context "when passed :through, :class_name, and :foreign_key options" do
-              it "returns a Projection, where its #operand is associated with the passed in :class_name using the provided :foreign_key, of the InnerJoin on the through Relation" do
-                user.fans.should == user.friendships_to_me.join(User.set).on(Friendship[:from_id].eq(User[:id])).project(User.set)
-                user.fans.should_not be_empty
-                user.fans.sort_by(&:id).should == user.friendships_to_me.map {|friendship| friendship.from.tuples.first}.uniq.sort_by(&:id)
-                user.fans.each do |fan|
-                  fan.heroes.should include(user)
+              context "when the target Relation is the owner of the :foreign_key" do
+
+              end
+
+              context "when the through Relation is the owner of the :foreign_key" do
+                it "returns a Projection, where its #operand is associated with the passed in :class_name using the provided :foreign_key, of the InnerJoin on the through Relation" do
+                  user.fans.should == user.friendships_to_me.join(User.set).on(Friendship[:from_id].eq(User[:id])).project(User.set)
+                  user.fans.should_not be_empty
+                  user.fans.sort_by(&:id).should == user.friendships_to_me.map {|friendship| friendship.from.tuples.first}.uniq.sort_by(&:id)
+                  user.fans.each do |fan|
+                    fan.heroes.should include(user)
+                  end
                 end
               end
             end
 
             context "when passed :through" do
-              it "returns a Projection, where its #operand and :foreign_key are inferred from the relation" do
-                user.cameras.should_not be_empty
-                user.cameras.sort_by(&:id).should == user.photos.map {|photo| photo.camera.tuples.first}.uniq.sort_by(&:id)
+              context "when the target Relation is the owner of the :foreign_key" do
+                it "returns members of the target Relation whose foreign key equals the id of members of the through Relation" do
+                  pending do
+                    team = Team.find(1)
+                    team.photos.sort_by(&:id).should == team.users.map(&:photos).flatten.sort_by(&:id)
+                  end
+                end
+
+                it "returns members of the target Relation whose id equals the foreign key of members of the through Relation" do
+                  user.cameras.should_not be_empty
+                  user.cameras.sort_by(&:id).should == user.photos.map {|photo| photo.camera.tuples.first}.uniq.sort_by(&:id)
+                end
+              end
+
+              context "when the through Relation is the owner of the :foreign_key" do
+                it "returns a Projection, where its #operand and :foreign_key are inferred from the relation" do
+                  user.cameras.should_not be_empty
+                  user.cameras.sort_by(&:id).should == user.photos.map {|photo| photo.camera.tuples.first}.uniq.sort_by(&:id)
+                end
               end
             end
           end

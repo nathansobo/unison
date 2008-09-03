@@ -36,6 +36,10 @@ module Unison
         raise NotImplementedError
       end
 
+      def has_attribute?(attribute)
+        operand_1.has_attribute?(attribute) || operand_2.has_attribute?(attribute)
+      end
+
       protected
       attr_reader :operand_1_subscriptions, :operand_2_subscriptions
 

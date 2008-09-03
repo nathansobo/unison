@@ -1,4 +1,4 @@
-require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
+require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 
 module Unison
   module Relations
@@ -26,7 +26,7 @@ module Unison
       describe "#to_sql" do
         it "returns 'select #operand_1 inner join #operand_2 on #predicate'" do
           join.to_sql.should be_like("
-            SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `photos`.`id`, `photos`.`user_id`, `photos`.`camera_id`, `photos`.`name`
+            SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `photos`.`id`, `photos`.`user_id`, `photos`.`camera_id`, `photos`.`name`
             FROM `users`
             INNER JOIN `photos`
             ON `photos`.`user_id` = `users`.`id`
@@ -90,7 +90,6 @@ module Unison
           join.should be_compound
         end
       end
-
 
       describe "#set" do
         it "raises a NotImplementedError" do
@@ -165,6 +164,28 @@ module Unison
           lambda do
             join.merge([])
           end.should raise_error(NotImplementedError)
+        end
+      end
+
+      describe "#has_attribute?" do
+        context "when #operand_1.has_attribute? is true" do
+          it "delegates to #operand_1" do
+            operand_1.has_attribute?(:id).should be_true
+
+            mock.proxy(operand_1).has_attribute?(:id)
+            join.has_attribute?(:id).should be_true
+          end
+        end
+
+        context "when #operand_1.has_attribute? is false" do
+          it "delegates to #operand_1 and #operand_2" do
+            operand_1.has_attribute?(:user_id).should be_false
+            operand_2.has_attribute?(:user_id).should be_true
+
+            mock.proxy(operand_1).has_attribute?(:user_id)
+            mock.proxy(operand_2).has_attribute?(:user_id)
+            join.has_attribute?(:user_id).should be_true
+          end
         end
       end
 

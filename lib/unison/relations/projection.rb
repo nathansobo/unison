@@ -35,6 +35,10 @@ module Unison
         operand.composed_sets
       end
 
+      def has_attribute?(attribute)
+        projected_set.has_attribute?(attribute)
+      end
+
       protected
       attr_reader :last_update, :operand_subscriptions
 

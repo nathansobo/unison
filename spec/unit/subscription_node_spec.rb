@@ -1,4 +1,4 @@
-require File.expand_path("#{File.dirname(__FILE__)}/../spec_helper")
+require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
   describe SubscriptionNode do

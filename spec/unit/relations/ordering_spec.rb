@@ -1,4 +1,4 @@
-require File.expand_path("#{File.dirname(__FILE__)}/../../spec_helper")
+require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 
 module Unison
   module Relations
@@ -20,7 +20,7 @@ module Unison
       describe "#to_sql" do
         it "returns the operand's SQL ordered by the #attribute" do
           ordering.to_sql.should be_like(<<-SQL)
-            SELECT          `users`.`id`, `users`.`name`, `users`.`hobby`
+            SELECT          `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`
             FROM            `users`
             ORDER BY       `users`.`name`
           SQL
@@ -85,10 +85,17 @@ module Unison
         end
       end
 
-
       describe "#composed_sets" do
         it "delegates to its #operand" do
           ordering.composed_sets.should == operand.composed_sets
+        end
+      end
+      
+      describe "#has_attribute?" do
+        it "delegates to #operand" do
+          operand.has_attribute?(:id).should be_true
+          mock.proxy(operand).has_attribute?(:id)
+          ordering.has_attribute?(:id).should be_true
         end
       end
 

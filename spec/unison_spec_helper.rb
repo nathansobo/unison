@@ -11,10 +11,16 @@ require "#{dir}/spec_helpers/be_like"
 
 connection = Sequel.sqlite
 Unison.origin = Unison::Repository.new(connection)
+connection.create_table :teams do
+  column :id, :integer
+  column :name, :string
+end
+
 connection.create_table :users do
   column :id, :integer
   column :name, :string
   column :hobby, :string
+  column :team_id, :integer
 end
 
 connection.create_table :life_goals do
@@ -76,14 +82,26 @@ Spec::Runner.configure do |config|
 
 
     Object.class_eval do
+      const_set(:Team, Class.new(Unison::PrimitiveTuple::Base) do
+        member_of Unison::Relations::Set.new(:teams)
+
+        attribute_accessor :id, :integer
+        attribute_accessor :name, :string
+
+        has_many :users
+#        has_many :photos, :through => :users
+      end)
+
       const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:users)
         
         attribute_accessor :id, :integer
         attribute_accessor :name, :string
         attribute_accessor :hobby, :string
+        attribute_accessor :team_id, :integer
 
         has_many :photos
+        belongs_to :team
 
         has_one :profile, :foreign_key => :owner_id
         has_one :profile_alias, :class_name => :Profile, :foreign_key => :owner_id
@@ -171,9 +189,12 @@ Spec::Runner.configure do |config|
       end)
     end
 
-    users_set.insert(User.new(:id => 1, :name => "Nathan", :hobby => "Yoga"))
-    users_set.insert(User.new(:id => 2, :name => "Corey", :hobby => "Drugs & Art & Burning Man"))
-    users_set.insert(User.new(:id => 3, :name => "Ross", :hobby => "Manicorn"))
+    teams_set.insert(Team.new(:id => 1, :name => "The Mangos"))
+    teams_set.insert(Team.new(:id => 2, :name => "San Diego Superchargers"))
+
+    users_set.insert(User.new(:id => 1, :name => "Nathan", :hobby => "Yoga", :team_id => 2))
+    users_set.insert(User.new(:id => 2, :name => "Corey", :hobby => "Drugs & Art & Burning Man", :team_id => 1))
+    users_set.insert(User.new(:id => 3, :name => "Ross", :hobby => "Manicorn", :team_id => 1))
 
     life_goals_set.insert(LifeGoal.new(:id => 1, :user_id => 1))
     life_goals_set.insert(LifeGoal.new(:id => 2, :user_id => 2))
@@ -202,6 +223,7 @@ Spec::Runner.configure do |config|
 
   config.after do
     Object.class_eval do
+      remove_const :Team
       remove_const :User
       remove_const :LifeGoal
       remove_const :Friendship
@@ -215,6 +237,10 @@ end
 
 class Spec::ExampleGroup
   include Unison
+
+  def teams_set
+    Team.set
+  end
 
   def users_set
     User.set
