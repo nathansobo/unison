@@ -107,6 +107,14 @@ module Unison
         end
       end
 
+      describe "#attribute" do
+        it "delegates to #operand" do
+          operand_attribute = operand.attribute(:id)
+          mock.proxy(operand).attribute(:id)
+          selection.attribute(:id).should == operand_attribute
+        end
+      end
+
       describe "#has_attribute?" do
         it "delegates to #operand" do
           operand.has_attribute?(:id).should be_true

@@ -3,22 +3,22 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 module Unison
   module Relations
     describe Ordering do
-      attr_reader :operand, :attribute, :ordering
+      attr_reader :operand, :order_by_attribute, :ordering
       before do
         @operand = users_set
-        @attribute = users_set[:name]
-        @ordering = Ordering.new(operand, attribute)
+        @order_by_attribute = users_set[:name]
+        @ordering = Ordering.new(operand, order_by_attribute)
       end
 
       describe "#initialize" do
-        it "sets the #operand and #attribute" do
+        it "sets the #operand and #order_by_attribute" do
           ordering.operand.should == operand
-          ordering.attribute.should == attribute
+          ordering.order_by_attribute.should == order_by_attribute
         end
       end
 
       describe "#to_sql" do
-        it "returns the operand's SQL ordered by the #attribute" do
+        it "returns the operand's SQL ordered by the #order_by_attribute" do
           ordering.to_sql.should be_like(<<-SQL)
             SELECT          `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`
             FROM            `users`
@@ -29,7 +29,7 @@ module Unison
 
       describe "#to_arel" do
         it "returns an Arel representation of the relation" do
-          ordering.to_arel.should == operand.to_arel.order(attribute.to_arel)
+          ordering.to_arel.should == operand.to_arel.order(order_by_attribute.to_arel)
         end
       end
 
@@ -90,6 +90,14 @@ module Unison
           ordering.composed_sets.should == operand.composed_sets
         end
       end
+
+      describe "#attribute" do
+        it "delegates to #operand" do
+          operand_attribute = operand.attribute(:id)
+          mock.proxy(operand).attribute(:id)
+          ordering.attribute(:id).should == operand_attribute
+        end
+      end
       
       describe "#has_attribute?" do
         it "delegates to #operand" do
@@ -107,7 +115,7 @@ module Unison
         describe "when a Tuple is inserted into the #operand" do
           it "the Tuple is inserted into #tuples in a location consistent with the ordering" do
             operand.insert(User.new(:name => "Marcel", :hobby => "Dog Walking"))
-            expected_tuples = operand.tuples.sort_by {|tuple| tuple[attribute]}
+            expected_tuples = operand.tuples.sort_by {|tuple| tuple[order_by_attribute]}
             expected_tuples.should_not == operand.tuples
             ordering.tuples.should == expected_tuples
           end
@@ -123,12 +131,12 @@ module Unison
         end
 
         describe "when a Tuple is updated in the #operand" do
-          describe "when the updated Attribute is the sort #attribute for the ordering" do
+          describe "when the updated Attribute is the sort #order_by_attribute for the ordering" do
             it "relocates the updated Tuple in accordance with the ordering" do
               tuple_to_update = ordering.first
-              tuple_to_update[attribute] = "Zarathustra"
+              tuple_to_update[order_by_attribute] = "Zarathustra"
 
-              expected_tuples = operand.tuples.sort_by {|tuple| tuple[attribute]}
+              expected_tuples = operand.tuples.sort_by {|tuple| tuple[order_by_attribute]}
               ordering.tuples.should == expected_tuples          
             end
           end
@@ -140,13 +148,13 @@ module Unison
             end
 
             tuple_to_update = operand.first
-            old_value = tuple_to_update[attribute]
+            old_value = tuple_to_update[order_by_attribute]
             new_value = "Marcel"
             new_value.should_not == old_value
 
-            tuple_to_update[attribute] = new_value
+            tuple_to_update[order_by_attribute] = new_value
 
-            arguments.should == [[tuple_to_update, attribute, old_value, new_value]]
+            arguments.should == [[tuple_to_update, order_by_attribute, old_value, new_value]]
           end
         end
 
@@ -207,8 +215,8 @@ module Unison
         end
 
         describe "#tuples" do
-          it "returns the #operand's #tuples, ordered by the #attribute" do
-            tuples_in_expected_order = operand.tuples.sort_by {|tuple| tuple[attribute]}
+          it "returns the #operand's #tuples, ordered by the #order_by_attribute" do
+            tuples_in_expected_order = operand.tuples.sort_by {|tuple| tuple[order_by_attribute]}
             tuples_in_expected_order.should_not == operand.tuples
             ordering.tuples.should == tuples_in_expected_order
           end

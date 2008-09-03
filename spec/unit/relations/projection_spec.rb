@@ -67,6 +67,14 @@ module Unison
         end
       end
 
+      describe "#attribute" do
+        it "delegates to #projected_set" do
+          projected_set_attribute = projected_set.attribute(:id)
+          mock.proxy(projected_set).attribute(:id)
+          projection.attribute(:id).should == projected_set_attribute
+        end
+      end
+
       describe "#has_attribute?" do
         it "delegates to the #projected_set" do
           projected_set.has_attribute?(:id).should be_true

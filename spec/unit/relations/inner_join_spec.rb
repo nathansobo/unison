@@ -167,6 +167,30 @@ module Unison
         end
       end
 
+      describe "attribute" do
+        context "when #operand_1.has_attribute? is true" do
+          it "delegates to #operand_1" do
+            operand_1_attribute = operand_1.attribute(:id)
+            operand_1_attribute.should_not be_nil
+
+            mock.proxy(operand_1).attribute(:id)
+            join.attribute(:id).should == operand_1_attribute
+          end
+        end
+
+        context "when #operand_1.has_attribute? is false" do
+          it "delegates to #operand_2" do
+            operand_1.should_not have_attribute(:user_id)
+            operand_2.should have_attribute(:user_id)
+            operand_2_attribute = operand_2.attribute(:user_id)
+
+            dont_allow(operand_1).attribute(:user_id)
+            mock.proxy(operand_2).attribute(:user_id)
+            join.attribute(:user_id).should == operand_2_attribute
+          end
+        end
+      end
+
       describe "#has_attribute?" do
         context "when #operand_1.has_attribute? is true" do
           it "delegates to #operand_1" do

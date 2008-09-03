@@ -36,8 +36,22 @@ module Unison
         raise NotImplementedError
       end
 
+      def attribute(attribute_name)
+        if operand_1.has_attribute?(attribute_name)
+          operand_1.attribute(attribute_name)
+        elsif operand_2.has_attribute?(attribute_name)
+          operand_2.attribute(attribute_name)
+        else
+          raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on #{inspect}.")
+        end
+      end
+
       def has_attribute?(attribute)
         operand_1.has_attribute?(attribute) || operand_2.has_attribute?(attribute)
+      end
+
+      def inspect
+        "<#{self.class}:#{object_id} @operand_1=#{operand_1.inspect} @operand_2=#{operand_2.inspect} @predicate=#{predicate.inspect}>"
       end
 
       protected

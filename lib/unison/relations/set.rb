@@ -89,6 +89,10 @@ module Unison
         @arel ||= Arel::Table.new(name, Adapters::Arel::Engine.new(self))
       end
 
+      def inspect
+        "<#{self.class}:#{object_id} @name=#{name.inspect}>"
+      end
+
       protected
       attr_reader :signals
 

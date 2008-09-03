@@ -107,7 +107,7 @@ module Unison
       end
 
       def inspect
-        "<#{self.class}:#{object_id} @insert_subscription_node.length=#{insert_subscription_node.length} @delete_subscription_node.length=#{delete_subscription_node.length} @tuple_update_subscription_node.length=#{tuple_update_subscription_node.length}>"
+        "<#{self.class}:#{object_id}>"
       end
 
       def ==(other)

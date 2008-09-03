@@ -1,12 +1,12 @@
 module Unison
   module Relations
     class Ordering < Relation
-      attr_reader :operand, :attribute, :operand_subscriptions
+      attr_reader :operand, :order_by_attribute, :operand_subscriptions
       retains :operand
 
-      def initialize(operand, attribute)
+      def initialize(operand, order_by_attribute)
         super()
-        @operand, @attribute = operand, attribute
+        @operand, @order_by_attribute = operand, order_by_attribute
         @operand_subscriptions = []
       end
 
@@ -16,7 +16,7 @@ module Unison
       end
 
       def to_arel
-        operand.to_arel.order(attribute.to_arel)
+        operand.to_arel.order(order_by_attribute.to_arel)
       end
 
       def tuple_class
@@ -31,8 +31,16 @@ module Unison
         operand.composed_sets
       end
 
+      def attribute(attribute_name)
+        operand.attribute(attribute_name)
+      end
+
       def has_attribute?(attribute)
         operand.has_attribute?(attribute)
+      end
+
+      def inspect
+        "<#{self.class}:#{object_id} @operand=#{operand.inspect} @order_by_attribute=#{order_by_attribute.inspect}>"
       end
 
       protected
@@ -71,11 +79,11 @@ module Unison
       end
 
       def reorder_tuples
-        tuples.sort! {|tuple_a, tuple_b| tuple_a[attribute] <=> tuple_b[attribute]}
+        tuples.sort! {|tuple_a, tuple_b| tuple_a[order_by_attribute] <=> tuple_b[order_by_attribute]}
       end
 
       def initial_read
-        operand.tuples.sort_by {|tuple| tuple[attribute]}
+        operand.tuples.sort_by {|tuple| tuple[order_by_attribute]}
       end
     end
   end

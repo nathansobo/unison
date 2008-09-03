@@ -39,6 +39,14 @@ module Unison
         projected_set.has_attribute?(attribute)
       end
 
+      def attribute(attribute_name)
+        projected_set.attribute(attribute_name)
+      end
+
+      def inspect
+        "<#{self.class}:#{object_id} @operand=#{operand.inspect} @projected_set=#{projected_set.inspect}>"
+      end
+
       protected
       attr_reader :last_update, :operand_subscriptions
 

@@ -35,6 +35,14 @@ module Unison
         operand.has_attribute?(attribute)
       end
 
+      def attribute(attribute_name)
+        operand.attribute(attribute_name)
+      end
+
+      def inspect
+        "<#{self.class}:#{object_id} @operand=#{operand.inspect} @predicate=#{predicate.inspect}>"
+      end
+
       protected
       def initial_read
         operand.tuples.select do |tuple|
