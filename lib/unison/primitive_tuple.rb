@@ -7,7 +7,7 @@ module Unison
       attr_accessor :set
 
       def member_of(set)
-        @set = set.retained_by(self)
+        @set = set.retain_with(self)
         set.tuple_class = self
       end
 

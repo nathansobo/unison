@@ -127,7 +127,7 @@ module Unison
         attr_reader :retainer
         before do
           @retainer = Object.new
-          selection.retained_by(retainer)
+          selection.retain_with(retainer)
           selection.tuples
         end
 
@@ -159,7 +159,7 @@ module Unison
             selection.should be_subscribed_to(operand.tuple_update_subscription_node)
 
             mock.proxy(selection).after_last_release
-            selection.released_by(retainer)
+            selection.release_from(retainer)
 
             operand.should_not be_retained_by(selection)
             selection.should_not be_subscribed_to(operand.insert_subscription_node)
@@ -174,7 +174,7 @@ module Unison
             selection.should be_subscribed_to(predicate.update_subscription_node)
 
             mock.proxy(selection).after_last_release
-            selection.released_by(retainer)
+            selection.release_from(retainer)
 
             predicate.should_not be_retained_by(selection)
             selection.should_not be_subscribed_to(predicate.update_subscription_node)
@@ -186,7 +186,7 @@ module Unison
           before do
             @user = User.find(1)
             @predicate = photos_set[:user_id].eq(user.signal(:id))
-            @selection = Selection.new(photos_set, predicate).retained_by(Object.new)
+            @selection = Selection.new(photos_set, predicate).retain_with(Object.new)
             @old_photos = selection.tuples.dup
             old_photos.length.should == 2
             @new_photos = [ Photo.create(:id => 100, :user_id => 100, :name => "Photo 100"),
@@ -274,7 +274,7 @@ module Unison
             it "is #retained by the Selection" do
               photo.should_not be_retained_by(selection)
               photos_set.insert(photo)
-              photo.should be_retained_by(selection)              
+              photo.should be_retained_by(selection)
             end
           end
 
@@ -331,7 +331,7 @@ module Unison
             it "is #retained by the Selection" do
               photo.should_not be_retained_by(selection)
               photo[:user_id] = 1
-              photo.should be_retained_by(selection)              
+              photo.should be_retained_by(selection)
             end
           end
 
@@ -353,7 +353,7 @@ module Unison
             it "is not #retained by the Selection" do
               photo.should_not be_retained_by(selection)
               photo[:user_id] = 3
-              photo.should_not be_retained_by(selection)              
+              photo.should_not be_retained_by(selection)
             end
           end
         end
@@ -419,7 +419,7 @@ module Unison
               photo[:name] = "New Name"
             end
 
-            it "does not released_by the deleted Tuple" do
+            it "does not release_from the deleted Tuple" do
               photo.should be_retained_by(selection)
               photo[:name] = "James Brown"
               photo.should be_retained_by(selection)
@@ -492,7 +492,7 @@ module Unison
             selection.should_not be_subscribed_to(predicate.update_subscription_node)
             predicate.should_not be_retained_by(selection)
 
-            selection.retained_by(Object.new)
+            selection.retain_with(Object.new)
             selection.should be_subscribed_to(predicate.update_subscription_node)
             predicate.should be_retained_by(selection)
           end
@@ -502,13 +502,13 @@ module Unison
             selection.subscriptions.should be_empty
             operand.should_not be_retained_by(selection)
 
-            selection.retained_by(Object.new)
+            selection.retain_with(Object.new)
             selection.subscriptions.should_not be_empty
             operand.should be_retained_by(selection)
           end
 
           it "retains the Tuples inserted by initial_read" do
-            selection.retained_by(Object.new)
+            selection.retain_with(Object.new)
             selection.should_not be_empty
             selection.each do |tuple|
               tuple.should be_retained_by(selection)

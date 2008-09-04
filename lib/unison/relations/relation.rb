@@ -125,7 +125,7 @@ module Unison
 
       def insert(tuple)
         raise "Relation must be retained" unless retained?
-        tuple.retained_by(self)
+        tuple.retain_with(self)
         add_to_tuples(tuple)
         insert_subscription_node.call(tuple)
         tuple
@@ -136,7 +136,7 @@ module Unison
       end
 
       def delete(tuple)
-        tuple.released_by(self)
+        tuple.release_from(self)
         tuples.delete(tuple)
         delete_subscription_node.call(tuple)
         tuple

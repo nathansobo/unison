@@ -115,7 +115,7 @@ module Unison
         attr_reader :retainer
         before do
           @retainer = Object.new
-          projection.retained_by(retainer)
+          projection.retain_with(retainer)
         end
 
         describe "#merge" do
@@ -364,7 +364,7 @@ module Unison
             projection.should be_subscribed_to(operand.tuple_update_subscription_node)
 
             mock.proxy(projection).after_last_release
-            projection.released_by(retainer)
+            projection.release_from(retainer)
 
             operand.should_not be_retained_by(projection)
             projection.should_not be_subscribed_to(operand.insert_subscription_node)
@@ -380,7 +380,7 @@ module Unison
             mock.proxy(projection).after_first_retain
 
             operand.should_not be_retained_by(projection)
-            projection.retained_by Object.new
+            projection.retain_with Object.new
             operand.should be_retained_by(projection)
           end
         end

@@ -217,7 +217,7 @@ module Unison
         attr_reader :retainer
         before do
           @retainer = Object.new
-          join.retained_by(retainer)
+          join.retain_with(retainer)
         end
 
         context "when a Tuple inserted into #operand_1" do
@@ -737,7 +737,7 @@ module Unison
             join.should be_subscribed_to(operand_2.tuple_update_subscription_node)
 
             mock.proxy(join).after_last_release
-            join.released_by(retainer)
+            join.release_from(retainer)
 
             operand_1.should_not be_retained_by(join)
             operand_2.should_not be_retained_by(join)
@@ -754,7 +754,7 @@ module Unison
           it "releases its #predicate" do
             predicate.should be_retained_by(join)
             mock.proxy(join).after_last_release
-            join.released_by(retainer)
+            join.release_from(retainer)
             predicate.should_not be_retained_by(join)
           end
         end
@@ -832,7 +832,7 @@ module Unison
             join.operand_2.should_not be_retained_by(join)
             join.predicate.should_not be_retained_by(join)
 
-            join.retained_by(Object.new)
+            join.retain_with(Object.new)
             join.operand_1.should be_retained_by(join)
             join.operand_2.should be_retained_by(join)
             join.predicate.should be_retained_by(join)

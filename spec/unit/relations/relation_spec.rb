@@ -246,7 +246,7 @@ module Unison
 
       context "when #retained?" do
         before do
-          @relation = users_set.where(Predicates::Eq.new(true, true)).retained_by(Object.new)
+          @relation = users_set.where(Predicates::Eq.new(true, true)).retain_with(Object.new)
           publicize relation, :tuples, :initial_read
         end
 
@@ -296,7 +296,7 @@ module Unison
           mock.proxy(relation).insert(user_1).ordered
           mock.proxy(relation).insert(user_2).ordered
 
-          relation.retained_by(Object.new)
+          relation.retain_with(Object.new)
 
           relation.tuples.should == relation.initial_read
           relation.tuples.object_id.should == relation.tuples.object_id

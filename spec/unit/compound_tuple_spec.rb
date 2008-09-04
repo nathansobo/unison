@@ -114,7 +114,7 @@ module Unison
         nested_tuple_2.should_not be_retained_by(tuple)
 
         mock.proxy(tuple).after_first_retain
-        tuple.retained_by(Object.new)
+        tuple.retain_with(Object.new)
 
         nested_tuple_1.should be_retained_by(tuple)
         nested_tuple_2.should be_retained_by(tuple)
@@ -124,12 +124,12 @@ module Unison
     describe "#after_last_release" do
       it "#releases the #nested_tuples" do
         retainer = Object.new
-        tuple.retained_by(retainer)
+        tuple.retain_with(retainer)
         nested_tuple_1.should be_retained_by(tuple)
         nested_tuple_2.should be_retained_by(tuple)
 
         mock.proxy(tuple).after_last_release
-        tuple.released_by(retainer)
+        tuple.release_from(retainer)
         nested_tuple_1.should_not be_retained_by(tuple)
         nested_tuple_2.should_not be_retained_by(tuple)
       end

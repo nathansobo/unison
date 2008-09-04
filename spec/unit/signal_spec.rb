@@ -20,7 +20,7 @@ module Unison
         attr_reader :retainer
         before do
           @retainer = Object.new
-          signal.retained_by(retainer)
+          signal.retain_with(retainer)
         end
 
         it "retains its Tuple" do
@@ -38,7 +38,7 @@ module Unison
           it "releases its Tuple" do
             user.should be_retained_by(signal)
             mock.proxy(signal).after_last_release
-            signal.released_by(retainer)
+            signal.release_from(retainer)
             user.should_not be_retained_by(signal)
           end
         end
@@ -78,7 +78,7 @@ module Unison
         end
       end
 
-      context "wheretained_by#retained?" do
+      context "wheretain_with#retained?" do
         describe "#after_first_retain" do
           before do
             publicize user, :update_subscription_node
@@ -90,7 +90,7 @@ module Unison
             user.should_not be_retained_by(signal)
             signal.should_not be_subscribed_to(user.update_subscription_node)
 
-            signal.retained_by(Object.new)
+            signal.retain_with(Object.new)
             user.should be_retained_by(signal)
             signal.should be_subscribed_to(user.update_subscription_node)
           end

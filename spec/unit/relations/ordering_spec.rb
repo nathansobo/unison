@@ -111,7 +111,7 @@ module Unison
         attr_reader :retainer
         before do
           @retainer = Object.new
-          ordering.retained_by(retainer)
+          ordering.retain_with(retainer)
         end
 
         describe "when a Tuple is inserted into the #operand" do
@@ -174,7 +174,7 @@ module Unison
             ordering.should be_subscribed_to(operand.tuple_update_subscription_node)
 
             mock.proxy(ordering).after_last_release
-            ordering.released_by(retainer)
+            ordering.release_from(retainer)
 
             operand.should_not be_retained_by(ordering)
             ordering.should_not be_subscribed_to(operand.insert_subscription_node)
@@ -204,13 +204,13 @@ module Unison
             operand.should_not be_retained_by(ordering)
 
             mock.proxy(ordering).after_first_retain
-            ordering.retained_by(Object.new)
+            ordering.retain_with(Object.new)
             ordering.subscriptions.should_not be_empty
             operand.should be_retained_by(ordering)
           end
 
           it "retains the Tuples inserted by initial_read" do
-            ordering.retained_by(Object.new)
+            ordering.retain_with(Object.new)
             ordering.should_not be_empty
             ordering.each do |tuple|
               tuple.should be_retained_by(ordering)

@@ -27,7 +27,7 @@ module Unison
         attr_reader :retainer
         before do
           @retainer = Object.new
-          predicate.retained_by(retainer)
+          predicate.retain_with(retainer)
         end
 
         describe "#==" do
@@ -68,7 +68,7 @@ module Unison
           it "unsubscribes from and releases #operands" do
             operands = predicate.operands.dup
             mock.proxy(predicate).after_last_release
-            predicate.released_by(retainer)
+            predicate.release_from(retainer)
 
             child_predicate_without_signal.send(:update_subscription_node).should be_empty
             child_predicate_with_signal.send(:update_subscription_node).should be_empty
@@ -92,7 +92,7 @@ module Unison
             predicate.should_not be_subscribed_to(child_predicate_without_signal.update_subscription_node)
             predicate.should_not be_subscribed_to(child_predicate_with_signal.update_subscription_node)
 
-            predicate.retained_by(Object.new)
+            predicate.retain_with(Object.new)
             child_predicate_without_signal.should be_retained_by(predicate)
             child_predicate_with_signal.should be_retained_by(predicate)
             predicate.should be_subscribed_to(child_predicate_without_signal.update_subscription_node)

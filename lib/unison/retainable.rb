@@ -38,7 +38,7 @@ module Unison
       mod.extend ClassMethods
     end
 
-    def retained_by(retainer)
+    def retain_with(retainer)
       if retained_by?(retainer)
         raise(ArgumentError, "#{retainer.inspect}\nhas already retained\n#{inspect}")
       end
@@ -51,7 +51,7 @@ module Unison
       self
     end
 
-    def released_by(retainer)
+    def release_from(retainer)
       retainers.delete(retainer.object_id)
       if refcount == 0
         destroy_subscriptions
@@ -103,7 +103,7 @@ module Unison
 
     def retain_children
       children_to_retain.each do |child|
-        child.retained_by(self)
+        child.retain_with(self)
       end
     end
 
@@ -115,7 +115,7 @@ module Unison
 
     def release_children
       children_to_retain.each do |child|
-        child.released_by(self)
+        child.release_from(self)
       end
     end
     

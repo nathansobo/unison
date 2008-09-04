@@ -8,7 +8,7 @@ module Unison
         @set = Set.new(:users)
         set.has_attribute(:id, :integer)
         set.has_attribute(:name, :string)
-        set.retained_by(Object.new)
+        set.retain_with(Object.new)
       end
 
       describe "#initialize" do
