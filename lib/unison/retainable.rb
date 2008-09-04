@@ -4,6 +4,14 @@ module Unison
       def retain(*children)
         names_of_children_to_retain.concat(children)
       end
+      
+      def subscribe(&subscription_definition)
+        subscription_definitions.push(subscription_definition)
+      end
+
+      def subscription_definitions
+        @subscription_definitions ||= []
+      end
 
       def names_of_children_to_retain
         @names_of_children_to_retain ||= begin
@@ -29,6 +37,7 @@ module Unison
       retainers[retainer.object_id] = retainer
       if refcount == 1
         retain_children
+        subscribe_to_children
         after_first_retain
       end
       self
@@ -78,6 +87,12 @@ module Unison
       @subscriptions ||= []
     end
 
+    def subscribe_to_children
+      subscription_definitions.each do |subscription_definition|
+        subscriptions.push(instance_eval(&subscription_definition))
+      end
+    end
+
     def retain_children
       children_to_retain.each do |child|
         child.retained_by(self)
@@ -106,6 +121,10 @@ module Unison
         end
         children
       end
+    end
+
+    def subscription_definitions
+      self.class.subscription_definitions
     end
   end
 end

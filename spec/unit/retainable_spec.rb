@@ -22,9 +22,9 @@ module Unison
 
         retainable_class = Class.new do
           include Retainable
+          attr_reader :child, :children
 
           retain :child, :children
-          attr_reader :child, :children
 
           def initialize(child, children)
             @child, @children = child, children
@@ -60,6 +60,53 @@ module Unison
         children.each do |child_in_children|
           child_in_children.should_not be_retained_by(retainable)
         end
+      end
+    end
+
+    describe ".subscribe" do
+      attr_reader :retainable, :child, :children
+      before do
+        @child = anonymous_subscribable_object
+
+        retainable_class = Class.new do
+          include Retainable
+          attr_reader :child
+
+          retain :child
+          subscribe do
+            child.subscription_node.subscribe {}
+          end
+
+          def initialize(child)
+            @child = child
+          end
+        end
+        @retainable = retainable_class.new(child)
+      end
+
+      def anonymous_subscribable_object
+        Class.new do
+          include Retainable
+          attr_reader :subscription_node
+
+          def initialize
+            @subscription_node = SubscriptionNode.new
+          end
+        end.new
+      end
+
+      it "causes the first call to #retained_by to create a Subscription based on the given definition" do
+        retainable.should_not be_subscribed_to(child.subscription_node)
+        retainable.retained_by(retainer)
+        retainable.should be_subscribed_to(child.subscription_node)
+      end
+
+      it "causes the last call to #released_by call to #destroy the #subscriptions" do
+        retainable.retained_by(retainer)
+        retainable.should be_subscribed_to(child.subscription_node)
+
+        retainable.released_by(retainer)
+        retainable.should_not be_subscribed_to(child.subscription_node)
       end
     end
 
