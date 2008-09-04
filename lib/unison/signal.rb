@@ -8,7 +8,6 @@ module Unison
     def initialize(tuple, attribute)
       @tuple, @attribute = tuple, attribute
       @update_subscription_node = SubscriptionNode.new
-      @tuple_subscription = nil
     end
 
     def value
@@ -24,20 +23,16 @@ module Unison
     end
 
     protected
-    attr_reader :update_subscription_node, :tuple_subscription
+    attr_reader :update_subscription_node
 
     def after_first_retain
-      @tuple_subscription =
+      subscriptions.push(
         tuple.on_update do |updated_attribute, old_value, new_value|
           if attribute == updated_attribute
             update_subscription_node.call(tuple, old_value, new_value)
           end
         end
-    end
-
-    def after_last_release
-      raise "Signal #{self.inspect} is not registered on its Tuple" unless tuple.send(:signals)[attribute] == self
-      tuple.send(:signals).delete(attribute)
+      )
     end
   end
 end

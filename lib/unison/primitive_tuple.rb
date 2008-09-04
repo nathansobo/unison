@@ -92,13 +92,10 @@ module Unison
       a_module.extend ClassMethods
     end
 
-    attr_reader :signals
-
     def initialize(initial_attributes={})
       super()
       @new = true
       @dirty = false
-      @signals = {}
       @attribute_values = {}
 
       initialize_attribute_values(initial_attributes)
@@ -190,8 +187,7 @@ module Unison
     end
 
     def signal(attribute_or_symbol)
-      attribute = attribute_for(attribute_or_symbol)
-      signals[attribute] ||= Signal.new(self, attribute)
+      Signal.new(self, attribute_for(attribute_or_symbol))
     end
 
     def inspect

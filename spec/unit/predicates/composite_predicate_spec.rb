@@ -80,16 +80,23 @@ module Unison
 
       context "when not #retained?" do
         describe "#after_first_retain" do
-          it "retains its #operands" do
+          before do
+            publicize child_predicate_without_signal, :update_subscription_node
+            publicize child_predicate_with_signal, :update_subscription_node
+          end
+
+          it "retains and subscribes to its #operands" do
             mock.proxy(predicate).after_first_retain
             child_predicate_without_signal.should_not be_retained_by(predicate)
             child_predicate_with_signal.should_not be_retained_by(predicate)
-            predicate.send(:child_predicate_subscriptions).should be_empty
+            predicate.should_not be_subscribed_to(child_predicate_without_signal.update_subscription_node)
+            predicate.should_not be_subscribed_to(child_predicate_with_signal.update_subscription_node)
 
             predicate.retained_by(Object.new)
             child_predicate_without_signal.should be_retained_by(predicate)
             child_predicate_with_signal.should be_retained_by(predicate)
-            predicate.send(:child_predicate_subscriptions).should_not be_empty
+            predicate.should be_subscribed_to(child_predicate_without_signal.update_subscription_node)
+            predicate.should be_subscribed_to(child_predicate_with_signal.update_subscription_node)
           end
         end
       end

@@ -1,11 +1,6 @@
 module Unison
   module Relations
     class CompositeRelation < Relation
-      def initialize
-        super
-        @subscriptions = []
-      end
-
       def attribute(name)
         operands.each do |operand|
           return operand.attribute(name) if operand.has_attribute?(name)
@@ -21,21 +16,6 @@ module Unison
 
       def operands
         [operand]
-      end
-
-      def subscribed_to?(subscription_node)
-        subscriptions.any? do |subscription|
-          subscription_node.include?(subscription)
-        end
-      end
-
-      protected
-      attr_reader :subscriptions
-
-      def after_last_release
-        subscriptions.each do |subscription|
-          subscription.destroy
-        end
       end
     end
   end

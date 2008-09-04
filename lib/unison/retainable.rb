@@ -37,6 +37,7 @@ module Unison
     def released_by(retainer)
       retainers.delete(retainer.object_id)
       if refcount == 0
+        destroy_subscriptions
         release_children
         after_last_release
       end
@@ -54,6 +55,12 @@ module Unison
       retainers[potential_retainer.object_id] ? true : false
     end
 
+    def subscribed_to?(subscription_node)
+      subscriptions.any? do |subscription|
+        subscription_node.include?(subscription)
+      end
+    end
+
     protected
     def retainers
       @retainers ||= {}
@@ -67,9 +74,19 @@ module Unison
 
     end
 
+    def subscriptions
+      @subscriptions ||= []
+    end
+
     def retain_children
       children_to_retain.each do |child|
         child.retained_by(self)
+      end
+    end
+
+    def destroy_subscriptions
+      subscriptions.each do |subscription|
+        subscription.destroy
       end
     end
 

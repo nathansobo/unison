@@ -41,23 +41,6 @@ module Unison
             signal.released_by(retainer)
             user.should_not be_retained_by(signal)
           end
-
-          context "when the Signal is registered in Tuple#signals[#attribute]" do
-            it "removes itself from its Tuple#signals hash" do
-              user.send(:signals)[users_set[:name]].should == signal
-              signal.send(:after_last_release)
-              user.send(:signals)[users_set[:name]].should be_nil
-            end
-          end
-
-          context "when Signal is not registered in Tuple#signals[#attribute]" do
-            it "removes itself from its Tuple#signals hash" do
-              signal.send(:after_last_release)
-              lambda do
-                signal.send(:after_last_release)
-              end.should raise_error
-            end
-          end
         end
 
         describe "#on_update" do
@@ -97,15 +80,19 @@ module Unison
 
       context "wheretained_by#retained?" do
         describe "#after_first_retain" do
+          before do
+            publicize user, :update_subscription_node
+          end
+
           it "retains and subscribes to its Tuple" do
             mock.proxy(signal).after_first_retain
 
             user.should_not be_retained_by(signal)
-            signal.send(:tuple_subscription).should be_nil
+            signal.should_not be_subscribed_to(user.update_subscription_node)
 
             signal.retained_by(Object.new)
             user.should be_retained_by(signal)
-            signal.send(:tuple_subscription).should_not be_nil
+            signal.should be_subscribed_to(user.update_subscription_node)
           end
         end
       end
