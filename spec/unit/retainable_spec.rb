@@ -140,6 +140,36 @@ module Unison
 
         should_subscribe_to_its_children
       end
+
+      context "when the subscription definition returns nil" do
+        before do
+          retainable_class.class_eval do
+            subscribe {nil}
+          end
+          publicize retainable, :subscriptions
+        end
+
+        it "after the first call to #retained_by, does not attempt to track the nil subscription" do
+          retainable.retained_by(retainer)
+          retainable.subscriptions.should_not include(nil)
+        end
+      end
+
+      context "when the subscription definition returns an Array containing nil(s)" do
+        before do
+          retainable_class.class_eval do
+            subscribe {[nil, child.subscription_node.subscribe {}, nil]}
+          end
+          publicize retainable, :subscriptions
+        end
+
+        it "after the first call to #retained_by, does not attempt to track the nil subscription" do
+          lambda do
+            retainable.retained_by(retainer)
+          end.should change {retainable.subscriptions.length}.by(4)
+          retainable.subscriptions.should_not include(nil)
+        end
+      end
     end
 
     describe "#retained_by" do

@@ -104,8 +104,9 @@ module Unison
             before do
               @user = User.find(1)
               @predicate = Eq.new(user.signal(:name), "Nathan").retained_by(Object.new)
+              publicize predicate, :subscriptions
               @operand = predicate.operand_1
-              subscriptions = predicate.send(:subscriptions)
+              subscriptions = predicate.subscriptions
               subscriptions.length.should == 1
               @operand_subscription = subscriptions.first
             end

@@ -2,6 +2,16 @@ module Unison
   module Predicates
     class Eq < Base
       attr_reader :operand_1, :operand_2
+
+      retain :subscribable_operands
+      subscribe do
+        subscribable_operands.map do |operand|
+          operand.on_update do
+            update_subscription_node.call
+          end
+        end
+      end
+
       def initialize(operand_1, operand_2)
         super()
         @operand_1, @operand_2 = operand_1, operand_2
@@ -25,25 +35,14 @@ module Unison
 
       protected
 
-      def after_first_retain
-        subscribe_to_operand_update_if_signal operand_1
-        subscribe_to_operand_update_if_signal operand_2
-      end
-
-      def subscribe_to_operand_update_if_signal(operand)
-        if operand.is_a?(Signal)
-          operand.retained_by(self)
-          subscriptions.push(
-            operand.on_update do
-              update_subscription_node.call
-            end
-          )
+      def subscribable_operands
+        operands.find_all do |operand|
+          operand.is_a?(Signal)
         end
       end
 
-      def after_last_release
-        operand_1.released_by(self) if operand_1.is_a?(Signal)
-        operand_2.released_by(self) if operand_2.is_a?(Signal)
+      def operands
+        [operand_1, operand_2]
       end
 
       def eval_operand(operand)

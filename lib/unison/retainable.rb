@@ -97,7 +97,7 @@ module Unison
 
     def subscribe_to_children
       subscription_definitions.each do |subscription_definition|
-        subscriptions.push(*instance_eval(&subscription_definition))
+        subscriptions.push(*[instance_eval(&subscription_definition)].flatten.compact)
       end
     end
 
