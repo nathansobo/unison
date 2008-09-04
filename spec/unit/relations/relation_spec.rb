@@ -267,9 +267,11 @@ module Unison
         end
 
         context "when the Relation is retained" do
+          attr_reader :retainer
           before do
             @relation = users_set
-            relation.should be_retained
+            @retainer = Object.new
+            relation.retain_with(retainer)
           end
 
           it "returns the contents of @tuples without calling #initial_read" do
@@ -312,19 +314,21 @@ module Unison
 
           it "raises an Error" do
             lambda do
-              relation.on_insert {}
+              relation.on_insert(retainer) {}
             end.should raise_error
           end
         end
 
         context "when Relation is retained" do
+          attr_reader :retainer
           before do
             @relation = users_set
-            relation.should be_retained            
+            @retainer = Object.new
+            relation.retain_with(retainer)
           end
 
           it "returns a Subscription" do
-            relation.on_insert {}.class.should == Subscription
+            relation.on_insert(retainer) {}.class.should == Subscription
           end
         end
       end
@@ -338,19 +342,21 @@ module Unison
 
           it "raises an Error" do
             lambda do
-              relation.on_delete {}
+              relation.on_delete(retainer) {}
             end.should raise_error
           end
         end
 
         context "when Relation is retained" do
+          attr_reader :retainer
           before do
             @relation = users_set
-            relation.should be_retained
+            @retainer = Object.new
+            relation.retain_with(retainer)
           end
 
           it "returns a Subscription" do
-            relation.on_delete {}.class.should == Subscription
+            relation.on_delete(retainer) {}.class.should == Subscription
           end
         end
       end
@@ -364,24 +370,26 @@ module Unison
 
           it "raises an Error" do
             lambda do
-              relation.on_tuple_update {}
+              relation.on_tuple_update(retainer) {}
             end.should raise_error
           end
         end
 
         context "when Relation is retained" do
+          attr_reader :retainer
           before do
             @relation = users_set
-            relation.should be_retained
+            @retainer = Object.new
+            relation.retain_with(retainer)
           end
 
           it "returns a Subscription" do
-            relation.on_tuple_update {}.class.should == Subscription
+            relation.on_tuple_update(retainer) {}.class.should == Subscription
           end
 
           it "invokes the block with the (Attribute, old_value, new_value) when a member Tuple is updated" do
             arguments = []
-            relation.on_tuple_update do |tuple, attribute, old_value, new_value|
+            relation.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
               arguments.push [tuple, attribute, old_value, new_value]
             end
 

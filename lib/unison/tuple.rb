@@ -25,7 +25,7 @@ module Unison
     end
 
     def initialize
-      @update_subscription_node = SubscriptionNode.new
+      @update_subscription_node = SubscriptionNode.new(self)
     end
 
     def bind(expression)
@@ -37,8 +37,8 @@ module Unison
       end
     end
 
-    def on_update(&block)
-      update_subscription_node.subscribe(&block)
+    def on_update(*args, &block)
+      update_subscription_node.subscribe(*args, &block)
     end
 
     protected

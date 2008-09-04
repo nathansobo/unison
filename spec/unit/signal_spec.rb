@@ -34,25 +34,16 @@ module Unison
           end
         end
 
-        describe "#after_last_release" do
-          it "releases its Tuple" do
-            user.should be_retained_by(signal)
-            mock.proxy(signal).after_last_release
-            signal.release_from(retainer)
-            user.should_not be_retained_by(signal)
-          end
-        end
-
         describe "#on_update" do
           context "when passed a block" do
             it "returns a Subscription" do
-              signal.on_update {}.class.should == Subscription
+              signal.on_update(retainer) {}.class.should == Subscription
             end
 
             context "when the #attribute's value is updated on the Tuple" do
               it "invokes the block" do
                 on_update_arguments = []
-                signal.on_update do |*args|
+                signal.on_update(retainer) do |*args|
                   on_update_arguments.push(args)
                 end
 
@@ -67,32 +58,13 @@ module Unison
 
             context "when another #attribute's value is updated on the Tuple" do
               it "does not invoke the block" do
-                signal.on_update do |*args|
+                signal.on_update(retainer) do |*args|
                   raise "Do not call me"
                 end
 
                 user[:id] = 100
               end
             end
-          end
-        end
-      end
-
-      context "wheretain_with#retained?" do
-        describe "#after_first_retain" do
-          before do
-            publicize user, :update_subscription_node
-          end
-
-          it "retains and subscribes to its Tuple" do
-            mock.proxy(signal).after_first_retain
-
-            user.should_not be_retained_by(signal)
-            signal.should_not be_subscribed_to(user.update_subscription_node)
-
-            signal.retain_with(Object.new)
-            user.should be_retained_by(signal)
-            signal.should be_subscribed_to(user.update_subscription_node)
           end
         end
       end

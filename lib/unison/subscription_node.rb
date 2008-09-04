@@ -1,6 +1,16 @@
 module Unison
   class SubscriptionNode < Array
-    def subscribe(&block)
+    attr_reader :owner
+
+    def initialize(owner)
+      @owner = owner
+    end
+    
+    def subscribe(subscriber=nil, &block)
+      subscriber ||= eval("self", block)
+      unless owner.retained_by?(subscriber)
+        raise ArgumentError, "Subscriber must retain the owner of the SubscriptionNode"
+      end
       Subscription.new(self, &block)
     end
 
@@ -10,6 +20,5 @@ module Unison
       end
       args
     end
-    alias_method :trigger, :call
   end
 end

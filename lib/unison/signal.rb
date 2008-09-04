@@ -14,15 +14,15 @@ module Unison
 
     def initialize(tuple, attribute)
       @tuple, @attribute = tuple, attribute
-      @update_subscription_node = SubscriptionNode.new
+      @update_subscription_node = SubscriptionNode.new(self)
     end
 
     def value
       tuple[attribute]
     end
 
-    def on_update(&block)
-      update_subscription_node.subscribe(&block)
+    def on_update(*args, &block)
+      update_subscription_node.subscribe(*args, &block)
     end
 
     def to_arel

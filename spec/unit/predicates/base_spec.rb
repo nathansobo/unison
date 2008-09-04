@@ -25,13 +25,19 @@ module Unison
       end
 
       describe "#on_update" do
+        attr_reader :retainer
+        before do
+          @retainer = Object.new
+          predicate.retain_with(retainer)
+        end
+
         it "returns a Subscription" do
-          predicate.on_update {}.class.should == Subscription
+          predicate.on_update(retainer) {}.class.should == Subscription
         end
 
         it "adds the new Subscription to #update_subscription_node" do
           predicate.send(:update_subscription_node).should be_empty
-          subscription = predicate.on_update {}
+          subscription = predicate.on_update(retainer) {}
           predicate.send(:update_subscription_node).should == [subscription]
         end
       end

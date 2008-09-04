@@ -3,12 +3,13 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 module Unison
   module Relations
     describe Set do
-      attr_reader :set
+      attr_reader :set, :retainer
       before do
         @set = Set.new(:users)
+        @retainer = Object.new
         set.has_attribute(:id, :integer)
         set.has_attribute(:name, :string)
-        set.retain_with(Object.new)
+        set.retain_with(retainer)
       end
 
       describe "#initialize" do
@@ -136,10 +137,11 @@ module Unison
             set.tuples.should include(tuple)
           end
 
-          it "does not retain the inserted Tuple" do
+          it "retains the inserted Tuple" do
             tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
-            set.insert(tuple)
             tuple.should_not be_retained_by(set)
+            set.insert(tuple)
+            tuple.should be_retained_by(set)
           end
 
           context "when an Tuple with the same #id exists in the Set" do
@@ -182,12 +184,21 @@ module Unison
 
       describe "#delete" do
         context "when the Tuple is in the Set" do
-          it "removes the Tuple from the Set" do
-            tuple = set.tuple_class.create(:id => 1, :name => "Nathan")
+          attr_reader :tuple
+          before do
+            @tuple = set.tuple_class.create(:id => 1, :name => "Nathan")
+          end
 
+          it "removes the Tuple from the Set" do
             set.tuples.should include(tuple)
             set.delete(tuple)
             set.tuples.should_not include(tuple)
+          end
+
+          it "releases the Tuple" do
+            tuple.should be_retained_by(set)
+            set.delete(tuple)
+            tuple.should_not be_retained_by(set)
           end
         end
 
@@ -209,7 +220,7 @@ module Unison
       describe "#on_insert" do
         it "will invoke the block when a Tuple is inserted" do
           inserted = nil
-          set.on_insert do |tuple|
+          set.on_insert(retainer) do |tuple|
             inserted = tuple
           end
           tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
@@ -222,7 +233,7 @@ module Unison
         it "will invoke the block when a Tuple is deleted from the Set" do
           tuple = set.tuple_class.create(:id => 1, :name => "Nathan")
           deleted = nil
-          set.on_delete do |deleted_tuple|
+          set.on_delete(retainer) do |deleted_tuple|
             deleted = deleted_tuple
           end
 

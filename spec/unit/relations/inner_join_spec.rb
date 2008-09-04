@@ -239,7 +239,7 @@ module Unison
 
             it "triggers the on_insert event" do
               inserted = nil
-              join.on_insert do |tuple|
+              join.on_insert(retainer) do |tuple|
                 inserted = tuple
               end
               users_set.insert(user)
@@ -273,7 +273,7 @@ module Unison
             end
 
             it "does not trigger the on_insert event" do
-              join.on_insert do |tuple|
+              join.on_insert(retainer) do |tuple|
                 raise "I should not be invoked"
               end
               users_set.insert(user)
@@ -306,7 +306,7 @@ module Unison
 
             it "trigger the on_insert event" do
               inserted = nil
-              join.on_insert do |tuple|
+              join.on_insert(retainer) do |tuple|
                 inserted = tuple
               end
               photos_set.insert(photo)
@@ -340,7 +340,7 @@ module Unison
             end
 
             it "does not trigger the on_insert event" do
-              join.on_insert do |tuple|
+              join.on_insert(retainer) do |tuple|
                 raise "I should not be invoked"
               end
               photos_set.insert(photo)
@@ -372,7 +372,7 @@ module Unison
 
               it "triggers the on_insert event" do
                 inserted = nil
-                join.on_insert do |tuple|
+                join.on_insert(retainer) do |tuple|
                   inserted = tuple
                 end
                 user[:id] = photo[:user_id]
@@ -397,7 +397,7 @@ module Unison
               end
 
               it "does not trigger the on_insert event" do
-                join.on_insert do |tuple|
+                join.on_insert(retainer) do |tuple|
                   raise "Do not call me"
                 end
                 user[:id] = photo[:user_id] + 1
@@ -428,7 +428,7 @@ module Unison
 
               it "triggers the on_delete event" do
                 deleted = []
-                join.on_delete do |tuple|
+                join.on_delete(retainer) do |tuple|
                   deleted.push tuple
                 end
                 user[:id] = 100
@@ -456,7 +456,7 @@ module Unison
 
               it "triggers the on_tuple_update event for the compound Tuple" do
                 updated = []
-                join.on_tuple_update do |tuple, attribute, old_value, new_value|
+                join.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
                   updated.push [tuple, attribute, old_value, new_value]
                 end
                 old_name = user[:name]
@@ -468,10 +468,10 @@ module Unison
               end
 
               it "does not trigger the on_insert or on_delete event" do
-                join.on_insert do |tuple|
+                join.on_insert(retainer) do |tuple|
                   raise "Dont call me"
                 end
-                join.on_delete do |tuple|
+                join.on_delete(retainer) do |tuple|
                   raise "Dont call me"
                 end
                 user[:name] = "Joe"
@@ -498,7 +498,7 @@ module Unison
 
               it "triggers the on_insert event" do
                 inserted = nil
-                join.on_insert do |tuple|
+                join.on_insert(retainer) do |tuple|
                   inserted = tuple
                 end
                 photo[:user_id] = user[:id]
@@ -523,7 +523,7 @@ module Unison
               end
 
               it "does not trigger the on_insert event" do
-                join.on_insert do |tuple|
+                join.on_insert(retainer) do |tuple|
                   raise "Do not call me"
                 end
                 photo[:user_id] = 1000
@@ -549,7 +549,7 @@ module Unison
 
               it "triggers the on_delete event" do
                 deleted = []
-                join.on_delete do |tuple|
+                join.on_delete(retainer) do |tuple|
                   deleted.push tuple
                 end
                 photo[:user_id] = 100
@@ -574,7 +574,7 @@ module Unison
 
               it "triggers the on_tuple_update event for the CompositeTuple" do
                 updated = []
-                join.on_tuple_update do |tuple, attribute, old_value, new_value|
+                join.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
                   updated.push [tuple, attribute, old_value, new_value]
                 end
                 old_value = photo[:name]
@@ -584,10 +584,10 @@ module Unison
               end
 
               it "does not trigger the on_insert or on_delete event" do
-                join.on_insert do |tuple|
+                join.on_insert(retainer) do |tuple|
                   raise "Dont call me"
                 end
-                join.on_delete do |tuple|
+                join.on_delete(retainer) do |tuple|
                   raise "Dont call me"
                 end
                 photo[:name] = "A great naked show part 3"
@@ -616,7 +616,7 @@ module Unison
 
             it "triggers the on_delete event" do
               deleted = nil
-              join.on_delete do |deleted_tuple|
+              join.on_delete(retainer) do |deleted_tuple|
                 deleted = deleted_tuple
               end
 
@@ -648,7 +648,7 @@ module Unison
             end
 
             it "does not trigger the on_delete event" do
-              join.on_delete do |deleted_tuple|
+              join.on_delete(retainer) do |deleted_tuple|
                 raise "I should not be invoked"
               end
               users_set.delete(user)
@@ -676,7 +676,7 @@ module Unison
 
             it "triggers the on_delete event" do
               deleted = nil
-              join.on_delete do |deleted_tuple|
+              join.on_delete(retainer) do |deleted_tuple|
                 deleted = deleted_tuple
               end
 
@@ -708,54 +708,11 @@ module Unison
             end
 
             it "does not trigger the on_delete event" do
-              join.on_delete do |deleted_tuple|
+              join.on_delete(retainer) do |deleted_tuple|
                 raise "I should not be invoked"
               end
               photos_set.delete(photo)
             end
-          end
-        end
-
-        describe "#after_last_release" do
-          before do
-            publicize join, :subscriptions
-            publicize operand_1, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
-            publicize operand_2, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
-          end
-
-          it "unsubscribes from and releases its operands" do
-            operand_1.should be_retained_by(join)
-            operand_2.should be_retained_by(join)
-            join.subscriptions.should_not be_empty
-
-            join.should be_subscribed_to(operand_1.insert_subscription_node)
-            join.should be_subscribed_to(operand_1.delete_subscription_node)
-            join.should be_subscribed_to(operand_1.tuple_update_subscription_node)
-
-            join.should be_subscribed_to(operand_2.insert_subscription_node)
-            join.should be_subscribed_to(operand_2.delete_subscription_node)
-            join.should be_subscribed_to(operand_2.tuple_update_subscription_node)
-
-            mock.proxy(join).after_last_release
-            join.release_from(retainer)
-
-            operand_1.should_not be_retained_by(join)
-            operand_2.should_not be_retained_by(join)
-
-            join.should_not be_subscribed_to(operand_1.insert_subscription_node)
-            join.should_not be_subscribed_to(operand_1.delete_subscription_node)
-            join.should_not be_subscribed_to(operand_1.tuple_update_subscription_node)
-
-            join.should_not be_subscribed_to(operand_2.insert_subscription_node)
-            join.should_not be_subscribed_to(operand_2.delete_subscription_node)
-            join.should_not be_subscribed_to(operand_2.tuple_update_subscription_node)
-          end
-
-          it "releases its #predicate" do
-            predicate.should be_retained_by(join)
-            mock.proxy(join).after_last_release
-            join.release_from(retainer)
-            predicate.should_not be_retained_by(join)
           end
         end
 
@@ -825,17 +782,12 @@ module Unison
 
       context "when not #retained?" do
         describe "#after_first_retain" do
-          it "retains the operands and #predicate" do
-            mock.proxy(join).after_first_retain
-            
-            join.operand_1.should_not be_retained_by(join)
-            join.operand_2.should_not be_retained_by(join)
-            join.predicate.should_not be_retained_by(join)
-
+          it "retains the Tuples inserted by #initial_read" do
             join.retain_with(Object.new)
-            join.operand_1.should be_retained_by(join)
-            join.operand_2.should be_retained_by(join)
-            join.predicate.should be_retained_by(join)
+            join.should_not be_empty
+            join.each do |tuple|
+              tuple.should be_retained_by(join)
+            end
           end
         end
 

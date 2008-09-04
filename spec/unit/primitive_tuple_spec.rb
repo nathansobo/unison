@@ -558,6 +558,12 @@ module Unison
         end
 
         describe "#[]=" do
+          attr_reader :retainer
+          before do
+            @retainer = Object.new
+            tuple.retain_with(retainer)
+          end
+
           context "when the passed in value is different than the original value" do
             attr_reader :new_value
             before do
@@ -581,7 +587,7 @@ module Unison
 
             it "triggers the on_update event" do
               update_args = []
-              tuple.on_update do |attribute, old_value, new_value|
+              tuple.on_update(retainer) do |attribute, old_value, new_value|
                 update_args.push [attribute, old_value, new_value]
               end
 
@@ -614,7 +620,7 @@ module Unison
 
           context "when the passed in value is the same than the original value" do
             it "does not trigger the on_update event" do
-              tuple.on_update do |attribute, old_value, new_value|
+              tuple.on_update(retainer) do |attribute, old_value, new_value|
                 raise "Dont call me"
               end
               
@@ -831,12 +837,6 @@ module Unison
               from_user = friendship.select_parent(User, :foreign_key => :from_id)
               from_user.should == User.find(friendship.from_id)
             end
-          end
-        end
-
-        describe "#on_update" do
-          it "returns a Subscription" do
-            tuple.on_update {}.class.should == Subscription
           end
         end
 

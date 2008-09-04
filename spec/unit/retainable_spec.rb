@@ -106,7 +106,7 @@ module Unison
           attr_reader :subscription_node
 
           def initialize
-            @subscription_node = SubscriptionNode.new
+            @subscription_node = SubscriptionNode.new(self)
           end
         end.new
       end

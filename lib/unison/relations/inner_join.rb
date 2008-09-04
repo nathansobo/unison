@@ -2,7 +2,7 @@ module Unison
   module Relations
     class InnerJoin < CompositeRelation
       attr_reader :operand_1, :operand_2, :predicate
-      retain :operand_1, :operand_2, :predicate
+      retain :operand_1, :operand_2
 
       subscribe do
         operand_1.on_insert do |operand_1_tuple|

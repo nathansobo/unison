@@ -15,9 +15,11 @@ module Unison
       end
 
       context "when #retained?" do
+        attr_reader :retainer
         before do
           @predicate = Eq.new(users_set[:name], "Nathan")
-          predicate.retain_with(Object.new)
+          @retainer = Object.new
+          predicate.retain_with(retainer)
         end
 
         describe "#eval" do
@@ -96,7 +98,7 @@ module Unison
 
         describe "#on_update" do
           it "returns a Subscription" do
-            predicate.on_update {}.class.should == Subscription
+            predicate.on_update(retainer) {}.class.should == Subscription
           end
 
           context "when #operand_1 is a Signal" do
@@ -104,6 +106,7 @@ module Unison
             before do
               @user = User.find(1)
               @predicate = Eq.new(user.signal(:name), "Nathan").retain_with(Object.new)
+              predicate.retain_with(retainer)
               publicize predicate, :subscriptions
               @operand = predicate.operand_1
               subscriptions = predicate.subscriptions
@@ -114,7 +117,7 @@ module Unison
             context "when #operand_1 is updated" do
               it "triggers the update Subscriptions" do
                 on_update_called = false
-                predicate.on_update do
+                predicate.on_update(retainer) do
                   on_update_called = true
                 end
 
@@ -129,6 +132,7 @@ module Unison
             before do
               @user = User.find(1)
               @predicate = Eq.new("Nathan", user.signal(:name)).retain_with(Object.new)
+              predicate.retain_with(retainer)
               @operand = predicate.operand_2
               subscriptions = predicate.send(:subscriptions)
             end
@@ -136,7 +140,7 @@ module Unison
             context "when #operand_2 is updated" do
               it "triggers the update Subscriptions" do
                 on_update_called = false
-                predicate.on_update do
+                predicate.on_update(retainer) do
                   on_update_called = true
                 end
 

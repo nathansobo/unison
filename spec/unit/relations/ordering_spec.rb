@@ -145,7 +145,7 @@ module Unison
 
           it "triggers the on_tuple_update event" do
             arguments = []
-            ordering.on_tuple_update do |tuple, attribute, old_value, new_value|
+            ordering.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
               arguments.push [tuple, attribute, old_value, new_value]
             end
 
@@ -157,29 +157,6 @@ module Unison
             tuple_to_update[order_by_attribute] = new_value
 
             arguments.should == [[tuple_to_update, order_by_attribute, old_value, new_value]]
-          end
-        end
-
-        describe "#after_last_release" do
-          before do
-            publicize ordering, :subscriptions
-            publicize operand, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
-          end
-          
-          it "unsubscribes from and releases its #operand" do
-            operand.should be_retained_by(ordering)
-
-            ordering.should be_subscribed_to(operand.insert_subscription_node)
-            ordering.should be_subscribed_to(operand.delete_subscription_node)
-            ordering.should be_subscribed_to(operand.tuple_update_subscription_node)
-
-            mock.proxy(ordering).after_last_release
-            ordering.release_from(retainer)
-
-            operand.should_not be_retained_by(ordering)
-            ordering.should_not be_subscribed_to(operand.insert_subscription_node)
-            ordering.should_not be_subscribed_to(operand.delete_subscription_node)
-            ordering.should_not be_subscribed_to(operand.tuple_update_subscription_node)
           end
         end
 
@@ -198,18 +175,7 @@ module Unison
 
       describe "when not #retained?" do
         describe "#after_first_retain" do
-          it "retains and subscribes to its #operand" do
-            publicize ordering, :subscriptions
-            ordering.subscriptions.should be_empty
-            operand.should_not be_retained_by(ordering)
-
-            mock.proxy(ordering).after_first_retain
-            ordering.retain_with(Object.new)
-            ordering.subscriptions.should_not be_empty
-            operand.should be_retained_by(ordering)
-          end
-
-          it "retains the Tuples inserted by initial_read" do
+          it "retains the Tuples inserted by #initial_read" do
             ordering.retain_with(Object.new)
             ordering.should_not be_empty
             ordering.each do |tuple|

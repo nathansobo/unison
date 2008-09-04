@@ -145,7 +145,7 @@ module Unison
 
             it "triggers the on_insert event" do
               inserted = nil
-              projection.on_insert do |tuple|
+              projection.on_insert(retainer) do |tuple|
                 inserted = tuple
               end
               Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
@@ -167,7 +167,7 @@ module Unison
             end
 
             it "does not trigger the on_insert event" do
-              projection.on_insert do |tuple|
+              projection.on_insert(retainer) do |tuple|
                 raise "I should not be called"
               end
 
@@ -197,7 +197,7 @@ module Unison
 
               it "triggers the on_delete event with the deleted Tuple restricted by #projected_set" do
                 deleted = nil
-                projection.on_delete do |tuple|
+                projection.on_delete(retainer) do |tuple|
                   deleted = tuple
                 end
                 users_set.delete(user)
@@ -223,7 +223,7 @@ module Unison
               end
 
               it "does not trigger the on_delete event" do
-                projection.on_delete do |tuple|
+                projection.on_delete(retainer) do |tuple|
                   raise "I should not be invoked"
                 end
                 photos_set.delete(photo_1)
@@ -246,7 +246,7 @@ module Unison
             end
 
             it "does not trigger the on_delete event with the Tuple restricted by #projected_set" do
-              projection.on_delete do |tuple|
+              projection.on_delete(retainer) do |tuple|
                 raise "I should not be invoked"
               end
               users_set.delete(user)
@@ -282,7 +282,7 @@ module Unison
 
             it "triggers #on_tuple_update subscriptions once" do
               on_tuple_update_arguments = []
-              projection.on_tuple_update do |tuple, attribute, old_value, new_value|
+              projection.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
                 on_tuple_update_arguments.push [tuple, attribute, old_value, new_value]
               end
               operand_projected_tuple[:name] = new_value
@@ -304,7 +304,7 @@ module Unison
 
               it "triggers #on_tuple_update subscriptions once" do
                 on_tuple_update_arguments = []
-                projection.on_tuple_update do |tuple, attribute, old_value, new_value|
+                projection.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
                   on_tuple_update_arguments.push [tuple, attribute, old_value, new_value]
                 end
 
@@ -323,7 +323,7 @@ module Unison
 
               it "triggers #on_tuple_update subscriptions once" do
                 on_tuple_update_arguments = []
-                projection.on_tuple_update do |tuple, attribute, old_value, new_value|
+                projection.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
                   on_tuple_update_arguments.push [tuple, attribute, old_value, new_value]
                 end
 
@@ -342,49 +342,16 @@ module Unison
             end
 
             it "does not trigger #on_tuple_update subscriptions" do
-              projection.on_tuple_update do |tuple, attribute, old_value, new_value|
+              projection.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
                 raise "Dont call me"
               end
               photo[:name] = "Freak show"
             end
           end
         end
-
-        describe "#after_last_release" do
-          before do
-            publicize projection, :subscriptions
-            publicize operand, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
-          end
-
-          it "unsubscribes from and releases its #operand" do
-            operand.should be_retained_by(projection)
-
-            projection.should be_subscribed_to(operand.insert_subscription_node)
-            projection.should be_subscribed_to(operand.delete_subscription_node)
-            projection.should be_subscribed_to(operand.tuple_update_subscription_node)
-
-            mock.proxy(projection).after_last_release
-            projection.release_from(retainer)
-
-            operand.should_not be_retained_by(projection)
-            projection.should_not be_subscribed_to(operand.insert_subscription_node)
-            projection.should_not be_subscribed_to(operand.delete_subscription_node)
-            projection.should_not be_subscribed_to(operand.tuple_update_subscription_node)
-          end
-        end
       end
 
       context "when not #retained?" do
-        describe "#after_first_retain" do
-          it "retains its #operand" do
-            mock.proxy(projection).after_first_retain
-
-            operand.should_not be_retained_by(projection)
-            projection.retain_with Object.new
-            operand.should be_retained_by(projection)
-          end
-        end
-
         describe "#tuples" do
           context "when #projected_set is one of the immediate operands of #operand" do
             it "returns the unique set of PrimitiveTuples corresponding to #projected_set from the #operand" do

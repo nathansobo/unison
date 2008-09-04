@@ -9,9 +9,9 @@ module Unison
 
       include Retainable
       def initialize
-        @insert_subscription_node = SubscriptionNode.new
-        @delete_subscription_node = SubscriptionNode.new
-        @tuple_update_subscription_node = SubscriptionNode.new
+        @insert_subscription_node = SubscriptionNode.new(self)
+        @delete_subscription_node = SubscriptionNode.new(self)
+        @tuple_update_subscription_node = SubscriptionNode.new(self)
         @singleton = false
         @tuples = nil
       end
@@ -91,19 +91,19 @@ module Unison
         @singleton
       end
 
-      def on_insert(&block)
+      def on_insert(*args, &block)
         raise "Relation must be retained" unless retained?
-        insert_subscription_node.subscribe(&block)
+        insert_subscription_node.subscribe(*args, &block)
       end
 
-      def on_delete(&block)
+      def on_delete(*args, &block)
         raise "Relation must be retained" unless retained?
-        delete_subscription_node.subscribe(&block)
+        delete_subscription_node.subscribe(*args, &block)
       end
 
-      def on_tuple_update(&block)
+      def on_tuple_update(*args, &block)
         raise "Relation must be retained" unless retained?
-        tuple_update_subscription_node.subscribe(&block)
+        tuple_update_subscription_node.subscribe(*args, &block)
       end
 
       def inspect

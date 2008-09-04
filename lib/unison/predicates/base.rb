@@ -4,7 +4,7 @@ module Unison
       include Retainable
 
       def initialize
-        @update_subscription_node = SubscriptionNode.new
+        @update_subscription_node = SubscriptionNode.new(self)
       end
 
       def eval(tuple)
@@ -15,8 +15,8 @@ module Unison
         self.object_id == other.object_id
       end
 
-      def on_update(&block)
-        update_subscription_node.subscribe(&block)
+      def on_update(*args, &block)
+        update_subscription_node.subscribe(*args, &block)
       end
 
       protected

@@ -144,49 +144,12 @@ module Unison
           end
         end
 
-        describe "#after_last_release" do
-          before do
-            publicize selection, :subscriptions
-            publicize operand, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
-          end
-
-          it "unsubscribes from and releases its #operand" do
-            selection.subscriptions.should_not be_empty
-            operand.should be_retained_by(selection)
-            
-            selection.should be_subscribed_to(operand.insert_subscription_node)
-            selection.should be_subscribed_to(operand.delete_subscription_node)
-            selection.should be_subscribed_to(operand.tuple_update_subscription_node)
-
-            mock.proxy(selection).after_last_release
-            selection.release_from(retainer)
-
-            operand.should_not be_retained_by(selection)
-            selection.should_not be_subscribed_to(operand.insert_subscription_node)
-            selection.should_not be_subscribed_to(operand.delete_subscription_node)
-            selection.should_not be_subscribed_to(operand.tuple_update_subscription_node)
-          end
-
-          it "unsubscribes from and releases its #predicate" do
-            publicize predicate, :update_subscription_node
-
-            predicate.should be_retained_by(selection)
-            selection.should be_subscribed_to(predicate.update_subscription_node)
-
-            mock.proxy(selection).after_last_release
-            selection.release_from(retainer)
-
-            predicate.should_not be_retained_by(selection)
-            selection.should_not be_subscribed_to(predicate.update_subscription_node)
-          end
-        end
-
         context "when the #predicate is updated" do
           attr_reader :user, :new_photos, :old_photos
           before do
             @user = User.find(1)
             @predicate = photos_set[:user_id].eq(user.signal(:id))
-            @selection = Selection.new(photos_set, predicate).retain_with(Object.new)
+            @selection = Selection.new(photos_set, predicate).retain_with(retainer)
             @old_photos = selection.tuples.dup
             old_photos.length.should == 2
             @new_photos = [ Photo.create(:id => 100, :user_id => 100, :name => "Photo 100"),
@@ -202,7 +165,7 @@ module Unison
 
             it "triggers the on_insert event" do
               inserted_tuples = []
-              selection.on_insert do |tuple|
+              selection.on_insert(retainer) do |tuple|
                 inserted_tuples << tuple
               end
               user[:id] = 100
@@ -225,7 +188,7 @@ module Unison
 
             it "triggers the on_delete event for the deleted Tuples" do
               deleted_tuples = []
-              selection.on_delete do |tuple|
+              selection.on_delete(retainer) do |tuple|
                 deleted_tuples << tuple
               end
               user[:id] = 100
@@ -263,7 +226,7 @@ module Unison
 
             it "triggers the on_insert event" do
               on_insert_tuple = nil
-              selection.on_insert do |tuple|
+              selection.on_insert(retainer) do |tuple|
                 on_insert_tuple = tuple
               end
 
@@ -291,7 +254,7 @@ module Unison
             end
 
             it "does not trigger the on_insert event" do
-              selection.on_insert do |tuple|
+              selection.on_insert(retainer) do |tuple|
                 raise "Don't call me"
               end
               photos_set.insert(photo)
@@ -319,7 +282,7 @@ module Unison
 
             it "triggers the on_insert event" do
               on_insert_tuple = nil
-              selection.on_insert do |tuple|
+              selection.on_insert(retainer) do |tuple|
                 on_insert_tuple = tuple
               end
               selection.tuples.should_not include(photo)
@@ -343,7 +306,7 @@ module Unison
             end
 
             it "does not trigger the on_insert event" do
-              selection.on_insert do |tuple|
+              selection.on_insert(retainer) do |tuple|
                 raise "Dont call me"
               end
 
@@ -372,7 +335,7 @@ module Unison
 
             it "triggers the on_delete event" do
               on_delete_tuple = nil
-              selection.on_delete do |tuple|
+              selection.on_delete(retainer) do |tuple|
                 on_delete_tuple = tuple
               end
 
@@ -398,7 +361,7 @@ module Unison
 
             it "triggers the on_tuple_update event" do
               arguments = []
-              selection.on_tuple_update do |tuple, attribute, old_value, new_value|
+              selection.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
                 arguments.push [tuple, attribute, old_value, new_value]
               end
 
@@ -409,10 +372,10 @@ module Unison
             end
 
             it "does not trigger the on_insert or on_delete event" do
-              selection.on_insert do |tuple|
+              selection.on_insert(retainer) do |tuple|
                 raise "Dont call me"
               end
-              selection.on_delete do |tuple|
+              selection.on_delete(retainer) do |tuple|
                 raise "Dont call me"
               end
 
@@ -443,7 +406,7 @@ module Unison
 
             it "triggers the on_delete event" do
               deleted = nil
-              selection.on_delete do |tuple|
+              selection.on_delete(retainer) do |tuple|
                 deleted = tuple
               end
 
@@ -472,7 +435,7 @@ module Unison
             end
 
             it "does not trigger the on_delete event" do
-              selection.on_delete do |tuple|
+              selection.on_delete(retainer) do |tuple|
                 raise "Don't call me"
               end
               photos_set.delete(photo)
@@ -488,26 +451,7 @@ module Unison
             publicize predicate, :update_subscription_node
           end
 
-          it "retains and subscribes to its #predicate" do
-            selection.should_not be_subscribed_to(predicate.update_subscription_node)
-            predicate.should_not be_retained_by(selection)
-
-            selection.retain_with(Object.new)
-            selection.should be_subscribed_to(predicate.update_subscription_node)
-            predicate.should be_retained_by(selection)
-          end
-
-          it "retains and subscribes to its #operand" do
-            publicize selection, :subscriptions
-            selection.subscriptions.should be_empty
-            operand.should_not be_retained_by(selection)
-
-            selection.retain_with(Object.new)
-            selection.subscriptions.should_not be_empty
-            operand.should be_retained_by(selection)
-          end
-
-          it "retains the Tuples inserted by initial_read" do
+          it "retains the Tuples inserted by #initial_read" do
             selection.retain_with(Object.new)
             selection.should_not be_empty
             selection.each do |tuple|

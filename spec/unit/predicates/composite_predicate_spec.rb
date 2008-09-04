@@ -54,49 +54,13 @@ module Unison
           context "when a child Predicate is updated" do
             it "triggers update Subscriptions" do
               on_update_called = false
-              predicate.on_update do
+              predicate.on_update(retainer) do
                 on_update_called = true
               end
 
               user.name = "Bob"
               on_update_called.should be_true
             end
-          end
-        end
-
-        describe "#after_last_release" do
-          it "unsubscribes from and releases #operands" do
-            operands = predicate.operands.dup
-            mock.proxy(predicate).after_last_release
-            predicate.release_from(retainer)
-
-            child_predicate_without_signal.send(:update_subscription_node).should be_empty
-            child_predicate_with_signal.send(:update_subscription_node).should be_empty
-            child_predicate_without_signal.should_not be_retained_by(predicate)
-            child_predicate_with_signal.should_not be_retained_by(predicate)
-          end
-        end
-      end
-
-      context "when not #retained?" do
-        describe "#after_first_retain" do
-          before do
-            publicize child_predicate_without_signal, :update_subscription_node
-            publicize child_predicate_with_signal, :update_subscription_node
-          end
-
-          it "retains and subscribes to its #operands" do
-            mock.proxy(predicate).after_first_retain
-            child_predicate_without_signal.should_not be_retained_by(predicate)
-            child_predicate_with_signal.should_not be_retained_by(predicate)
-            predicate.should_not be_subscribed_to(child_predicate_without_signal.update_subscription_node)
-            predicate.should_not be_subscribed_to(child_predicate_with_signal.update_subscription_node)
-
-            predicate.retain_with(Object.new)
-            child_predicate_without_signal.should be_retained_by(predicate)
-            child_predicate_with_signal.should be_retained_by(predicate)
-            predicate.should be_subscribed_to(child_predicate_without_signal.update_subscription_node)
-            predicate.should be_subscribed_to(child_predicate_with_signal.update_subscription_node)
           end
         end
       end
