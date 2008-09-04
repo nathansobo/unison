@@ -2,9 +2,12 @@ require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
   describe Retainable do
-    attr_reader :retainable
-    before do
-      @retainable = users_set
+    def retainer
+      @retainer ||= Object.new
+    end
+
+    def retainable
+      users_set
     end
 
     describe "#retained_by" do
@@ -61,9 +64,7 @@ module Unison
     end
 
     describe "#released_by" do
-      attr_reader :retainer
       before do
-        @retainer = Object.new
         retainable.retained_by(retainer)
         retainable.should be_retained_by(retainer)
       end
@@ -89,9 +90,11 @@ module Unison
       end
 
       context "when #refcount becomes 0" do
+        def retainable
+          @retainable ||= users_set.where(users_set[:id].eq(1))
+        end
+        
         before do
-          @retainable = users_set.where(users_set[:id].eq(1))
-          retainable.retained_by(retainer)
           retainable.refcount.should == 1
         end
 
@@ -103,8 +106,8 @@ module Unison
     end
 
     describe "#retained?" do
-      before do
-        @retainable = Relations::Set.new(:test)
+      def retainable
+        @retainable ||= Relations::Set.new(:test)
       end
 
       context "when retainable has been retained" do
@@ -123,5 +126,23 @@ module Unison
         end
       end
     end
+
+    describe "#subscribed_to?" do
+      context "when #subscriptions contains a Subscription that is in the passed in SubscriptionNode" do
+        def retainable
+          @retainable ||= users_set.where(User[:id].eq(1))
+        end
+
+        it "returns true" do
+          publicize retainable, :subscriptions
+          publicize users_set, :insert_subscription_node
+
+          retainable.retained_by(retainer)
+          retainable.subscriptions.should_not be_empty
+
+          retainable.should be_subscribed_to(users_set.insert_subscription_node)
+        end
+      end
+    end    
   end
 end
