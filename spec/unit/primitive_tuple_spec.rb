@@ -159,6 +159,15 @@ module Unison
             user = User.find(1)
             user.photos.should == photos_set.where(photos_set[:user_id].eq(1))
           end
+
+          context "when the Relation definition is invalid" do
+            it "includes the definition backtrace in the error message" do
+              User.relates_to_n(:invalid) {raise "An Error"}; definition_line = __LINE__
+              lambda do
+                User.new
+              end.should raise_error(RuntimeError, Regexp.new("#{__FILE__}:#{definition_line}"))
+            end
+          end
         end
 
         describe ".relates_to_1" do
@@ -174,6 +183,15 @@ module Unison
 
           it "causes the Relation to be treated as a singleton" do
             photo.user.should be_singleton
+          end
+
+          context "when the Relation definition is invalid" do
+            it "includes the definition backtrace in the error message" do
+              User.relates_to_1(:invalid) {raise "An Error"}; definition_line = __LINE__
+              lambda do
+                User.new
+              end.should raise_error(RuntimeError, Regexp.new("#{__FILE__}:#{definition_line}"))
+            end
           end
         end
 

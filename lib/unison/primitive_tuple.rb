@@ -43,12 +43,12 @@ module Unison
       end
 
       def relates_to_n(name, &definition)
-        instance_relations.push [name, definition]
+        instance_relations.push [name, definition, caller]
         attr_reader name
       end
 
       def relates_to_1(name, &definition)
-        singleton_instance_relations.push [name, definition]
+        singleton_instance_relations.push [name, definition, caller]
         attr_reader name
       end
 
@@ -107,14 +107,22 @@ module Unison
 
       initialize_attribute_values(initial_attributes)
 
-      instance_relations.each do |name, proc|
-        relation = instance_eval(&proc)
-        instance_variable_set("@#{name}", relation)
+      instance_relations.each do |name, definition, definition_backtrace|
+        begin
+          instance_variable_set("@#{name}", instance_eval(&definition))
+        rescue Exception => e
+          e.message.concat("\nThe above error was caused by the relation definition at:\n\t#{definition_backtrace.join("\n\t\t")}\n\nThe actual exception backtrace is:\n")
+          raise e
+        end
       end
 
-      singleton_instance_relations.each do |name, definition|
-        relation = instance_eval(&definition).singleton
-        instance_variable_set("@#{name}", relation)
+      singleton_instance_relations.each do |name, definition, definition_backtrace|
+        begin
+          instance_variable_set("@#{name}", instance_eval(&definition).singleton)
+        rescue Exception => e
+          e.message.concat("\nThe above error was caused by the relation definition at:\n\t#{definition_backtrace.join("\n\t\t")}\n\nThe actual exception backtrace is:\n")
+          raise e
+        end
       end
     end
 
