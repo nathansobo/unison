@@ -5,7 +5,7 @@ module Unison
     def retainable
       users_set
     end
-    
+
     def retainer
       @retainer ||= Object.new
     end
@@ -15,12 +15,12 @@ module Unison
     end
 
     describe ".retain" do
-      attr_reader :retainable, :child, :children
+      attr_reader :retainable, :retainable_class, :child, :children
       before do
         @child = anonymous_retainable_object
         @children = [anonymous_retainable_object, anonymous_retainable_object]
 
-        retainable_class = Class.new do
+        @retainable_class = Class.new do
           include Retainable
           attr_reader :child, :children
 
@@ -33,42 +33,55 @@ module Unison
         @retainable = retainable_class.new(child, children)
       end
 
-      it "causes the objects named by the passed-in names to be retained after the first call to #retained_by" do
-        child.should_not be_retained_by(retainable)
-        children.each do |child_in_children|
-          child_in_children.should_not be_retained_by(retainable)
+      def self.should_retain_its_children
+        it "causes the objects named by the passed-in names to be retained after the first call to #retained_by" do
+          child.should_not be_retained_by(retainable)
+          children.each do |child_in_children|
+            child_in_children.should_not be_retained_by(retainable)
+          end
+
+          retainable.retained_by(retainer)
+
+          child.should be_retained_by(retainable)
+          children.each do |child_in_children|
+            child_in_children.should be_retained_by(retainable)
+          end
         end
 
-        retainable.retained_by(retainer)
+        it "causes the objects named by the passed-in names to be released after the last call to #released_by" do
+          retainable.retained_by(retainer)
+          child.should be_retained_by(retainable)
+          children.each do |child_in_children|
+            child_in_children.should be_retained_by(retainable)
+          end
 
-        child.should be_retained_by(retainable)
-        children.each do |child_in_children|
-          child_in_children.should be_retained_by(retainable)
+          retainable.released_by(retainer)
+
+          child.should_not be_retained_by(retainable)
+          children.each do |child_in_children|
+            child_in_children.should_not be_retained_by(retainable)
+          end
         end
       end
 
-      it "causes the objects named by the passed-in names to be released after the last call to #released_by" do
-        retainable.retained_by(retainer)
-        child.should be_retained_by(retainable)
-        children.each do |child_in_children|
-          child_in_children.should be_retained_by(retainable)
+      should_retain_its_children
+
+      context "when .retain is invoked by the superclass" do
+        before do
+          retainable_subclass = Class.new(retainable_class)
+          @retainable = retainable_subclass.new(child, children)
         end
 
-        retainable.released_by(retainer)
-
-        child.should_not be_retained_by(retainable)
-        children.each do |child_in_children|
-          child_in_children.should_not be_retained_by(retainable)
-        end
+        should_retain_its_children
       end
     end
 
     describe ".subscribe" do
-      attr_reader :retainable, :child, :children
+      attr_reader :retainable, :retainable_class, :child, :children
       before do
         @child = anonymous_subscribable_object
 
-        retainable_class = Class.new do
+        @retainable_class = Class.new do
           include Retainable
           attr_reader :child
 
@@ -98,21 +111,34 @@ module Unison
         end.new
       end
 
-      it "causes the first call to #retained_by to create a Subscription based on the given definition" do
-        publicize retainable, :subscriptions
-        retainable.should_not be_subscribed_to(child.subscription_node)
-        lambda do
+      def self.should_subscribe_to_its_children
+        it "causes the first call to #retained_by to create a Subscription based on the given definition" do
+          publicize retainable, :subscriptions
+          retainable.should_not be_subscribed_to(child.subscription_node)
+          lambda do
+            retainable.retained_by(retainer)
+          end.should change {retainable.subscriptions.length}.by(3)
+          retainable.should be_subscribed_to(child.subscription_node)
+        end
+
+        it "causes the last call to #released_by call to #destroy the #subscriptions" do
           retainable.retained_by(retainer)
-        end.should change {retainable.subscriptions.length}.by(3)
-        retainable.should be_subscribed_to(child.subscription_node)
+          retainable.should be_subscribed_to(child.subscription_node)
+
+          retainable.released_by(retainer)
+          retainable.should_not be_subscribed_to(child.subscription_node)
+        end
       end
 
-      it "causes the last call to #released_by call to #destroy the #subscriptions" do
-        retainable.retained_by(retainer)
-        retainable.should be_subscribed_to(child.subscription_node)
+      should_subscribe_to_its_children
 
-        retainable.released_by(retainer)
-        retainable.should_not be_subscribed_to(child.subscription_node)
+      context "when .subscribe is invoked by the superclass" do
+        before do
+          retainable_subclass = Class.new(retainable_class)
+          @retainable = retainable_subclass.new(child)
+        end
+
+        should_subscribe_to_its_children
       end
     end
 
@@ -199,7 +225,7 @@ module Unison
         def retainable
           @retainable ||= users_set.where(users_set[:id].eq(1))
         end
-        
+
         before do
           retainable.refcount.should == 1
         end
@@ -249,6 +275,6 @@ module Unison
           retainable.should be_subscribed_to(users_set.insert_subscription_node)
         end
       end
-    end    
+    end
   end
 end
