@@ -1,14 +1,8 @@
 module Unison
-  module CompositeTuple
+  class CompositeTuple
     include Tuple
     attr_reader :nested_tuples
-
-    module ClassMethods
-      include Tuple::ClassMethods
-    end
-    def self.included(a_module)
-      a_module.extend ClassMethods
-    end
+    retains :nested_tuples
 
     def initialize(*nested_tuples)
       super()
@@ -40,23 +34,6 @@ module Unison
 
     def compound?
       true
-    end
-
-    class Base
-      include CompositeTuple
-    end
-
-    protected
-    def after_first_retain
-      nested_tuples.each do |tuple|
-        tuple.retained_by(self)
-      end
-    end
-
-    def after_last_release
-      nested_tuples.each do |tuple|
-        tuple.released_by(self)
-      end
     end
   end
 end

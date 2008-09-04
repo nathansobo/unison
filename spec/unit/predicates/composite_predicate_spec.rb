@@ -24,8 +24,10 @@ module Unison
       end
 
       context "when #retained?" do
+        attr_reader :retainer
         before do
-          predicate.retained_by(Object.new)
+          @retainer = Object.new
+          predicate.retained_by(retainer)
         end
 
         describe "#==" do
@@ -65,7 +67,8 @@ module Unison
         describe "#after_last_release" do
           it "unsubscribes from and releases #operands" do
             operands = predicate.operands.dup
-            predicate.send(:after_last_release)
+            mock.proxy(predicate).after_last_release
+            predicate.released_by(retainer)
 
             child_predicate_without_signal.send(:update_subscription_node).should be_empty
             child_predicate_with_signal.send(:update_subscription_node).should be_empty

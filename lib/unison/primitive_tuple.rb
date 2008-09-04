@@ -106,9 +106,6 @@ module Unison
       @attribute_values = {}
 
       initialize_attribute_values(initial_attributes)
-#      initialize_attribute_values(
-#        default_attribute_values.merge(normalize_attribute_keys(initial_attribute_values))
-#      )
 
       instance_relations.each do |name, proc|
         relation = instance_eval(&proc)
