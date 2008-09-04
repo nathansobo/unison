@@ -462,16 +462,6 @@ module Unison
             tuple[:name].should == "Nathan"
           end
 
-          it "instantiates its #instance_relations" do
-            relations = tuple.send(:instance_relations)
-            relations.should_not be_empty
-          end
-
-          it "instantiates its #singleton_instance_relations" do
-            relations = tuple.send(:singleton_instance_relations)
-            relations.should_not be_empty
-          end
-
           it "sets new? to true" do
             tuple.should be_new
           end
