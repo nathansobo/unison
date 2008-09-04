@@ -364,7 +364,7 @@ module Unison
             projection.should be_subscribed_to(operand.tuple_update_subscription_node)
 
             mock.proxy(projection).after_last_release
-            projection.release(retainer)
+            projection.released_by(retainer)
 
             operand.should_not be_retained_by(projection)
             projection.should_not be_subscribed_to(operand.insert_subscription_node)

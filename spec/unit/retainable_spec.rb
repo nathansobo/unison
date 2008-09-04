@@ -12,7 +12,7 @@ module Unison
         retainable.retained_by(Object.new).should == retainable
       end
 
-      it "retains its .children_to_retain only upon its first invocation" do
+      it "retains its .names_of_children_to_retain only upon its first invocation" do
         retainable = users_set.where(users_set[:id].eq(1))
         retainable.operand.should_not be_retained_by(retainable)
 
@@ -60,7 +60,7 @@ module Unison
       end
     end
 
-    describe "#release" do
+    describe "#released_by" do
       attr_reader :retainer
       before do
         @retainer = Object.new
@@ -69,13 +69,13 @@ module Unison
       end
 
       it "causes #retained_by(retainer) to return false" do
-        retainable.release(retainer)
+        retainable.released_by(retainer)
         retainable.should_not be_retained_by(retainer)
       end
 
       it "decrements #refcount by 1" do
         lambda do
-          retainable.release(retainer)
+          retainable.released_by(retainer)
         end.should change {retainable.refcount}.by(-1)
       end
 
@@ -84,7 +84,7 @@ module Unison
           retainable.retained_by(Object.new)
           retainable.refcount.should be > 1
           dont_allow(retainable).after_last_release
-          retainable.release(retainer)
+          retainable.released_by(retainer)
         end
       end
 
@@ -97,7 +97,7 @@ module Unison
 
         it "calls #after_last_release on itself" do
           mock.proxy(retainable).after_last_release
-          retainable.release(retainer)
+          retainable.released_by(retainer)
         end
       end
     end

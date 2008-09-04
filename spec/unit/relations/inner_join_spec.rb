@@ -737,7 +737,7 @@ module Unison
             join.should be_subscribed_to(operand_2.tuple_update_subscription_node)
 
             mock.proxy(join).after_last_release
-            join.release(retainer)
+            join.released_by(retainer)
 
             operand_1.should_not be_retained_by(join)
             operand_2.should_not be_retained_by(join)
@@ -754,7 +754,7 @@ module Unison
           it "releases its #predicate" do
             predicate.should be_retained_by(join)
             mock.proxy(join).after_last_release
-            join.release(retainer)
+            join.released_by(retainer)
             predicate.should_not be_retained_by(join)
           end
         end

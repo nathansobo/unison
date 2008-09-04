@@ -47,8 +47,8 @@ module Unison
         subscriptions.each do |subscription|
           subscription.destroy
         end
-        operand_1.release(self) if operand_1.is_a?(Signal)
-        operand_2.release(self) if operand_2.is_a?(Signal)
+        operand_1.released_by(self) if operand_1.is_a?(Signal)
+        operand_2.released_by(self) if operand_2.is_a?(Signal)
       end
 
       def eval_operand(operand)

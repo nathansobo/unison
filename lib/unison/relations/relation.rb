@@ -136,7 +136,7 @@ module Unison
       end
 
       def delete(tuple)
-        tuple.release(self)
+        tuple.released_by(self)
         tuples.delete(tuple)
         delete_subscription_node.call(tuple)
         tuple

@@ -37,7 +37,7 @@ module Unison
         end
 
         operands.each do |child_predicate|
-          child_predicate.release self
+          child_predicate.released_by self
         end
       end
     end

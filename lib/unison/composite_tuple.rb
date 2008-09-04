@@ -55,7 +55,7 @@ module Unison
 
     def after_last_release
       nested_tuples.each do |tuple|
-        tuple.release(self)
+        tuple.released_by(self)
       end
     end
   end

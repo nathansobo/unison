@@ -38,7 +38,7 @@ module Unison
           it "releases its Tuple" do
             user.should be_retained_by(signal)
             mock.proxy(signal).after_last_release
-            signal.release(retainer)
+            signal.released_by(retainer)
             user.should_not be_retained_by(signal)
           end
 

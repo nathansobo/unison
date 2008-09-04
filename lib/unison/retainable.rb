@@ -2,12 +2,12 @@ module Unison
   module Retainable
     module ClassMethods
       def retains(*children)
-        children_to_retain.concat(children)
+        names_of_children_to_retain.concat(children)
       end
 
       protected
-      def children_to_retain
-        @children_to_retain ||= []
+      def names_of_children_to_retain
+        @names_of_children_to_retain ||= []
       end
     end
 
@@ -19,20 +19,16 @@ module Unison
       raise ArgumentError, "Object #{retainer.inspect} has already retained this Object" if retained_by?(retainer)
       retainers[retainer.object_id] = retainer
       if refcount == 1
-        self.class.send(:children_to_retain).each do |retainable_name|
-          send(retainable_name).retained_by(self)
-        end
+        retain_children
         after_first_retain
       end
       self
     end
 
-    def release(retainer)
+    def released_by(retainer)
       retainers.delete(retainer.object_id)
       if refcount == 0
-        self.class.send(:children_to_retain).each do |retainable_name|
-          send(retainable_name).release(self)
-        end
+        release_children
         after_last_release
       end
     end
@@ -60,6 +56,24 @@ module Unison
 
     def after_last_release
 
-    end    
+    end
+
+    def retain_children
+      children_to_retain.each do |child|
+        child.retained_by(self)
+      end
+    end
+
+    def release_children
+      children_to_retain.each do |child|
+        child.released_by(self)
+      end
+    end
+    
+    def children_to_retain
+      self.class.send(:names_of_children_to_retain).map do |name|
+        send(name)
+      end
+    end
   end
 end

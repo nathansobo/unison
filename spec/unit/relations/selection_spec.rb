@@ -159,7 +159,7 @@ module Unison
             selection.should be_subscribed_to(operand.tuple_update_subscription_node)
 
             mock.proxy(selection).after_last_release
-            selection.release(retainer)
+            selection.released_by(retainer)
 
             operand.should_not be_retained_by(selection)
             selection.should_not be_subscribed_to(operand.insert_subscription_node)
@@ -174,7 +174,7 @@ module Unison
             selection.should be_subscribed_to(predicate.update_subscription_node)
 
             mock.proxy(selection).after_last_release
-            selection.release(retainer)
+            selection.released_by(retainer)
 
             predicate.should_not be_retained_by(selection)
             selection.should_not be_subscribed_to(predicate.update_subscription_node)
@@ -419,7 +419,7 @@ module Unison
               photo[:name] = "New Name"
             end
 
-            it "does not #release the deleted Tuple" do
+            it "does not released_by the deleted Tuple" do
               photo.should be_retained_by(selection)
               photo[:name] = "James Brown"
               photo.should be_retained_by(selection)

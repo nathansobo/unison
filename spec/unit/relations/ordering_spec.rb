@@ -174,7 +174,7 @@ module Unison
             ordering.should be_subscribed_to(operand.tuple_update_subscription_node)
 
             mock.proxy(ordering).after_last_release
-            ordering.release(retainer)
+            ordering.released_by(retainer)
 
             operand.should_not be_retained_by(ordering)
             ordering.should_not be_subscribed_to(operand.insert_subscription_node)
