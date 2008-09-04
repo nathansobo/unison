@@ -2,7 +2,7 @@ module Unison
   module Relations
     class InnerJoin < CompositeRelation
       attr_reader :operand_1, :operand_2, :predicate
-      retains :operand_1, :operand_2, :predicate
+      retain :operand_1, :operand_2, :predicate
       
       def initialize(operand_1, operand_2, predicate)
         super()

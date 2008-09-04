@@ -2,7 +2,7 @@ module Unison
   module Predicates
     class CompositePredicate < Base
       attr_reader :operands
-      retains :operands
+      retain :operands
       
       def initialize(*operands)
         raise ArgumentError, "And predicate must have at least one child Predicate" if operands.empty?

@@ -2,7 +2,7 @@ module Unison
   module Relations
     class Ordering < CompositeRelation
       attr_reader :operand, :order_by_attribute
-      retains :operand
+      retain :operand
 
       def initialize(operand, order_by_attribute)
         super()

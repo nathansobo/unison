@@ -2,7 +2,7 @@ module Unison
   module Relations
     class Projection < CompositeRelation
       attr_reader :operand, :projected_set
-      retains :operand
+      retain :operand
 
       def initialize(operand, projected_set)
         super()

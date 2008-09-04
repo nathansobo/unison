@@ -109,7 +109,7 @@ module Unison
     end
 
     describe "#after_first_retain" do
-      it "#retains the #nested_tuples" do
+      it "retains the #nested_tuples" do
         nested_tuple_1.should_not be_retained_by(tuple)
         nested_tuple_2.should_not be_retained_by(tuple)
 

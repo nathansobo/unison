@@ -3,7 +3,7 @@ module Unison
     include Retainable
     attr_reader :tuple, :attribute
 
-    retains :tuple
+    retain :tuple
 
     def initialize(tuple, attribute)
       @tuple, @attribute = tuple, attribute

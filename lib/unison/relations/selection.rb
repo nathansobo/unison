@@ -2,7 +2,7 @@ module Unison
   module Relations
     class Selection < CompositeRelation
       attr_reader :operand, :predicate
-      retains :operand, :predicate
+      retain :operand, :predicate
 
       def initialize(operand, predicate)
         super()

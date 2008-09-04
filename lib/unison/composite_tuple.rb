@@ -2,7 +2,7 @@ module Unison
   class CompositeTuple
     include Tuple
     attr_reader :nested_tuples
-    retains :nested_tuples
+    retain :nested_tuples
 
     def initialize(*nested_tuples)
       super()

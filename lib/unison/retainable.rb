@@ -1,7 +1,7 @@
 module Unison
   module Retainable
     module ClassMethods
-      def retains(*children)
+      def retain(*children)
         names_of_children_to_retain.concat(children)
       end
 

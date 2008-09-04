@@ -14,7 +14,7 @@ module Unison
       Class.new {include Retainable}.new
     end
 
-    describe ".retains" do
+    describe ".retain" do
       attr_reader :retainable, :child, :children
       before do
         @child = anonymous_retainable_object
@@ -23,7 +23,7 @@ module Unison
         retainable_class = Class.new do
           include Retainable
 
-          retains :child, :children
+          retain :child, :children
           attr_reader :child, :children
 
           def initialize(child, children)
