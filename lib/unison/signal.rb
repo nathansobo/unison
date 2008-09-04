@@ -4,6 +4,13 @@ module Unison
     attr_reader :tuple, :attribute
 
     retain :tuple
+    subscribe do
+      tuple.on_update do |updated_attribute, old_value, new_value|
+        if attribute == updated_attribute
+          update_subscription_node.call(tuple, old_value, new_value)
+        end
+      end
+    end
 
     def initialize(tuple, attribute)
       @tuple, @attribute = tuple, attribute
@@ -24,15 +31,5 @@ module Unison
 
     protected
     attr_reader :update_subscription_node
-
-    def after_first_retain
-      subscriptions.push(
-        tuple.on_update do |updated_attribute, old_value, new_value|
-          if attribute == updated_attribute
-            update_subscription_node.call(tuple, old_value, new_value)
-          end
-        end
-      )
-    end
   end
 end

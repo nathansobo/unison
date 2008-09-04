@@ -20,13 +20,13 @@ module Unison
 
       protected
       def after_first_retain
-        operands.each do |child_predicate|
+        operands.each do |operand|
           subscriptions.push(
-            child_predicate.on_update do
+            operand.on_update do
               update_subscription_node.call
             end
           )
-        end        
+        end
       end
     end
   end

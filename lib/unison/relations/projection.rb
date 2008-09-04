@@ -4,6 +4,37 @@ module Unison
       attr_reader :operand, :projected_set
       retain :operand
 
+      subscribe do
+        operand.on_insert do |created|
+          restricted = created[projected_set]
+          unless tuples.include?(restricted)
+            tuples.push(restricted)
+            insert_subscription_node.call(restricted)
+          end
+        end
+      end
+
+      subscribe do
+        operand.on_delete do |deleted|
+          restricted = deleted[projected_set]
+          unless initial_read.include?(restricted)
+            tuples.delete(restricted)
+            delete_subscription_node.call(restricted)
+          end
+        end
+      end
+
+      subscribe do
+        operand.on_tuple_update do |updated, attribute, old_value, new_value|
+          restricted = updated[projected_set]
+          # TODO: BT/NS - Make sure that this condition is sufficient for nested composite Tuples
+          if projected_set.has_attribute?(attribute) && last_update != [restricted, attribute, old_value, new_value]
+            @last_update = [restricted, attribute, old_value, new_value]
+            tuple_update_subscription_node.call(restricted, attribute, old_value, new_value)
+          end
+        end
+      end
+
       def initialize(operand, projected_set)
         super()
         @operand, @projected_set = operand, projected_set
@@ -53,40 +84,6 @@ module Unison
         operand.tuples.map do |tuple|
           tuple[projected_set]
         end.uniq
-      end
-
-      def after_first_retain
-        super
-        subscriptions.push(
-          operand.on_insert do |created|
-            restricted = created[projected_set]
-            unless tuples.include?(restricted)
-              tuples.push(restricted)
-              insert_subscription_node.call(restricted)
-            end
-          end
-        )
-
-        subscriptions.push(
-          operand.on_delete do |deleted|
-            restricted = deleted[projected_set]
-            unless initial_read.include?(restricted)
-              tuples.delete(restricted)
-              delete_subscription_node.call(restricted)
-            end
-          end
-        )
-
-        subscriptions.push(
-          operand.on_tuple_update do |updated, attribute, old_value, new_value|
-            restricted = updated[projected_set]
-            # TODO: BT/NS - Make sure that this condition is sufficient for nested composite Tuples
-            if projected_set.has_attribute?(attribute) && last_update != [restricted, attribute, old_value, new_value]
-              @last_update = [restricted, attribute, old_value, new_value]
-              tuple_update_subscription_node.call(restricted, attribute, old_value, new_value)
-            end
-          end
-        )
       end
     end
   end

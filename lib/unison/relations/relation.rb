@@ -2,7 +2,7 @@ module Unison
   module Relations
     class Relation
       instance_methods.each do |m|
-        unless m =~ /(^__|^methods$|^respond_to\?$|^instance_of\?$|^equal\?$|^is_a\?$|^extend$|^class$|^nil\?$|^send$|^object_id$|^should)/
+        unless m =~ /(^__|^methods$|^respond_to\?$|^instance_of\?$|^equal\?$|^is_a\?$|^extend$|^class$|^nil\?$|^send$|^object_id$|^should|^instance_eval$)/
           undef_method m
         end
       end

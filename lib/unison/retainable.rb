@@ -83,6 +83,10 @@ module Unison
 
     end
 
+    def subscribe
+      subscriptions.push(yield)
+    end
+
     def subscriptions
       @subscriptions ||= []
     end

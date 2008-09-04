@@ -33,11 +33,11 @@ module Unison
       def subscribe_to_operand_update_if_signal(operand)
         if operand.is_a?(Signal)
           operand.retained_by(self)
-          subscriptions.push(
+          subscribe do
             operand.on_update do
               update_subscription_node.call
             end
-          )
+          end
         end
       end
 

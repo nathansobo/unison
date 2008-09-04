@@ -4,6 +4,23 @@ module Unison
       attr_reader :operand, :order_by_attribute
       retain :operand
 
+      subscribe do
+        operand.on_insert do |inserted|
+          insert(inserted)
+        end
+      end
+      subscribe do
+        operand.on_delete do |inserted|
+          delete(inserted)
+        end
+      end
+      subscribe do
+        operand.on_tuple_update do |tuple, attribute, old_value, new_value|
+          reorder_tuples
+          tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
+        end
+      end
+
       def initialize(operand, order_by_attribute)
         super()
         @operand, @order_by_attribute = operand, order_by_attribute
@@ -35,26 +52,6 @@ module Unison
       end
 
       protected
-
-      def after_first_retain
-        super
-        subscriptions.push(
-          operand.on_insert do |inserted|
-            insert(inserted)
-          end
-        )
-        subscriptions.push(
-          operand.on_delete do |inserted|
-            delete(inserted)
-          end
-        )
-        subscriptions.push(
-          operand.on_tuple_update do |tuple, attribute, old_value, new_value|
-            reorder_tuples
-            tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
-          end
-        )
-      end
 
       def add_to_tuples(tuple_to_add)
         super
