@@ -10,6 +10,14 @@ module Unison
         @last_update = nil
       end
 
+      def attribute(name)
+        projected_set.attribute(name)
+      end
+
+      def has_attribute?(attribute)
+        projected_set.has_attribute?(attribute)
+      end 
+
       def to_arel
         Arel::Project.new( operand.to_arel, *projected_set.to_arel.attributes )
       end
@@ -49,7 +57,7 @@ module Unison
 
       def after_first_retain
         super
-        operand_subscriptions.push(
+        subscriptions.push(
           operand.on_insert do |created|
             restricted = created[projected_set]
             unless tuples.include?(restricted)
@@ -59,7 +67,7 @@ module Unison
           end
         )
 
-        operand_subscriptions.push(
+        subscriptions.push(
           operand.on_delete do |deleted|
             restricted = deleted[projected_set]
             unless initial_read.include?(restricted)
@@ -69,7 +77,7 @@ module Unison
           end
         )
 
-        operand_subscriptions.push(
+        subscriptions.push(
           operand.on_tuple_update do |updated, attribute, old_value, new_value|
             restricted = updated[projected_set]
             # TODO: BT/NS - Make sure that this condition is sufficient for nested composite Tuples

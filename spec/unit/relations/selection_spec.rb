@@ -143,30 +143,30 @@ module Unison
         end
 
         describe "#after_last_release" do
+          before do
+            publicize selection, :subscriptions, :after_last_release
+            publicize operand, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+          end
+
           it "unsubscribes from and releases its #operand" do
-            class << selection; public :operand_subscriptions; end
-            selection.operand_subscriptions.should_not be_empty
+            selection.subscriptions.should_not be_empty
             operand.should be_retained_by(selection)
-
-            selection.operand_subscriptions.each do |subscription|
-              operand.subscriptions.should include(subscription)
-            end
-
-            selection.send(:after_last_release)
+            
+            selection.should be_subscribed_to(operand.insert_subscription_node)
+            selection.should be_subscribed_to(operand.delete_subscription_node)
+            selection.should be_subscribed_to(operand.tuple_update_subscription_node)
+            
+            selection.after_last_release
 
             operand.should_not be_retained_by(selection)
-            selection.operand_subscriptions.each do |subscription|
-              operand.subscriptions.should_not include(subscription)
-            end
+            selection.should_not be_subscribed_to(operand.insert_subscription_node)
+            selection.should_not be_subscribed_to(operand.delete_subscription_node)
+            selection.should_not be_subscribed_to(operand.tuple_update_subscription_node)
           end
 
           it "unsubscribes from and releases its #predicate" do
-            class << selection
-              public :predicate_subscription
-            end
-            class << predicate
-              public :update_subscription_node
-            end
+            publicize selection, :predicate_subscription
+            publicize predicate, :update_subscription_node
 
             selection.predicate_subscription.should_not be_nil
             predicate.should be_retained_by(selection)
@@ -495,12 +495,12 @@ module Unison
           end
 
           it "retains and subscribes to its #operand" do
-            class << selection; public :operand_subscriptions; end
-            selection.operand_subscriptions.should be_empty
+            publicize selection, :subscriptions
+            selection.subscriptions.should be_empty
             operand.should_not be_retained_by(selection)
 
             selection.retained_by(Object.new)
-            selection.operand_subscriptions.should_not be_empty
+            selection.subscriptions.should_not be_empty
             operand.should be_retained_by(selection)
           end
 

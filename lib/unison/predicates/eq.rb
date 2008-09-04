@@ -5,7 +5,7 @@ module Unison
       def initialize(operand_1, operand_2)
         super()
         @operand_1, @operand_2 = operand_1, operand_2
-        @operand_subscriptions = []
+        @subscriptions = []
       end
 
       def ==(other)
@@ -25,7 +25,7 @@ module Unison
       end
 
       protected
-      attr_reader :operand_subscriptions
+      attr_reader :subscriptions
       
       def after_first_retain
         subscribe_to_operand_update_if_signal operand_1
@@ -35,7 +35,7 @@ module Unison
       def subscribe_to_operand_update_if_signal(operand)
         if operand.is_a?(Signal)
           operand.retained_by(self)
-          operand_subscriptions.push(
+          subscriptions.push(
             operand.on_update do
               update_subscription_node.call
             end
@@ -44,7 +44,7 @@ module Unison
       end
 
       def after_last_release
-        operand_subscriptions.each do |subscription|
+        subscriptions.each do |subscription|
           subscription.destroy
         end
         operand_1.release(self) if operand_1.is_a?(Signal)

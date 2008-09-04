@@ -159,24 +159,25 @@ module Unison
         end
 
         describe "#after_last_release" do
+          before do
+            ordering.retained_by(Object.new)
+            publicize ordering, :subscriptions, :after_last_release
+            publicize operand, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+          end
+          
           it "unsubscribes from and releases its #operand" do
-            class << ordering
-              public :after_last_release, :operand_subscriptions
-            end
-
-            ordering.operand_subscriptions.should_not be_empty
             operand.should be_retained_by(ordering)
 
-            ordering.operand_subscriptions.each do |subscription|
-              operand.subscriptions.should include(subscription)
-            end
+            ordering.should be_subscribed_to(operand.insert_subscription_node)
+            ordering.should be_subscribed_to(operand.delete_subscription_node)
+            ordering.should be_subscribed_to(operand.tuple_update_subscription_node)
 
             ordering.after_last_release
 
             operand.should_not be_retained_by(ordering)
-            ordering.operand_subscriptions.each do |subscription|
-              operand.subscriptions.should_not include(subscription)
-            end
+            ordering.should_not be_subscribed_to(operand.insert_subscription_node)
+            ordering.should_not be_subscribed_to(operand.delete_subscription_node)
+            ordering.should_not be_subscribed_to(operand.tuple_update_subscription_node)
           end
         end
 
@@ -196,13 +197,13 @@ module Unison
       describe "when not #retained?" do
         describe "#after_first_retain" do
           it "retains and subscribes to its #operand" do
-            class << ordering; public :operand_subscriptions; end
-            ordering.operand_subscriptions.should be_empty
+            publicize ordering, :subscriptions
+            ordering.subscriptions.should be_empty
             operand.should_not be_retained_by(ordering)
 
             mock.proxy(ordering).after_first_retain
             ordering.retained_by(Object.new)
-            ordering.operand_subscriptions.should_not be_empty
+            ordering.subscriptions.should_not be_empty
             operand.should be_retained_by(ordering)
           end
 

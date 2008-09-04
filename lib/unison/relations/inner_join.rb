@@ -7,12 +7,11 @@ module Unison
       def initialize(operand_1, operand_2, predicate)
         super()
         @operand_1, @operand_2, @predicate = operand_1, operand_2, predicate
-        @operand_1_subscriptions, @operand_2_subscriptions = [], []
       end
       
       def operands
         [operand_1, operand_2]
-      end  
+      end
 
       def to_arel
         operand_1.to_arel.join(operand_2.to_arel).on(predicate.to_arel)
@@ -39,15 +38,9 @@ module Unison
       end
 
       protected
-      attr_reader :operand_1_subscriptions, :operand_2_subscriptions
-
-      def operand_subscriptions
-        operand_1_subscriptions + operand_2_subscriptions
-      end
-
       def after_first_retain
         super
-        operand_1_subscriptions.push(
+        subscriptions.push(
           operand_1.on_insert do |operand_1_tuple|
             operand_2.each do |operand_2_tuple|
               insert_if_predicate_matches CompositeTuple::Base.new(operand_1_tuple, operand_2_tuple)
@@ -55,7 +48,7 @@ module Unison
           end
         )
 
-        operand_2_subscriptions.push(
+        subscriptions.push(
           operand_2.on_insert do |operand_2_tuple|
             operand_1.each do |operand_1_tuple|
               insert_if_predicate_matches CompositeTuple::Base.new(operand_1_tuple, operand_2_tuple)
@@ -63,19 +56,19 @@ module Unison
           end
         )
 
-        operand_1_subscriptions.push(
+        subscriptions.push(
           operand_1.on_delete do |operand_1_tuple|
             delete_if_member_of_compound_tuple operand_1, operand_1_tuple
           end
         )
 
-        operand_2_subscriptions.push(
+        subscriptions.push(
           operand_2.on_delete do |operand_2_tuple|
             delete_if_member_of_compound_tuple operand_2, operand_2_tuple
           end
         )
 
-        operand_1_subscriptions.push(
+        subscriptions.push(
           operand_1.on_tuple_update do |operand_1_tuple, attribute, old_value, new_value|
             operand_2.each do |operand_2_tuple|
               compound_tuple = find_compound_tuple(operand_1_tuple, operand_2_tuple)
@@ -92,7 +85,7 @@ module Unison
           end
         )
 
-        operand_2_subscriptions.push(
+        subscriptions.push(
           operand_2.on_tuple_update do |operand_2_tuple, attribute, old_value, new_value|
             operand_1.each do |operand_1_tuple|
               compound_tuple = find_compound_tuple(operand_1_tuple, operand_2_tuple)

@@ -835,7 +835,7 @@ module Unison
         describe "#initialize_attribute_values" do
           it "transforms Symbol keys into their corresponding Attribute objects" do
             user = User.new
-            class << user; public :initialize_attribute_values; end
+            publicize user, :initialize_attribute_values
 
             dont_allow(user).__send__(:[]=, :name, "Einstein")
             mock.proxy(user).__send__(:[]=, User[:name], "Einstein")

@@ -247,9 +247,7 @@ module Unison
       context "when #retained?" do
         before do
           @relation = users_set.where(Predicates::Eq.new(true, true)).retained_by(Object.new)
-          class << relation
-            public :tuples, :initial_read
-          end
+          publicize relation, :tuples, :initial_read
         end
 
       end
@@ -285,9 +283,7 @@ module Unison
         attr_reader :relation
         before do
           @relation = users_set.where(Predicates::Eq.new(true, true))
-          class << relation
-            public :tuples, :initial_read
-          end
+          publicize relation, :tuples, :initial_read
         end
 
         it "inserts each of the results of #initial_read" do

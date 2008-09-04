@@ -241,6 +241,13 @@ end
 class Spec::ExampleGroup
   include Unison
 
+  def publicize(object, *methods)
+    eigenclass = class << object; self; end
+    eigenclass.class_eval do
+      public *methods
+    end
+  end
+
   def teams_set
     Team.set
   end
@@ -279,11 +286,5 @@ class Spec::ExampleGroup
 
   def connection
     origin.connection
-  end
-end
-
-class Unison::Relations::Relation
-  def subscriptions
-    insert_subscription_node + delete_subscription_node + tuple_update_subscription_node
   end
 end

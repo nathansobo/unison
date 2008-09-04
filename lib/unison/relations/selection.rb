@@ -52,7 +52,7 @@ module Unison
             inserted_tuples.each{|tuple| insert(tuple)}
           end
 
-        operand_subscriptions.push(
+        subscriptions.push(
           operand.on_insert do |inserted|
             if predicate.eval(inserted)
               insert(inserted)
@@ -60,7 +60,7 @@ module Unison
           end
         )
 
-        operand_subscriptions.push(
+        subscriptions.push(
           operand.on_delete do |deleted|
             if predicate.eval(deleted)
               delete(deleted)
@@ -68,7 +68,7 @@ module Unison
           end
         )
 
-        operand_subscriptions.push(
+        subscriptions.push(
           operand.on_tuple_update do |tuple, attribute, old_value, new_value|
             if predicate.eval(tuple)
               if tuples.include?(tuple)

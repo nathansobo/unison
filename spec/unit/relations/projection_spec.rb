@@ -68,19 +68,46 @@ module Unison
       end
 
       describe "#attribute" do
-        it "delegates to #projected_set" do
-          projected_set_attribute = projected_set.attribute(:id)
-          mock.proxy(projected_set).attribute(:id)
-          projection.attribute(:id).should == projected_set_attribute
+        context "when the #projected_set.has_attribute? is true for the given Attribute" do
+          it "delegates to #projected_set" do
+            projected_set.should have_attribute(:id)
+            projected_set_attribute = projected_set.attribute(:id)
+            mock.proxy(projected_set).attribute(:id)
+            projection.attribute(:id).should == projected_set_attribute
+          end
+        end
+
+        context "when the #projected_set.has_attribute? is false and the #operand.has_attribute? is true for the given Attribute" do
+          it "delegates to #projected_set which raises an ArgumentError" do
+            operand.should have_attribute(:user_id)
+            projected_set.should_not have_attribute(:user_id)
+            mock.proxy(projected_set).attribute(:user_id)
+
+            lambda do
+              projection.attribute(:user_id).should == projected_set_attribute
+            end.should raise_error(ArgumentError)
+          end
         end
       end
 
       describe "#has_attribute?" do
-        it "delegates to the #projected_set" do
-          projected_set.has_attribute?(:id).should be_true
-          mock.proxy(projected_set).has_attribute?(:id)
-          
-          projection.has_attribute?(:id).should be_true
+        context "when the #projected_set.has_attribute? is true for the given Attribute" do
+          it "delegates to the #projected_set" do
+            projected_set.should have_attribute(:id)
+            mock.proxy(projected_set).has_attribute?(:id)
+
+            projection.should have_attribute(:id)
+          end
+        end
+
+        context "when the #projected_set.has_attribute? is false and the #operand.has_attribute? is true for the given Attribute" do
+          it "delegates to #projected_set" do
+            operand.should have_attribute(:user_id)
+            projected_set.should_not have_attribute(:user_id)
+            mock.proxy(projected_set).has_attribute?(:user_id)
+
+            projection.should_not have_attribute(:user_id)
+          end
         end
       end
 
@@ -324,23 +351,23 @@ module Unison
         describe "#after_last_release" do
           before do
             projection.retained_by(Object.new)
+            publicize projection, :subscriptions, :after_last_release
+            publicize operand, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
           end
 
           it "unsubscribes from and releases its #operand" do
             operand.should be_retained_by(projection)
 
-            projection.send(:operand_subscriptions).should_not be_empty
-            projection.send(:operand_subscriptions).each do |subscription|
-              operand.subscriptions.should include(subscription)
-            end
+            projection.should be_subscribed_to(operand.insert_subscription_node)
+            projection.should be_subscribed_to(operand.delete_subscription_node)
+            projection.should be_subscribed_to(operand.tuple_update_subscription_node)
 
-            projection.send(:after_last_release)
+            projection.after_last_release
 
             operand.should_not be_retained_by(projection)
-            projection.send(:operand_subscriptions).should_not be_empty
-            projection.send(:operand_subscriptions).each do |subscription|
-              operand.subscriptions.should_not include(subscription)
-            end
+            projection.should_not be_subscribed_to(operand.insert_subscription_node)
+            projection.should_not be_subscribed_to(operand.delete_subscription_node)
+            projection.should_not be_subscribed_to(operand.tuple_update_subscription_node)
           end
         end
       end

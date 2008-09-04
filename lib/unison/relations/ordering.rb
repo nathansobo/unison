@@ -38,17 +38,17 @@ module Unison
 
       def after_first_retain
         super
-        operand_subscriptions.push(
+        subscriptions.push(
           operand.on_insert do |inserted|
             insert(inserted)
           end
         )
-        operand_subscriptions.push(
+        subscriptions.push(
           operand.on_delete do |inserted|
             delete(inserted)
           end
         )
-        operand_subscriptions.push(
+        subscriptions.push(
           operand.on_tuple_update do |tuple, attribute, old_value, new_value|
             reorder_tuples
             tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)

@@ -716,33 +716,37 @@ module Unison
 
         describe "#after_last_release" do
           before do
+            publicize join, :subscriptions, :after_last_release
+            publicize operand_1, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+            publicize operand_2, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
             join.retained_by(Object.new)
           end
 
           it "unsubscribes from and releases its operands" do
             operand_1.should be_retained_by(join)
             operand_2.should be_retained_by(join)
-            join.send(:operand_1_subscriptions).should_not be_empty
-            join.send(:operand_1_subscriptions).each do |subscription|
-              operand_1.subscriptions.should include(subscription)
-            end
-            join.send(:operand_2_subscriptions).should_not be_empty
-            join.send(:operand_2_subscriptions).each do |subscription|
-              operand_2.subscriptions.should include(subscription)
-            end
+            join.subscriptions.should_not be_empty
 
-            join.send(:after_last_release)
+            join.should be_subscribed_to(operand_1.insert_subscription_node)
+            join.should be_subscribed_to(operand_1.delete_subscription_node)
+            join.should be_subscribed_to(operand_1.tuple_update_subscription_node)
+
+            join.should be_subscribed_to(operand_2.insert_subscription_node)
+            join.should be_subscribed_to(operand_2.delete_subscription_node)
+            join.should be_subscribed_to(operand_2.tuple_update_subscription_node)
+
+            join.after_last_release
 
             operand_1.should_not be_retained_by(join)
             operand_2.should_not be_retained_by(join)
-            join.send(:operand_1_subscriptions).should_not be_empty
-            join.send(:operand_1_subscriptions).each do |subscription|
-              operand_1.subscriptions.should_not include(subscription)
-            end
-            join.send(:operand_2_subscriptions).should_not be_empty
-            join.send(:operand_2_subscriptions).each do |subscription|
-              operand_2.subscriptions.should_not include(subscription)
-            end
+
+            join.should_not be_subscribed_to(operand_1.insert_subscription_node)
+            join.should_not be_subscribed_to(operand_1.delete_subscription_node)
+            join.should_not be_subscribed_to(operand_1.tuple_update_subscription_node)
+
+            join.should_not be_subscribed_to(operand_2.insert_subscription_node)
+            join.should_not be_subscribed_to(operand_2.delete_subscription_node)
+            join.should_not be_subscribed_to(operand_2.tuple_update_subscription_node)
           end
 
           it "releases its #predicate" do

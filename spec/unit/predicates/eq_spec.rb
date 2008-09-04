@@ -105,9 +105,9 @@ module Unison
               @user = User.find(1)
               @predicate = Eq.new(user.signal(:name), "Nathan").retained_by(Object.new)
               @operand = predicate.operand_1
-              operand_subscriptions = predicate.send(:operand_subscriptions)
-              operand_subscriptions.length.should == 1
-              @operand_subscription = operand_subscriptions.first
+              subscriptions = predicate.send(:subscriptions)
+              subscriptions.length.should == 1
+              @operand_subscription = subscriptions.first
             end
 
             context "when #operand_1 is updated" do
@@ -129,7 +129,7 @@ module Unison
               @user = User.find(1)
               @predicate = Eq.new("Nathan", user.signal(:name)).retained_by(Object.new)
               @operand = predicate.operand_2
-              operand_subscriptions = predicate.send(:operand_subscriptions)
+              subscriptions = predicate.send(:subscriptions)
             end
 
             context "when #operand_2 is updated" do
@@ -160,11 +160,11 @@ module Unison
             it "#retains and #subscribes to #on_update on the Signal" do
               mock.proxy(predicate).after_first_retain
               operand.should_not be_retained_by(predicate)
-              predicate.send(:operand_subscriptions).should be_empty
+              predicate.send(:subscriptions).should be_empty
 
               predicate.retained_by(Object.new)
               operand.should be_retained_by(predicate)
-              predicate.send(:operand_subscriptions).should_not be_empty
+              predicate.send(:subscriptions).should_not be_empty
             end
           end
 
@@ -179,11 +179,11 @@ module Unison
             it "#retains and #subscribes to #on_update on the Signal" do
               mock.proxy(predicate).after_first_retain
               operand.should_not be_retained_by(predicate)
-              predicate.send(:operand_subscriptions).should be_empty
+              predicate.send(:subscriptions).should be_empty
 
               predicate.retained_by(Object.new)
               operand.should be_retained_by(predicate)
-              predicate.send(:operand_subscriptions).should_not be_empty
+              predicate.send(:subscriptions).should_not be_empty
             end
           end
         end

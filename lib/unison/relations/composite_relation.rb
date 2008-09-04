@@ -3,7 +3,7 @@ module Unison
     class CompositeRelation < Relation
       def initialize
         super
-        @operand_subscriptions = []
+        @subscriptions = []
       end
 
       def attribute(name)
@@ -23,11 +23,17 @@ module Unison
         [operand]
       end
 
+      def subscribed_to?(subscription_node)
+        subscriptions.any? do |subscription|
+          subscription_node.include?(subscription)
+        end
+      end
+
       protected
-      attr_reader :operand_subscriptions
+      attr_reader :subscriptions
 
       def after_last_release
-        operand_subscriptions.each do |subscription|
+        subscriptions.each do |subscription|
           subscription.destroy
         end
         operands.each do |operand|
