@@ -2,12 +2,65 @@ require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
   describe Retainable do
+    def retainable
+      users_set
+    end
+    
     def retainer
       @retainer ||= Object.new
     end
 
-    def retainable
-      users_set
+    def anonymous_retainable_object
+      Class.new {include Retainable}.new
+    end
+
+    describe ".retains" do
+      attr_reader :retainable, :child, :children
+      before do
+        @child = anonymous_retainable_object
+        @children = [anonymous_retainable_object, anonymous_retainable_object]
+
+        retainable_class = Class.new do
+          include Retainable
+
+          retains :child, :children
+          attr_reader :child, :children
+
+          def initialize(child, children)
+            @child, @children = child, children
+          end
+        end
+        @retainable = retainable_class.new(child, children)
+      end
+
+      it "causes the objects named by the passed-in names to be retained after the first call to #retained_by" do
+        child.should_not be_retained_by(retainable)
+        children.each do |child_in_children|
+          child_in_children.should_not be_retained_by(retainable)
+        end
+
+        retainable.retained_by(retainer)
+
+        child.should be_retained_by(retainable)
+        children.each do |child_in_children|
+          child_in_children.should be_retained_by(retainable)
+        end
+      end
+
+      it "causes the objects named by the passed-in names to be released after the last call to #released_by" do
+        retainable.retained_by(retainer)
+        child.should be_retained_by(retainable)
+        children.each do |child_in_children|
+          child_in_children.should be_retained_by(retainable)
+        end
+
+        retainable.released_by(retainer)
+
+        child.should_not be_retained_by(retainable)
+        children.each do |child_in_children|
+          child_in_children.should_not be_retained_by(retainable)
+        end
+      end
     end
 
     describe "#retained_by" do
