@@ -78,18 +78,17 @@ module Unison
         child.released_by(self)
       end
     end
-
+    
     def children_to_retain
-      children = []
-      self.class.send(:names_of_children_to_retain).each do |name|
+      self.class.send(:names_of_children_to_retain).inject([]) do |children, name|
         child = send(name)
-        if child.respond_to?(:flatten) && !child.is_a?(Retainable)
-          children.concat(child)
-        else
+        if child.is_a?(Retainable)
           children.push(child)
+        else
+          children.concat(child)
         end
+        children
       end
-      children
     end
   end
 end
