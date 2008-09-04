@@ -38,7 +38,6 @@ module Unison
     def after_last_release
       raise "Signal #{self.inspect} is not registered on its Tuple" unless tuple.send(:signals)[attribute] == self
       tuple.send(:signals).delete(attribute)
-      tuple.release(self)
     end
   end
 end

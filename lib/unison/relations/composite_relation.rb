@@ -36,10 +36,7 @@ module Unison
         subscriptions.each do |subscription|
           subscription.destroy
         end
-        operands.each do |operand|
-          operand.release(self)
-        end
-      end      
+      end
     end
   end
 end

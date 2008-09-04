@@ -1,7 +1,7 @@
 module Unison
   module Relations
     class Selection < CompositeRelation
-      attr_reader :operand, :predicate, :predicate_subscription
+      attr_reader :operand, :predicate
       retains :operand, :predicate
 
       def initialize(operand, predicate)
@@ -43,7 +43,7 @@ module Unison
 
       def after_first_retain
         super
-        @predicate_subscription =
+        subscriptions.push(
           predicate.on_update do
             new_tuples = initial_read
             deleted_tuples = tuples - new_tuples
@@ -51,6 +51,7 @@ module Unison
             deleted_tuples.each{|tuple| delete(tuple)}
             inserted_tuples.each{|tuple| insert(tuple)}
           end
+        )
 
         subscriptions.push(
           operand.on_insert do |inserted|
@@ -81,12 +82,6 @@ module Unison
             end
           end
         )
-      end
-
-      def after_last_release
-        super
-        predicate_subscription.destroy
-        predicate.release self
       end
     end
   end

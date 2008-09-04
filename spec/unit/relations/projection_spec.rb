@@ -112,8 +112,10 @@ module Unison
       end
 
       context "when #retained?" do
+        attr_reader :retainer
         before do
-          projection.retained_by(Object.new)
+          @retainer = Object.new
+          projection.retained_by(retainer)
         end
 
         describe "#merge" do
@@ -350,8 +352,7 @@ module Unison
 
         describe "#after_last_release" do
           before do
-            projection.retained_by(Object.new)
-            publicize projection, :subscriptions, :after_last_release
+            publicize projection, :subscriptions
             publicize operand, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
           end
 
@@ -362,7 +363,8 @@ module Unison
             projection.should be_subscribed_to(operand.delete_subscription_node)
             projection.should be_subscribed_to(operand.tuple_update_subscription_node)
 
-            projection.after_last_release
+            mock.proxy(projection).after_last_release
+            projection.release(retainer)
 
             operand.should_not be_retained_by(projection)
             projection.should_not be_subscribed_to(operand.insert_subscription_node)

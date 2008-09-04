@@ -124,8 +124,10 @@ module Unison
       end
 
       context "when #retained?" do
+        attr_reader :retainer
         before do
-          selection.retained_by(Object.new)
+          @retainer = Object.new
+          selection.retained_by(retainer)
           selection.tuples
         end
 
@@ -144,7 +146,7 @@ module Unison
 
         describe "#after_last_release" do
           before do
-            publicize selection, :subscriptions, :after_last_release
+            publicize selection, :subscriptions
             publicize operand, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
           end
 
@@ -155,8 +157,9 @@ module Unison
             selection.should be_subscribed_to(operand.insert_subscription_node)
             selection.should be_subscribed_to(operand.delete_subscription_node)
             selection.should be_subscribed_to(operand.tuple_update_subscription_node)
-            
-            selection.after_last_release
+
+            mock.proxy(selection).after_last_release
+            selection.release(retainer)
 
             operand.should_not be_retained_by(selection)
             selection.should_not be_subscribed_to(operand.insert_subscription_node)
@@ -165,17 +168,16 @@ module Unison
           end
 
           it "unsubscribes from and releases its #predicate" do
-            publicize selection, :predicate_subscription
             publicize predicate, :update_subscription_node
 
-            selection.predicate_subscription.should_not be_nil
             predicate.should be_retained_by(selection)
-            predicate.update_subscription_node.should include(selection.predicate_subscription)
+            selection.should be_subscribed_to(predicate.update_subscription_node)
 
-            selection.send(:after_last_release)
+            mock.proxy(selection).after_last_release
+            selection.release(retainer)
 
             predicate.should_not be_retained_by(selection)
-            predicate.update_subscription_node.should_not include(selection.predicate_subscription)
+            selection.should_not be_subscribed_to(predicate.update_subscription_node)
           end
         end
 
@@ -483,14 +485,15 @@ module Unison
         describe "#after_first_retain" do
           before do
             mock.proxy(selection).after_first_retain
+            publicize predicate, :update_subscription_node
           end
 
           it "retains and subscribes to its #predicate" do
-            selection.predicate_subscription.should be_nil
+            selection.should_not be_subscribed_to(predicate.update_subscription_node)
             predicate.should_not be_retained_by(selection)
 
             selection.retained_by(Object.new)
-            selection.predicate_subscription.should_not be_nil
+            selection.should be_subscribed_to(predicate.update_subscription_node)
             predicate.should be_retained_by(selection)
           end
 

@@ -17,8 +17,10 @@ module Unison
       end
 
       context "when #retained?" do
+        attr_reader :retainer
         before do
-          signal.retained_by(Object.new)
+          @retainer = Object.new
+          signal.retained_by(retainer)
         end
 
         it "retains its Tuple" do
@@ -34,9 +36,9 @@ module Unison
 
         describe "#after_last_release" do
           it "releases its Tuple" do
-            signal.retained_by(Object.new)
             user.should be_retained_by(signal)
-            signal.send(:after_last_release)
+            mock.proxy(signal).after_last_release
+            signal.release(retainer)
             user.should_not be_retained_by(signal)
           end
 

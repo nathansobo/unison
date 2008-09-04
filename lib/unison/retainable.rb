@@ -29,7 +29,12 @@ module Unison
 
     def release(retainer)
       retainers.delete(retainer.object_id)
-      after_last_release if refcount == 0
+      if refcount == 0
+        self.class.send(:children_to_retain).each do |retainable_name|
+          send(retainable_name).release(self)
+        end
+        after_last_release
+      end
     end
 
     def refcount

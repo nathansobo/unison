@@ -108,8 +108,10 @@ module Unison
       end
 
       describe "when #retained?" do
+        attr_reader :retainer
         before do
-          ordering.retained_by(Object.new)
+          @retainer = Object.new
+          ordering.retained_by(retainer)
         end
 
         describe "when a Tuple is inserted into the #operand" do
@@ -160,8 +162,7 @@ module Unison
 
         describe "#after_last_release" do
           before do
-            ordering.retained_by(Object.new)
-            publicize ordering, :subscriptions, :after_last_release
+            publicize ordering, :subscriptions
             publicize operand, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
           end
           
@@ -172,7 +173,8 @@ module Unison
             ordering.should be_subscribed_to(operand.delete_subscription_node)
             ordering.should be_subscribed_to(operand.tuple_update_subscription_node)
 
-            ordering.after_last_release
+            mock.proxy(ordering).after_last_release
+            ordering.release(retainer)
 
             operand.should_not be_retained_by(ordering)
             ordering.should_not be_subscribed_to(operand.insert_subscription_node)

@@ -214,8 +214,10 @@ module Unison
       end
 
       context "when #retained?" do
+        attr_reader :retainer
         before do
-          join.retained_by(Object.new)
+          @retainer = Object.new
+          join.retained_by(retainer)
         end
 
         context "when a Tuple inserted into #operand_1" do
@@ -716,10 +718,9 @@ module Unison
 
         describe "#after_last_release" do
           before do
-            publicize join, :subscriptions, :after_last_release
+            publicize join, :subscriptions
             publicize operand_1, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
             publicize operand_2, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
-            join.retained_by(Object.new)
           end
 
           it "unsubscribes from and releases its operands" do
@@ -735,7 +736,8 @@ module Unison
             join.should be_subscribed_to(operand_2.delete_subscription_node)
             join.should be_subscribed_to(operand_2.tuple_update_subscription_node)
 
-            join.after_last_release
+            mock.proxy(join).after_last_release
+            join.release(retainer)
 
             operand_1.should_not be_retained_by(join)
             operand_2.should_not be_retained_by(join)
@@ -751,7 +753,8 @@ module Unison
 
           it "releases its #predicate" do
             predicate.should be_retained_by(join)
-            join.send(:after_last_release)
+            mock.proxy(join).after_last_release
+            join.release(retainer)
             predicate.should_not be_retained_by(join)
           end
         end

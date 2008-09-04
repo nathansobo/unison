@@ -103,11 +103,6 @@ module Unison
         )
       end
 
-      def after_last_release
-        super
-        predicate.release(self)
-      end
-
       def insert_if_predicate_matches(compound_tuple)
         insert(compound_tuple) if predicate.eval(compound_tuple)
       end
