@@ -43,12 +43,12 @@ module Unison
       end
 
       def relates_to_n(name, &definition)
-        instance_relations.push(InstanceRelationDefinition.new(name, definition, caller, false))
+        instance_relation_definitions.push(InstanceRelationDefinition.new(name, definition, caller, false))
         attr_reader name
       end
 
       def relates_to_1(name, &definition)
-        instance_relations.push(InstanceRelationDefinition.new(name, definition, caller, true))
+        instance_relation_definitions.push(InstanceRelationDefinition.new(name, definition, caller, true))
         attr_reader name
       end
 
@@ -84,8 +84,8 @@ module Unison
       end      
 
       protected
-      def instance_relations
-        @instance_relations ||= []
+      def instance_relation_definitions
+        @instance_relation_definitions ||= []
       end
     end
     def self.included(a_module)
@@ -102,10 +102,7 @@ module Unison
       @attribute_values = {}
 
       initialize_attribute_values(initial_attributes)
-
-      instance_relations.each do |instance_relation_definition|
-        instance_relation_definition.initialize_relation(self)
-      end
+      initialize_instance_relations
     end
 
     def [](attribute)
@@ -204,6 +201,12 @@ module Unison
     protected
     attr_reader :attribute_values
 
+    def initialize_instance_relations
+      instance_relation_definitions.each do |instance_relation_definition|
+        instance_relation_definition.initialize_instance_relation(self)
+      end
+    end
+
     def initialize_attribute_values(initial_attributes)
       initial_attributes = default_attribute_values.merge(
         convert_symbol_keys_to_attributes(initial_attributes)
@@ -264,8 +267,8 @@ module Unison
       options[:foreign_key] || :"#{self.class.name.to_s.underscore}_id"
     end
 
-    def instance_relations
-      self.class.send(:instance_relations)
+    def instance_relation_definitions
+      self.class.send(:instance_relation_definitions)
     end
 
     public

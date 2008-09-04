@@ -2,7 +2,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
   describe InstanceRelationDefinition do
-    describe "#initialize_relation" do
+    describe "#initialize_instance_relation" do
       it "creates a Relation by instance evaling the definition block in the passed in instance" do
         relation = users_set
         passed_in_instance = nil
@@ -13,7 +13,7 @@ module Unison
         definition = InstanceRelationDefinition.new(:relation_name, definition_block, caller, false)
 
         instance = Object.new        
-        definition.initialize_relation(instance).should == relation
+        definition.initialize_instance_relation(instance).should == relation
         passed_in_instance.should == instance
       end
 
@@ -23,7 +23,7 @@ module Unison
         definition = InstanceRelationDefinition.new(:relation_name, definition_block, caller, false)
 
         instance = Object.new
-        definition.initialize_relation(instance).should == relation
+        definition.initialize_instance_relation(instance).should == relation
         instance.instance_variable_get("@relation_name").should == relation
       end
 
@@ -34,7 +34,7 @@ module Unison
           definition = InstanceRelationDefinition.new(:relation_name, definition_block, caller, false)
 
           relation.should_not be_singleton
-          definition.initialize_relation(Object.new).should_not be_singleton
+          definition.initialize_instance_relation(Object.new).should_not be_singleton
         end
       end
 
@@ -45,7 +45,7 @@ module Unison
           definition = InstanceRelationDefinition.new(:relation_name, definition_block, caller, true)
 
           relation.should_not be_singleton
-          definition.initialize_relation(Object.new).should be_singleton
+          definition.initialize_instance_relation(Object.new).should be_singleton
         end
       end
     end
