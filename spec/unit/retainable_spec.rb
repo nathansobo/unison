@@ -76,6 +76,9 @@ module Unison
           subscribe do
             child.subscription_node.subscribe {}
           end
+          subscribe do
+            [child.subscription_node.subscribe {}, child.subscription_node.subscribe {}]
+          end
 
           def initialize(child)
             @child = child
@@ -96,8 +99,11 @@ module Unison
       end
 
       it "causes the first call to #retained_by to create a Subscription based on the given definition" do
+        publicize retainable, :subscriptions
         retainable.should_not be_subscribed_to(child.subscription_node)
-        retainable.retained_by(retainer)
+        lambda do
+          retainable.retained_by(retainer)
+        end.should change {retainable.subscriptions.length}.by(3)
         retainable.should be_subscribed_to(child.subscription_node)
       end
 

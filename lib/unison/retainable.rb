@@ -10,7 +10,15 @@ module Unison
       end
 
       def subscription_definitions
-        @subscription_definitions ||= []
+        @subscription_definitions ||= begin
+          definitions = []
+          current_class = superclass
+          while current_class.respond_to?(:subscription_definitions)
+            definitions.concat(current_class.subscription_definitions)
+            current_class = current_class.superclass
+          end
+          definitions
+        end
       end
 
       def names_of_children_to_retain
@@ -93,7 +101,7 @@ module Unison
 
     def subscribe_to_children
       subscription_definitions.each do |subscription_definition|
-        subscriptions.push(instance_eval(&subscription_definition))
+        subscriptions.push(*instance_eval(&subscription_definition))
       end
     end
 

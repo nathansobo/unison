@@ -3,6 +3,14 @@ module Unison
     class CompositePredicate < Base
       attr_reader :operands
       retain :operands
+
+      subscribe do
+        operands.map do |operand|
+          operand.on_update do
+            update_subscription_node.call
+          end
+        end
+      end
       
       def initialize(*operands)
         raise ArgumentError, "And predicate must have at least one child Predicate" if operands.empty?
@@ -15,17 +23,6 @@ module Unison
           operands == other.operands
         else
           false
-        end
-      end
-
-      protected
-      def after_first_retain
-        operands.each do |operand|
-          subscriptions.push(
-            operand.on_update do
-              update_subscription_node.call
-            end
-          )
         end
       end
     end
