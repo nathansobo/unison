@@ -220,6 +220,24 @@ module Unison
           end.should raise_error
         end
       end
+
+      context "when passed an InnerJoin" do
+        it "raises an ArgumentError" do
+          join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
+          lambda do
+            origin.push(join)
+          end.should raise_error(NotImplementedError)
+        end
+      end
+
+      context "when passed a CompositeTuple" do
+        it "raises a NotImplementedError" do
+          tuple = CompositeTuple.new(users_set.tuples.first)
+          lambda do
+            origin.push(tuple)
+          end.should raise_error(NotImplementedError)
+        end
+      end
     end
   end
 end

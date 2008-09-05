@@ -13,8 +13,8 @@ module Unison
     end
 
     def push(relation_or_tuple)
-      if relation_or_tuple.is_a?(Relations::InnerJoin)
-        raise "You cannot push Relations that contain CompositeTuples"
+      if relation_or_tuple.is_a?(Relations::InnerJoin) || relation_or_tuple.is_a?(CompositeTuple)
+        raise NotImplementedError, "You cannot push CompositeTuples or Relations that contain CompositeTuples"
       end
       table = connection[relation_or_tuple.set.name]
       if relation_or_tuple.respond_to?(:tuples)
