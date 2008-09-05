@@ -200,6 +200,9 @@ module Unison
     protected
     attr_reader :attribute_values
 
+    def after_create
+    end  
+
     def initialize_instance_relations
       instance_relation_definitions.each do |instance_relation_definition|
         instance_relation_definition.initialize_instance_relation(self)

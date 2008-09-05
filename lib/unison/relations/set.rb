@@ -65,6 +65,7 @@ module Unison
           raise ArgumentError, "Tuple with id #{tuple[:id]} already exists in this Set"
         end
         tuples.push(tuple)
+        tuple.send(:after_create) if tuple.new?
         insert_subscription_node.call(tuple)
         tuple.retain_with(self)
         tuple.on_update do |attribute, old_value, new_value|

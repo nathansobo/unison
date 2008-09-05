@@ -157,6 +157,33 @@ module Unison
             end
           end
 
+          context "when the Tuple is #new?" do
+            it "calls #after_create on the PrimitiveTuple before triggering the the on_insert event" do
+              call_order = []
+              tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+              mock.proxy(tuple).after_create do |returns|
+                call_order.push(:after_create)
+                returns
+              end
+              set.on_insert(retainer) do |*args|
+                call_order.push(:on_insert)
+              end
+
+              set.insert(tuple)
+              call_order.should == [:after_create, :on_insert]
+            end
+          end
+
+          context "when the Tuple is not #new?" do
+            it "does not call #after_create on the PrimitiveTuple" do
+              tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+              tuple.persisted
+              tuple.should_not be_new
+              dont_allow(tuple).after_create
+              set.insert(tuple)
+            end
+          end
+
           it "when the Set is not the passed in object's #relation, raises an ArgumentError" do
             incorrect_tuple = Profile.find(1)
             incorrect_tuple.set.should_not == set
