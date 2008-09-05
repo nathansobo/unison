@@ -52,30 +52,33 @@ module Unison
         attr_reader name
       end
 
-      def has_many(name, options={})
+      def has_many(name, options={}, &customization_block)
         relates_to_n(name) do
           class_name = options[:class_name] || name.to_s.classify
           target_relation = class_name.to_s.constantize.set
-          if options[:through]
+          relation = if options[:through]
             has_many_through(target_relation, options)
           else
             select_children(target_relation, :foreign_key => options[:foreign_key])
           end
+          customization_block ? instance_exec(relation, &customization_block) : relation
         end
       end
 
-      def has_one(name, options={})
+      def has_one(name, options={}, &customization_block)
         relates_to_1(name) do
           class_name = options[:class_name] || name.to_s.classify
-          select_child class_name.to_s.constantize, options
+          relation = select_child class_name.to_s.constantize, options
+          customization_block ? instance_exec(relation, &customization_block) : relation
         end
       end
 
-      def belongs_to(name, options = {})
+      def belongs_to(name, options = {}, &customization_block)
         relates_to_1(name) do
           class_name = options[:class_name] || name.to_s.classify
           foreign_key = options[:foreign_key] || :"#{name}_id"
-          select_parent(class_name.to_s.constantize.set, :foreign_key => foreign_key)
+          relation = select_parent(class_name.to_s.constantize.set, :foreign_key => foreign_key)
+          customization_block ? instance_exec(relation, &customization_block) : relation
         end
       end
 

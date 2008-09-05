@@ -12,7 +12,7 @@ module Unison
     
     context "when the #owner is retained by the subscriber" do
       before do
-        owner.retain_with(retainer)        
+        owner.retain_with(retainer)
       end
 
       describe "#subscribe" do

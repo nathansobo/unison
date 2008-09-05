@@ -189,6 +189,10 @@ Spec::Runner.configure do |config|
         attribute_accessor :name, :string
         attribute_accessor :deactivated_at, :datetime
         belongs_to :owner, :foreign_key => :user_id, :class_name => :User
+
+        def active?
+          !deactivated_at
+        end
       end)
     end
 
@@ -217,9 +221,10 @@ Spec::Runner.configure do |config|
     photos_set.insert(Photo.new(:id => 2, :user_id => 1, :name => "Photo 2", :camera_id => 1))
     photos_set.insert(Photo.new(:id => 3, :user_id => 2, :name => "Photo 3", :camera_id => 1))
 
-    accounts_set.insert(Account.new(:id => 1, :user_id => 1, :name => "Account 1", :deactivated_at => nil))
+    accounts_set.insert(Account.new(:id => 1, :user_id => 1, :name => "Nathan's Pivotal Account", :deactivated_at => Time.utc(2008, 8, 31)))
     accounts_set.insert(Account.new(:id => 2, :user_id => 1, :name => "Account 2", :deactivated_at => nil))
     accounts_set.insert(Account.new(:id => 3, :user_id => 2, :name => "Account 3", :deactivated_at => Time.utc(2008, 8, 2)))
+    accounts_set.insert(Account.new(:id => 4, :user_id => 1, :name => "Account 1", :deactivated_at => nil))
 
     cameras_set.insert(Camera.new(:id => 1, :name => "Minolta XD-11"))
   end

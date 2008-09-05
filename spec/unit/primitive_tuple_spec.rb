@@ -294,6 +294,19 @@ module Unison
               end
             end
           end
+
+          context "when passed a customization block" do
+            it "calls the block on the default generated relation, using its return value as the instance relation" do
+              user = User.find(1)
+              user.active_accounts.should_not be_empty
+              user.accounts.any? do |account|
+                !account.active?
+              end.should be_true
+              user.active_accounts.each do |account|
+                account.should be_active
+              end
+            end
+          end
         end
 
         describe ".has_one" do
@@ -351,7 +364,7 @@ module Unison
 
             context "when passed a block" do
               describe "the reader method" do
-                it "returns the result of the default Selection yielded to the block" do
+                it "calls the block on the default generated relation, using its return value as the instance relation" do
                   user.active_account.should be_singleton
                   user.active_account.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
                 end
@@ -422,6 +435,7 @@ module Unison
               describe "the reader method" do
                 it "returns the result of the default Selection yielded to the block" do
                   profile.yoga_owner.should == User.where(User[:id].eq(profile[:owner_id])).where(User[:hobby].eq("Yoga"))
+                  Profile.find(2).yoga_owner.should be_nil
                 end
               end
             end

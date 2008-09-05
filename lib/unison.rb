@@ -12,6 +12,7 @@ class String
   remove_method :to_sql
 end
 
+require "#{dir}/unison/extensions/object"
 require "#{dir}/unison/adapters"
 require "#{dir}/unison/repository"
 require "#{dir}/unison/retainable"
