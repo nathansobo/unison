@@ -616,7 +616,7 @@ module Unison
 
             context "when not new? and not dirty?" do
               it "sets dirty? to true" do
-                tuple.persisted.should_not be_new
+                tuple.pushed.should_not be_new
                 tuple.should_not be_dirty
 
                 tuple[:name] = new_value
@@ -646,7 +646,7 @@ module Unison
 
             context "when not new? and not dirty?" do
               it "does not set dirty? to true" do
-                tuple.persisted.should_not be_new
+                tuple.pushed.should_not be_new
                 tuple.should_not be_dirty
 
                 tuple[:name] = tuple[:name]
@@ -656,23 +656,48 @@ module Unison
           end
         end
 
-        describe "#persisted" do
+        describe "#push" do
+          it "calls Unison.origin.push(self)" do
+            mock.proxy(origin).push(tuple)
+            tuple.push
+          end
+
           it "sets new? to false" do
             tuple.should be_new
-            tuple.persisted
+            tuple.push
             tuple.should_not be_new
           end
 
           it "sets dirty? to false" do
-            tuple.persisted
+            tuple.push
             tuple[:name] = "#{tuple[:name]} with addition"
             tuple.should be_dirty
-            tuple.persisted
+            tuple.push
+            tuple.should_not be_dirty
+          end
+          
+          it "returns self" do
+            tuple.push.should == tuple
+          end
+        end
+
+        describe "#pushed" do
+          it "sets new? to false" do
+            tuple.should be_new
+            tuple.pushed
+            tuple.should_not be_new
+          end
+
+          it "sets dirty? to false" do
+            tuple.pushed
+            tuple[:name] = "#{tuple[:name]} with addition"
+            tuple.should be_dirty
+            tuple.pushed
             tuple.should_not be_dirty
           end
 
           it "returns self" do
-            tuple.persisted.should == tuple
+            tuple.pushed.should == tuple
           end
         end
 

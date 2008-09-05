@@ -137,7 +137,12 @@ module Unison
       attributes          
     end
 
-    def persisted
+    def push
+      Unison.origin.push(self)
+      pushed
+    end
+
+    def pushed
       @new = false
       @dirty = false
       self

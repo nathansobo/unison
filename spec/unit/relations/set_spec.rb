@@ -177,7 +177,7 @@ module Unison
           context "when the Tuple is not #new?" do
             it "does not call #after_create on the PrimitiveTuple" do
               tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
-              tuple.persisted
+              tuple.pushed
               tuple.should_not be_new
               dont_allow(tuple).after_create
               set.insert(tuple)

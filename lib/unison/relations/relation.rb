@@ -31,11 +31,11 @@ module Unison
         end
       end
 
-      def pull(repository)
+      def pull(repository=Unison.origin)
         merge(repository.fetch(self))
       end
 
-      def push(repository)
+      def push(repository=Unison.origin)
         if compound?
           composed_sets.each do |component_set|
             repository.push(self.project(component_set))

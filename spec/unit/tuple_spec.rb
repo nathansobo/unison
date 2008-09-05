@@ -33,13 +33,13 @@ module Unison
       end
     end
 
-    describe "#persisted" do
+    describe "#pushed" do
       it "if new? is true, sets it to false" do
         user = User.find(1)
         user.should be_new
-        user.persisted
+        user.pushed
         user.should_not be_new
-        user.persisted
+        user.pushed
         user.should_not be_new
       end
     end
