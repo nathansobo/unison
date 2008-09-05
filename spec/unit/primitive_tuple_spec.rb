@@ -367,6 +367,9 @@ module Unison
                 it "calls the block on the default generated relation, using its return value as the instance relation" do
                   user.active_account.should be_singleton
                   user.active_account.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
+
+                  user_without_active_account = User.find(3)
+                  user_without_active_account.active_account.should be_nil
                 end
               end
             end
