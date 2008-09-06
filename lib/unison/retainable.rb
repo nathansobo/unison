@@ -11,24 +11,27 @@ module Unison
 
       def subscription_definitions
         @subscription_definitions ||= begin
-          inheritable_send(:subscription_definitions)
+          inheritable_inject(:subscription_definitions) do |definitions, value|
+            definitions.concat(value)
+          end
         end
       end
 
       def names_of_children_to_retain
         @names_of_children_to_retain ||= begin
-          inheritable_send(:names_of_children_to_retain).uniq
+          inheritable_inject(:names_of_children_to_retain) do |names, value|
+            names.concat(value)
+          end.uniq
         end
       end
 
-      def inheritable_send(method_name)
-        values = []
+      def inheritable_inject(method_name, collection=[])
         current_class = superclass
         while current_class.respond_to?(method_name)
-          values.concat(current_class.send(method_name))
+          collection = yield(collection, current_class.send(method_name))
           current_class = current_class.superclass
         end
-        values
+        collection
       end
     end
 
