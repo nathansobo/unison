@@ -21,6 +21,7 @@ connection.create_table :users do
   column :name, :string
   column :hobby, :string
   column :team_id, :integer
+  column :developer, :integer
 end
 
 connection.create_table :life_goals do
@@ -102,6 +103,15 @@ Spec::Runner.configure do |config|
         attribute_accessor :name, :string
         attribute_accessor :hobby, :string
         attribute_accessor :team_id, :integer
+        attribute_accessor :developer, :boolean
+
+        def polymorphic_allocate(attrs)
+          if attrs[:developer]
+            Developer.allocate
+          else
+            super
+          end
+        end
 
         has_many :photos
         belongs_to :team
@@ -125,6 +135,10 @@ Spec::Runner.configure do |config|
         has_many :heroes, :through => :friendships_from_me, :class_name => :User, :foreign_key => :to_id
 
         has_many :cameras, :through => :photos
+      end)
+
+      const_set(:Developer, Class.new(User) do
+
       end)
 
       const_set(:LifeGoal, Class.new(Unison::PrimitiveTuple::Base) do
@@ -233,6 +247,7 @@ Spec::Runner.configure do |config|
     Object.class_eval do
       remove_const :Team
       remove_const :User
+      remove_const :Developer
       remove_const :LifeGoal
       remove_const :Friendship
       remove_const :Profile

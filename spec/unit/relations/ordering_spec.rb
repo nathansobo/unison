@@ -20,7 +20,7 @@ module Unison
       describe "#to_sql" do
         it "returns the operand's SQL ordered by the #order_by_attribute" do
           ordering.to_sql.should be_like(<<-SQL)
-            SELECT          `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`
+            SELECT          `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`
             FROM            `users`
             ORDER BY       `users`.`name`
           SQL

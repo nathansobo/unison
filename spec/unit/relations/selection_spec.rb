@@ -70,7 +70,7 @@ module Unison
           end
 
           it "returns 'select #operand where #predicate'" do
-            selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id` FROM `users` WHERE `users`.`id` = 1")
+            selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer` FROM `users` WHERE `users`.`id` = 1")
           end
         end
 
@@ -81,7 +81,7 @@ module Unison
 
           it "returns 'select #operand where #predicate'" do
             selection.to_sql.should be_like("
-              SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`
+              SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`
               FROM `users`
               WHERE `users`.`id` = 1 AND `users`.`name` = 'Nathan'
             ")

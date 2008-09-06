@@ -26,7 +26,7 @@ module Unison
       describe "#to_sql" do
         it "returns 'select #operand_1 inner join #operand_2 on #predicate'" do
           join.to_sql.should be_like("
-            SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `photos`.`id`, `photos`.`user_id`, `photos`.`camera_id`, `photos`.`name`
+            SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`, `photos`.`id`, `photos`.`user_id`, `photos`.`camera_id`, `photos`.`name`
             FROM `users`
             INNER JOIN `photos`
             ON `photos`.`user_id` = `users`.`id`

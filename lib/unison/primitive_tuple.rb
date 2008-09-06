@@ -4,7 +4,33 @@ module Unison
     include Enumerable
     module ClassMethods
       include Tuple::ClassMethods
-      attr_accessor :set
+
+      def new(attrs={})
+        instance = polymorphic_allocate(attrs)
+        instance.send(:initialize, attrs)
+        instance
+      end
+
+      def polymorphic_allocate(attrs)
+        allocate
+      end
+
+      def inherited(subclass)
+        super
+        unless self == PrimitiveTuple::Base
+          subclass.foreign_key_name = foreign_key_name
+        end
+      end
+
+      def foreign_key_name
+        @foreign_key_name ||= :"#{name.to_s.underscore}_id"
+      end
+      attr_writer :foreign_key_name
+
+      def set
+        @set || (superclass.respond_to?(:set) ? superclass.set : nil)
+      end
+      attr_writer :set
 
       def member_of(set)
         @set = set.retain_with(self)
@@ -12,7 +38,9 @@ module Unison
       end
 
       def default_attribute_values
-        @default_attribute_values ||= {}
+        @default_attribute_values ||= inheritable_inject(:default_attribute_values, {}) do |defaults, value|
+          defaults.merge(value)
+        end
       end
 
       def attribute(name, type, options={})
@@ -88,7 +116,9 @@ module Unison
 
       protected
       def instance_relation_definitions
-        @instance_relation_definitions ||= []
+        @instance_relation_definitions ||= inheritable_inject(:instance_relation_definitions) do |definitions, value|
+          definitions.concat(value)
+        end
       end
     end
     def self.included(a_module)
@@ -271,7 +301,7 @@ module Unison
     end
 
     def child_foreign_key_from_options(options)
-      options[:foreign_key] || :"#{self.class.name.to_s.underscore}_id"
+      options[:foreign_key] || self.class.foreign_key_name
     end
 
     def instance_relation_definitions

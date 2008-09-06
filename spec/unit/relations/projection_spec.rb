@@ -26,7 +26,7 @@ module Unison
       describe "#to_sql" do
         it "returns select attributes from operand" do
           projection.to_sql.should be_like("
-            SELECT DISTINCT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`
+            SELECT DISTINCT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`
             FROM `users`
             INNER JOIN `photos`
             ON `photos`.`user_id` = `users`.`id`"

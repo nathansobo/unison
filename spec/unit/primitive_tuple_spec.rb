@@ -6,6 +6,24 @@ module Unison
       attr_reader :tuple
 
       describe "Class Methods" do
+        describe ".new" do
+          context "when .polymorphic_allocate is overridden" do
+            it "returns the object that is returned by .polymorphic_allocate" do
+              other_class = Class.new(PrimitiveTuple::Base) do
+                member_of(User.set)
+              end
+              (class << User; self; end).class_eval do
+                define_method :polymorphic_allocate do |attrs|
+                  other_class.allocate
+                end
+              end
+
+              instance = User.new
+              instance.class.should == other_class
+            end
+          end
+        end
+
         describe ".member_of" do
           it "associates the Tuple class with a Set and vice-versa" do
             users_set = User.set
@@ -18,6 +36,20 @@ module Unison
           it "delegates to .set" do
             mock.proxy(User.set).has_attribute(:nick_name, :string)
             User.attribute(:nick_name, :string)
+          end
+
+          context "when passed :default option" do
+            it "defaults the Attribute value to the passed-in :default option value" do
+              User.attribute_reader(:nick_name, :string, :default => "Bobo")
+              User.new.nick_name.should == "Bobo"
+            end
+
+            context "when subclassed" do
+              it "defaults the Attribute value to the :default option value passed-in to the superclass" do
+                User.attribute_reader(:nick_name, :string, :default => "Bobo")
+                Developer.new.nick_name.should == "Bobo"
+              end
+            end
           end
         end
 
@@ -168,6 +200,14 @@ module Unison
               end.should raise_error(RuntimeError, Regexp.new("#{__FILE__}:#{definition_line}"))
             end
           end
+
+          context "when subclassed" do
+            it "creates an instance method representing the given Relation subclass" do
+              user = Developer.create(:id => 100, :name => "Jeff")
+              photo = Photo.create(:id => 100, :user_id => 100, :name => "Jeff's Photo")
+              user.photos.should == [photo]
+            end
+          end
         end
 
         describe ".relates_to_1" do
@@ -191,6 +231,14 @@ module Unison
               lambda do
                 User.new
               end.should raise_error(RuntimeError, Regexp.new("#{__FILE__}:#{definition_line}"))
+            end
+          end
+
+          context "when subclassed" do
+            it "creates an instance method representing the given Relation subclass" do
+              user = Developer.create(:id => 100, :name => "Jeff")
+              profile = Profile.create(:id => 100, :owner_id => 100)
+              user.profile.should == profile
             end
           end
         end
@@ -458,6 +506,44 @@ module Unison
             tuple_class = Class.new(PrimitiveTuple::Base)
             stub(tuple_class).name {"Foo::Bar::Baz"}
             tuple_class.basename.should == "Baz"
+          end
+        end
+
+        describe ".set" do
+          context "when .member_of was not called" do
+            it "returns nil" do
+              tuple_class = Class.new(PrimitiveTuple::Base)
+              tuple_class.set.should be_nil
+            end
+          end
+
+          context "when .member_of was called" do
+            it "returns the passed-in Set" do
+              set = Relations::Set.new(:sets)
+              tuple_class = Class.new(PrimitiveTuple::Base) do
+                member_of(set)
+              end
+              tuple_class.set.should == set
+            end
+          end
+
+          context "when subclassed" do
+            context "when .member_of was not called on the subclass" do
+              it "returns the superclass.set" do
+                sub_class = Class.new(User)
+                sub_class.set.should == User.set
+              end
+            end
+
+            context "when .member_of was called on the subclass" do
+              it "returns the passed-in Set" do
+                sub_set = Relations::Set.new(:sub_users)
+                sub_class = Class.new(User) do
+                  member_of(sub_set)
+                end
+                sub_class.set.should == sub_set
+              end
+            end
           end
         end
       end
