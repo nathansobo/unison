@@ -15,15 +15,8 @@ module Unison
         allocate
       end
 
-      def inherited(subclass)
-        super
-        unless self == PrimitiveTuple::Base
-          subclass.foreign_key_name = foreign_key_name
-        end
-      end
-
       def foreign_key_name
-        @foreign_key_name ||= :"#{name.to_s.underscore}_id"
+        @foreign_key_name ||= :"#{set.name.to_s.singularize.to_s.underscore}_id"
       end
       attr_writer :foreign_key_name
 
