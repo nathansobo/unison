@@ -11,27 +11,25 @@ module Unison
 
       def subscription_definitions
         @subscription_definitions ||= begin
-          definitions = []
-          current_class = superclass
-          while current_class.respond_to?(:subscription_definitions)
-            definitions.concat(current_class.subscription_definitions)
-            current_class = current_class.superclass
-          end
-          definitions
+          inheritable_send(:subscription_definitions)
         end
       end
 
       def names_of_children_to_retain
         @names_of_children_to_retain ||= begin
-          names = []
-          current_class = superclass
-          while current_class.respond_to?(:names_of_children_to_retain)
-            names.concat(current_class.names_of_children_to_retain)
-            current_class = current_class.superclass
-          end
-          names.uniq
+          inheritable_send(:names_of_children_to_retain).uniq
         end
-      end      
+      end
+
+      def inheritable_send(method_name)
+        values = []
+        current_class = superclass
+        while current_class.respond_to?(method_name)
+          values.concat(current_class.send(method_name))
+          current_class = current_class.superclass
+        end
+        values
+      end
     end
 
     def self.included(mod)
