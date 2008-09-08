@@ -30,10 +30,29 @@ module Unison
     def initialize(relation, name, type)
       raise ArgumentError, "Type #{type.inspect} is invalid. Valid types are #{VALID_TYPES.inspect}" unless VALID_TYPES.include?(type)
       @relation, @name, @type = relation, name, type
+      @ascending = true
     end
 
     def convert(value)
       send("convert_to_#{type}", value)
+    end
+
+    def ascending
+      @ascending = true
+      self
+    end
+
+    def ascending?
+      @ascending == true
+    end
+
+    def descending
+      @ascending = false
+      self
+    end
+
+    def descending?
+      !ascending?
     end
 
     def ==(other)

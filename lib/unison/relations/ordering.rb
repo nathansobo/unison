@@ -59,11 +59,18 @@ module Unison
       end
 
       def reorder_tuples
-        tuples.sort! {|tuple_a, tuple_b| tuple_a[order_by_attribute] <=> tuple_b[order_by_attribute]}
+        tuples.sort!(&comparator)
       end
 
       def initial_read
-        operand.tuples.sort_by {|tuple| tuple[order_by_attribute]}
+        operand.tuples.sort(&comparator)
+      end
+      
+      def comparator
+        direction_coefficient = order_by_attribute.ascending?? 1 : -1
+        lambda do |a, b|
+          (a[order_by_attribute] <=> b[order_by_attribute]) * direction_coefficient
+        end
       end
     end
   end

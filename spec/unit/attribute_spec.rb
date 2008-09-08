@@ -180,6 +180,40 @@ module Unison
         end
       end
     end
+
+    describe "ordering directions" do
+      it "defaults to ascending" do
+        attribute.should be_ascending
+      end
+
+      describe "#ascending" do
+        before do
+          attribute.ascending
+        end
+
+        it "sets #ascending? to true" do
+          attribute.should be_ascending
+        end
+
+        it "sets #descending? to false" do
+          attribute.should_not be_descending
+        end
+      end
+
+      describe "#descending" do
+        before do
+          attribute.descending
+        end
+
+        it "sets #descending? to true" do
+          attribute.should be_descending
+        end
+
+        it "sets #ascending? to false" do
+          attribute.should_not be_ascending
+        end
+      end
+    end
     
     describe "#to_arel" do
       before do
