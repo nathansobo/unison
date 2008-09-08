@@ -67,18 +67,18 @@ module Unison
         attribute_writer(name, type, options)
       end
 
-      def relates_to_n(name, &definition)
+      def relates_to_many(name, &definition)
         instance_relation_definitions_on_self.push(InstanceRelationDefinition.new(name, definition, caller, false))
         attr_reader name
       end
 
-      def relates_to_1(name, &definition)
+      def relates_to_one(name, &definition)
         instance_relation_definitions_on_self.push(InstanceRelationDefinition.new(name, definition, caller, true))
         attr_reader name
       end
 
       def has_many(name, options={}, &customization_block)
-        relates_to_n(name) do
+        relates_to_many(name) do
           class_name = options[:class_name] || name.to_s.classify
           target_relation = class_name.to_s.constantize.set
           relation = if options[:through]
@@ -91,7 +91,7 @@ module Unison
       end
 
       def has_one(name, options={}, &customization_block)
-        relates_to_1(name) do
+        relates_to_one(name) do
           class_name = options[:class_name] || name.to_s.classify
           relation = select_child class_name.to_s.constantize, options
           customization_block ? instance_exec(relation, &customization_block) : relation
@@ -99,7 +99,7 @@ module Unison
       end
 
       def belongs_to(name, options = {}, &customization_block)
-        relates_to_1(name) do
+        relates_to_one(name) do
           class_name = options[:class_name] || name.to_s.classify
           foreign_key = options[:foreign_key] || :"#{name}_id"
           relation = select_parent(class_name.to_s.constantize.set, :foreign_key => foreign_key)

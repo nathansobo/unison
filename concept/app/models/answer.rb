@@ -7,7 +7,7 @@ module Models
     attribute :question_id
     attribute :body
 
-    relates_to_1 :question do
+    relates_to_one :question do
       Question.where(Question[:id].eq(self[:question_id]))
     end
   end

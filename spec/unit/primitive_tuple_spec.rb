@@ -186,7 +186,7 @@ module Unison
           end
         end
         
-        describe ".relates_to_n" do
+        describe ".relates_to_many" do
           it "creates an instance method representing the given Relation" do
             user = User.find(1)
             user.photos.should == photos_set.where(photos_set[:user_id].eq(1))
@@ -194,7 +194,7 @@ module Unison
 
           context "when the Relation definition is invalid" do
             it "includes the definition backtrace in the error message" do
-              User.relates_to_n(:invalid) {raise "An Error"}; definition_line = __LINE__
+              User.relates_to_many(:invalid) {raise "An Error"}; definition_line = __LINE__
               lambda do
                 User.new
               end.should raise_error(RuntimeError, Regexp.new("#{__FILE__}:#{definition_line}"))
@@ -210,7 +210,7 @@ module Unison
           end
         end
 
-        describe ".relates_to_1" do
+        describe ".relates_to_one" do
           attr_reader :photo
           before do
             @photo = Photo.find(1)
@@ -227,7 +227,7 @@ module Unison
 
           context "when the Relation definition is invalid" do
             it "includes the definition backtrace in the error message" do
-              User.relates_to_1(:invalid) {raise "An Error"}; definition_line = __LINE__
+              User.relates_to_one(:invalid) {raise "An Error"}; definition_line = __LINE__
               lambda do
                 User.new
               end.should raise_error(RuntimeError, Regexp.new("#{__FILE__}:#{definition_line}"))

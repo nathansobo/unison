@@ -8,11 +8,11 @@ module Models
     attribute :answer_id
     attribute :deactivated_at
 
-    relates_to_1 :answer do
+    relates_to_one :answer do
       Answer.where(Answer[:id].eq(signal(:answer_id)))
     end
 
-    relates_to_1 :game do
+    relates_to_one :game do
       Game.where(Game[:id].eq(self[:game_id]))
     end
 
