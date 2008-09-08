@@ -2,36 +2,42 @@ module Unison
   module Retainable
     module ClassMethods
       def retain(*children)
-        names_of_children_to_retain.concat(children)
+        names_of_children_to_retain_on_self.concat(children)
       end
-      
+
       def subscribe(&subscription_definition)
-        subscription_definitions.push(subscription_definition)
+        subscription_definitions_on_self.push(subscription_definition)
       end
 
       def subscription_definitions
-        @subscription_definitions ||= begin
-          inheritable_inject(:subscription_definitions) do |definitions, value|
-            definitions.concat(value)
-          end
+        responders_in_inheritance_chain(:subscription_definitions_on_self).inject([]) do |definitions, klass|
+          definitions.concat(klass.send(:subscription_definitions_on_self))
         end
       end
 
       def names_of_children_to_retain
-        @names_of_children_to_retain ||= begin
-          inheritable_inject(:names_of_children_to_retain) do |names, value|
-            names.concat(value)
-          end.uniq
-        end
+        responders_in_inheritance_chain(:names_of_children_to_retain_on_self).inject([]) do |names, klass|
+          names.concat(klass.send(:names_of_children_to_retain_on_self))
+        end.uniq
       end
 
-      def inheritable_inject(method_name, collection=[])
-        current_class = superclass
+      def responders_in_inheritance_chain(method_name)
+        chain = []
+        current_class = self
         while current_class.respond_to?(method_name)
-          collection = yield(collection, current_class.send(method_name))
+          chain.unshift(current_class)
           current_class = current_class.superclass
         end
-        collection
+        chain
+      end
+
+      protected
+      def subscription_definitions_on_self
+        @subscription_definitions_on_self ||= []
+      end
+
+      def names_of_children_to_retain_on_self
+        @names_of_children_to_retain_on_self ||= []
       end
     end
 
@@ -85,7 +91,7 @@ module Unison
     end
 
     def after_first_retain
-      
+
     end
 
     def after_last_release
@@ -119,7 +125,7 @@ module Unison
         child.release_from(self)
       end
     end
-    
+
     def children_to_retain
       self.class.send(:names_of_children_to_retain).inject([]) do |children, name|
         child = send(name)

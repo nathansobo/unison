@@ -31,15 +31,19 @@ module Unison
       end
 
       def default_attribute_values
-        @default_attribute_values ||= inheritable_inject(:default_attribute_values, {}) do |defaults, value|
-          defaults.merge(value)
+        responders_in_inheritance_chain(:default_attribute_values_on_self).inject({}) do |defaults, klass|
+          defaults.merge(klass.default_attribute_values_on_self)
         end
+      end
+
+      def default_attribute_values_on_self
+        @default_attribute_values_on_self ||= {}
       end
 
       def attribute(name, type, options={})
         attribute = set.has_attribute(name, type)
         if options.has_key?(:default)
-          default_attribute_values[attribute] = options[:default]
+          default_attribute_values_on_self[attribute] = options[:default]
         end
         attribute
       end
@@ -64,12 +68,12 @@ module Unison
       end
 
       def relates_to_n(name, &definition)
-        instance_relation_definitions.push(InstanceRelationDefinition.new(name, definition, caller, false))
+        instance_relation_definitions_on_self.push(InstanceRelationDefinition.new(name, definition, caller, false))
         attr_reader name
       end
 
       def relates_to_1(name, &definition)
-        instance_relation_definitions.push(InstanceRelationDefinition.new(name, definition, caller, true))
+        instance_relation_definitions_on_self.push(InstanceRelationDefinition.new(name, definition, caller, true))
         attr_reader name
       end
 
@@ -109,9 +113,13 @@ module Unison
 
       protected
       def instance_relation_definitions
-        @instance_relation_definitions ||= inheritable_inject(:instance_relation_definitions) do |definitions, value|
-          definitions.concat(value)
+        responders_in_inheritance_chain(:instance_relation_definitions_on_self).inject([]) do |definitions, klass|
+          definitions.concat(klass.send(:instance_relation_definitions_on_self))
         end
+      end
+
+      def instance_relation_definitions_on_self
+        @instance_relation_definitions_on_self ||= []
       end
     end
     def self.included(a_module)
