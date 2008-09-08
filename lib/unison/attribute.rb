@@ -4,6 +4,22 @@ module Unison
       def eq(other)
         Predicates::EqualTo.new(self, other)
       end
+
+      def gt(other)
+        Predicates::GreaterThan.new(self, other)
+      end
+
+      def lt(other)
+        Predicates::LessThan.new(self, other)
+      end
+
+      def gteq(other)
+        Predicates::GreaterThanOrEqualTo.new(self, other)
+      end
+
+      def lteq(other)
+        Predicates::LessThanOrEqualTo.new(self, other)
+      end
     end
     include PredicateConstructors
 

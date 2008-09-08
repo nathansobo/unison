@@ -143,6 +143,42 @@ module Unison
           predicate.operand_2.should == 1
         end
       end
+
+      describe "#gt" do
+        it "returns an instance of Predicates::GreaterThan with the attribute and the argument as its operands" do
+          predicate = attribute.gt(1)
+          predicate.should be_an_instance_of(Predicates::GreaterThan)
+          predicate.operand_1.should == attribute
+          predicate.operand_2.should == 1
+        end
+      end
+
+      describe "#lt" do
+        it "returns an instance of Predicates::GreaterThan with the attribute and the argument as its operands" do
+          predicate = attribute.lt(1)
+          predicate.should be_an_instance_of(Predicates::LessThan)
+          predicate.operand_1.should == attribute
+          predicate.operand_2.should == 1
+        end
+      end
+
+      describe "#gteq" do
+        it "returns an instance of Predicates::GreaterThan with the attribute and the argument as its operands" do
+          predicate = attribute.gteq(1)
+          predicate.should be_an_instance_of(Predicates::GreaterThanOrEqualTo)
+          predicate.operand_1.should == attribute
+          predicate.operand_2.should == 1
+        end
+      end
+
+      describe "#lteq" do
+        it "returns an instance of Predicates::GreaterThan with the attribute and the argument as its operands" do
+          predicate = attribute.lteq(1)
+          predicate.should be_an_instance_of(Predicates::LessThanOrEqualTo)
+          predicate.operand_1.should == attribute
+          predicate.operand_2.should == 1
+        end
+      end
     end
     
     describe "#to_arel" do
