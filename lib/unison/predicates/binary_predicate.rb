@@ -1,6 +1,6 @@
 module Unison
   module Predicates
-    class Binary < Base
+    class BinaryPredicate < Base
       attr_reader :operand_1, :operand_2
 
       retain :subscribable_operands

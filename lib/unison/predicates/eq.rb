@@ -1,6 +1,6 @@
 module Unison
   module Predicates
-    class Eq < Binary
+    class Eq < BinaryPredicate
       def to_arel
         Arel::Equality.new(operand_1.to_arel, operand_2.to_arel)
       end

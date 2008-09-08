@@ -1,6 +1,6 @@
 module Unison
   module Predicates
-    class Gt < Binary
+    class Gt < BinaryPredicate
       def to_arel
         Arel::GreaterThan.new(operand_1.to_arel, operand_2.to_arel)
       end

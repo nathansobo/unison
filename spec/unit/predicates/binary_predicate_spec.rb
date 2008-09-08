@@ -2,7 +2,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 
 module Unison
   module Predicates
-    describe Eq do
+    describe BinaryPredicate do
       attr_reader :predicate
 
       context "when #retained?" do
