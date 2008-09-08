@@ -69,12 +69,21 @@ module Unison
 
       def relates_to_many(name, &definition)
         instance_relation_definitions_on_self.push(InstanceRelationDefinition.new(name, definition, caller, false))
-        attr_reader name
+        attr_reader "#{name}_relation"
+        alias_method name, "#{name}_relation"
       end
 
       def relates_to_one(name, &definition)
         instance_relation_definitions_on_self.push(InstanceRelationDefinition.new(name, definition, caller, true))
-        attr_reader name
+        relation_method_name = "#{name}_relation"
+        attr_reader relation_method_name
+        method_definition_line = __LINE__ + 1
+        method_definition = %{
+          def #{name}
+            @#{relation_method_name}.nil?? nil : @#{relation_method_name}
+          end
+        }
+        class_eval(method_definition, __FILE__, method_definition_line)
       end
 
       def has_many(name, options={}, &customization_block)
@@ -259,7 +268,7 @@ module Unison
     end
 
     def has_many_through(target_relation, options)
-      through_relation = self.send(options[:through])
+      through_relation = self.send("#{options[:through]}_relation")
       has_many_through_where_through_relation_has_foreign_key(target_relation, through_relation, options) \
       || has_many_through_where_target_relation_has_foreign_key(target_relation, through_relation, options) \
       || raise(ArgumentError, "Unable to construct a has_many\n#{target_relation.inspect}\nrelationship through\n#{through_relation.inspect}\nwith options #{options.inspect}")

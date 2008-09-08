@@ -168,6 +168,7 @@ Spec::Runner.configure do |config|
         belongs_to :yoga_owner, :class_name => :User, :foreign_key => :owner_id do |owner|
           owner.where(User[:hobby].eq("Yoga"))
         end
+        has_many :yoga_photos, :through => :yoga_owner, :class_name => :Photo
       end)
 
       const_set(:Photo, Class.new(Unison::PrimitiveTuple::Base) do

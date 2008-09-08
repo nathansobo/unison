@@ -192,6 +192,11 @@ module Unison
             user.photos.should == photos_set.where(photos_set[:user_id].eq(1))
           end
 
+          it 'creates a "#{name}_relation" method to return the relation' do
+            user = User.find(1)
+            user.photos_relation.should == user.photos
+          end
+
           context "when the Relation definition is invalid" do
             it "includes the definition backtrace in the error message" do
               User.relates_to_many(:invalid) {raise "An Error"}; definition_line = __LINE__
@@ -219,6 +224,30 @@ module Unison
           it "defines a method named after the name which returns the Relation that is produced by instance-evaling the block" do
             photo.user.should_not be_nil
             photo.user.should == User.where(User[:id].eq(photo[:user_id]))
+          end
+
+          describe "the defined reader method" do
+            context "when the produced Relation is #nil?" do
+              it "returns nil" do
+                users_set.delete(photo.user.tuple)
+                photo.user_relation.should be_nil
+
+                if photo.user
+                  raise "photo.user should be the nil object`"
+                end
+              end
+            end
+
+            context "when the produced Relation is not #nil?" do
+              it "returns the Relation" do
+                photo.user.should_not be_nil
+                photo.user.should == User.where(User[:id].eq(photo[:user_id]))
+              end
+            end
+          end
+
+          it 'creates a "#{name}_relation" method to return the relation' do
+            photo.user_relation.should == photo.user
           end
 
           it "causes the Relation to be treated as a singleton" do
@@ -339,6 +368,14 @@ module Unison
                   user.cameras.should_not be_empty
                   user.cameras.sort_by(&:id).should == user.photos.map {|photo| photo.camera.tuples.first}.uniq.sort_by(&:id)
                 end
+              end
+            end
+
+            context "when passed a :through relation that is #nil?" do
+              it "returns an empty Relation" do
+                yogaless_profile = Profile.find(2)
+                yogaless_profile.yoga_owner.should be_nil
+                yogaless_profile.yoga_photos.should == []
               end
             end
           end

@@ -24,7 +24,7 @@ module Unison
 
         instance = Object.new
         definition.initialize_instance_relation(instance).should == relation
-        instance.instance_variable_get("@relation_name").should == relation
+        instance.instance_variable_get("@relation_name_relation").should == relation
       end
 
       context "when not singleton" do
