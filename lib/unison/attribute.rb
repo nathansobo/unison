@@ -2,7 +2,7 @@ module Unison
   class Attribute
     module PredicateConstructors
       def eq(other)
-        Predicates::Eq.new(self, other)
+        Predicates::EqualTo.new(self, other)
       end
     end
     include PredicateConstructors

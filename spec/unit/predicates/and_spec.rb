@@ -8,8 +8,8 @@ module Unison
       before do
         @user = User.find(1)
         @signal = user.signal(:name)
-        @child_predicate_without_signal = Eq.new(users_set[:id], 1)
-        @child_predicate_subscribed_signal = Eq.new(signal, "Nathan")
+        @child_predicate_without_signal = EqualTo.new(users_set[:id], 1)
+        @child_predicate_subscribed_signal = EqualTo.new(signal, "Nathan")
         @predicate = And.new(child_predicate_without_signal, child_predicate_subscribed_signal)
       end
 

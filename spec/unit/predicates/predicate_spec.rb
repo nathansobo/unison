@@ -55,7 +55,7 @@ module Unison
         
         context "when other is not a Predicate" do
           it "returns false" do
-            Predicate.new {}.should_not == Eq.new(users_set[:name], "Nathan")
+            Predicate.new {}.should_not == EqualTo.new(users_set[:name], "Nathan")
           end
         end
       end

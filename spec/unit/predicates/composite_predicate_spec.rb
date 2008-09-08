@@ -8,8 +8,8 @@ module Unison
       before do
         @user = User.find(1)
         @signal = user.signal(:name)
-        @child_predicate_without_signal = Eq.new(users_set[:id], 1)
-        @child_predicate_with_signal = Eq.new(signal, "Nathan")
+        @child_predicate_without_signal = EqualTo.new(users_set[:id], 1)
+        @child_predicate_with_signal = EqualTo.new(signal, "Nathan")
         @predicate = And.new(child_predicate_without_signal, child_predicate_with_signal)
       end
 
@@ -39,13 +39,13 @@ module Unison
 
           context "when other And does not have the same #operands" do
             it "returns false" do
-              predicate.should_not == And.new(Eq.new(users_set[:id], 1))
+              predicate.should_not == And.new(EqualTo.new(users_set[:id], 1))
             end
           end
 
           context "when other is not an And" do
             it "returns false" do
-              predicate.should_not == Eq.new(users_set[:name], "Nathan")
+              predicate.should_not == EqualTo.new(users_set[:name], "Nathan")
             end
           end
         end

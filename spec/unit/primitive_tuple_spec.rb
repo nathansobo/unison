@@ -260,7 +260,7 @@ module Unison
           describe ":foreign_key option" do
             context "when not passed :foreign_key" do
               describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
                   user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
                 end
               end
@@ -268,7 +268,7 @@ module Unison
 
             context "when passed a :foreign_key option" do
               describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
                   user.friendships_to_me.should == Friendship.where(Friendship[:to_id].eq(user[:id]))
                 end
               end
@@ -291,7 +291,7 @@ module Unison
 
           describe "customization block" do
             context "when not passed a block" do
-              it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+              it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
                 user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
               end
             end
@@ -374,7 +374,7 @@ module Unison
           describe ":foreign_key option" do
             context "when not passed :foreign_key" do
               describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
                   user.life_goal.should == LifeGoal.where(LifeGoal[:user_id].eq(user[:id]))
                 end
               end
@@ -382,7 +382,7 @@ module Unison
 
             context "when passed a :foreign_key option" do
               describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
                   user.profile.should == Profile.where(Profile[:owner_id].eq(user[:id]))
                 end
               end
@@ -405,7 +405,7 @@ module Unison
 
           describe "customization block" do
             context "when not passed a block" do
-              it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+              it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
                 user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
               end
             end
@@ -443,7 +443,7 @@ module Unison
           describe ":foreign_key option" do
             context "when not passed :foreign_key" do
               describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
                   friendship = Friendship.find(1)
                   friendship.from.should == user
                 end
@@ -452,7 +452,7 @@ module Unison
 
             context "when passed a :foreign_key option" do
               describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
                   account = Account.find(1)
                   account.owner.should == user
                 end
@@ -477,7 +477,7 @@ module Unison
 
           describe "customization block" do
             context "when not passed a block" do
-              it "returns a Selection on the target Relation where the foreign key Attribute Eq's the instance's #id" do
+              it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
                 profile.owner.should == user
               end
             end

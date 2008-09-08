@@ -136,9 +136,9 @@ module Unison
 
     describe "predicate constructors" do
       describe "#eq" do
-        it "returns an instance of Predicates::Eq with the attribute and the argument as its operands" do
+        it "returns an instance of Predicates::EqualTo with the attribute and the argument as its operands" do
           predicate = attribute.eq(1)
-          predicate.should be_an_instance_of(Predicates::Eq)
+          predicate.should be_an_instance_of(Predicates::EqualTo)
           predicate.operand_1.should == attribute
           predicate.operand_2.should == 1
         end

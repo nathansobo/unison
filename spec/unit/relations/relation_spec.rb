@@ -229,7 +229,7 @@ module Unison
 
       describe "#==" do
         before do
-          @relation = users_set.where(Predicates::Eq.new(true, true))
+          @relation = users_set.where(Predicates::EqualTo.new(true, true))
         end
 
         context "when passed the same Set" do
@@ -242,7 +242,7 @@ module Unison
           attr_reader :other_relation
           context "with the same result of #tuples" do
             before do
-              @other_relation = relation.where(Predicates::Eq.new(true, true))
+              @other_relation = relation.where(Predicates::EqualTo.new(true, true))
               relation.tuples.should == other_relation.tuples
             end
 
@@ -274,7 +274,7 @@ module Unison
 
       context "when #retained?" do
         before do
-          @relation = users_set.where(Predicates::Eq.new(true, true)).retain_with(Object.new)
+          @relation = users_set.where(Predicates::EqualTo.new(true, true)).retain_with(Object.new)
           publicize relation, :tuples, :initial_read
         end
 
@@ -312,7 +312,7 @@ module Unison
       describe "#after_first_retain" do
         attr_reader :relation
         before do
-          @relation = users_set.where(Predicates::Eq.new(true, true))
+          @relation = users_set.where(Predicates::EqualTo.new(true, true))
           publicize relation, :tuples, :initial_read
         end
 

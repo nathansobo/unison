@@ -2,13 +2,13 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 
 module Unison
   module Predicates
-    describe Gt do
+    describe GreaterThan do
       attr_reader :predicate, :operand_1, :operand_2
 
       before do
         @operand_1 = users_set[:id]
         @operand_2 = 2
-        @predicate = Gt.new(operand_1, operand_2)
+        @predicate = GreaterThan.new(operand_1, operand_2)
       end      
       
       describe "#to_arel" do
@@ -29,8 +29,8 @@ module Unison
         context "when one of the operands is a Signal" do
           it "uses the value of the Signal in the predication" do
             user = User.new(:id => 1)
-            Gt.new(1, user.signal(:id)).eval(user).should be_false
-            Gt.new(user.signal(:id), 0).eval(user).should be_true
+            GreaterThan.new(1, user.signal(:id)).eval(user).should be_false
+            GreaterThan.new(user.signal(:id), 0).eval(user).should be_true
           end
         end
       end

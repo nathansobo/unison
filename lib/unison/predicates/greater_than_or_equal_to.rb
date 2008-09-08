@@ -1,6 +1,6 @@
 module Unison
   module Predicates
-    class Gteq < BinaryPredicate
+    class GreaterThanOrEqualTo < BinaryPredicate
       def to_arel
         Arel::GreaterThanOrEqualTo.new(operand_1.to_arel, operand_2.to_arel)
       end

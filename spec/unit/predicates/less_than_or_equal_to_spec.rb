@@ -2,13 +2,13 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 
 module Unison
   module Predicates
-    describe Lteq do
+    describe LessThanOrEqualTo do
       attr_reader :predicate, :operand_1, :operand_2
 
       before do
         @operand_1 = users_set[:id]
         @operand_2 = 2
-        @predicate = Lteq.new(operand_1, operand_2)
+        @predicate = LessThanOrEqualTo.new(operand_1, operand_2)
       end      
       
       describe "#to_arel" do

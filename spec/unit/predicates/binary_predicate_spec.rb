@@ -5,7 +5,7 @@ module Unison
     describe BinaryPredicate do
       attr_reader :predicate, :operand_1, :operand_2
       before do
-        @predicate = Eq.new(operand_1, operand_2)
+        @predicate = EqualTo.new(operand_1, operand_2)
       end
 
       def operand_1
@@ -18,10 +18,10 @@ module Unison
 
       describe "#==" do
         it "returns true for predicates of the same class with == operands and false otherwise" do
-          predicate.class.should == Eq
-          predicate.should == Eq.new(users_set[:name], "Nathan")
-          predicate.should_not == Eq.new(users_set[:id], "Nathan")
-          predicate.should_not == Eq.new(users_set[:name], "Corey")
+          predicate.class.should == EqualTo
+          predicate.should == EqualTo.new(users_set[:name], "Nathan")
+          predicate.should_not == EqualTo.new(users_set[:id], "Nathan")
+          predicate.should_not == EqualTo.new(users_set[:name], "Corey")
           predicate.should_not == Object.new
         end
       end      
@@ -30,8 +30,8 @@ module Unison
         context "when one of the operands is a Signal" do
           it "uses the value of the Signal in the predication" do
             user = User.new(:id => 1, :name => "Nathan")
-            Eq.new(1, user.signal(:id)).eval(user).should be_true
-            Eq.new(user.signal(:id), 1).eval(user).should be_true
+            EqualTo.new(1, user.signal(:id)).eval(user).should be_true
+            EqualTo.new(user.signal(:id), 1).eval(user).should be_true
           end
         end
       end
@@ -187,7 +187,7 @@ module Unison
             attr_reader :user, :operand
             before do
               @user = User.find(1)
-              @predicate = Eq.new("Nathan", user.signal(:name))
+              @predicate = EqualTo.new("Nathan", user.signal(:name))
               @operand = predicate.operand_2
             end
 

@@ -2,13 +2,13 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 
 module Unison
   module Predicates
-    describe Eq do
+    describe EqualTo do
       attr_reader :predicate, :operand_1, :operand_2
 
       before do
         @operand_1 = users_set[:name]
         @operand_2 = "Nathan"
-        @predicate = Eq.new(operand_1, operand_2)
+        @predicate = EqualTo.new(operand_1, operand_2)
       end
 
       describe "#to_arel" do
@@ -27,7 +27,7 @@ module Unison
         end
 
         it "returns true if its operands are == when called on any tuple" do
-          predicate = Eq.new(1, 1)
+          predicate = EqualTo.new(1, 1)
           predicate.eval(User.new(:id => 1, :name => "Nathan")).should be_true
         end
       end

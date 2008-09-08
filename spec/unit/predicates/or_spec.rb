@@ -6,8 +6,8 @@ module Unison
       attr_reader :predicate, :operand_1, :operand_2
 
       before do
-        @operand_1 = Eq.new(users_set[:id], 3)
-        @operand_2 = Eq.new(users_set[:name], "Nathan")
+        @operand_1 = EqualTo.new(users_set[:id], 3)
+        @operand_2 = EqualTo.new(users_set[:name], "Nathan")
         @predicate = Or.new(operand_1, operand_2)
       end
 
