@@ -15,10 +15,10 @@ module Unison
         allocate
       end
 
-      def foreign_key_name
-        @foreign_key_name ||= :"#{set.name.to_s.singularize.to_s.underscore}_id"
+      def default_foreign_key_name
+        @default_foreign_key_name ||= :"#{set.name.to_s.singularize.to_s.underscore}_id"
       end
-      attr_writer :foreign_key_name
+      attr_writer :default_foreign_key_name
 
       def set
         @set || (superclass.respond_to?(:set) ? superclass.set : nil)
@@ -302,7 +302,7 @@ module Unison
     end
 
     def child_foreign_key_from_options(options)
-      options[:foreign_key] || self.class.foreign_key_name
+      options[:foreign_key] || self.class.default_foreign_key_name
     end
 
     def instance_relation_definitions
