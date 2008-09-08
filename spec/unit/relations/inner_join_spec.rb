@@ -3,12 +3,18 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 module Unison
   module Relations
     describe InnerJoin do
-      attr_reader :join, :predicate, :operand_1, :operand_2
+      attr_reader :join, :predicate
       before do
-        @operand_1 = users_set
-        @operand_2 = photos_set
         @predicate = photos_set[:user_id].eq(users_set[:id])
         @join = InnerJoin.new(operand_1, operand_2, predicate)
+      end
+
+      def operand_1
+        users_set
+      end
+
+      def operand_2
+        photos_set
       end
 
       describe "#initialize" do
@@ -813,6 +819,26 @@ module Unison
             tuples[2][photos_set[:id]].should == 3
             tuples[2][photos_set[:user_id]].should == 2
             tuples[2][photos_set[:name]].should == "Photo 3"
+          end
+
+          context "when #operand_1 is an empty singleton Relation" do
+            def operand_1
+              users_set.where(User[:id].eq(-1)).singleton
+            end
+            
+            it "returns an empty Array" do
+              join.tuples.should == []
+            end
+          end
+
+          context "when #operand_2 is an empty singleton Relation" do
+            def operand_2
+              photos_set.where(Photo[:id].eq(-1)).singleton
+            end
+
+            it "returns an empty Array" do
+              join.tuples.should == []
+            end
           end
         end
       end
