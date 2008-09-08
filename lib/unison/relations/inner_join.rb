@@ -118,8 +118,8 @@ module Unison
 
       def cartesian_product
         tuples = []
-        operand_1.each do |tuple_1|
-          operand_2.each do |tuple_2|
+        operand_1.tuples.each do |tuple_1|
+          operand_2.tuples.each do |tuple_2|
             tuples.push(CompositeTuple.new(tuple_1, tuple_2))
           end
         end
