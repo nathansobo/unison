@@ -85,6 +85,17 @@ module Unison
           end
         end
       end
+
+      describe "#create" do
+        it "creates an instance of the #operand.tuple_class with its #foreign_key set to the parent_tuple.id" do
+          name = "Photo 100"
+          photo = has_many.create(:id => 100, :name => name)
+          Photo.set.should include(photo)
+          photo.class.should == Photo
+          photo.user_id.should == parent_tuple.id
+          photo.name.should == name
+        end
+      end
     end
   end
 end
