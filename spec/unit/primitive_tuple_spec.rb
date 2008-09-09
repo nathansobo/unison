@@ -468,48 +468,8 @@ module Unison
             @user = User.find(1)
           end
 
-          it "creates a singleton Selection on the target Set where the target's id matches the instance's foreign key" do
-            profile.owner.should be_singleton
-            profile.owner.should == user
-          end
-
-          it "creates a reader method with the given name" do
-            profile.should respond_to(:owner)
-          end
-
-          describe ":foreign_key option" do
-            context "when not passed :foreign_key" do
-              describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
-                  friendship = Friendship.find(1)
-                  friendship.from.should == user
-                end
-              end
-            end
-
-            context "when passed a :foreign_key option" do
-              describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
-                  account = Account.find(1)
-                  account.owner.should == user
-                end
-              end
-            end
-          end
-
-          describe ":class_name option" do
-            context "when not passed a :class_name option" do
-              it "chooses the target Relation by singularizing and classifying the given name" do
-                photo = Photo.find(1)
-                photo.user.operand.should == User.set
-              end
-            end
-
-            context "when passed a :class_name option" do
-              it "uses the #set of the class with the given name as the target Relation" do
-                profile.owner.operand.should == User.set
-              end
-            end
+          it "assigns a BelongsTo instance on the PrimitiveTuple during initialization" do
+            profile.owner.class.should == Relations::BelongsTo
           end
 
           describe "customization block" do
