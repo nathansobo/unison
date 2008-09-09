@@ -27,7 +27,7 @@ module Unison
       end
 
       def foreign_key
-        options[:foreign_key] || owner_class.default_foreign_key_name
+        options[:foreign_key] || owner_class.set.default_foreign_key_name
       end
     end
   end
