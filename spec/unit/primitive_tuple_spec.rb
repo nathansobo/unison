@@ -278,44 +278,8 @@ module Unison
             @user = User.find(1)
           end
 
-          it "does not create a singleton Selection" do
-            user.photos.should_not be_singleton
-          end
-
-          it "creates a reader method with the given name" do
-            user.should respond_to(:photos)
-          end
-
-          describe ":foreign_key option" do
-            context "when not passed :foreign_key" do
-              describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
-                  user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
-                end
-              end
-            end
-
-            context "when passed a :foreign_key option" do
-              describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
-                  user.friendships_to_me.should == Friendship.where(Friendship[:to_id].eq(user[:id]))
-                end
-              end
-            end
-          end
-
-          describe ":class_name option" do
-            context "when not passed a :class_name option" do
-              it "chooses the target Relation by singularizing and classifying the given name" do
-                user.photos.operand.should == Photo.set
-              end
-            end
-
-            context "when passed a :class_name option" do
-              it "uses the #set of the class with the given name as the target Relation" do
-                user.friendships_to_me.operand.should == Friendship.set
-              end
-            end
+          it "assigns a HasMany instance on the PrimitiveTuple during initialization" do
+            user.photos.class.should == Relations::HasMany
           end
 
           describe "customization block" do
