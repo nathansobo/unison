@@ -61,9 +61,9 @@ module Unison
         Projection.new(self, attributes)
       end
 
-      def order_by(attribute)
-        Ordering.new(self, attribute)
-      end
+      def order_by(*attributes)
+        Ordering.new(self, *attributes)
+      end      
 
       def tuples
         retained?? @tuples : initial_read
