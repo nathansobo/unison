@@ -83,26 +83,22 @@ module Unison
 
       def has_many(name, options={}, &customization_block)
         relates_to_many(name) do
-          relation = if options[:through]
-            Relations::HasManyThrough.new(self, name, options)
-          else
-            Relations::HasMany.new(self, name, options)
-          end
-          customization_block ? instance_exec(relation, &customization_block) : relation
+          customize_relation(
+            (options[:through] ? Relations::HasManyThrough : Relations::HasMany).new(self, name, options),
+            &customization_block
+          )
         end
       end
 
       def has_one(name, options={}, &customization_block)
         relates_to_one(name) do
-          relation = Relations::HasOne.new(self, name, options)
-          customization_block ? instance_exec(relation, &customization_block) : relation
+          customize_relation(Relations::HasOne.new(self, name, options), &customization_block)
         end
       end
 
       def belongs_to(name, options = {}, &customization_block)
         relates_to_one(name) do
-          relation = Relations::BelongsTo.new(self, name, options)
-          customization_block ? instance_exec(relation, &customization_block) : relation
+          customize_relation(Relations::BelongsTo.new(self, name, options), &customization_block)
         end
       end
 
@@ -254,6 +250,10 @@ module Unison
 
     def instance_relation_definitions
       self.class.send(:instance_relation_definitions)
+    end
+
+    def customize_relation(relation, &customization_block)
+      customization_block ? instance_exec(relation, &customization_block) : relation
     end
 
     public
