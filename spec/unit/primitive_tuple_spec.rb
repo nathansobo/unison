@@ -400,44 +400,8 @@ module Unison
             @user = User.find(1)
           end
 
-          it "creates a singleton Selection" do
-            user.profile.should be_singleton
-          end
-
-          it "creates a reader method with the given name" do
-            user.should respond_to(:profile)
-          end
-
-          describe ":foreign_key option" do
-            context "when not passed :foreign_key" do
-              describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
-                  user.life_goal.should == LifeGoal.where(LifeGoal[:user_id].eq(user[:id]))
-                end
-              end
-            end
-
-            context "when passed a :foreign_key option" do
-              describe "the reader method" do
-                it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
-                  user.profile.should == Profile.where(Profile[:owner_id].eq(user[:id]))
-                end
-              end
-            end
-          end
-
-          describe ":class_name option" do
-            context "when not passed a :class_name option" do
-              it "chooses the target Relation by singularizing and classifying the given name" do
-                user.profile.operand.should == Profile.set
-              end
-            end
-
-            context "when passed a :class_name option" do
-              it "uses the #set of the class with the given name as the target Relation" do
-                user.profile_alias.operand.should == Profile.set
-              end
-            end
+          it "assigns a HasOne instance on the PrimitiveTuple during initialization" do
+            user.profile.class.should == Relations::HasOne
           end
 
           describe "customization block" do
