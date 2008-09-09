@@ -102,9 +102,7 @@ module Unison
 
       def belongs_to(name, options = {}, &customization_block)
         relates_to_one(name) do
-          class_name = options[:class_name] || name.to_s.classify
-          foreign_key = options[:foreign_key] || :"#{name}_id"
-          relation = select_parent(class_name.to_s.constantize.set, :foreign_key => foreign_key)
+          relation = Relations::BelongsTo.new(self, name, options)
           customization_block ? instance_exec(relation, &customization_block) : relation
         end
       end
@@ -214,11 +212,6 @@ module Unison
       target_relation.where(
         target_relation[child_foreign_key_from_options(options)].eq(self[:id])
       ).singleton
-    end
-
-    def select_parent(target_relation, options={})
-      foreign_key = options[:foreign_key] || :"#{target_relation.name.to_s.singularize.underscore}_id"
-      target_relation.where(target_relation[:id].eq(self[foreign_key])).singleton
     end
 
     def signal(attribute_or_symbol)

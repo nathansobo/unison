@@ -958,16 +958,6 @@ module Unison
           end
         end
 
-        describe "#select_parent" do
-          context "when passed a :foreign_key" do
-            it "creates a singleton Selection on the target Set where the instance id matches the target Set's passed in foreign_key attribute value" do
-              friendship = Friendship.find(1)
-              from_user = friendship.select_parent(User, :foreign_key => :from_id)
-              from_user.should == User.find(friendship.from_id)
-            end
-          end
-        end
-
         describe "#initialize_attribute_values" do
           it "transforms Symbol keys into their corresponding Attribute objects" do
             user = User.new
