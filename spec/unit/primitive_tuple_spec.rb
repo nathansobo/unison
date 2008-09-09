@@ -937,43 +937,6 @@ module Unison
           end
         end
 
-        describe "#select_children" do
-          attr_reader :user
-          before do
-            @user = User.find(1)
-          end
-
-          it "does not create a singleton Selection" do
-            user.select_children(Account).should_not be_singleton
-          end
-
-          context "when passed a Tuple" do
-            it "creates a Selection on the target Set where the foreign key matches the instances' id" do
-              accounts = user.select_children(Account)
-              accounts.should_not be_empty
-              accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
-            end
-          end
-
-          context "when passed a Relation" do
-            it "creates a Selection on the target Relation where the foreign key matches the instances' id" do
-              accounts = user.select_children(Account.set)
-              accounts.should_not be_empty
-              accounts.should == accounts_set.where(accounts_set[:user_id].eq(user[:id]))
-            end
-          end
-
-          context "when passed :foreign_key option" do
-            it "returns the Tuples in the set that match the instance's foreign_key value" do
-              friendships_to_me = user.select_children(Friendship, :foreign_key => :to_id)
-              friendships_to_me.should_not be_empty
-              friendships_to_me.should == friendships_set.where(
-                friendships_set[:to_id].eq(user[:id])
-              )
-            end
-          end
-        end
-
         describe "#select_child" do
           attr_reader :user
           before do

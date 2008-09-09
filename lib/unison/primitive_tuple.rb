@@ -88,12 +88,10 @@ module Unison
 
       def has_many(name, options={}, &customization_block)
         relates_to_many(name) do
-          class_name = options[:class_name] || name.to_s.classify
-          target_relation = class_name.to_s.constantize.set
           relation = if options[:through]
-            has_many_through(target_relation, options)
+            Relations::HasManyThrough.new(self, name, options)
           else
-            select_children(target_relation, :foreign_key => options[:foreign_key])
+            Relations::HasMany.new(self, name, options)
           end
           customization_block ? instance_exec(relation, &customization_block) : relation
         end
@@ -217,12 +215,6 @@ module Unison
       false
     end
 
-    def select_children(target_relation, options={})
-      target_relation.where(
-        target_relation[child_foreign_key_from_options(options)].eq(self[:id])
-      )
-    end
-
     def select_child(target_relation, options={})
       target_relation.where(
         target_relation[child_foreign_key_from_options(options)].eq(self[:id])
@@ -266,37 +258,6 @@ module Unison
         self[attribute] = value
       end
     end
-
-    def has_many_through(target_relation, options)
-      through_relation = self.send("#{options[:through]}_relation")
-      has_many_through_where_through_relation_has_foreign_key(target_relation, through_relation, options) \
-      || has_many_through_where_target_relation_has_foreign_key(target_relation, through_relation, options) \
-      || raise(ArgumentError, "Unable to construct a has_many\n#{target_relation.inspect}\nrelationship through\n#{through_relation.inspect}\nwith options #{options.inspect}")
-    end
-
-    def has_many_through_where_through_relation_has_foreign_key(target_relation, through_relation, options)
-      foreign_key = options[:foreign_key] || :"#{target_relation.set.name.to_s.singularize.underscore}_id"
-      if through_relation.has_attribute?(foreign_key)
-        through_relation.
-          join(target_relation).
-          on(through_relation[foreign_key].eq(target_relation[:id])).
-          project(target_relation)
-      else
-        nil
-      end
-    end
-
-    def has_many_through_where_target_relation_has_foreign_key(target_relation, through_relation, options)
-      foreign_key = options[:foreign_key] || :"#{through_relation.set.name.to_s.singularize.underscore}_id"
-      if target_relation.has_attribute?(foreign_key)
-        through_relation.
-          join(target_relation).
-            on(target_relation[foreign_key].eq(through_relation[:id])).
-          project(target_relation)
-      else
-        nil
-      end
-    end    
 
     def convert_symbol_keys_to_attributes(attributes)
       attributes.inject({}) do |normalized_hash, pair|

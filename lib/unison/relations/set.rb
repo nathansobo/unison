@@ -88,6 +88,11 @@ module Unison
         end
       end
 
+      def default_foreign_key_name
+        @default_foreign_key_name ||= :"#{name.to_s.singularize.to_s.underscore}_id"
+      end
+      attr_writer :default_foreign_key_name
+
       def to_arel
         @arel ||= Arel::Table.new(name, Adapters::Arel::Engine.new(self))
       end
