@@ -282,65 +282,9 @@ module Unison
             user.photos.class.should == Relations::HasMany
           end
 
-          describe "customization block" do
-            context "when not passed a block" do
-              it "returns a Selection on the target Relation where the foreign key Attribute is EqualTo the instance's #id" do
-                user.photos.should == Photo.where(Photo[:user_id].eq(user[:id]))
-              end
-            end
-
-            context "when passed a block" do
-              describe "the reader method" do
-                it "returns the result of the default Selection yielded to the block" do
-                  user.active_accounts.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
-                end
-              end
-            end
-          end
-
           describe ":through option" do
-            context "when passed :through, :class_name, and :foreign_key options" do
-              context "when the target Relation is the owner of the :foreign_key" do
-                it "returns members of the target Relation (associated with :class_name) whose foreign key (explicated by :foreign_key) equals the id of members of the through Relation" do
-                  team = Team.find(1)
-                  team.friendships_from_users.sort_by(&:id).should == team.users.map(&:friendships_from_me).flatten.sort_by(&:id)
-                end
-              end
-
-              context "when the through Relation is the owner of the :foreign_key" do
-                it "returns members of the target Relation (associated with :class_name) whose id equals the foreign key (explicated by :foreign_key) of members of the through Relation" do
-                  user.fans.should == user.friendships_to_me.join(User.set).on(Friendship[:from_id].eq(User[:id])).project(User.set)
-                  user.fans.should_not be_empty
-                  user.fans.sort_by(&:id).should == user.friendships_to_me.map {|friendship| friendship.from.tuples.first}.uniq.sort_by(&:id)
-                  user.fans.each do |fan|
-                    fan.heroes.should include(user)
-                  end
-                end
-              end
-            end
-
-            context "when passed :through" do
-              context "when the target Relation is the owner of the :foreign_key" do
-                it "returns members of the target Relation whose foreign key equals the id of members of the through Relation" do
-                  team = Team.find(1)
-                  team.photos.sort_by(&:id).should == team.users.map(&:photos).flatten.sort_by(&:id)
-                end
-              end
-
-              context "when the through Relation is the owner of the :foreign_key" do
-                it "returns members of the target Relation whose id equals the foreign key of members of the through Relation" do
-                  user.cameras.should_not be_empty
-                  user.cameras.sort_by(&:id).should == user.photos.map {|photo| photo.camera.tuples.first}.uniq.sort_by(&:id)
-                end
-              end
-            end
-
-            context "when passed a :through relation that is #nil?" do
-              it "returns an empty Relation" do
-                yogaless_profile = Profile.find(2)
-                yogaless_profile.yoga_owner.should be_nil
-                yogaless_profile.yoga_photos.should == []
-              end
+            it "assigns a HasManyThrough instance on the PrimitiveTuple during initialization" do
+              user.fans.class.should == Relations::HasManyThrough
             end
           end
 
