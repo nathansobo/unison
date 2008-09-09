@@ -63,7 +63,7 @@ module Unison
 
       def order_by(*attributes)
         Ordering.new(self, *attributes)
-      end      
+      end
 
       def tuples
         retained?? @tuples : initial_read

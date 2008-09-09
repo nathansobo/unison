@@ -66,20 +66,22 @@ module Unison
         operand.tuples.sort(&comparator)
       end
       
+      def direction_coefficient(attribute)
+        attribute.ascending?? 1 : -1
+      end
+
       def comparator
         lambda do |a, b|
-          left_side, right_side = [], []
-          order_by_attributes.each do |order_by_attribute|
-            if order_by_attribute.ascending?
-              left_side.push(a[order_by_attribute])
-              right_side.push(b[order_by_attribute])
-            else
-              left_side.push(b[order_by_attribute])
-              right_side.push(a[order_by_attribute])
-            end
-          end
-          left_side <=> right_side
+          compare(a, b)
         end
+      end
+
+      def compare(a, b)
+        order_by_attributes.each do |attribute|
+          result = direction_coefficient(attribute) * (a[attribute] <=> b[attribute])
+          return result unless result == 0
+        end
+        0
       end
     end
   end
