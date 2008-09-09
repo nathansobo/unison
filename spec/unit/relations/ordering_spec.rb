@@ -3,33 +3,35 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 module Unison
   module Relations
     describe Ordering do
-      attr_reader :operand, :order_by_attribute, :ordering
+      attr_reader :operand, :order_by_attributes, :ordering, :order_by_attribute_1, :order_by_attribute_2
       before do
-        @operand = users_set
-        @order_by_attribute = users_set[:name]
-        @ordering = Ordering.new(operand, order_by_attribute)
+        @operand = User.set
+        @order_by_attribute_1 = User.set[:name]
+        @order_by_attribute_2 = User.set[:id]
+        @order_by_attributes = [order_by_attribute_1, order_by_attribute_2]
+        @ordering = Ordering.new(operand, *order_by_attributes)
       end
 
       describe "#initialize" do
-        it "sets the #operand and #order_by_attribute" do
+        it "sets the #operand and #order_by_attributes" do
           ordering.operand.should == operand
-          ordering.order_by_attribute.should == order_by_attribute
+          ordering.order_by_attributes.should == order_by_attributes
         end
       end
 
       describe "#to_sql" do
-        it "returns the operand's SQL ordered by the #order_by_attribute" do
+        it "returns the operand's SQL ordered by the #order_by_attributes" do
           ordering.to_sql.should be_like(<<-SQL)
             SELECT          `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`
             FROM            `users`
-            ORDER BY       `users`.`name`
+            ORDER BY       `users`.`name`, `users`.`id`
           SQL
         end
       end
 
       describe "#to_arel" do
         it "returns an Arel representation of the relation" do
-          ordering.to_arel.should == operand.to_arel.order(order_by_attribute.to_arel)
+          ordering.to_arel.should == operand.to_arel.order(order_by_attribute_1.to_arel, order_by_attribute_2.to_arel)
         end
       end
 
@@ -115,29 +117,31 @@ module Unison
         end
 
         describe "when a Tuple is inserted into the #operand" do
-          context "when the #order_by_attribute is #ascending?" do
+          context "when the #order_by_attributes is #ascending?" do
             before do
-              order_by_attribute.should be_ascending
+              order_by_attribute_1.should be_ascending
+              order_by_attribute_2.should be_ascending
             end
 
             it "the Tuple is inserted into #tuples in a location consistent with the ordering" do
               operand.insert(User.new(:name => "Marcel", :hobby => "Dog Walking"))
-              expected_tuples = operand.tuples.sort_by {|tuple| tuple[order_by_attribute]}
-              expected_tuples.should_not == operand.tuples
-              ordering.tuples.should == expected_tuples
+              tuples_in_expected_order = operand.tuples.sort_by {|tuple| [tuple[order_by_attribute_1], tuple[order_by_attribute_2]]}
+              tuples_in_expected_order.should_not == operand.tuples
+              ordering.tuples.should == tuples_in_expected_order
             end
           end
 
-          context "when the #order_by_attribute is #descending?" do
+          context "when the #order_by_attributes is #descending?" do
             before do
-              order_by_attribute.descending
+              order_by_attribute_1.descending
+              order_by_attribute_2.descending
             end
 
             it "the Tuple is inserted into #tuples in a location consistent with the ordering" do
               operand.insert(User.new(:name => "Marcel", :hobby => "Dog Walking"))
-              expected_tuples = operand.tuples.sort_by {|tuple| tuple[order_by_attribute]}.reverse
-              expected_tuples.should_not == operand.tuples
-              ordering.tuples.should == expected_tuples
+              tuples_in_expected_order = operand.tuples.sort_by {|tuple| [tuple[order_by_attribute_1], tuple[order_by_attribute_2]]}.reverse
+              tuples_in_expected_order.should_not == operand.tuples
+              ordering.tuples.should == tuples_in_expected_order
             end
           end
         end
@@ -152,31 +156,33 @@ module Unison
         end
 
         describe "when a Tuple is updated in the #operand" do
-          describe "when the updated Attribute is the sort #order_by_attribute for the ordering" do
-            context "when the #order_by_attribute is #ascending?" do
+          describe "when the updated Attribute is the sort #order_by_attributes for the ordering" do
+            context "when the #order_by_attributes is #ascending?" do
               before do
-                order_by_attribute.should be_ascending
+                order_by_attribute_1.should be_ascending
+                order_by_attribute_2.should be_ascending
               end
               
               it "relocates the updated Tuple in accordance with the ordering" do
                 tuple_to_update = ordering.first
-                tuple_to_update[order_by_attribute] = "Zarathustra"
+                tuple_to_update[order_by_attribute_1] = "Zarathustra"
 
-                expected_tuples = operand.tuples.sort_by {|tuple| tuple[order_by_attribute]}
+                expected_tuples = operand.tuples.sort_by {|tuple| [tuple[order_by_attribute_1], tuple[order_by_attribute_2]]}
                 ordering.tuples.should == expected_tuples
               end
             end
 
-            context "when the #order_by_attribute is #descending?" do
+            context "when the #order_by_attributes is #descending?" do
               before do
-                order_by_attribute.descending
+                order_by_attribute_1.descending
+                order_by_attribute_2.descending
               end
 
               it "relocates the updated Tuple in accordance with the ordering" do
                 tuple_to_update = ordering.first
-                tuple_to_update[order_by_attribute] = "Zarathustra"
+                tuple_to_update[order_by_attribute_1] = "Zarathustra"
 
-                expected_tuples = operand.tuples.sort_by {|tuple| tuple[order_by_attribute]}.reverse
+                expected_tuples = operand.tuples.sort_by {|tuple| [tuple[order_by_attribute_1], tuple[order_by_attribute_2]]}.reverse
                 ordering.tuples.should == expected_tuples
               end
             end
@@ -189,13 +195,13 @@ module Unison
             end
 
             tuple_to_update = operand.first
-            old_value = tuple_to_update[order_by_attribute]
+            old_value = tuple_to_update[order_by_attribute_1]
             new_value = "Marcel"
             new_value.should_not == old_value
 
-            tuple_to_update[order_by_attribute] = new_value
+            tuple_to_update[order_by_attribute_1] = new_value
 
-            arguments.should == [[tuple_to_update, order_by_attribute, old_value, new_value]]
+            arguments.should == [[tuple_to_update, order_by_attribute_1, old_value, new_value]]
           end
         end
 
@@ -224,25 +230,27 @@ module Unison
         end
 
         describe "#tuples" do
-          context "when the #order_by_attribute is #ascending?" do
+          context "when the #order_by_attributes is #ascending?" do
             before do
-              order_by_attribute.should be_ascending
+              order_by_attribute_1.should be_ascending
+              order_by_attribute_2.should be_ascending
             end
 
-            it "returns the #operand's #tuples, ordered by the #order_by_attribute in ascending order" do
-              tuples_in_expected_order = operand.tuples.sort_by {|tuple| tuple[order_by_attribute]}
+            it "returns the #operand's #tuples, ordered by the #order_by_attributes in ascending order" do
+              tuples_in_expected_order = operand.tuples.sort_by {|tuple| [tuple[order_by_attribute_1], tuple[order_by_attribute_2]]}
               tuples_in_expected_order.should_not == operand.tuples
               ordering.tuples.should == tuples_in_expected_order
             end
           end
 
-          context "when the #order_by_attribute is #descending?" do
+          context "when the #order_by_attributes are #descending?" do
             before do
-              order_by_attribute.descending
+              order_by_attribute_1.descending
+              order_by_attribute_2.descending
             end
 
-            it "returns the #operand's #tuples, ordered by the #order_by_attribute in descending order" do
-              tuples_in_expected_order = operand.tuples.sort_by {|tuple| tuple[order_by_attribute]}.reverse
+            it "returns the #operand's #tuples, ordered by the #order_by_attributes in descending order" do
+              tuples_in_expected_order = operand.tuples.sort_by {|tuple| [tuple[order_by_attribute_1], tuple[order_by_attribute_2]]}.reverse
               tuples_in_expected_order.should_not == operand.tuples
               ordering.tuples.should == tuples_in_expected_order
             end
