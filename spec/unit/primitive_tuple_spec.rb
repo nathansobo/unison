@@ -937,27 +937,6 @@ module Unison
           end
         end
 
-        describe "#select_child" do
-          attr_reader :user
-          before do
-            @user = User.find(1)
-          end
-
-          it "creates a singleton Selection on the target Set where the target Set id matches the instance's default foreign key attribute value" do
-            profile = user.select_child(Account)
-            profile.should be_singleton
-            profile.should == Account.find(1)
-          end
-
-          context "when passed :foreign_key option" do
-            it "creates a singleton Selection on the target Set where the target Set id matches the instance's passed in foreign_key attribute value" do
-              profile = user.select_child(Profile, :foreign_key => :owner_id)
-              profile.should_not be_nil
-              profile.should == profiles_set.where(profiles_set[:owner_id].eq(user[:id])).singleton
-            end
-          end
-        end
-
         describe "#initialize_attribute_values" do
           it "transforms Symbol keys into their corresponding Attribute objects" do
             user = User.new

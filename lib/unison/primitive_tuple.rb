@@ -94,8 +94,7 @@ module Unison
 
       def has_one(name, options={}, &customization_block)
         relates_to_one(name) do
-          class_name = options[:class_name] || name.to_s.classify
-          relation = select_child class_name.to_s.constantize, options
+          relation = Relations::HasOne.new(self, name, options)
           customization_block ? instance_exec(relation, &customization_block) : relation
         end
       end
@@ -208,12 +207,6 @@ module Unison
       false
     end
 
-    def select_child(target_relation, options={})
-      target_relation.where(
-        target_relation[child_foreign_key_from_options(options)].eq(self[:id])
-      ).singleton
-    end
-
     def signal(attribute_or_symbol)
       Signal.new(self, attribute_for(attribute_or_symbol))
     end
@@ -257,10 +250,6 @@ module Unison
 
     def default_attribute_values
       self.class.default_attribute_values
-    end
-
-    def child_foreign_key_from_options(options)
-      options[:foreign_key] || set.default_foreign_key_name
     end
 
     def instance_relation_definitions
