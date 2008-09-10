@@ -36,6 +36,14 @@ module Unison
     end
     attr_writer :origin
 
+    def and(*args)
+      Predicates::And.new(*args)
+    end
+
+    def or(*args)
+      Predicates::Or.new(*args)
+    end
+
     attr_writer :test_mode
     def test_mode?
       @test_mode ||= false
