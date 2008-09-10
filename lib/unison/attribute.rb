@@ -5,6 +5,10 @@ module Unison
         Predicates::EqualTo.new(self, other)
       end
 
+      def neq(other)
+        Predicates::NotEqualTo.new(self, other)
+      end
+
       def gt(other)
         Predicates::GreaterThan.new(self, other)
       end

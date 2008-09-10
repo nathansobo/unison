@@ -144,6 +144,15 @@ module Unison
         end
       end
 
+      describe "#neq" do
+        it "returns an instance of Predicates::EqualTo with the attribute and the argument as its operands" do
+          predicate = attribute.neq(1)
+          predicate.should be_an_instance_of(Predicates::NotEqualTo)
+          predicate.operand_1.should == attribute
+          predicate.operand_2.should == 1
+        end
+      end
+
       describe "#gt" do
         it "returns an instance of Predicates::GreaterThan with the attribute and the argument as its operands" do
           predicate = attribute.gt(1)
