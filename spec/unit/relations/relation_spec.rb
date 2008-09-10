@@ -91,6 +91,11 @@ module Unison
       end
 
       describe "#find" do
+        it "calls self[:id].convert on the argument" do
+          mock.proxy(users_set[:id]).convert(1)
+          users_set.find(1)
+        end
+
         context "when a Tuple with the given #id is in the Relation" do
           before do
             users_set.where(users_set[:id].eq("nathan")).should_not be_empty

@@ -46,7 +46,7 @@ module Unison
       end
 
       def find(id)
-        where(self[:id].eq(id)).tuples.first
+        where(self[:id].eq(self[:id].convert(id))).tuples.first
       end
 
       def where(predicate)
