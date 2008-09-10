@@ -24,11 +24,21 @@ module Unison
       end
     end
 
+    class << self
+      define_method "when passed nil, returns nil" do
+        it "when passed nil, returns nil" do
+          attribute.convert(nil).should == nil
+        end
+      end
+    end
+
     describe "#convert" do
       context "when #type is :integer" do
         before do
           @attribute = Attribute.new(set, :id, :integer)
         end
+
+        send("when passed nil, returns nil")
 
         it "when passed an Integer, returns the Integer" do
           attribute.convert(5).should == 5
@@ -50,6 +60,8 @@ module Unison
           @attribute = Attribute.new(set, :name, :string)
         end
 
+        send("when passed nil, returns nil")
+
         it "when passed a String, returns the String" do
           attribute.convert("hello").should == "hello"
         end
@@ -65,6 +77,8 @@ module Unison
           @attribute = Attribute.new(set, :state, :symbol)
         end
 
+        send("when passed nil, returns nil")
+
         it "when passed a Symbol, returns the Symbol" do
           attribute.convert(:hello).should == :hello
         end
@@ -79,7 +93,9 @@ module Unison
         before do
           @attribute = Attribute.new(set, :is_cool, :boolean)
         end
-        
+
+        send("when passed nil, returns nil")
+
         it "when passed true or false, returns identity" do
           attribute.convert(true).should == true
           attribute.convert(false).should == false
@@ -108,6 +124,8 @@ module Unison
         before do
           @attribute = Attribute.new(set, :created_at, :datetime)
         end
+
+        send("when passed nil, returns nil")
 
         it "when passed a Time, returns the time" do
           now = Time.now.utc

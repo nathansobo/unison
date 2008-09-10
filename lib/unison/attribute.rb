@@ -38,7 +38,7 @@ module Unison
     end
 
     def convert(value)
-      send("convert_to_#{type}", value)
+      value.nil?? nil : send("convert_to_#{type}", value)
     rescue Exception => e
       e.message.replace("Error converting value for '#{set.name}.#{name}' attribute\n#{e.message}")
       raise e
