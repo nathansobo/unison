@@ -70,6 +70,15 @@ module Unison
             user = User.new
             user.should_not respond_to(:nick_name=)
           end
+
+          context "when the type is :boolean" do
+            it 'defines a #{name}? reader alias' do
+              User.attribute_reader(:has_crabs, :boolean)
+              user = User.new(:has_crabs => true)
+              user.has_crabs.should be_true
+              user.has_crabs?.should be_true
+            end
+          end
           
           describe ":default option" do
             context "when a :default is supplied" do

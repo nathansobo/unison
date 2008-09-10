@@ -48,6 +48,7 @@ module Unison
         define_method(name) do
           self[attribute]
         end
+        alias_method "#{name}?", name if type == :boolean
       end
 
       def attribute_writer(name, type, options={})
