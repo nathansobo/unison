@@ -398,7 +398,7 @@ module Unison
             context "when the update does not cause the Tuple to match the #predicate" do
               it "does not add the Tuple into the result of #tuples" do
                 join.should_not include(expected_compound_tuple)
-                user[:id] = photo[:user_id] + 1
+                user[:id] = photo[:user_id] + "junk"
                 join.should_not include(expected_compound_tuple)
               end
 
@@ -406,7 +406,7 @@ module Unison
                 join.on_insert(retainer) do |tuple|
                   raise "Do not call me"
                 end
-                user[:id] = photo[:user_id] + 1
+                user[:id] = photo[:user_id] + "junk"
               end
             end
           end
@@ -414,7 +414,7 @@ module Unison
           context "when the Tuple is a member of a compound Tuple that matches the #predicate" do
             attr_reader :compound_tuples, :user
             before do
-              @user = User.find(1)
+              @user = User.find("nathan")
               @compound_tuples = join.select do |compound_tuple|
                 compound_tuple[users_set] == user
               end
@@ -745,7 +745,7 @@ module Unison
 
           context "when #tuples only contains a CompositeTuple that contains the first argument" do
             before do
-              @user = User.find(1)
+              @user = User.find("nathan")
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
 
               join.tuples.any? do |compound_tuple|
@@ -766,8 +766,8 @@ module Unison
 
           context "when #tuples only contains a CompositeTuple that contains the second argument" do
             before do
-              @user = User.create(:id => 100, :name => "Brian")
-              @photo = Photo.find(1)
+              @user = User.create(:id => "brian", :name => "Brian")
+              @photo = Photo.find("nathan_photo_1")
 
               join.tuples.any? do |compound_tuple|
                 compound_tuple[users_set] == user &&
@@ -802,23 +802,29 @@ module Unison
             tuples = join
             tuples.size.should == 3
 
-            tuples[0][users_set[:id]].should == 1
-            tuples[0][users_set[:name]].should == "Nathan"
-            tuples[0][photos_set[:id]].should == 1
-            tuples[0][photos_set[:user_id]].should == 1
-            tuples[0][photos_set[:name]].should == "Photo 1"
+            nathan = User.find("nathan")
+            corey = User.find("corey")
+            nathan_photo_1 = Photo.find("nathan_photo_1")
+            nathan_photo_2 = Photo.find("nathan_photo_2")
+            corey_photo_1 = Photo.find("corey_photo_1")
 
-            tuples[1][users_set[:id]].should == 1
-            tuples[1][users_set[:name]].should == "Nathan"
-            tuples[1][photos_set[:id]].should == 2
-            tuples[1][photos_set[:user_id]].should == 1
-            tuples[1][photos_set[:name]].should == "Photo 2"
+            tuples[0][users_set[:id]].should == nathan.id
+            tuples[0][users_set[:name]].should == nathan.name
+            tuples[0][photos_set[:id]].should == nathan_photo_1.id
+            tuples[0][photos_set[:user_id]].should == nathan_photo_1.user_id
+            tuples[0][photos_set[:name]].should == nathan_photo_1.name
 
-            tuples[2][users_set[:id]].should == 2
-            tuples[2][users_set[:name]].should == "Corey"
-            tuples[2][photos_set[:id]].should == 3
-            tuples[2][photos_set[:user_id]].should == 2
-            tuples[2][photos_set[:name]].should == "Photo 3"
+            tuples[1][users_set[:id]].should == nathan.id
+            tuples[1][users_set[:name]].should == nathan.name
+            tuples[1][photos_set[:id]].should == nathan_photo_2.id
+            tuples[1][photos_set[:user_id]].should == nathan_photo_2.user_id
+            tuples[1][photos_set[:name]].should == nathan_photo_2.name
+
+            tuples[2][users_set[:id]].should == corey.id
+            tuples[2][users_set[:name]].should == corey.name
+            tuples[2][photos_set[:id]].should == corey_photo_1.id
+            tuples[2][photos_set[:user_id]].should == corey_photo_1.user_id
+            tuples[2][photos_set[:name]].should == corey_photo_1.name
           end
 
           context "when #operand_1 is an empty singleton Relation" do

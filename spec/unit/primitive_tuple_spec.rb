@@ -188,12 +188,12 @@ module Unison
         
         describe ".relates_to_many" do
           it "creates an instance method representing the given Relation" do
-            user = User.find(1)
+            user = User.find("nathan")
             user.photos.should == photos_set.where(photos_set[:user_id].eq(1))
           end
 
           it 'creates a "#{name}_relation" method to return the relation' do
-            user = User.find(1)
+            user = User.find("nathan")
             user.photos_relation.should == user.photos
           end
 
@@ -208,8 +208,8 @@ module Unison
 
           context "when subclassed" do
             it "creates an instance method representing the given Relation subclass" do
-              user = Developer.create(:id => 100, :name => "Jeff")
-              photo = Photo.create(:id => 100, :user_id => 100, :name => "Jeff's Photo")
+              user = Developer.create(:id => "jeff", :name => "Jeff")
+              photo = Photo.create(:id => "jeff_photo", :user_id => "jeff", :name => "Jeff's Photo")
               user.photos.should == [photo]
             end
           end
@@ -275,7 +275,7 @@ module Unison
         describe ".has_many" do
           attr_reader :user
           before do
-            @user = User.find(1)
+            @user = User.find("nathan")
           end
 
           it "assigns a HasMany instance on the PrimitiveTuple during initialization" do
@@ -290,7 +290,7 @@ module Unison
 
           context "when passed a customization block" do
             it "calls the block on the default generated relation, using its return value as the instance relation" do
-              user = User.find(1)
+              user = User.find("nathan")
               user.active_accounts.should_not be_empty
               user.accounts.any? do |account|
                 !account.active?
@@ -305,7 +305,7 @@ module Unison
         describe ".has_one" do
           attr_reader :user
           before do
-            @user = User.find(1)
+            @user = User.find("nathan")
           end
 
           it "assigns a HasOne instance on the PrimitiveTuple during initialization" do
@@ -325,7 +325,7 @@ module Unison
                   user.active_account.should be_singleton
                   user.active_account.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
 
-                  user_without_active_account = User.find(3)
+                  user_without_active_account = User.find("ross")
                   user_without_active_account.active_account.should be_nil
                 end
               end
@@ -337,7 +337,7 @@ module Unison
           attr_reader :profile, :user
           before do
             @profile = Profile.find(1)
-            @user = User.find(1)
+            @user = User.find("nathan")
           end
 
           it "assigns a BelongsTo instance on the PrimitiveTuple during initialization" do
@@ -543,6 +543,18 @@ module Unison
               tuple[:name].should_not == new_value
             end
 
+            it "converts the passed in value using the Attribute" do
+              tuple = Account.find(1)
+              attribute = Account[:deactivated_at]
+
+              new_time = Time.now
+              mock.proxy(attribute).convert(new_time.to_s)
+
+              tuple[attribute] = new_time.to_s
+              tuple[attribute].class.should == Time
+              tuple[attribute].to_s.should == new_time.to_s
+            end
+
             it "sets the value for an Attribute defined on the set of the Tuple class" do
               tuple[User.set[:id]] = 2
               tuple[User.set[:id]].should == 2
@@ -688,7 +700,7 @@ module Unison
         describe "#signal" do
           attr_reader :user, :signal
           before do
-            @user = User.find(1)
+            @user = User.find("nathan")
           end
 
           context "when passed a Symbol" do
@@ -723,7 +735,7 @@ module Unison
         describe "#bind" do
           context "when passed in expression is an Attribute" do
             it "retrieves the value for an Attribute defined on the set of the Tuple class" do
-              tuple.bind(User.set[:id]).should == 1
+              tuple.bind(User.set[:id]).should == "nathan"
               tuple.bind(User.set[:name]).should == "Nathan"
             end
           end

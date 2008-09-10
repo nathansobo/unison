@@ -9,7 +9,7 @@ module Unison
       end
 
       def parent_tuple
-        @parent_tuple ||= User.find(1)
+        @parent_tuple ||= User.find("nathan")
       end
 
       def name
@@ -48,7 +48,7 @@ module Unison
         context "when passed a :foreign_key option" do
           describe "#foreign_key" do
             def parent_tuple
-              @parent_tuple ||= Profile.find(1)
+              @parent_tuple ||= Profile.find("nathan_profile")
             end
 
             def name
@@ -77,7 +77,7 @@ module Unison
 
         context "when passed a :class_name option" do
           def parent_tuple
-            @parent_tuple ||= Profile.find(1)
+            @parent_tuple ||= Profile.find("nathan_profile")
           end
 
           def name

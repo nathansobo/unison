@@ -98,27 +98,11 @@ module Unison
     def convert_to_datetime(value)
       case value
       when Time
-        utc_time = value.utc
-        Time.utc(
-          utc_time.year,
-          utc_time.month,
-          utc_time.day,
-          utc_time.hour,
-          utc_time.min,
-          utc_time.sec
-        )
+        value
       when Integer
         Time.at(value)
       when String
-        time_values = Time.parse(value)
-        Time.utc(
-          time_values.year,
-          time_values.month,
-          time_values.day,
-          time_values.hour,
-          time_values.min,
-          time_values.sec
-        )
+        Time.parse(value)
       end
     end
   end

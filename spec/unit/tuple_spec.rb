@@ -21,7 +21,7 @@ module Unison
 
     describe ".find" do
       it "delegates to #find on the #relation" do
-        User.find(1).should == User.set.find(1)
+        User.find("nathan").should == User.set.find(1)
       end
     end
 
@@ -35,7 +35,7 @@ module Unison
 
     describe "#pushed" do
       it "if new? is true, sets it to false" do
-        user = User.find(1)
+        user = User.find("nathan")
         user.should be_new
         user.pushed
         user.should_not be_new

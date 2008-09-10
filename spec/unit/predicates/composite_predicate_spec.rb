@@ -6,7 +6,7 @@ module Unison
       attr_reader :user, :predicate, :signal, :child_predicate_without_signal, :child_predicate_with_signal
 
       before do
-        @user = User.find(1)
+        @user = User.find("nathan")
         @signal = user.signal(:name)
         @child_predicate_without_signal = EqualTo.new(users_set[:id], 1)
         @child_predicate_with_signal = EqualTo.new(signal, "Nathan")

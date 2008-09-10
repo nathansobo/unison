@@ -12,50 +12,50 @@ require "#{dir}/spec_helpers/be_like"
 connection = Sequel.sqlite
 Unison.origin = Unison::Repository.new(connection)
 connection.create_table :teams do
-  column :id, :integer
+  column :id, :string
   column :name, :string
 end
 
 connection.create_table :users do
-  column :id, :integer
+  column :id, :string
   column :name, :string
   column :hobby, :string
-  column :team_id, :integer
+  column :team_id, :string
   column :developer, :integer
 end
 
 connection.create_table :life_goals do
-  column :id, :integer
-  column :user_id, :integer
+  column :id, :string
+  column :user_id, :string
 end
 
 connection.create_table :friendships do
-  column :id, :integer
-  column :from_id, :integer
-  column :to_id, :integer
+  column :id, :string
+  column :from_id, :string
+  column :to_id, :string
 end
 
 connection.create_table :profiles do
-  column :id, :integer
-  column :owner_id, :integer
+  column :id, :string
+  column :owner_id, :string
 end
 
 connection.create_table :photos do
-  column :id, :integer
+  column :id, :string
   column :name, :string
-  column :user_id, :integer
-  column :camera_id, :integer
+  column :user_id, :string
+  column :camera_id, :string
 end
 
 connection.create_table :cameras do
-  column :id, :integer
+  column :id, :string
   column :name, :string
 end
 
 connection.create_table :accounts do
-  column :id, :integer
+  column :id, :string
   column :name, :string
-  column :user_id, :integer
+  column :user_id, :string
   column :deactivated_at, :string
 end
 
@@ -67,26 +67,26 @@ Spec::Runner.configure do |config|
 
     users = connection[:users]
     users.delete
-    users << {:id => 11, :name => "Buffington", :hobby => "Bots"}
-    users << {:id => 12, :name => "Keefa", :hobby => "Begging"}
+    users << {:id => "buffington", :name => "Buffington", :hobby => "Bots", :team_id => "mangos"}
+    users << {:id => "keefa", :name => "Keefa", :hobby => "Begging", :team_id => "chargers"}
 
     photos = connection[:photos]
     photos.delete
-    photos << {:id => 11, :user_id => 11, :name => "Photo of Buffington.", :camera_id => 10}
-    photos << {:id => 12, :user_id => 11, :name => "Another photo of Buffington. This one is bad.", :camera_id => 10}
-    photos << {:id => 13, :user_id => 12, :name => "Photo of Keefa in a dog fight. She's totally kicking Teddy's ass.", :camera_id => 11}
+    photos << {:id => "buffing_photo", :user_id => "buffington", :name => "Photo of Buffington.", :camera_id => "nikkon_d50"}
+    photos << {:id => "buffing_bad_photo", :user_id => "buffington", :name => "Another photo of Buffington. This one is bad.", :camera_id => "nikkon_d50"}
+    photos << {:id => "keefa_kicking_teddys_ass", :user_id => "keefa", :name => "Photo of Keefa in a dog fight. She's totally kicking Teddy's ass.", :camera_id => "sony_cybershot"}
 
     cameras = connection[:cameras]
     cameras.delete
-    cameras << {:id => 11, :name => "Nikon D50"}
-    cameras << {:id => 12, :name => "Sony CyberShot"}
+    cameras << {:id => "nikkon_d50", :name => "Nikon D50"}
+    cameras << {:id => "sony_cybershot", :name => "Sony CyberShot"}
 
 
     Object.class_eval do
       const_set(:Team, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:teams)
 
-        attribute_accessor :id, :integer
+        attribute_accessor :id, :string
         attribute_accessor :name, :string
 
         has_many :users
@@ -99,10 +99,10 @@ Spec::Runner.configure do |config|
       const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:users)
         
-        attribute_accessor :id, :integer
+        attribute_accessor :id, :string
         attribute_accessor :name, :string
         attribute_accessor :hobby, :string
-        attribute_accessor :team_id, :integer
+        attribute_accessor :team_id, :string
         attribute_accessor :developer, :boolean
 
         def polymorphic_allocate(attrs)
@@ -143,17 +143,17 @@ Spec::Runner.configure do |config|
 
       const_set(:LifeGoal, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:life_goals)
-        attribute_accessor :id, :integer
-        attribute_accessor :user_id, :integer
+        attribute_accessor :id, :string
+        attribute_accessor :user_id, :string
 
         belongs_to :user
       end)
 
       const_set(:Friendship, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:friendships)
-        attribute_accessor :id, :integer
-        attribute_accessor :from_id, :integer
-        attribute_accessor :to_id, :integer
+        attribute_accessor :id, :string
+        attribute_accessor :from_id, :string
+        attribute_accessor :to_id, :string
 
         belongs_to :from, :class_name => :User
         belongs_to :to, :class_name => :User
@@ -161,8 +161,8 @@ Spec::Runner.configure do |config|
 
       const_set(:Profile, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:profiles)
-        attribute_reader :id, :integer
-        attribute_accessor :owner_id, :integer
+        attribute_reader :id, :string
+        attribute_accessor :owner_id, :string
 
         belongs_to :owner, :class_name => :User
         belongs_to :yoga_owner, :class_name => :User, :foreign_key => :owner_id do |owner|
@@ -175,9 +175,9 @@ Spec::Runner.configure do |config|
 
       const_set(:Photo, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:photos)
-        attribute_accessor :id, :integer
-        attribute_accessor :user_id, :integer
-        attribute_accessor :camera_id, :integer
+        attribute_accessor :id, :string
+        attribute_accessor :user_id, :string
+        attribute_accessor :camera_id, :string
         attribute_accessor :name, :string
 
         belongs_to :user
@@ -186,7 +186,7 @@ Spec::Runner.configure do |config|
 
       const_set(:Camera, Class.new(Unison::PrimitiveTuple::Base) do
         member_of Unison::Relations::Set.new(:cameras)
-        attribute_accessor :id, :integer
+        attribute_accessor :id, :string
         attribute_accessor :name, :string
 
         has_many :photos
@@ -201,8 +201,8 @@ Spec::Runner.configure do |config|
           end
         end
 
-        attribute_accessor :id, :integer
-        attribute_accessor :user_id, :integer
+        attribute_accessor :id, :string
+        attribute_accessor :user_id, :string
         attribute_accessor :name, :string
         attribute_accessor :deactivated_at, :datetime
         belongs_to :owner, :foreign_key => :user_id, :class_name => :User
@@ -213,37 +213,37 @@ Spec::Runner.configure do |config|
       end)
     end
 
-    teams_set.insert(Team.new(:id => 1, :name => "The Mangos"))
-    teams_set.insert(Team.new(:id => 2, :name => "San Diego Superchargers"))
+    teams_set.insert(Team.new(:id => "mangos", :name => "The Mangos"))
+    teams_set.insert(Team.new(:id => "chargers", :name => "San Diego Superchargers"))
 
-    users_set.insert(User.new(:id => 1, :name => "Nathan", :hobby => "Yoga", :team_id => 2))
-    users_set.insert(User.new(:id => 2, :name => "Corey", :hobby => "Drugs & Art & Burning Man", :team_id => 1))
-    users_set.insert(User.new(:id => 3, :name => "Ross", :hobby => "Manicorn", :team_id => 1))
+    users_set.insert(User.new(:id => "nathan", :name => "Nathan", :hobby => "Yoga", :team_id => "chargers"))
+    users_set.insert(User.new(:id => "corey", :name => "Corey", :hobby => "Drugs & Art & Burning Man", :team_id => 1))
+    users_set.insert(User.new(:id => "ross", :name => "Ross", :hobby => "Manicorn", :team_id => "mangos"))
 
-    life_goals_set.insert(LifeGoal.new(:id => 1, :user_id => 1))
-    life_goals_set.insert(LifeGoal.new(:id => 2, :user_id => 2))
-    life_goals_set.insert(LifeGoal.new(:id => 3, :user_id => 3))
+    life_goals_set.insert(LifeGoal.new(:id => "nathan_goal", :user_id => "nathan"))
+    life_goals_set.insert(LifeGoal.new(:id => "corey_goal", :user_id => "corey"))
+    life_goals_set.insert(LifeGoal.new(:id => "ross_goal", :user_id => "ross"))
 
-    friendships_set.insert(Friendship.new(:id => 1, :to_id => 2, :from_id => 1))
-    friendships_set.insert(Friendship.new(:id => 2, :to_id => 3, :from_id => 1))
-    friendships_set.insert(Friendship.new(:id => 3, :to_id => 1, :from_id => 2))
-    friendships_set.insert(Friendship.new(:id => 4, :to_id => 3, :from_id => 2))
-    friendships_set.insert(Friendship.new(:id => 5, :to_id => 1, :from_id => 3))
+    friendships_set.insert(Friendship.new(:id => "nathan_to_corey", :to_id => "corey", :from_id => "nathan"))
+    friendships_set.insert(Friendship.new(:id => "nathan_to_ross", :to_id => "ross", :from_id => "nathan"))
+    friendships_set.insert(Friendship.new(:id => "corey_to_nathan", :to_id => "nathan", :from_id => "corey"))
+    friendships_set.insert(Friendship.new(:id => "corey_to_ross", :to_id => "ross", :from_id => "corey"))
+    friendships_set.insert(Friendship.new(:id => "ross_to_nathan", :to_id => "nathan", :from_id => "ross"))
 
-    profiles_set.insert(Profile.new(:id => 1, :owner_id => 1))
-    profiles_set.insert(Profile.new(:id => 2, :owner_id => 2))
-    profiles_set.insert(Profile.new(:id => 3, :owner_id => 3))
+    profiles_set.insert(Profile.new(:id => "nathan_profile", :owner_id => "nathan"))
+    profiles_set.insert(Profile.new(:id => "corey_profile", :owner_id => "corey"))
+    profiles_set.insert(Profile.new(:id => "ross_profile", :owner_id => "ross"))
 
-    photos_set.insert(Photo.new(:id => 1, :user_id => 1, :name => "Photo 1", :camera_id => 1))
-    photos_set.insert(Photo.new(:id => 2, :user_id => 1, :name => "Photo 2", :camera_id => 1))
-    photos_set.insert(Photo.new(:id => 3, :user_id => 2, :name => "Photo 3", :camera_id => 1))
+    photos_set.insert(Photo.new(:id => "nathan_photo_1", :user_id => "nathan", :name => "Nathan Photo 1", :camera_id => "minolta_xd_11"))
+    photos_set.insert(Photo.new(:id => "nathan_photo_2", :user_id => "nathan", :name => "Nathan Photo 2", :camera_id => "minolta_xd_11"))
+    photos_set.insert(Photo.new(:id => "corey_photo_1", :user_id => "corey", :name => "Corey Photo 1", :camera_id => "minolta_xd_11"))
 
-    accounts_set.insert(Account.new(:id => 1, :user_id => 1, :name => "Nathan's Pivotal Account", :deactivated_at => Time.utc(2008, 8, 31)))
-    accounts_set.insert(Account.new(:id => 2, :user_id => 1, :name => "Account 2", :deactivated_at => nil))
-    accounts_set.insert(Account.new(:id => 3, :user_id => 2, :name => "Account 3", :deactivated_at => Time.utc(2008, 8, 2)))
-    accounts_set.insert(Account.new(:id => 4, :user_id => 1, :name => "Account 1", :deactivated_at => nil))
+    accounts_set.insert(Account.new(:id => "nathan_pivotal_account", :user_id => "nathan", :name => "Nathan's Pivotal Account", :deactivated_at => Time.utc(2008, 8, 31)))
+    accounts_set.insert(Account.new(:id => "nathan_account_2", :user_id => "nathan", :name => "Nathan's Account 2", :deactivated_at => nil))
+    accounts_set.insert(Account.new(:id => "corey_account", :user_id => "corey", :name => "Corey's Account", :deactivated_at => nil))
+    accounts_set.insert(Account.new(:id => "ross_account", :user_id => "ross", :name => "Ross's Account", :deactivated_at => Time.utc(2008, 8, 2)))
 
-    cameras_set.insert(Camera.new(:id => 1, :name => "Minolta XD-11"))
+    cameras_set.insert(Camera.new(:id => "minolta_xd_11", :name => "Minolta XD-11"))
   end
 
   config.after do

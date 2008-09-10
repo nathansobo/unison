@@ -5,7 +5,7 @@ module Unison
     describe Signal do
       attr_reader :user, :attribute, :signal
       before do
-        @user = User.find(1)
+        @user = User.find("nathan")
         @attribute = users_set[:name]
         @signal = user.signal(attribute)
       end

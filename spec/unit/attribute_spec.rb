@@ -109,13 +109,13 @@ module Unison
           @attribute = Attribute.new(relation, :created_at, :datetime)
         end
 
-        it "when passed a Time, returns the same Time with second precision" do
+        it "when passed a Time, returns the time" do
           now = Time.now.utc
-          attribute.convert(now).should == Time.at(now.to_i)
+          attribute.convert(now).should == now
         end
 
         it "when passed a String, returns a Time represented by the String" do
-          attribute.convert("2/4/1999").should == Time.utc(1999, 2, 4)
+          attribute.convert("2/4/1999").should == Time.parse("2/4/1999")
         end
 
         it "when passed an Integer, returns a Time represented by the Integer" do

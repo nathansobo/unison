@@ -9,7 +9,7 @@ module Unison
       end
 
       def parent_tuple
-        @parent_tuple ||= User.find(1)
+        @parent_tuple ||= User.find("nathan")
       end
 
       def name

@@ -24,7 +24,7 @@ module Unison
 
         context "when the passed in Tuple causes the proc to evaluate to true" do
           it "returns true" do
-            user = User.find(1)
+            user = User.find("nathan")
             user.name.should == "Nathan"
             predicate.eval(user).should be_true
           end
@@ -32,7 +32,7 @@ module Unison
 
         context "when the passed in Tuple causes the proc to evaluate to false" do
           it "returns false" do
-            user = User.find(2)
+            user = User.find("corey")
             user.name.should_not == "Nathan"
             predicate.eval(user).should be_false
           end

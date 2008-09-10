@@ -143,12 +143,13 @@ module Unison
     def []=(attribute_or_symbol, new_value)
       attribute = attribute_for(attribute_or_symbol)
       old_value = attribute_values[attribute]
-      if old_value != new_value
-        attribute_values[attribute] = new_value
-        update_subscription_node.call(attribute, old_value, new_value)
+      converted_new_value = attribute.convert(new_value)
+      if old_value != converted_new_value
+        attribute_values[attribute] = converted_new_value
+        update_subscription_node.call(attribute, old_value, converted_new_value)
         @dirty = true unless new?
       end
-      new_value
+      converted_new_value
     end
 
     def has_attribute?(attribute)

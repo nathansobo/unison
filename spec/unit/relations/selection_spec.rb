@@ -6,7 +6,7 @@ module Unison
       attr_reader :operand, :selection, :predicate, :photo
       before do
         @operand = photos_set
-        @predicate = operand[:user_id].eq(1)
+        @predicate = operand[:user_id].eq("nathan")
         @selection = Selection.new(operand, predicate)
       end
 
@@ -43,7 +43,7 @@ module Unison
 
         context "when the Selection contains CompositeTuples" do
           before do
-            @selection = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id])).where(users_set[:id].eq(1))
+            @selection = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id])).where(users_set[:id].eq("nathan"))
             selection.should_not be_empty
             selection.composed_sets.length.should == 2
           end
@@ -66,24 +66,24 @@ module Unison
       describe "#to_sql" do
         context "when #operand is a Set" do
           before do
-            @selection = users_set.where(users_set[:id].eq(1))
+            @selection = users_set.where(users_set[:id].eq("nathan"))
           end
 
           it "returns 'select #operand where #predicate'" do
-            selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer` FROM `users` WHERE `users`.`id` = 1")
+            selection.to_sql.should be_like("SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer` FROM `users` WHERE `users`.`id` = 'nathan'")
           end
         end
 
         context "when #operand is a Selection" do
           before do
-            @selection = users_set.where(users_set[:id].eq(1)).where(users_set[:name].eq("Nathan"))
+            @selection = users_set.where(users_set[:id].eq("nathan")).where(users_set[:name].eq("Nathan"))
           end
 
           it "returns 'select #operand where #predicate'" do
             selection.to_sql.should be_like("
               SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`
               FROM `users`
-              WHERE `users`.`id` = 1 AND `users`.`name` = 'Nathan'
+              WHERE `users`.`id` = 'nathan' AND `users`.`name` = 'Nathan'
             ")
           end
         end
@@ -133,7 +133,7 @@ module Unison
 
         describe "#merge" do
           it "calls #merge on the #operand" do
-            tuple = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
+            tuple = Photo.new(:id => "photo_100", :user_id => "nathan", :name => "Photo 100")
             operand.find(tuple[:id]).should be_nil
             operand.should_not include(tuple)
             mock.proxy(operand).merge([tuple])
@@ -147,19 +147,19 @@ module Unison
         context "when the #predicate is updated" do
           attr_reader :user, :new_photos, :old_photos
           before do
-            @user = User.find(1)
+            @user = User.find("nathan")
             @predicate = photos_set[:user_id].eq(user.signal(:id))
             @selection = Selection.new(photos_set, predicate).retain_with(retainer)
             @old_photos = selection.tuples.dup
             old_photos.length.should == 2
-            @new_photos = [ Photo.create(:id => 100, :user_id => 100, :name => "Photo 100"),
-                            Photo.create(:id => 101, :user_id => 100, :name => "Photo 101") ]
+            @new_photos = [ Photo.create(:id => "photo_100", :user_id => "new_id", :name => "Photo 100"),
+                            Photo.create(:id => "photo_101", :user_id => "new_id", :name => "Photo 101") ]
           end
 
           context "for Tuples that match the new Predicate but not the old one" do
             it "inserts the Tuples in the set" do
               new_photos.each{|tuple| selection.tuples.should_not include(tuple)}
-              user[:id] = 100
+              user[:id] = "new_id"
               new_photos.each{|tuple| selection.tuples.should include(tuple)}
             end
 
@@ -168,13 +168,13 @@ module Unison
               selection.on_insert(retainer) do |tuple|
                 inserted_tuples << tuple
               end
-              user[:id] = 100
+              user[:id] = "new_id"
               inserted_tuples.should == new_photos
             end
 
             it "#retains inserted Tuples" do
               new_photos.each{|tuple| tuple.should_not be_retained_by(selection)}
-              user[:id] = 100
+              user[:id] = "new_id"
               new_photos.each{|tuple| tuple.should be_retained_by(selection)}
             end
           end
@@ -182,7 +182,7 @@ module Unison
           context "for Tuples that matched the old Predicate but not the new one" do
             it "deletes the Tuples from the set" do
               old_photos.each{|tuple| selection.tuples.should include(tuple)}
-              user[:id] = 100
+              user[:id] = "new_id"
               old_photos.each{|tuple| selection.tuples.should_not include(tuple)}
             end
 
@@ -191,13 +191,13 @@ module Unison
               selection.on_delete(retainer) do |tuple|
                 deleted_tuples << tuple
               end
-              user[:id] = 100
+              user[:id] = "new_id"
               deleted_tuples.should == old_photos
             end
 
             it "#releases deleted Tuples"  do
               old_photos.each{|tuple| tuple.should be_retained_by(selection)}
-              user[:id] = 100
+              user[:id] = "new_id"
               old_photos.each{|tuple| tuple.should_not be_retained_by(selection)}
             end
           end
@@ -214,7 +214,7 @@ module Unison
         context "when a Tuple is inserted into the #operand" do
           context "when the Tuple matches the #predicate" do
             before do
-              @photo = Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")
+              @photo = Photo.new(:id => "photo_100", :user_id => "nathan", :name => "Photo 100")
               predicate.eval(photo).should be_true
             end
 
@@ -243,7 +243,7 @@ module Unison
 
           context "when the Tuple does not match the #predicate" do
             before do
-              @photo = Photo.new(:id => 100, :user_id => 2, :name => "Photo 100")
+              @photo = Photo.new(:id => "photo_100", :user_id => 2, :name => "Photo 100")
               predicate.eval(photo).should be_false
             end
 
@@ -270,13 +270,13 @@ module Unison
 
         context "when a Tuple in the #operand that does not match the #predicate is updated" do
           before do
-            @photo = Photo.create(:id => 100, :user_id => 2, :name => "Photo 100")
+            @photo = Photo.create(:id => "photo_100", :user_id => 2, :name => "Photo 100")
           end
 
           context "when the update causes the Tuple to match the #predicate" do
             it "adds the Tuple to the result of #tuples" do
               selection.tuples.should_not include(photo)
-              photo[:user_id] = 1
+              photo[:user_id] = "nathan"
               selection.tuples.should include(photo)
             end
 
@@ -287,13 +287,13 @@ module Unison
               end
               selection.tuples.should_not include(photo)
 
-              photo[:user_id] = 1
+              photo[:user_id] = "nathan"
               on_insert_tuple.should == photo
             end
 
             it "is #retained by the Selection" do
               photo.should_not be_retained_by(selection)
-              photo[:user_id] = 1
+              photo[:user_id] = "nathan"
               photo.should be_retained_by(selection)
             end
           end
@@ -301,7 +301,7 @@ module Unison
           context "when the update does not cause the Tuple to match the #predicate" do
             it "does not add the Tuple into the result of #tuples" do
               selection.tuples.should_not include(photo)
-              photo[:user_id] = 3
+              photo[:user_id] = "ross"
               selection.tuples.should_not include(photo)
             end
 
@@ -310,12 +310,12 @@ module Unison
                 raise "Dont call me"
               end
 
-              photo[:user_id] = 3
+              photo[:user_id] = "ross"
             end
 
             it "is not #retained by the Selection" do
               photo.should_not be_retained_by(selection)
-              photo[:user_id] = 3
+              photo[:user_id] = "ross"
               photo.should_not be_retained_by(selection)
             end
           end
@@ -329,7 +329,7 @@ module Unison
           context "when the update causes the Tuple to not match the #predicate" do
             it "removes the Tuple from the result of #tuples" do
               selection.tuples.should include(photo)
-              photo[:user_id] = 3
+              photo[:user_id] = "ross"
               selection.tuples.should_not include(photo)
             end
 
@@ -339,13 +339,13 @@ module Unison
                 on_delete_tuple = tuple
               end
 
-              photo[:user_id] = 3
+              photo[:user_id] = "ross"
               on_delete_tuple.should == photo
             end
 
             it "#releases the deleted Tuple" do
               photo.should be_retained_by(selection)
-              photo[:user_id] = 3
+              photo[:user_id] = "ross"
               photo.should_not be_retained_by(selection)
             end
           end
@@ -424,7 +424,7 @@ module Unison
           context "when the Tuple does not match the #predicate" do
             attr_reader :photo
             before do
-              @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
+              @photo = Photo.create(:id => "photo_100", :user_id => "new_id", :name => "Photo 100")
               predicate.eval(photo).should be_false
             end
 
@@ -465,7 +465,7 @@ module Unison
             tuples = selection.tuples
             tuples.size.should == 2
             tuples.each do |tuple|
-              tuple[:user_id].should == 1
+              tuple[:user_id].should == "nathan"
             end
           end
         end
@@ -473,7 +473,7 @@ module Unison
         describe "#merge" do
           it "raises an Exception" do
             lambda do
-              selection.merge([Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")])
+              selection.merge([Photo.new(:id => "photo_100", :user_id => "nathan", :name => "Photo 100")])
             end.should raise_error
           end
         end

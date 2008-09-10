@@ -14,8 +14,8 @@ module Unison
       context "when passed a Set" do
         it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#to_sql" do
           origin.fetch(users_set).should == [
-            User.new(:id => 11, :name => "Buffington", :hobby => "Bots"),
-              User.new(:id => 12, :name => "Keefa", :hobby => "Begging")
+            User.new(:id => "buffington", :name => "Buffington", :hobby => "Bots", :team_id => "mangos"),
+              User.new(:id => "keefa", :name => "Keefa", :hobby => "Begging", :team_id => "chargers")
           ]
         end
       end
@@ -23,7 +23,7 @@ module Unison
       context "when passed a Selection" do
         it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#to_sql" do
           selection = users_set.where(users_set[:name].eq("Buffington"))
-          origin.fetch(selection).should == [User.new(:id => 11, :name => "Buffington", :hobby => "Bots")]
+          origin.fetch(selection).should == [User.new(:id => "buffington", :name => "Buffington", :hobby => "Bots", :team_id => "mangos")]
         end
       end
 
@@ -109,7 +109,7 @@ module Unison
           context "when PrimitiveTuple is new?" do
             before do
               origin.connection[:photos].delete
-              @relation = photos_set.where(Photo[:id].eq(1)).singleton
+              @relation = photos_set.where(Photo[:id].eq("nathan_photo_1")).singleton
               @tuple = relation.tuple
               relation.tuple.should be_new
             end
@@ -124,7 +124,7 @@ module Unison
 
           context "when PrimitiveTuple is not new? and dirty?" do
             before do
-              @relation = photos_set.where(Photo[:id].eq(1)).singleton
+              @relation = photos_set.where(Photo[:id].eq("nathan_photo_1")).singleton
               @tuple = relation.tuple
               relation.push
               tuple.should_not be_new
@@ -142,7 +142,7 @@ module Unison
 
           context "when PrimitiveTuple is not new? and not dirty?" do
             before do
-              @relation = photos_set.where(Photo[:id].eq(1)).singleton
+              @relation = photos_set.where(Photo[:id].eq("nathan_photo_1")).singleton
               @tuple = relation.tuple
               relation.push
               tuple.should_not be_new
@@ -171,7 +171,7 @@ module Unison
 
               origin.fetch(photos_set).should be_empty
               origin.push(photos_set)
-              origin.fetch(photos_set).sort.should == photos_set.tuples
+              origin.fetch(photos_set).sort_by(&:id).should == photos_set.tuples.sort_by(&:id)
               photos_set.any? {|tuple| tuple.new?}.should be_false
             end
           end
@@ -190,7 +190,7 @@ module Unison
 
               origin.push(photos_set)
               fetched_photos = origin.fetch(photos_set)
-              origin.fetch(photos_set).sort.should == photos_set.tuples
+              origin.fetch(photos_set).sort_by(&:id).should == photos_set.tuples.sort_by(&:id)
               photos_set.any? {|tuple| tuple.dirty?}.should be_false
             end
 

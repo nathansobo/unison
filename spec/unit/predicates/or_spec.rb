@@ -14,7 +14,7 @@ module Unison
       describe "#eval" do
         context "when the passed in Tuple causes one of the child Predicates to #eval to true" do
           it "returns true" do
-            user = User.find(1)
+            user = User.find("nathan")
             user.id.should_not == 3
             user.name.should == "Nathan"
             predicate.eval(user).should be_true
@@ -23,7 +23,7 @@ module Unison
 
         context "when the passed in Tuple causes none of the child Predicates to #eval to true" do
           it "returns false" do
-            user = User.find(2)
+            user = User.find("corey")
             user.name.should_not == 3
             user.name.should_not == "Nathan"
             predicate.eval(user).should be_false

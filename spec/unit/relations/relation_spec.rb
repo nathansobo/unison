@@ -178,7 +178,7 @@ module Unison
       describe "#singleton" do
         attr_reader :user
         before do
-          @user = User.find(1)
+          @user = User.find("nathan")
           @relation = users_set.where(users_set[:id].eq(1))
           relation.should_not be_singleton
         end

@@ -63,7 +63,7 @@ module Unison
             end
 
             def operand_1
-              @user ||= User.find(1)
+              @user ||= User.find("nathan")
               @operand_1 ||= user.signal(:name)
             end
             alias_method :operand, :operand_1
@@ -87,7 +87,7 @@ module Unison
             end
 
             def operand_2
-              @user ||= User.find(1)
+              @user ||= User.find("nathan")
               @operand_2 ||= user.signal(:name)
             end
             alias_method :operand, :operand_2
@@ -114,7 +114,7 @@ module Unison
             attr_reader :user
 
             def operand_1
-              @user ||= User.find(1)
+              @user ||= User.find("nathan")
               user.signal(:name)
             end
             alias_method :operand, :operand_1
@@ -136,7 +136,7 @@ module Unison
             attr_reader :user
 
             def operand_2
-              @user ||= User.find(1)
+              @user ||= User.find("nathan")
               user.signal(:name)
             end
             alias_method :operand, :operand_2
@@ -166,7 +166,7 @@ module Unison
             end
 
             def operand_1
-              @user ||= User.find(1)
+              @user ||= User.find("nathan")
               @operand_1 ||= user.signal(:name)
             end
             alias_method :operand, :operand_1
@@ -186,7 +186,7 @@ module Unison
           context "when #operand_2 is a Signal" do
             attr_reader :user, :operand
             before do
-              @user = User.find(1)
+              @user = User.find("nathan")
               @predicate = EqualTo.new("Nathan", user.signal(:name))
               @operand = predicate.operand_2
             end
