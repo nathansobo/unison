@@ -55,6 +55,18 @@ module Arel
     end
   end
 
+  class Inequality < Binary
+    def ==(other)
+      Inequality === other and
+        ((operand1 == other.operand1 and operand2 == other.operand2) or
+         (operand1 == other.operand2 and operand2 == other.operand1))
+    end
+
+    def predicate_sql
+      operand2.inequality_predicate_sql
+    end
+  end
+
   class GreaterThanOrEqualTo < Binary
     def predicate_sql; '>=' end
   end

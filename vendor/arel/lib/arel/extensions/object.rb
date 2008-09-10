@@ -14,6 +14,10 @@ class Object
   def equality_predicate_sql
     '='
   end
+
+  def inequality_predicate_sql
+    '<>'
+  end
     
   def metaclass
     class << self

@@ -1,0 +1,6 @@
+coverage/*
+config/database.yml
+*.DS_Store
+*.iws
+*.ipr
+*.iml

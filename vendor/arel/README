@@ -107,7 +107,7 @@ The `parent_id` column is a foreign key from the `comments` table to itself. Now
     comments_with_replies = \
       comments.join(replies).on(replies[:parent_id].eq(comments[:id]))
     # => SELECT * FROM comments INNER JOIN comments AS comments_2 WHERE comments_2.parent_id = comments.id
-    
+      
 The call to `#alias` is actually optional: Arel will always produce a unique name for every table joined in the relation, and it will always do so deterministically to exploit query caching. Explicit aliasing is more common, however. When you want to extract specific slices of data, aliased tables are a necessity. For example to get just certain columns from the row, treat a row like a hash:
 
     comments_with_replies.first[replies[:body]]
