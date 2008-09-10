@@ -23,18 +23,21 @@ module Unison
     end
     include PredicateConstructors
 
-    attr_reader :relation, :name, :type
+    attr_reader :set, :name, :type
 
     VALID_TYPES = [:integer, :boolean, :string, :symbol, :datetime]
 
-    def initialize(relation, name, type)
+    def initialize(set, name, type)
       raise ArgumentError, "Type #{type.inspect} is invalid. Valid types are #{VALID_TYPES.inspect}" unless VALID_TYPES.include?(type)
-      @relation, @name, @type = relation, name, type
+      @set, @name, @type = set, name, type
       @ascending = true
     end
 
     def convert(value)
       send("convert_to_#{type}", value)
+    rescue Exception => e
+      e.message.replace("Error converting value for '#{set.name}.#{name}' attribute\n#{e.message}")
+      raise e
     end
 
     def ascending
@@ -57,11 +60,11 @@ module Unison
 
     def ==(other)
       return false unless other.instance_of?(Attribute)
-      relation.equal?(other.relation) && name == other.name
+      set.equal?(other.set) && name == other.name
     end
 
     def to_arel
-      relation.to_arel[name]
+      set.to_arel[name]
     end
 
     protected

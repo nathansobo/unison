@@ -2,23 +2,23 @@ require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
   describe Attribute do
-    attr_reader :relation, :attribute
+    attr_reader :set, :attribute
     before do
-      @relation = Relations::Set.new(:users)
-      @attribute = Attribute.new(relation, :name, :string)
-      relation.attributes[attribute.name] = attribute
+      @set = Relations::Set.new(:users)
+      @attribute = Attribute.new(set, :name, :string)
+      set.attributes[attribute.name] = attribute
     end
 
     describe "#initialize" do
-      it "sets the #relation and #name" do
-        attribute.relation.should == relation
+      it "sets the #set and #name" do
+        attribute.set.should == set
         attribute.name.should == :name
       end
 
       context "when passed an 'invalid' type" do
         it "raises an ArgumentError" do
           lambda do
-            Attribute.new(relation, :id, :invalid)
+            Attribute.new(set, :id, :invalid)
           end.should raise_error(ArgumentError)
         end
       end
@@ -27,7 +27,7 @@ module Unison
     describe "#convert" do
       context "when #type is :integer" do
         before do
-          @attribute = Attribute.new(relation, :id, :integer)
+          @attribute = Attribute.new(set, :id, :integer)
         end
 
         it "when passed an Integer, returns the Integer" do
@@ -47,7 +47,7 @@ module Unison
 
       context "when #type is :string" do
         before do
-          @attribute = Attribute.new(relation, :name, :string)
+          @attribute = Attribute.new(set, :name, :string)
         end
 
         it "when passed a String, returns the String" do
@@ -62,7 +62,7 @@ module Unison
 
       context "when #type is :symbol" do
         before do
-          @attribute = Attribute.new(relation, :state, :symbol)
+          @attribute = Attribute.new(set, :state, :symbol)
         end
 
         it "when passed a Symbol, returns the Symbol" do
@@ -77,7 +77,7 @@ module Unison
 
       context "when #type is :boolean" do
         before do
-          @attribute = Attribute.new(relation, :is_cool, :boolean)
+          @attribute = Attribute.new(set, :is_cool, :boolean)
         end
         
         it "when passed true or false, returns identity" do
@@ -106,7 +106,7 @@ module Unison
 
       context "when #type is :datetime" do
         before do
-          @attribute = Attribute.new(relation, :created_at, :datetime)
+          @attribute = Attribute.new(set, :created_at, :datetime)
         end
 
         it "when passed a Time, returns the time" do
@@ -126,10 +126,10 @@ module Unison
     end
 
     describe "#==" do
-      it "returns true for Attributes of the same relation and name and false otherwise" do
-        attribute.should == Attribute.new(relation, :name, :string)
+      it "returns true for Attributes of the same set and name and false otherwise" do
+        attribute.should == Attribute.new(set, :name, :string)
         attribute.should_not == Attribute.new(Relations::Set.new(:foo), :name, :string)
-        attribute.should_not == Attribute.new(relation, :foo, :string)
+        attribute.should_not == Attribute.new(set, :foo, :string)
         attribute.should_not == Object.new
       end
     end
@@ -217,12 +217,12 @@ module Unison
     
     describe "#to_arel" do
       before do
-        @relation = users_set
-        @attribute = Attribute.new(relation, :name, :string)
+        @set = users_set
+        @attribute = Attribute.new(set, :name, :string)
       end
       
-      it "returns the Arel::Attribute with the same #name from #relation.to_arel" do
-        attribute.to_arel.should == attribute.relation.to_arel[attribute.name]
+      it "returns the Arel::Attribute with the same #name from #set.to_arel" do
+        attribute.to_arel.should == attribute.set.to_arel[attribute.name]
       end
       
       it "when called repeatedly, returns the same Arel::Attribute instance" do
