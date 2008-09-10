@@ -16,6 +16,38 @@ module Unison
         end
       end
 
+      describe "#==" do
+        context "when other is a Signal" do
+          context "when other.attribute == #attribute and other.tuple == #tuple" do
+            it "returns true" do
+              signal.should == user.signal(attribute)
+            end
+          end
+
+          context "when other.attribute == #attribute and other.tuple != #tuple" do
+            it "returns true" do
+              user_2 = User.find("corey")
+              user_2.should_not == user
+              signal.should_not == user_2.signal(attribute)
+            end
+          end
+
+          context "when other.attribute != #attribute and other.tuple == #tuple" do
+            it "returns true" do
+              attribute_2 = users_set[:id]
+              attribute_2.should_not == attribute
+              signal.should_not == user.signal(attribute_2)
+            end
+          end
+        end
+
+        context "when other is not a Signal" do
+          it "returns false" do
+            signal.should_not == Object.new
+          end
+        end
+      end
+
       context "when #retained?" do
         attr_reader :retainer
         before do

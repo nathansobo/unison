@@ -29,6 +29,11 @@ module Unison
       value.to_arel
     end
 
+    def ==(other)
+      return false unless other.is_a?(Signal)
+      other.attribute == attribute && other.tuple == tuple
+    end
+
     protected
     attr_reader :update_subscription_node
   end
