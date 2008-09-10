@@ -103,9 +103,18 @@ module Unison
       when Time
         value
       when Integer
-        Time.at(value)
+        Time.utc(value)
       when String
-        Time.parse(value)
+        local_time = Time.parse(value)
+        Time.utc(
+          local_time.year,
+          local_time.month,
+          local_time.day,
+          local_time.hour,
+          local_time.min,
+          local_time.sec,
+          local_time.usec
+        )
       end
     end
   end

@@ -550,7 +550,7 @@ module Unison
               tuple = Account.find("nathan_pivotal_account")
               attribute = Account[:deactivated_at]
 
-              new_time = Time.now
+              new_time = Time.now.utc
               mock.proxy(attribute).convert(new_time.to_s)
 
               tuple[attribute] = new_time.to_s
