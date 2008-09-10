@@ -21,7 +21,7 @@ module Unison
 
     describe ".find" do
       it "delegates to #find on the #relation" do
-        User.find("nathan").should == User.set.find(1)
+        User.find("nathan").should == User.set.find("nathan")
       end
     end
 

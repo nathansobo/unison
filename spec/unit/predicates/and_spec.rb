@@ -8,7 +8,7 @@ module Unison
       before do
         @user = User.find("nathan")
         @signal = user.signal(:name)
-        @child_predicate_without_signal = EqualTo.new(users_set[:id], 1)
+        @child_predicate_without_signal = EqualTo.new(users_set[:id], "nathan")
         @child_predicate_subscribed_signal = EqualTo.new(signal, "Nathan")
         @predicate = And.new(child_predicate_without_signal, child_predicate_subscribed_signal)
       end
@@ -17,7 +17,7 @@ module Unison
         context "when the passed in Tuple causes all of the child Predicates to #eval to true" do
           it "returns true" do
             user = User.find("nathan")
-            user.id.should == 1
+            user.id.should == "nathan"
             user.name.should == "Nathan"
             predicate.eval(user).should be_true
           end

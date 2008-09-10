@@ -57,6 +57,7 @@ connection.create_table :accounts do
   column :name, :string
   column :user_id, :string
   column :deactivated_at, :string
+  column :employee_id, :integer
 end
 
 Spec::Runner.configure do |config|
@@ -205,6 +206,7 @@ Spec::Runner.configure do |config|
         attribute_accessor :user_id, :string
         attribute_accessor :name, :string
         attribute_accessor :deactivated_at, :datetime
+        attribute_accessor :employee_id, :integer
         belongs_to :owner, :foreign_key => :user_id, :class_name => :User
 
         def active?
@@ -238,10 +240,10 @@ Spec::Runner.configure do |config|
     photos_set.insert(Photo.new(:id => "nathan_photo_2", :user_id => "nathan", :name => "Nathan Photo 2", :camera_id => "minolta_xd_11"))
     photos_set.insert(Photo.new(:id => "corey_photo_1", :user_id => "corey", :name => "Corey Photo 1", :camera_id => "minolta_xd_11"))
 
-    accounts_set.insert(Account.new(:id => "nathan_pivotal_account", :user_id => "nathan", :name => "Nathan's Pivotal Account", :deactivated_at => Time.utc(2008, 8, 31)))
-    accounts_set.insert(Account.new(:id => "nathan_account_2", :user_id => "nathan", :name => "Nathan's Account 2", :deactivated_at => nil))
-    accounts_set.insert(Account.new(:id => "corey_account", :user_id => "corey", :name => "Corey's Account", :deactivated_at => nil))
-    accounts_set.insert(Account.new(:id => "ross_account", :user_id => "ross", :name => "Ross's Account", :deactivated_at => Time.utc(2008, 8, 2)))
+    accounts_set.insert(Account.new(:id => "nathan_pivotal_account", :user_id => "nathan", :name => "Nathan's Pivotal Account", :deactivated_at => Time.utc(2008, 8, 31), :employee_id => 1))
+    accounts_set.insert(Account.new(:id => "nathan_account_2", :user_id => "nathan", :name => "Nathan's Account 2", :deactivated_at => nil, :employee_id => 2))
+    accounts_set.insert(Account.new(:id => "corey_account", :user_id => "corey", :name => "Corey's Account", :deactivated_at => nil, :employee_id => 3))
+    accounts_set.insert(Account.new(:id => "ross_account", :user_id => "ross", :name => "Ross's Account", :deactivated_at => Time.utc(2008, 8, 2), :employee_id => 4))
 
     cameras_set.insert(Camera.new(:id => "minolta_xd_11", :name => "Minolta XD-11"))
   end

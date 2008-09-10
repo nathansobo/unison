@@ -61,7 +61,7 @@ module Unison
 
       context "when the target Relation is the owner of the :foreign_key" do
         def parent_tuple
-          @parent_tuple ||= Team.find(1)
+          @parent_tuple ||= Team.find("mangos")
         end
 
         def name
@@ -80,7 +80,7 @@ module Unison
 
         describe ":foreign_key option" do
           def parent_tuple
-            @parent_tuple ||= Profile.find(1)
+            @parent_tuple ||= Profile.find("nathan_profile")
           end
 
           def name
@@ -127,7 +127,7 @@ module Unison
 
       context "when passed a :through relation that is #nil?" do
         def parent_tuple
-          @parent_tuple ||= Profile.find(2)
+          @parent_tuple ||= Profile.find("corey_profile")
         end
 
         def name
@@ -139,7 +139,7 @@ module Unison
         end
 
         it "returns an empty Relation" do
-          yogaless_profile = Profile.find(2)
+          yogaless_profile = Profile.find("corey_profile")
           yogaless_profile.yoga_owner.should be_nil
           yogaless_profile.yoga_photos.should == []
         end

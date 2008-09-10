@@ -29,9 +29,9 @@ module Unison
       describe "#eval" do
         context "when one of the operands is a Signal" do
           it "uses the value of the Signal in the predication" do
-            user = User.new(:id => 1, :name => "Nathan")
-            EqualTo.new(1, user.signal(:id)).eval(user).should be_true
-            EqualTo.new(user.signal(:id), 1).eval(user).should be_true
+            user = User.new(:id => "nathan", :name => "Nathan")
+            EqualTo.new("nathan", user.signal(:id)).eval(user).should be_true
+            EqualTo.new(user.signal(:id), "nathan").eval(user).should be_true
           end
         end
       end

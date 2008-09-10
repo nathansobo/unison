@@ -188,8 +188,11 @@ module Unison
         
         describe ".relates_to_many" do
           it "creates an instance method representing the given Relation" do
-            user = User.find("nathan")
-            user.photos.should == photos_set.where(photos_set[:user_id].eq(1))
+            User.relates_to_many(:custom_photos) do
+              Photo.set.where(Photo[:user_id].eq(id))
+            end
+            user = User.create(:id => "bob", :name => "Bob")
+            user.custom_photos.should == Photo.set.where(photos_set[:user_id].eq("bob"))
           end
 
           it 'creates a "#{name}_relation" method to return the relation' do
@@ -218,7 +221,7 @@ module Unison
         describe ".relates_to_one" do
           attr_reader :photo
           before do
-            @photo = Photo.find(1)
+            @photo = Photo.find("nathan_photo_1")
           end
 
           it "defines a method named after the name which returns the Relation that is produced by instance-evaling the block" do
@@ -265,8 +268,8 @@ module Unison
 
           context "when subclassed" do
             it "creates an instance method representing the given Relation subclass" do
-              user = Developer.create(:id => 100, :name => "Jeff")
-              profile = Profile.create(:id => 100, :owner_id => 100)
+              user = Developer.create(:id => "jeff", :name => "Jeff")
+              profile = Profile.create(:id => "jeff_profile", :owner_id => "jeff")
               user.profile.should == profile
             end
           end
@@ -336,7 +339,7 @@ module Unison
         describe ".belongs_to" do
           attr_reader :profile, :user
           before do
-            @profile = Profile.find(1)
+            @profile = Profile.find("nathan_profile")
             @user = User.find("nathan")
           end
 
@@ -355,7 +358,7 @@ module Unison
               describe "the reader method" do
                 it "returns the result of the default Selection yielded to the block" do
                   profile.yoga_owner.should == User.where(User[:id].eq(profile[:owner_id])).where(User[:hobby].eq("Yoga"))
-                  Profile.find(2).yoga_owner.should be_nil
+                  Profile.find("corey_profile").yoga_owner.should be_nil
                 end
               end
             end
@@ -364,9 +367,9 @@ module Unison
 
         describe ".create" do
           it "instantiates an instance of the Tuple with the given attributes and inserts it into its .set, then returns it" do
-            User.find(100).should be_nil
-            user = User.create(:id => 100, :name => "Ernie")
-            User.find(100).should == user
+            User.find("ernie").should be_nil
+            user = User.create(:id => "ernie", :name => "Ernie")
+            User.find("ernie").should == user
           end
         end
 
@@ -420,17 +423,17 @@ module Unison
       describe "Instance Methods" do
         before do
           User.superclass.should == PrimitiveTuple::Base
-          @tuple = User.new(:id => 1, :name => "Nathan")
+          @tuple = User.new(:id => "nathan", :name => "Nathan")
         end
 
         describe "#initialize" do
           attr_reader :tuple
           before do
-            @tuple = User.new(:id => 1, :name => "Nathan")
+            @tuple = User.new(:id => "nathan", :name => "Nathan")
           end
 
           it "assigns a hash of attribute-value pairs corresponding to its Relation" do
-            tuple[:id].should == 1
+            tuple[:id].should == "nathan"
             tuple[:name].should == "Nathan"
           end
 
@@ -448,8 +451,8 @@ module Unison
             end
 
             it "if an #id is provided, honors it" do
-              user = User.create(:id => 100, :name => "Obama")
-              user.id.should == 100
+              user = User.create(:id => "obama", :name => "Obama")
+              user.id.should == "obama"
             end
 
             it "if no #id is provided, sets :id to a generated guid" do
@@ -465,7 +468,7 @@ module Unison
 
             it "if an #id is provided, raises an error" do
               lambda do
-                User.create(:id => 100, :name => "Obama")
+                User.create(:id => "obama", :name => "Obama")
               end.should raise_error
             end
           end
@@ -486,7 +489,7 @@ module Unison
         describe "#[]" do
           context "when passed an Attribute defined on #relation" do
             it "returns the value" do
-              tuple[User.set[:id]].should == 1
+              tuple[User.set[:id]].should == "nathan"
               tuple[User.set[:name]].should == "Nathan"
             end
           end
@@ -507,7 +510,7 @@ module Unison
 
           context "when passed a Symbol corresponding to a name of an Attribute defined on #set" do
             it "returns the value" do
-              tuple[:id].should == 1
+              tuple[:id].should == "nathan"
               tuple[:name].should == "Nathan"
             end
           end
@@ -544,7 +547,7 @@ module Unison
             end
 
             it "converts the passed in value using the Attribute" do
-              tuple = Account.find(1)
+              tuple = Account.find("nathan_pivotal_account")
               attribute = Account[:deactivated_at]
 
               new_time = Time.now
@@ -556,15 +559,15 @@ module Unison
             end
 
             it "sets the value for an Attribute defined on the set of the Tuple class" do
-              tuple[User.set[:id]] = 2
-              tuple[User.set[:id]].should == 2
+              tuple[User.set[:id]] = "corey"
+              tuple[User.set[:id]].should == "corey"
               tuple[User.set[:name]] = new_value
               tuple[User.set[:name]].should == new_value
             end
 
             it "sets the value for a Symbol corresponding to a name of an Attribute defined on the #set of the Tuple class" do
-              tuple[:id] = 2
-              tuple[:id].should == 2
+              tuple[:id] = "corey"
+              tuple[:id].should == "corey"
               tuple[:name] = new_value
               tuple[:name].should == new_value
             end
@@ -576,7 +579,7 @@ module Unison
               end
 
               old_value = tuple[:id]
-              new_value = tuple[:id] + 1
+              new_value = "#{tuple[:id]}_id"
               tuple[:id] = new_value
               update_args.should == [[tuple.set[:id], old_value, new_value]]
             end
@@ -688,8 +691,8 @@ module Unison
 
         describe "#<=>" do
           it "sorts on the :id attribute" do
-            tuple_1 = Photo.find(1)
-            tuple_2 = Photo.find(2)
+            tuple_1 = Photo.find("nathan_photo_1")
+            tuple_2 = Photo.find("nathan_photo_2")
 
             (tuple_1 <=> tuple_2).should == -1
             (tuple_2 <=> tuple_1).should == 1
@@ -743,7 +746,7 @@ module Unison
           context "when passed in expression is not an Attribute" do
             it "is the identity function" do
               tuple.bind(:id).should == :id
-              tuple.bind(1).should == 1
+              tuple.bind("nathan").should == "nathan"
               tuple.bind("Hi").should == "Hi"
             end
           end
@@ -760,7 +763,7 @@ module Unison
 
           context "when other Tuple#attribute_values == #attribute_values" do
             before do
-              @other_tuple = User.new(:id => 1, :name => "Nathan")
+              @other_tuple = User.new(:id => "nathan", :name => "Nathan")
               other_tuple.send(:attribute_values).should == tuple.send(:attribute_values)
             end
 
@@ -771,7 +774,7 @@ module Unison
 
           context "when other Tuple#attributes != #attributes" do
             before do
-              @other_tuple = User.new(:id => 100, :name => "Nathan's Clone")
+              @other_tuple = User.new(:id => "nathan_clone", :name => "Nathan's Clone")
               other_tuple.send(:attribute_values).should_not == tuple.send(:attribute_values)
             end
 

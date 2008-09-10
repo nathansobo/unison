@@ -93,22 +93,22 @@ module Unison
       describe "#find" do
         context "when a Tuple with the given #id is in the Relation" do
           before do
-            users_set.where(users_set[:id].eq(1)).should_not be_empty
+            users_set.where(users_set[:id].eq("nathan")).should_not be_empty
           end
 
           it "returns that Tuple" do
-            user = users_set.find(1)
-            user[:id].should == 1
+            user = users_set.find("nathan")
+            user[:id].should == "nathan"
           end
         end
 
         context "when no Tuple with the given #id is in the Relation" do
           before do
-            users_set.where(users_set[:id].eq(100)).should be_empty
+            users_set.where(users_set[:id].eq("not_in_set")).should be_empty
           end
 
           it "returns that Tuple" do
-            user = users_set.find(100)
+            user = users_set.find("not_in_set")
             user.should be_nil
           end
         end
@@ -116,10 +116,10 @@ module Unison
 
       describe "#where" do
         it "returns a Selection with self as its #operand and the given predicate as its #predicate" do
-          selection = users_set.where(users_set[:id].eq(1))
+          selection = users_set.where(users_set[:id].eq("nathan"))
           selection.should be_an_instance_of(Selection)
           selection.operand.should == users_set
-          selection.predicate.should == users_set[:id].eq(1)
+          selection.predicate.should == users_set[:id].eq("nathan")
         end
       end
 
@@ -147,7 +147,7 @@ module Unison
         context "when the Relation is a singleton" do
           context "when #tuples.first is nil" do
             it "returns true" do
-              selection = users_set.where(users_set[:id].eq(100))
+              selection = users_set.where(users_set[:id].eq("not_in_set"))
               selection.singleton
 
               selection.tuples.first.should be_nil
@@ -157,7 +157,7 @@ module Unison
 
           context "when #tuples.first is not nil" do
             it "returns false" do
-              selection = users_set.where(users_set[:id].eq(1))
+              selection = users_set.where(users_set[:id].eq("nathan"))
               selection.singleton
 
               selection.tuples.first.should_not be_nil
@@ -168,9 +168,9 @@ module Unison
 
         context "when the Relation is not a singleton" do
           it "always returns false even when #tuples is empty" do
-            users_set.where(users_set[:id].eq(1)).should_not be_nil
-            users_set.where(users_set[:id].eq(100)).should be_empty
-            users_set.where(users_set[:id].eq(100)).should_not be_nil
+            users_set.where(users_set[:id].eq("nathan")).should_not be_nil
+            users_set.where(users_set[:id].eq("not_in_set")).should be_empty
+            users_set.where(users_set[:id].eq("not_in_set")).should_not be_nil
           end
         end
       end
@@ -179,7 +179,7 @@ module Unison
         attr_reader :user
         before do
           @user = User.find("nathan")
-          @relation = users_set.where(users_set[:id].eq(1))
+          @relation = users_set.where(users_set[:id].eq("nathan"))
           relation.should_not be_singleton
         end
 
@@ -201,7 +201,7 @@ module Unison
 
       describe "#tuple" do
         before do
-          @relation = users_set.where(users_set[:id].eq(1))
+          @relation = users_set.where(users_set[:id].eq("nathan"))
         end
 
         context "when singleton? is true" do
@@ -253,7 +253,7 @@ module Unison
 
           context "with the a different result of #tuples" do
             before do
-              predicate = users_set[:id].eq(1)
+              predicate = users_set[:id].eq("nathan")
               @other_relation = relation.where(predicate)
               other_relation.should_not be_empty
               relation.tuples.should_not == other_relation.tuples
@@ -319,8 +319,8 @@ module Unison
         it "inserts each of the results of #initial_read" do
           mock.proxy(relation).after_first_retain
 
-          user_1 = users_set.find(1)
-          user_2 = users_set.find(2)
+          user_1 = users_set.find("nathan")
+          user_2 = users_set.find("corey")
 
           stub(relation).initial_read {[user_1, user_2]}
           mock.proxy(relation).insert(user_1).ordered

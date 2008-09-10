@@ -6,7 +6,7 @@ module Unison
       attr_reader :predicate, :operand_1, :operand_2
 
       before do
-        @operand_1 = users_set[:id]
+        @operand_1 = accounts_set[:employee_id]
         @operand_2 = 2
         @predicate = GreaterThanOrEqualTo.new(operand_1, operand_2)
       end      
@@ -19,9 +19,9 @@ module Unison
 
       describe "#eval" do
         it "returns true if one of the operands is an attribute and its value in the tuple is >= than the other operand" do
-          predicate.eval(User.new(:id => operand_2 + 1)).should be_true
-          predicate.eval(User.new(:id => operand_2)).should be_true
-          predicate.eval(User.new(:id => operand_2 - 1)).should be_false
+          predicate.eval(Account.new(:employee_id => operand_2 + 1)).should be_true
+          predicate.eval(Account.new(:employee_id => operand_2)).should be_true
+          predicate.eval(Account.new(:employee_id => operand_2 - 1)).should be_false
         end
       end
     end

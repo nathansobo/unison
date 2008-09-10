@@ -7,7 +7,7 @@ module Unison
       before do
         @set = Set.new(:users)
         @retainer = Object.new
-        set.has_attribute(:id, :integer)
+        set.has_attribute(:id, :string)
         set.has_attribute(:name, :string)
         set.retain_with(retainer)
       end
@@ -130,7 +130,7 @@ module Unison
           end
 
           it "adds the given Tuple to the results of #tuples" do
-            tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+            tuple = set.tuple_class.new(:id => "nathan", :name => "Nathan")
             lambda do
               set.insert(tuple).should == tuple
             end.should change {set.size}.by(1)
@@ -138,7 +138,7 @@ module Unison
           end
 
           it "retains the inserted Tuple" do
-            tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+            tuple = set.tuple_class.new(:id => "nathan", :name => "Nathan")
             tuple.should_not be_retained_by(set)
             set.insert(tuple)
             tuple.should be_retained_by(set)
@@ -146,13 +146,13 @@ module Unison
 
           context "when an Tuple with the same #id exists in the Set" do
             before do
-              set.insert(set.tuple_class.new(:id => 1))
+              set.insert(set.tuple_class.new(:id => "nathan"))
             end
 
             it "raises an ArgumentError" do
-              set.find(1).should_not be_nil
+              set.find("nathan").should_not be_nil
               lambda do
-                set.insert(set.tuple_class.new(:id => 1))
+                set.insert(set.tuple_class.new(:id => "nathan"))
               end.should raise_error(ArgumentError)
             end
           end
@@ -160,7 +160,7 @@ module Unison
           context "when the Tuple is #new?" do
             it "calls #after_create on the PrimitiveTuple before triggering the the on_insert event" do
               call_order = []
-              tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+              tuple = set.tuple_class.new(:id => "nathan", :name => "Nathan")
               mock.proxy(tuple).after_create do |returns|
                 call_order.push(:after_create)
                 returns
@@ -176,7 +176,7 @@ module Unison
 
           context "when the Tuple is not #new?" do
             it "does not call #after_create on the PrimitiveTuple" do
-              tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+              tuple = set.tuple_class.new(:id => "nathan", :name => "Nathan")
               tuple.pushed
               tuple.should_not be_new
               dont_allow(tuple).after_create
@@ -185,7 +185,7 @@ module Unison
           end
 
           it "when the Set is not the passed in object's #relation, raises an ArgumentError" do
-            incorrect_tuple = Profile.find(1)
+            incorrect_tuple = Profile.find("nathan_profile")
             incorrect_tuple.set.should_not == set
 
             lambda do
@@ -203,7 +203,7 @@ module Unison
 
           it "raises an error" do
             lambda do
-              set.insert(set.tuple_class.new(:id => 100))
+              set.insert(set.tuple_class.new(:id => "bob"))
             end.should raise_error
           end
         end
@@ -213,7 +213,7 @@ module Unison
         context "when the Tuple is in the Set" do
           attr_reader :tuple
           before do
-            @tuple = set.tuple_class.create(:id => 1, :name => "Nathan")
+            @tuple = set.tuple_class.create(:id => "nathan", :name => "Nathan")
           end
 
           it "removes the Tuple from the Set" do
@@ -232,7 +232,7 @@ module Unison
         context "when the Tuple is not in the Set" do
           attr_reader :tuple_not_in_set
           before do
-            @tuple_not_in_set = set.tuple_class.new(:id => 100, :name => "Nathan")
+            @tuple_not_in_set = set.tuple_class.new(:id => "nathan_not_in_set", :name => "Nathan")
             set.tuples.should_not include(tuple_not_in_set)
           end
           
@@ -250,7 +250,7 @@ module Unison
           set.on_insert(retainer) do |tuple|
             inserted = tuple
           end
-          tuple = set.tuple_class.new(:id => 1, :name => "Nathan")
+          tuple = set.tuple_class.new(:id => "nathan", :name => "Nathan")
           set.insert(tuple)
           inserted.should == tuple
         end
@@ -258,7 +258,7 @@ module Unison
 
       describe "#on_delete" do
         it "will invoke the block when a Tuple is deleted from the Set" do
-          tuple = set.tuple_class.create(:id => 1, :name => "Nathan")
+          tuple = set.tuple_class.create(:id => "nathan", :name => "Nathan")
           deleted = nil
           set.on_delete(retainer) do |deleted_tuple|
             deleted = deleted_tuple
@@ -273,9 +273,9 @@ module Unison
         context "when passed some Tuples that have the same id as Tuples already in the Set and some that don't" do
           attr_reader :in_set, :not_in_set, :tuples
           before do
-            set.tuple_class.create(:id => 1, :name => "Wil")
-            @in_set = set.tuple_class.new(:id => 1, :name => "Kunal")
-            @not_in_set = set.tuple_class.new(:id => 2, :name => "Nathan")
+            set.tuple_class.create(:id => "in_set", :name => "Wil")
+            @in_set = set.tuple_class.new(:id => "in_set", :name => "Kunal")
+            @not_in_set = set.tuple_class.new(:id => "not_in_set", :name => "Nathan")
             set.find(in_set[:id]).should_not be_nil
             set.find(not_in_set[:id]).should be_nil
             @tuples = [in_set, not_in_set]
