@@ -91,30 +91,48 @@ module Unison
       end
 
       describe "#find" do
-        it "calls self[:id].convert on the argument" do
-          mock.proxy(users_set[:id]).convert(1)
-          users_set.find(1)
+        context "when passed a Predicate" do
+          context "when the Predicate results in a Selection that is not empty" do
+            it "returns the first matching Tuple" do
+              result = users_set.find(users_set[:id].eq("nathan"))
+              result.class.should == User
+              result.id.should == "nathan"
+            end
+          end
+
+          context "when the Predicate results in a Selection that is empty" do
+            it "returns nil" do
+              users_set.find(users_set[:id].eq("not_in_set")).class.should == NilClass
+            end
+          end
         end
 
-        context "when a Tuple with the given #id is in the Relation" do
-          before do
-            users_set.where(users_set[:id].eq("nathan")).should_not be_empty
+        context "when passed an id" do
+          it "calls self[:id].convert on the argument" do
+            mock.proxy(users_set[:id]).convert("nathan")
+            users_set.find("nathan")
           end
 
-          it "returns that Tuple" do
-            user = users_set.find("nathan")
-            user[:id].should == "nathan"
-          end
-        end
+          context "when a Tuple with the given #id is in the Relation" do
+            before do
+              users_set.where(users_set[:id].eq("nathan")).should_not be_empty
+            end
 
-        context "when no Tuple with the given #id is in the Relation" do
-          before do
-            users_set.where(users_set[:id].eq("not_in_set")).should be_empty
+            it "returns that Tuple" do
+              user = users_set.find("nathan")
+              user[:id].should == "nathan"
+            end
           end
 
-          it "returns that Tuple" do
-            user = users_set.find("not_in_set")
-            user.should be_nil
+          context "when no Tuple with the given #id is in the Relation" do
+            before do
+              users_set.where(users_set[:id].eq("not_in_set")).should be_empty
+            end
+
+            it "returns that Tuple" do
+              user = users_set.find("not_in_set")
+              user.should be_nil
+            end
           end
         end
       end

@@ -45,8 +45,13 @@ module Unison
         end
       end
 
-      def find(id)
-        where(self[:id].eq(self[:id].convert(id))).tuples.first
+      def find(id_or_predicate)
+        if id_or_predicate.is_a?(Predicates::Base)
+          predicate = id_or_predicate
+        else
+          predicate = self[:id].eq(self[:id].convert(id_or_predicate))
+        end
+        where(predicate).tuples.first
       end
 
       def where(predicate)
