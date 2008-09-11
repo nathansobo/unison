@@ -26,7 +26,8 @@ module Unison
       end
 
       def default_attribute_values
-        responders_in_inheritance_chain(:default_attribute_values_on_self).inject({}) do |defaults, klass|
+        responders = responders_in_inheritance_chain(:default_attribute_values_on_self)
+        responders.inject({self[:id] => lambda {Guid.new.to_s}}) do |defaults, klass|
           defaults.merge(klass.default_attribute_values_on_self)
         end
       end
@@ -230,15 +231,22 @@ module Unison
     end
 
     def initialize_attribute_values(initial_attributes)
-      initial_attributes = default_attribute_values.merge(
-        convert_symbol_keys_to_attributes(initial_attributes)
-      )
+      initial_attributes = convert_symbol_keys_to_attributes(initial_attributes)
       if initial_attributes[set[:id]] && !Unison.test_mode?
         raise "You can only assign the :id attribute in test mode"
       end
-      initial_attributes[set[:id]] ||= Guid.new.to_s
-      initial_attributes.each do |attribute, value|
-        self[attribute] = value
+
+      initial_attributes.each do |attribute, attribute_value|
+        self[attribute] = attribute_value
+      end
+
+      assign_default_attribute_values(initial_attributes)
+    end
+
+    def assign_default_attribute_values(initial_attributes)
+      default_attribute_values.each do |attribute, default_value|
+        next if initial_attributes.has_key?(attribute)
+        self[attribute] = default_value.is_a?(Proc)? instance_eval(&default_value) : default_value
       end
     end
 

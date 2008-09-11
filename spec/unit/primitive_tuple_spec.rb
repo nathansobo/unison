@@ -95,6 +95,15 @@ module Unison
                   User.new(:is_awesome => true).is_awesome.should be_true
                 end
               end
+
+              context "when passed a Proc" do
+                it "defaults the attribute value to the result of #instance_eval(&the_passed_in_Proc)" do
+                  User.attribute_reader(:nick_name, :string, :default => lambda {name + "y"})
+                  User.new(:name => "Joe").nick_name.should == "Joey"
+                  User.new(:name => "Joe", :nick_name => "Joe Bob").nick_name.should == "Joe Bob"
+                  User.new(:name => "Joe", :nick_name => nil).nick_name.should == nil
+                end
+              end
             end
 
             context "when a :default is not supplied" do
