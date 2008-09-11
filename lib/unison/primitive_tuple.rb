@@ -176,6 +176,10 @@ module Unison
       self
     end
 
+    def delete
+      set.delete(self)
+    end
+
     def new?
       @new
     end

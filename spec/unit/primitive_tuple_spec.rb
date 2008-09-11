@@ -660,6 +660,15 @@ module Unison
           end
         end
 
+        describe "#delete" do
+          it "removes itself from its #set" do
+            tuple = User.find("nathan")
+            tuple.set.should include(tuple)
+            tuple.delete
+            tuple.set.should_not include(tuple)
+          end
+        end
+
         describe "#pushed" do
           it "sets new? to false" do
             tuple.should be_new
