@@ -1,0 +1,39 @@
+Signal Ideas
+game.signal(:mode) # tuple signal
+game.signal(:current_round) # singleton relation signal
+
+game.current_round.signal(:mode) # tuple signal
+game.signal(:current_round).signal(:mode) # derived tuple signal
+
+
+game.signal(:game_sessions) do |game_sessions| # relation signal
+end
+
+class DerivedSignal
+
+
+
+
+  def initialize(operand, attribute)
+    @operand = operand
+
+    operand.on_change do |old_value, new_value|
+      operand_signal.destroy
+      @operand_signal = new_value.signal(attribute)
+      operand_signal.on_change do
+        operand_signal.value
+#        trigger_on_change(old_value, new_value)
+      end
+      unless old_value.send(attribute) == new_value.send(attribute)
+        trigger_on_change(old_value.send(attribute), new_value.send(attribute))
+      end
+    end
+
+
+
+
+  end
+
+
+
+end
