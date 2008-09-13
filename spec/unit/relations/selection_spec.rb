@@ -448,7 +448,6 @@ module Unison
         describe "#after_first_retain" do
           before do
             mock.proxy(selection).after_first_retain
-            publicize predicate, :update_subscription_node
           end
 
           it "retains the Tuples inserted by #initial_read" do

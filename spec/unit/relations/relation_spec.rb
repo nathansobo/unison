@@ -137,6 +137,19 @@ module Unison
         end
       end
 
+      describe "#singleton" do
+        attr_reader :user
+        before do
+          @user = User.find("nathan")
+          @relation = users_set.where(users_set[:id].eq("nathan"))
+          relation.should_not be_singleton
+        end
+
+        it "returns an instance of a SingletonRelation with self as the #operand" do
+          
+        end
+      end
+
       describe "#where" do
         it "returns a Selection with self as its #operand and the given predicate as its #predicate" do
           selection = users_set.where(users_set[:id].eq("nathan"))
@@ -167,86 +180,10 @@ module Unison
       end
 
       describe "#nil?" do
-        context "when the Relation is a singleton" do
-          context "when #tuples.first is nil" do
-            it "returns true" do
-              selection = users_set.where(users_set[:id].eq("not_in_set"))
-              selection.singleton
-
-              selection.tuples.first.should be_nil
-              selection.should be_nil
-            end
-          end
-
-          context "when #tuples.first is not nil" do
-            it "returns false" do
-              selection = users_set.where(users_set[:id].eq("nathan"))
-              selection.singleton
-
-              selection.tuples.first.should_not be_nil
-              selection.should_not be_nil
-            end
-          end
-        end
-
-        context "when the Relation is not a singleton" do
-          it "always returns false even when #tuples is empty" do
-            users_set.where(users_set[:id].eq("nathan")).should_not be_nil
-            users_set.where(users_set[:id].eq("not_in_set")).should be_empty
-            users_set.where(users_set[:id].eq("not_in_set")).should_not be_nil
-          end
-        end
-      end
-
-      describe "#singleton" do
-        attr_reader :user
-        before do
-          @user = User.find("nathan")
-          @relation = users_set.where(users_set[:id].eq("nathan"))
-          relation.should_not be_singleton
-        end
-
-        it "causes #singleton? to be true" do
-          relation.singleton          
-          relation.should be_singleton
-        end
-
-        it "forwards #method_missing to the first Tuple in the Relation" do
-          mock(user).my_method {:return_value}
-          relation.singleton
-          relation.my_method.should == :return_value
-        end
-
-        it "returns self" do
-          relation.singleton.should == relation
-        end
-      end
-
-      describe "#tuple" do
-        before do
-          @relation = users_set.where(users_set[:id].eq("nathan"))
-        end
-
-        context "when singleton? is true" do
-          before do
-            relation.singleton
-          end
-
-          it "returns #tuples.first" do
-            relation.tuple.should == relation.tuples.first
-          end
-        end
-
-        context "when singleton? is false" do
-          before do
-            relation.should_not be_singleton
-          end
-
-          it "raises an Exception" do
-            lambda do
-              relation.tuple
-            end.should raise_error
-          end
+        it "always returns false even when #tuples is empty" do
+          users_set.where(users_set[:id].eq("nathan")).should_not be_nil
+          users_set.where(users_set[:id].eq("not_in_set")).should be_empty
+          users_set.where(users_set[:id].eq("not_in_set")).should_not be_nil
         end
       end
 

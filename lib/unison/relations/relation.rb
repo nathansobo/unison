@@ -129,11 +129,15 @@ module Unison
       attr_reader :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
 
       def insert(tuple)
+        insert_without_callback(tuple)
+        insert_subscription_node.call(tuple)
+        tuple
+      end
+
+      def insert_without_callback(tuple)
         raise "Relation must be retained" unless retained?
         tuple.retain_with(self)
         add_to_tuples(tuple)
-        insert_subscription_node.call(tuple)
-        tuple
       end
 
       def add_to_tuples(tuple)
@@ -141,10 +145,14 @@ module Unison
       end
 
       def delete(tuple)
-        tuple.release_from(self)
-        tuples.delete(tuple)
+        delete_without_callback(tuple)
         delete_subscription_node.call(tuple)
         tuple
+      end
+
+      def delete_without_callback(tuple)
+        tuple.release_from(self)
+        tuples.delete(tuple)
       end
 
       def after_first_retain
