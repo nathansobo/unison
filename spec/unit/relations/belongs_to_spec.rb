@@ -20,19 +20,22 @@ module Unison
         {}
       end
 
-      it "is a singleton" do
-        belongs_to.should be_singleton
-      end
 
       describe "#operand" do
-        it "is the #set of the class with the pluralized and classified #name" do
-          belongs_to.operand.should == Team.set
+        it "is a Selection" do
+          belongs_to.operand.class.should == Selection
         end
-      end
 
-      describe "#predicate" do
-        it "compares a Signal of the :id attribute with the value of the #foreign_key on the #parent_tuple" do
-          belongs_to.predicate.should == Team[:id].eq(parent_tuple.signal(belongs_to.foreign_key))
+        describe ".operand" do
+          it "is the #set of the class with the pluralized and classified #name" do
+            belongs_to.operand.operand.should == Team.set
+          end
+        end
+
+        describe ".predicate" do
+          it "compares a Signal of the :id attribute with the value of the #foreign_key on the #parent_tuple" do
+            belongs_to.operand.predicate.should == Team[:id].eq(parent_tuple.signal(belongs_to.foreign_key))
+          end
         end
       end
 
@@ -69,8 +72,9 @@ module Unison
       describe ":class_name option" do
         context "when not passed a :class_name option" do
           describe "#operand" do
-            it "returns the #set on the class associated with the pluralized and classified #name" do
-              belongs_to.operand.should == Team.set
+            it "returns a Selection whose #set is that of the class associated with the pluralized and classified #name" do
+              belongs_to.operand.class.should == Selection
+              belongs_to.operand.operand.should == Team.set
             end
           end
         end
@@ -88,8 +92,11 @@ module Unison
             {:class_name => :User}
           end
 
-          it "uses the #set of the class with the given name as the target Relation" do
-            belongs_to.operand.should == User.set
+          describe "#operand" do
+            it "returns a Selection whose #set is that of the class associated with the :class_name option" do
+              belongs_to.operand.class.should == Selection
+              belongs_to.operand.operand.should == User.set
+            end
           end
         end
       end

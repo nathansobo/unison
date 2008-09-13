@@ -142,11 +142,10 @@ module Unison
         before do
           @user = User.find("nathan")
           @relation = users_set.where(users_set[:id].eq("nathan"))
-          relation.should_not be_singleton
         end
 
         it "returns an instance of a SingletonRelation with self as the #operand" do
-          
+          relation.singleton.should == SingletonRelation.new(relation)
         end
       end
 

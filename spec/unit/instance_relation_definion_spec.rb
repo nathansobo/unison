@@ -27,25 +27,25 @@ module Unison
         instance.instance_variable_get("@relation_name_relation").should == relation
       end
 
-      context "when not singleton" do
-        it "sets #singleton? to false on the created Relation" do
+      context "is_singleton? is false" do
+        it "returns the Relation created in the #definition" do
           relation = users_set
-          definition_block = lambda {relation}
-          definition = InstanceRelationDefinition.new(:relation_name, definition_block, caller, false)
+          definition_proc = lambda {relation}
+          definition = InstanceRelationDefinition.new(:relation_name, definition_proc, caller, false)
 
-          relation.should_not be_singleton
-          definition.initialize_instance_relation(Object.new).should_not be_singleton
+          definition.initialize_instance_relation(Object.new).should == relation
         end
       end
 
-      context "when singleton" do
-        it "sets #singleton? to true on the created Relation" do
+      context "is_singleton? is true" do
+        it "returns a SingletonRelation whose #operand is the Relation created in the #definition" do
           relation = users_set
-          definition_block = lambda {relation}
-          definition = InstanceRelationDefinition.new(:relation_name, definition_block, caller, true)
+          definition_proc = lambda {relation}
+          definition = InstanceRelationDefinition.new(:relation_name, definition_proc, caller, true)
 
-          relation.should_not be_singleton
-          definition.initialize_instance_relation(Object.new).should be_singleton
+          created_relation = definition.initialize_instance_relation(Object.new)
+          created_relation.class.should == Relations::SingletonRelation
+          created_relation.operand.should == relation
         end
       end
     end

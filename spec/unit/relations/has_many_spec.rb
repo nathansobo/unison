@@ -20,10 +20,6 @@ module Unison
         {}
       end
 
-      it "is not a singleton" do
-        has_many.should_not be_singleton
-      end
-
       describe "#operand" do
         it "is the #set of the class with the pluralized and classified #name" do
           has_many.operand.should == Photo.set

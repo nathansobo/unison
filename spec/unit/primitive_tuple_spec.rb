@@ -252,27 +252,29 @@ module Unison
               it "returns nil" do
                 users_set.delete(photo.user.tuple)
                 photo.user_relation.should be_nil
-
-                if photo.user
-                  raise "photo.user should be the nil object`"
-                end
+                photo.user.class.should == NilClass
               end
             end
 
             context "when the produced Relation is not #nil?" do
-              it "returns the Relation" do
-                photo.user.should_not be_nil
-                photo.user.should == User.where(User[:id].eq(photo[:user_id]))
+              it "returns a SingletonRelation whose #operand is the block's return value" do
+                Photo.class_eval do
+                  relates_to_one :relates_to_one_user do
+                    User.where(User[:id].eq(user_id))
+                  end
+                end
+
+                photo = Photo.create(:user_id => "nathan")
+
+                photo.relates_to_one_user.should_not be_nil
+                photo.relates_to_one_user.class.should == Relations::SingletonRelation
+                photo.relates_to_one_user.operand.should == User.where(User[:id].eq(photo[:user_id]))
               end
             end
           end
 
           it 'creates a "#{name}_relation" method to return the relation' do
             photo.user_relation.should == photo.user
-          end
-
-          it "causes the Relation to be treated as a singleton" do
-            photo.user.should be_singleton
           end
 
           context "when the Relation definition is invalid" do
@@ -342,9 +344,9 @@ module Unison
 
             context "when passed a block" do
               describe "the reader method" do
-                it "calls the block on the default generated relation, using its return value as the instance relation" do
-                  user.active_account.should be_singleton
-                  user.active_account.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
+                it "calls the block on the default generated Relation, and uses a SingletonRelation whose #operand is the return value of the block as its instance Relation" do
+                  user.active_account.class.should == Relations::SingletonRelation
+                  user.active_account.operand.should == Account.where(Account[:user_id].eq(user[:id])).where(Account.active?)
 
                   user_without_active_account = User.find("ross")
                   user_without_active_account.active_account.should be_nil

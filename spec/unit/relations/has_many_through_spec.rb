@@ -20,10 +20,6 @@ module Unison
         {:through => :photos}
       end
 
-      it "is not a singleton" do
-        has_many_through.should_not be_singleton
-      end
-
       describe "#projected_set" do
         it "returns the #target_relation" do
           has_many_through.projected_set.should == Camera.set

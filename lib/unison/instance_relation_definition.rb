@@ -7,8 +7,8 @@ module Unison
 
     def initialize_instance_relation(tuple_instance)
       begin
-        relation = tuple_instance.instance_eval(&definition)
-        relation.singleton if singleton?
+        definition_relation = tuple_instance.instance_eval(&definition)
+        relation = singleton?? definition_relation.singleton : definition_relation
         tuple_instance.instance_variable_set("@#{name}_relation", relation)
       rescue Exception => e
         e.message.concat("\nThe above error was caused by the relation definition at:\n\t#{definition_backtrace.join("\n\t\t")}\n\nThe actual exception backtrace is:\n")

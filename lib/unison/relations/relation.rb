@@ -78,22 +78,8 @@ module Unison
         composed_sets.size > 1
       end
 
-      def tuple
-        raise "Relation must be singleton to call #tuple" unless singleton?
-        tuples.first
-      end
-
-      def nil?
-        singleton?? tuples.first.nil? : false
-      end
-
       def singleton
-        @singleton = true
-        self
-      end
-
-      def singleton?
-        @singleton
+        SingletonRelation.new(self)
       end
 
       def on_insert(*args, &block)
@@ -171,11 +157,7 @@ module Unison
       end
 
       def delegate_to_read(method_name, *args, &block)
-        if singleton?
-          tuples.first.send(method_name, *args, &block)
-        else
-          tuples.send(method_name, *args, &block)
-        end
+        tuples.send(method_name, *args, &block)
       end
     end
   end

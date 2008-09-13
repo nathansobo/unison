@@ -20,19 +20,21 @@ module Unison
         {}
       end
 
-      it "is a singleton" do
-        has_one.should be_singleton
-      end
-
       describe "#operand" do
-        it "is the #set of the class with the pluralized and classified #name" do
-          has_one.operand.should == LifeGoal.set
+        it "is a Selection" do
+          has_one.operand.class.should == Selection
         end
-      end
 
-      describe "#predicate" do
-        it "compares the #foreign_key attribute with #parent_tuple.id" do
-          has_one.predicate.should == LifeGoal[has_one.foreign_key].eq(parent_tuple.id)
+        describe "#operand" do
+          it "is the #set of the class with the pluralized and classified #name" do
+            has_one.operand.operand.should == LifeGoal.set
+          end
+        end
+
+        describe "#predicate" do
+          it "compares the #foreign_key attribute with #parent_tuple.id" do
+            has_one.operand.predicate.should == LifeGoal[has_one.foreign_key].eq(parent_tuple.id)
+          end
         end
       end
 
@@ -65,8 +67,9 @@ module Unison
       describe ":class_name option" do
         context "when not passed a :class_name option" do
           describe "#operand" do
-            it "returns the #set on the class associated with the pluralized and classified #name" do
-              has_one.operand.should == LifeGoal.set
+            it "returns a Selection whose #set is that of the class associated with the pluralized and classified #name" do
+              has_one.operand.class.should == Selection
+              has_one.operand.operand.should == LifeGoal.set
             end
           end
         end
@@ -80,8 +83,11 @@ module Unison
             {:class_name => :Profile, :foreign_key => :owner_id}
           end
 
-          it "uses the #set of the class with the given name as the target Relation" do
-            has_one.operand.should == Profile.set
+          describe "#operand" do
+            it "returns a Selection whose #set is that of the class associated with the :class_name option" do
+              has_one.operand.class.should == Selection
+              has_one.operand.operand.should == Profile.set
+            end
           end
         end
       end

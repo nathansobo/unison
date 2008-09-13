@@ -31,6 +31,12 @@ module Unison
         end
       end
 
+      describe "#singleton" do
+        it "returns self" do
+          singleton_relation.singleton.should equal(singleton_relation)
+        end
+      end
+
       describe "#tuple" do
         it "returns #operand.tuples.first" do
           singleton_relation.tuple.should == operand.tuples.first

@@ -1,11 +1,11 @@
 module Unison
   module Relations
-    class BelongsTo < Selection
+    class BelongsTo < SingletonRelation
       include TupleRelationMethods
 
       def initialize(owner, name, options)
         @owner, @name, @options = owner, name, options
-        super(target_class.set, target_class.set[:id].eq(owner.signal(foreign_key)))
+        super(Selection.new(target_class.set, target_class.set[:id].eq(owner.signal(foreign_key))))
         singleton
       end
 
