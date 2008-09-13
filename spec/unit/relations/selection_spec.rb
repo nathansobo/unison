@@ -321,6 +321,59 @@ module Unison
           end
         end
 
+        context "when a Tuple is deleted from the #operand" do
+          context "when the Tuple matches the #predicate" do
+            attr_reader :photo
+            before do
+              @photo = selection.tuples.first
+              predicate.eval(photo).should be_true
+            end
+
+            it "is deleted from the objects returned by #tuples" do
+              selection.tuples.should include(photo)
+              photos_set.delete(photo)
+              selection.tuples.should_not include(photo)
+            end
+
+            it "triggers the on_delete event" do
+              deleted = nil
+              selection.on_delete(retainer) do |tuple|
+                deleted = tuple
+              end
+
+              photos_set.delete(photo)
+              deleted.should == photo
+            end
+
+            it "#releases the deleted Tuple" do
+              photo.should be_retained_by(selection)
+              photos_set.delete(photo)
+              photo.should_not be_retained_by(selection)
+            end
+          end
+
+          context "when the Tuple does not match the #predicate" do
+            attr_reader :photo
+            before do
+              @photo = Photo.create(:id => "photo_100", :user_id => "new_id", :name => "Photo 100")
+              predicate.eval(photo).should be_false
+            end
+
+            it "is not deleted from the objects returned by #tuples" do
+              selection.tuples.should_not include(photo)
+              photos_set.delete(photo)
+              selection.tuples.should_not include(photo)
+            end
+
+            it "does not trigger the on_delete event" do
+              selection.on_delete(retainer) do |tuple|
+                raise "Don't call me"
+              end
+              photos_set.delete(photo)
+            end
+          end
+        end
+        
         context "when a Tuple that matches the #predicate in the #operand is updated" do
           before do
             @photo = selection.tuples.first
@@ -386,59 +439,6 @@ module Unison
               photo.should be_retained_by(selection)
               photo[:name] = "James Brown"
               photo.should be_retained_by(selection)
-            end
-          end
-        end
-
-        context "when a Tuple is deleted from the #operand" do
-          context "when the Tuple matches the #predicate" do
-            attr_reader :photo
-            before do
-              @photo = selection.tuples.first
-              predicate.eval(photo).should be_true
-            end
-
-            it "is deleted from the objects returned by #tuples" do
-              selection.tuples.should include(photo)
-              photos_set.delete(photo)
-              selection.tuples.should_not include(photo)
-            end
-
-            it "triggers the on_delete event" do
-              deleted = nil
-              selection.on_delete(retainer) do |tuple|
-                deleted = tuple
-              end
-
-              photos_set.delete(photo)
-              deleted.should == photo
-            end
-
-            it "#releases the deleted Tuple" do
-              photo.should be_retained_by(selection)
-              photos_set.delete(photo)
-              photo.should_not be_retained_by(selection)
-            end
-          end
-
-          context "when the Tuple does not match the #predicate" do
-            attr_reader :photo
-            before do
-              @photo = Photo.create(:id => "photo_100", :user_id => "new_id", :name => "Photo 100")
-              predicate.eval(photo).should be_false
-            end
-
-            it "is not deleted from the objects returned by #tuples" do
-              selection.tuples.should_not include(photo)
-              photos_set.delete(photo)
-              selection.tuples.should_not include(photo)
-            end
-
-            it "does not trigger the on_delete event" do
-              selection.on_delete(retainer) do |tuple|
-                raise "Don't call me"
-              end
-              photos_set.delete(photo)
             end
           end
         end

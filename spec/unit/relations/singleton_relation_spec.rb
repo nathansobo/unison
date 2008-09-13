@@ -3,10 +3,13 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 module Unison
   module Relations
     describe SingletonRelation do
-      attr_reader :operand, :singleton_relation
+      attr_reader :singleton_relation
       before do
-        @operand = accounts_set.order_by(accounts_set[:employee_id])
         @singleton_relation = SingletonRelation.new(operand)
+      end
+
+      def operand
+        @operand ||= accounts_set.order_by(accounts_set[:employee_id])
       end
 
       describe "#initialize" do
@@ -146,49 +149,88 @@ module Unison
 
         context "when a Tuple is inserted into the #operand" do
           context "when the Tuple is first in the #operand" do
-            attr_reader :old_first_tuple, :new_first_tuple
-
-            before do
-              @old_first_tuple = singleton_relation.tuple
-              @new_first_tuple = Account.new(:employee_id => old_first_tuple.employee_id - 1)
-            end
-
-            it "sets #tuple to the inserted Tuple" do
-              accounts_set.insert(new_first_tuple)
-              operand.tuples.should include(new_first_tuple)              
-              singleton_relation.tuple.should == new_first_tuple
-            end
-            
-            it "triggers the on_insert event with the inserted Tuple after the #tuple has changed" do
-              on_insert_tuple = nil
-              singleton_relation.on_insert(retainer) do |tuple|
-                singleton_relation.tuple.should == new_first_tuple
-                on_insert_tuple = tuple
+            context "when #operand.tuples.size > 0" do
+              attr_reader :old_first_tuple, :new_first_tuple
+              before do
+                @old_first_tuple = singleton_relation.tuple
+                @new_first_tuple = Account.new(:employee_id => old_first_tuple.employee_id - 1)
               end
-              operand.set.insert(new_first_tuple)
-              on_insert_tuple.should == new_first_tuple
-            end
 
-            it "retains the inserted Tuple" do
-              new_first_tuple.should_not be_retained_by(singleton_relation)
-              operand.set.insert(new_first_tuple)
-              new_first_tuple.should be_retained_by(singleton_relation)
-            end
-
-            it "triggers the on_delete event with the old #tuple after the #tuple has changed" do
-              on_delete_tuple = nil
-              singleton_relation.on_delete(retainer) do |tuple|
+              it "sets #tuple to the inserted Tuple" do
+                accounts_set.insert(new_first_tuple)
                 singleton_relation.tuple.should == new_first_tuple
-                on_delete_tuple = tuple
               end
-              operand.set.insert(new_first_tuple)
-              on_delete_tuple.should == old_first_tuple
+
+              it "triggers the on_insert event with the inserted Tuple after the #tuple has changed" do
+                on_insert_tuple = nil
+                singleton_relation.on_insert(retainer) do |tuple|
+                  singleton_relation.tuple.should == new_first_tuple
+                  on_insert_tuple = tuple
+                end
+                operand.set.insert(new_first_tuple)
+                on_insert_tuple.should == new_first_tuple
+              end
+
+              it "triggers the on_delete event with the old #tuple after the #tuple has changed" do
+                on_delete_tuple = nil
+                singleton_relation.on_delete(retainer) do |tuple|
+                  singleton_relation.tuple.should == new_first_tuple
+                  on_delete_tuple = tuple
+                end
+                operand.set.insert(new_first_tuple)
+                on_delete_tuple.should == old_first_tuple
+              end
+
+              it "retains the inserted Tuple" do
+                new_first_tuple.should_not be_retained_by(singleton_relation)
+                operand.set.insert(new_first_tuple)
+                new_first_tuple.should be_retained_by(singleton_relation)
+              end
+
+              it "releases the old value of #tuple" do
+                old_first_tuple.should be_retained_by(singleton_relation)
+                operand.set.insert(new_first_tuple)
+                old_first_tuple.should_not be_retained_by(singleton_relation)
+              end              
             end
 
-            it "releases the old value of #tuple" do
-              old_first_tuple.should be_retained_by(singleton_relation)
-              operand.set.insert(new_first_tuple)
-              old_first_tuple.should_not be_retained_by(singleton_relation)
+            context "when #operand.tuples.size == 0" do
+              attr_reader :new_first_tuple
+              before do
+                @new_first_tuple = Account.new(:employee_id => 999)
+              end
+
+              def operand
+                @operand ||= accounts_set.where(accounts_set[:employee_id].eq(999))
+              end
+
+              it "sets #tuple to the inserted Tuple" do
+                accounts_set.insert(new_first_tuple)
+                singleton_relation.tuple.should == new_first_tuple
+              end
+
+              it "triggers the on_insert event with the inserted Tuple after the #tuple has changed" do
+                on_insert_tuple = nil
+                singleton_relation.on_insert(retainer) do |tuple|
+                  singleton_relation.tuple.should == new_first_tuple
+                  on_insert_tuple = tuple
+                end
+                operand.set.insert(new_first_tuple)
+                on_insert_tuple.should == new_first_tuple
+              end
+
+              it "does not trigger the on_delete event" do
+                singleton_relation.on_delete(retainer) do |tuple|
+                  raise "Don't call me"
+                end
+                operand.set.insert(new_first_tuple)
+              end
+
+              it "retains the inserted Tuple" do
+                new_first_tuple.should_not be_retained_by(singleton_relation)
+                operand.set.insert(new_first_tuple)
+                new_first_tuple.should be_retained_by(singleton_relation)
+              end
             end
           end
 
@@ -206,37 +248,139 @@ module Unison
 
             it "does not trigger the on_insert event" do
               singleton_relation.on_insert(retainer) do
-                raise "Dont call me"
+                raise "Don't call me"
               end
               operand.set.insert(new_tuple)
             end
 
             it "does not trigger the on_delete event" do
               singleton_relation.on_delete(retainer) do
-                raise "Dont call me"
+                raise "Don't call me"
               end
               operand.set.insert(new_tuple)
             end
           end          
         end
-
-        context "when a Tuple in the #operand is updated" do
-          context "when the Tuple is first in the #operand" do
-
-          end
-
-          context "when the Tuple is not first in the #operand" do
-
-          end
-        end
-
-        context "when a Tuple is inserted from the #operand" do
+        
+        context "when a Tuple is deleted from the #operand" do
           context "when the Tuple was first in the #operand" do
+            attr_reader :old_first_tuple, :new_first_tuple
 
+            context "when #operand.tuples.size > 1" do
+              before do
+                operand.tuples.size.should be > 1
+                @old_first_tuple = singleton_relation.tuple
+                @new_first_tuple = operand.tuples[1]
+              end
+
+              it "sets #tuple to the new value of #operand.tuples.first" do
+                accounts_set.delete(old_first_tuple)
+                singleton_relation.tuple.should == new_first_tuple
+              end
+
+              it "triggers the on_delete event with the deleted Tuple after the #tuple has changed" do
+                on_delete_tuple = nil
+                singleton_relation.on_delete(retainer) do |tuple|
+                  singleton_relation.tuple.should == new_first_tuple
+                  on_delete_tuple = tuple
+                end
+                operand.set.delete(old_first_tuple)
+                on_delete_tuple.should == old_first_tuple
+              end
+
+              it "triggers the on_insert event with the new value of #tuple after the #tuple has changed" do
+                on_insert_tuple = nil
+                singleton_relation.on_insert(retainer) do |tuple|
+                  singleton_relation.tuple.should == new_first_tuple
+                  on_insert_tuple = tuple
+                end
+                operand.set.delete(old_first_tuple)
+                on_insert_tuple.should == new_first_tuple
+              end
+
+              it "retains the new value of #tuple" do
+                new_first_tuple.should_not be_retained_by(singleton_relation)
+                operand.set.delete(old_first_tuple)
+                new_first_tuple.should be_retained_by(singleton_relation)
+              end              
+
+              it "releases the old value of #tuple" do
+                old_first_tuple.should be_retained_by(singleton_relation)
+                operand.set.delete(old_first_tuple)
+                old_first_tuple.should_not be_retained_by(singleton_relation)
+              end
+            end
+
+            context "when #operand.tuples.size == 1" do
+              before do
+                operand.tuples.size.should == 1
+                @old_first_tuple = operand.tuples.first
+              end
+
+              def operand
+                @operand ||= accounts_set.where(accounts_set[:employee_id].eq(1))
+              end
+
+              it "sets #tuple to nil" do
+                accounts_set.delete(old_first_tuple)
+                operand.tuples.should be_empty
+                singleton_relation.tuple.should be_nil
+              end
+
+              it "triggers the on_delete event with the deleted Tuple after the #tuple has changed" do
+                on_delete_tuple = nil
+                singleton_relation.on_delete(retainer) do |tuple|
+                  singleton_relation.tuple.should == new_first_tuple
+                  on_delete_tuple = tuple
+                end
+                operand.set.delete(old_first_tuple)
+                on_delete_tuple.should == old_first_tuple
+              end
+
+              it "does not trigger the on_insert event" do
+                singleton_relation.on_insert(retainer) do |tuple|
+                  raise "Don't call me"
+                end
+                operand.set.delete(old_first_tuple)
+              end
+
+              it "releases the old value of #tuple" do
+                old_first_tuple.should be_retained_by(singleton_relation)
+                operand.set.delete(old_first_tuple)
+                old_first_tuple.should_not be_retained_by(singleton_relation)
+              end
+            end
           end
 
           context "when the Tuple was not first in the #operand" do
 
+          end
+        end
+
+        context "when a Tuple in the #operand is updated" do
+          context "when the Tuple is first in the #operand" do
+            it "triggers the on_tuple_update event with the inserted Tuple after the #tuple has changed" do
+              on_tuple_update_arguments = []
+              singleton_relation.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
+                on_tuple_update_arguments.push([tuple, attribute, old_value, new_value])
+              end
+              old_name = singleton_relation.tuple.name
+              new_name = "#{old_name} that is changed"
+              singleton_relation.tuple.name = new_name
+              on_tuple_update_arguments.should == [[singleton_relation.tuple, operand.set[:name], old_name, new_name]]
+            end
+          end
+
+          context "when the Tuple is not first in the #operand" do
+            it "does not trigger the on_tuple_update event" do
+              singleton_relation.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
+                raise "Don't call me"
+              end
+              old_name = singleton_relation.tuple.name
+              new_name = "#{old_name} that is changed"
+              operand.tuples.length.should be > 1
+              operand.tuples.last.name = new_name
+            end            
           end
         end
       end
@@ -257,11 +401,29 @@ module Unison
         end
 
         describe "#tuple" do
-          it "returns #operand.tuples.first"
+          it "returns #operand.tuples.first" do
+            operand.should_not be_empty
+            singleton_relation.tuple.should == operand.tuples.first
+          end
         end
 
         describe "#tuples" do
-          it "returns [#operand.tuples.first]"
+          context "when #operand.tuples is empty" do
+            def operand
+              @operand ||= accounts_set.where(accounts_set[:employee_id].eq(999))
+            end
+
+            it "returns []" do
+              operand.should be_empty
+              singleton_relation.tuples.should == []
+            end
+          end
+
+          context "when #operand.tuples not empty" do
+            it "returns [#operand.tuples.first]" do
+              singleton_relation.tuples.should == [operand.tuples.first]
+            end
+          end
         end
 
         describe "#merge" do
