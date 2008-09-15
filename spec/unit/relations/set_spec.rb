@@ -84,16 +84,51 @@ module Unison
       end
 
       describe "#attribute" do
-        it "retrieves the Set's Attribute by the given name" do
-          set.attribute(:id).should == Attribute.new(set, :id, :integer)
-          set.attribute(:name).should == Attribute.new(set, :name, :string)
-        end
-        
-        context "when no Attribute with the passed-in name is defined" do
-          it "raises an ArgumentError" do
-            lambda do
-              set.attribute(:i_dont_exist)
-            end.should raise_error(ArgumentError)
+        context "when passed a Symbol" do
+          context "when the Symbol is formatted like :attribute_name" do
+            context "when an Attribute with the given name is defined" do
+              it "retrieves the Set's Attribute by the given name" do
+                set.attribute(:id).should == Attribute.new(set, :id, :integer)
+                set.attribute(:name).should == Attribute.new(set, :name, :string)
+              end
+            end
+
+            context "when no Attribute with the given name is defined" do
+              it "raises an ArgumentError" do
+                lambda do
+                  set.attribute(:i_dont_exist)
+                end.should raise_error(ArgumentError)
+              end
+            end
+          end
+
+          context 'when the Symbol is formatted like :"`table_name`.`attribute_name`"' do
+            context "when an Attribute with the given name is defined" do
+              it "retrieves the Set's Attribute by the given name" do
+                set.attribute(:"`#{set.name}`.`id`").should == Attribute.new(set, :id, :integer)
+                set.attribute(:"`#{set.name}`.`name`").should == Attribute.new(set, :name, :string)
+              end
+            end
+
+            context "when no Attribute with the given name is defined" do
+              it "raises an ArgumentError" do
+                lambda do
+                  set.attribute(:"`#{set.name}`.`i_dont_exist`")
+                end.should raise_error(ArgumentError)
+              end
+            end
+
+            context "when the table name does not match the #name of the Set" do
+              it "raises an ArgumentError" do
+                name = "bogus"
+                set.name.should_not == name
+                set[:id].should_not be_nil
+
+                lambda do
+                  set.attribute(:"`#{name}`.`id`")
+                end.should raise_error(ArgumentError)
+              end
+            end
           end
         end
       end

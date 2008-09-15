@@ -9,7 +9,12 @@ require "test/unit"
 require "active_support"
 require "#{dir}/spec_helpers/be_like"
 
-connection = Sequel.sqlite
+if RUBY_PLATFORM == "java"
+  connection = Sequel.connect("jdbc:sqlite::memory:")
+else
+  connection = Sequel.sqlite
+end
+
 Unison.origin = Unison::Repository.new(connection)
 connection.create_table :teams do
   column :id, :string
@@ -250,6 +255,8 @@ Spec::Runner.configure do |config|
 
   config.after do
     Object.class_eval do
+
+
       remove_const :Team
       remove_const :User
       remove_const :Developer
@@ -311,5 +318,11 @@ class Spec::ExampleGroup
 
   def connection
     origin.connection
+  end
+
+  def have_the_same_elements_as(expected, sort_by = :id)
+    simple_matcher(expected) do |actual|
+      actual.sort_by {|object| object.send(sort_by) } == expected.sort_by {|object| object.send(sort_by) }
+    end
   end
 end

@@ -51,7 +51,7 @@ module Unison
           mock.proxy(operand).push(origin)
           origin.fetch(projection).should be_empty
           projection.push(origin)
-          origin.fetch(projection).should == projection.tuples
+          origin.fetch(projection).should have_the_same_elements_as(projection.tuples)
         end
       end
 

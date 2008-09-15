@@ -1,7 +1,7 @@
 --- 
 format: 1
 handler: 
-  commit: 1d1cfcd801fe5f4080dfe13ad0163bb6b0f36dd2
+  commit: 610730c1c0eecefcd543a1c77097f4e316419786
   branch: HEAD
 lock: false
 repository_url: git://github.com/grockit/arel.git

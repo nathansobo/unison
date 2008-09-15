@@ -1,6 +1,7 @@
 dir = File.dirname(__FILE__)
 $LOAD_PATH.unshift(File.expand_path("#{dir}/../vendor/arel/lib"))
 $LOAD_PATH.unshift(File.expand_path("#{dir}/../vendor/collections-0.1.4/lib"))
+$arel_requires_active_record = false
 require "arel"
 require "collections"
 require "rubygems"

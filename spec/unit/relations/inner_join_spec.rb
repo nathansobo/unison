@@ -62,8 +62,8 @@ module Unison
 
             join.push(origin)
 
-            users_projection.pull(origin).should == users_projection.tuples
-            photos_projection.pull(origin).should == photos_projection.tuples
+            origin.fetch(users_projection).should have_the_same_elements_as(users_projection.tuples)
+            origin.fetch(photos_projection).should have_the_same_elements_as(photos_projection.tuples)
           end
         end
 
@@ -84,9 +84,9 @@ module Unison
 
             join.push(origin)
 
-            users_projection.pull(origin).should == users_projection.tuples
-            photos_projection.pull(origin).should == photos_projection.tuples
-            cameras_projection.pull(origin).should == cameras_projection.tuples
+            origin.fetch(users_projection).should have_the_same_elements_as(users_projection.tuples)
+            origin.fetch(photos_projection).should have_the_same_elements_as(photos_projection.tuples)
+            origin.fetch(cameras_projection).should have_the_same_elements_as(cameras_projection.tuples)
           end
         end
       end

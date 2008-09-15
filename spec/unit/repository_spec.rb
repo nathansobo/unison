@@ -34,7 +34,7 @@ module Unison
             .on(users_set[:id].eq(photos_set[:user_id])) \
             .project(photos_set)
 
-          origin.fetch(projection).should == origin.fetch(photos_set)
+          origin.fetch(projection).should have_the_same_elements_as(origin.fetch(photos_set))
         end
       end
 

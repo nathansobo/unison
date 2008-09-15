@@ -84,8 +84,8 @@ module Unison
             origin.fetch(users_projection).should be_empty
             origin.fetch(accounts_projection).should be_empty
             singleton_relation.push(origin)
-            origin.fetch(users_projection).should == users_projection.tuples
-            origin.fetch(accounts_projection).should == accounts_projection.tuples
+            origin.fetch(users_projection).should have_the_same_elements_as(users_projection.tuples)
+            origin.fetch(accounts_projection).should have_the_same_elements_as(accounts_projection.tuples)
           end
         end
       end

@@ -42,8 +42,11 @@ module Unison
       end
 
       def attribute(attribute_name)
-        attributes[attribute_name] ||
+        if attribute = attributes[extract_column_name(attribute_name)]
+          return attribute
+        else
           raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on Set with name #{name.inspect}.")
+        end
       end
 
       def compound?
@@ -106,6 +109,17 @@ module Unison
 
       def initial_read
         []
+      end
+
+      def extract_column_name(attribute_name)
+        if match = /`(\w+)`\.`(\w+)`/.match(attribute_name.to_s)
+          unless match[1] == name.to_s
+            raise(ArgumentError, "Invalid table name in #{attribute_name}")
+          end
+          match[2].to_sym
+        else
+          attribute_name
+        end
       end
     end
   end
