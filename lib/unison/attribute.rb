@@ -107,7 +107,7 @@ module Unison
       when Time
         value
       when Integer
-        Time.utc(value)
+        Time.at(value)
       when String
         local_time = Time.parse(value)
         Time.utc(

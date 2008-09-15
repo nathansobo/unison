@@ -138,7 +138,7 @@ module Unison
 
         it "when passed an Integer, returns a Time represented by the Integer" do
           now = Time.now
-          attribute.convert(now.to_i).should == Time.utc(now.to_i)
+          attribute.convert(now.to_i).should == Time.at(now.to_i)
         end
       end
     end
