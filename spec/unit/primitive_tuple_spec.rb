@@ -441,13 +441,15 @@ module Unison
       end
 
       describe "Instance Methods" do
+        attr_reader :attributes
+
         before do
           User.superclass.should == PrimitiveTuple::Base
-          @tuple = User.new(:id => "nathan", :name => "Nathan")
+          @attributes = {:id => "nathan", :name => "Nathan"}
+          @tuple = User.new(attributes)
         end
 
         describe "#initialize" do
-          attr_reader :tuple
           before do
             @tuple = User.new(:id => "nathan", :name => "Nathan")
           end
@@ -646,6 +648,12 @@ module Unison
           end
         end
 
+        context "#attributes" do
+          it "returns a Attribute#name => value hash" do
+            tuple.attributes.should == attributes
+          end
+        end
+
         describe "#push" do
           it "calls Unison.origin.push(self)" do
             mock.proxy(origin).push(tuple)
@@ -703,18 +711,6 @@ module Unison
         describe "#has_attribute?" do
           it "delegates to #set" do
             tuple.has_attribute?(:id).should == tuple.set.has_attribute?(:id)
-          end
-        end
-
-        describe "#attributes" do
-          it "returns the #attribute_values, keyed by the name of their corresponding Attribute" do
-            expected_attributes = {}
-            tuple.send(:attribute_values).each do |attribute, value|
-              expected_attributes[attribute.name] = value
-            end
-            expected_attributes.should_not be_empty
-
-            tuple.attributes.should == expected_attributes
           end
         end
 
@@ -793,7 +789,7 @@ module Unison
           context "when other Tuple#attribute_values == #attribute_values" do
             before do
               @other_tuple = User.new(:id => "nathan", :name => "Nathan")
-              other_tuple.send(:attribute_values).should == tuple.send(:attribute_values)
+              other_tuple.send(:attributes).should == tuple.send(:attributes)
             end
 
             it "returns true" do
@@ -804,7 +800,7 @@ module Unison
           context "when other Tuple#attributes != #attributes" do
             before do
               @other_tuple = User.new(:id => "nathan_clone", :name => "Nathan's Clone")
-              other_tuple.send(:attribute_values).should_not == tuple.send(:attribute_values)
+              other_tuple.send(:attributes).should_not == tuple.send(:attributes)
             end
 
             it "returns false" do

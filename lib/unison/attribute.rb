@@ -44,6 +44,22 @@ module Unison
       raise e
     end
 
+    def convert_to_java(value)
+      if type == :datetime && value
+        value.to_i
+      else
+        value
+      end
+    end
+
+    def convert_from_java(value)
+      if type == :datetime && value
+        Time.at(value).utc
+      else
+        value
+      end
+    end
+
     def ascending
       @ascending = true
       self

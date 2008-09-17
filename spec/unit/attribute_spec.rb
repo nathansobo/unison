@@ -5,8 +5,12 @@ module Unison
     attr_reader :set, :attribute
     before do
       @set = Relations::Set.new(:users)
-      @attribute = Attribute.new(set, :name, :string)
+      @attribute = Attribute.new(set, :name, type)
       set.attributes[attribute.name] = attribute
+    end
+
+    def type
+      :string
     end
 
     describe "#initialize" do
@@ -32,10 +36,64 @@ module Unison
       end
     end
 
+    describe "#convert_to_java" do
+      context "when type is :datetime" do
+        def type
+          :datetime
+        end
+
+        it "when passed nil, returns nil" do
+          attribute.convert_to_java(nil).should be_nil
+        end
+
+        it "when passed a Time, returns an Integer" do
+          time = Time.new
+          attribute.convert_to_java(time).should == time.to_i
+        end
+      end
+
+      context "when type is not :datetime" do
+        def type
+          :string
+        end
+
+        it "returns the argument unchanged" do
+          attribute.convert_to_java("foo").should == "foo"
+        end
+      end
+    end
+
+    describe "#convert_from_java" do
+      context "when type is :datetime" do
+        def type
+          :datetime
+        end
+
+        it "when passed nil, returns nil" do
+          attribute.convert_from_java(nil).should be_nil
+        end
+
+        it "when passed an Integer, returns a UTC time" do
+          time = Time.now
+          attribute.convert_from_java(time.to_i).to_s.should == time.utc.to_s
+        end
+      end
+
+      context "when type is not :datetime" do
+        def type
+          :string
+        end
+
+        it "returns the argument unchanged" do
+          attribute.convert_from_java("foo").should == "foo"
+        end
+      end
+    end
+
     describe "#convert" do
       context "when #type is :integer" do
-        before do
-          @attribute = Attribute.new(set, :id, :integer)
+        def type
+          :integer
         end
 
         send("when passed nil, returns nil")
@@ -56,8 +114,8 @@ module Unison
       end
 
       context "when #type is :string" do
-        before do
-          @attribute = Attribute.new(set, :name, :string)
+        def type
+          :string
         end
 
         send("when passed nil, returns nil")
@@ -73,8 +131,8 @@ module Unison
       end
 
       context "when #type is :symbol" do
-        before do
-          @attribute = Attribute.new(set, :state, :symbol)
+        def type
+          :symbol
         end
 
         send("when passed nil, returns nil")
@@ -90,8 +148,8 @@ module Unison
       end
 
       context "when #type is :boolean" do
-        before do
-          @attribute = Attribute.new(set, :is_cool, :boolean)
+        def type
+          :boolean
         end
 
         send("when passed nil, returns nil")
@@ -121,8 +179,8 @@ module Unison
       end
 
       context "when #type is :datetime" do
-        before do
-          @attribute = Attribute.new(set, :created_at, :datetime)
+        def type
+          :datetime
         end
 
         send("when passed nil, returns nil")

@@ -84,13 +84,13 @@ module Unison
         end
       end
 
-      describe "#attributeIterator" do
+      describe "#attributeNameIterator" do
         describe "the returned iterator" do
           attr_reader :iterator
           before do
             data_object.put("foo", "bar")
             data_object.put("baz", 1)
-            @iterator = data_object.attributeIterator
+            @iterator = data_object.attributeNameIterator
           end
 
           describe "#hasNext" do
@@ -110,10 +110,9 @@ module Unison
 
           describe "#next" do
             context "when the iterator is not at the end" do
-              it "advances to the next name-value pair and returns true" do
-                iterator.name.should == "foo"
-                iterator.next
-                iterator.name.should == "baz"
+              it "returns the next name" do
+                iterator.next.should == "foo"
+                iterator.next.should == "baz"
               end
             end
 
@@ -125,22 +124,6 @@ module Unison
                   iterator.next
                 end.should raise_error
               end
-            end
-          end
-
-          describe "#name" do
-            it "returns the name of the current name-value pair" do
-              iterator.name.should == "foo"
-              iterator.next
-              iterator.name.should == "baz"
-            end
-          end
-
-          describe "#value" do
-            it "returns the value of the current name-value pair" do
-              iterator.value.should == "bar"
-              iterator.next
-              iterator.value.should == 1
             end
           end
         end

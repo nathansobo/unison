@@ -12,7 +12,7 @@ module Unison
         when Fixnum, String, TrueClass, FalseClass, NilClass
           attribute_values[key] = value
         else
-          raise ArgumentError, "Value type must be Java-compatible"
+          raise ArgumentError, "Value #{value.inspect} is not Java-compatible"
         end
       end
 
@@ -21,37 +21,29 @@ module Unison
         attribute_values[key]
       end
 
-      def attributeIterator
-        AttributeIterator.new(attribute_values)
+      def attributeNameIterator
+        Iterator.new(attribute_values.keys)
       end
 
-      class AttributeIterator
-        def initialize(attribute_values)
-          @entries = attribute_values.inject([]) do |entries, entry|
-            entries + [entry]
-          end
+      class Iterator
+        def initialize(items)
+          @items = items
           @index = 0
         end
 
         def hasNext
-          index < entries.size
+          index < items.size
         end
 
         def next
           raise "Out of bounds" unless hasNext
+          item = items[index]
           @index += 1
-        end
-
-        def name
-          entries[index][0]
-        end
-
-        def value
-          entries[index][1]
+          item
         end
 
         protected
-        attr_reader :entries, :index
+        attr_reader :items, :index
       end
 
       protected

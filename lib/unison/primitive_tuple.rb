@@ -127,7 +127,7 @@ module Unison
       super()
       @new = true
       @dirty = false
-      @attribute_values = {}
+      @data = DataObjects::PrimitiveTuple.new
 
       initialize_attribute_values(initial_attributes)
       initialize_instance_relations
@@ -138,16 +138,16 @@ module Unison
         raise "#attribute is only defined for Attribute's of this Tuple's #relation or its #relation itself" unless attribute == set
         self
       else
-        attribute_values[attribute_for(attribute)]
+        attribute_for(attribute).convert_from_java(data.get(attribute_for(attribute).name.to_s))
       end
     end    
 
     def []=(attribute_or_symbol, new_value)
       attribute = attribute_for(attribute_or_symbol)
-      old_value = attribute_values[attribute]
+      old_value = data.get(attribute.name.to_s)
       converted_new_value = attribute.convert(new_value)
       if old_value != converted_new_value
-        attribute_values[attribute] = converted_new_value
+        data.put(attribute.name.to_s, attribute.convert_to_java(converted_new_value))
         update_subscription_node.call(attribute, old_value, converted_new_value)
         @dirty = true unless new?
       end
@@ -160,10 +160,12 @@ module Unison
 
     def attributes
       attributes = {}
-      attribute_values.each do |attribute, value|
-        attributes[attribute.name] = value
+      iterator = data.attributeNameIterator
+      while iterator.hasNext
+        name = iterator.next
+        attributes[name.to_sym] = data.get(name)
       end
-      attributes          
+      attributes
     end
 
     def push
@@ -195,7 +197,7 @@ module Unison
 
     def ==(other)
       return false unless other.is_a?(PrimitiveTuple)
-      attribute_values == other.send(:attribute_values)
+      attributes == other.send(:attributes)
     end
 
     def <=>(other)
@@ -219,7 +221,7 @@ module Unison
     end
 
     protected
-    attr_reader :attribute_values
+    attr_reader :data
 
     def after_create
     end  
