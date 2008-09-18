@@ -5,7 +5,7 @@ module Unison
       retain :operand, :predicate
 
       subscribe do
-        predicate.on_update do
+        predicate.on_change do
           new_tuples = initial_read
           deleted_tuples = tuples - new_tuples
           inserted_tuples = new_tuples - tuples

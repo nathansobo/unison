@@ -15,7 +15,7 @@ module Unison
         self.object_id == other.object_id
       end
 
-      def on_update(*args, &block)
+      def on_change(*args, &block)
         update_subscription_node.subscribe(*args, &block)
       end
 

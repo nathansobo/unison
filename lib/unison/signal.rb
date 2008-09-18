@@ -6,7 +6,7 @@ module Unison
       @update_subscription_node = SubscriptionNode.new(self)
     end
 
-    def on_update(*args, &block)
+    def on_change(*args, &block)
       update_subscription_node.subscribe(*args, &block)
     end
 

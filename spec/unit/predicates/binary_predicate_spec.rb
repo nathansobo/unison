@@ -105,9 +105,9 @@ module Unison
           end
         end
 
-        describe "#on_update" do
+        describe "#on_change" do
           it "returns a Subscription" do
-            predicate.on_update(retainer) {}.class.should == Subscription
+            predicate.on_change(retainer) {}.class.should == Subscription
           end
 
           context "when #operand_1 is an AttributeSignal" do
@@ -122,7 +122,7 @@ module Unison
             context "when #operand_1 is updated" do
               it "triggers the update Subscriptions" do
                 on_update_called = false
-                predicate.on_update(retainer) do
+                predicate.on_change(retainer) do
                   on_update_called = true
                 end
 
@@ -144,7 +144,7 @@ module Unison
             context "when #operand_2 is updated" do
               it "triggers the update Subscriptions" do
                 on_update_called = false
-                predicate.on_update(retainer) do
+                predicate.on_change(retainer) do
                   on_update_called = true
                 end
 
@@ -171,7 +171,7 @@ module Unison
             end
             alias_method :operand, :operand_1
             
-            it "#retains and #subscribes to #on_update on the AttributeSignal" do
+            it "#retains and #subscribes to #on_change on the AttributeSignal" do
               mock.proxy(predicate).after_first_retain
               operand.should_not be_retained_by(predicate)
               predicate.should_not be_subscribed_to(operand.update_subscription_node)
@@ -191,7 +191,7 @@ module Unison
               @operand = predicate.operand_2
             end
 
-            it "#retains and #subscribes to #on_update on the AttributeSignal" do
+            it "#retains and #subscribes to #on_change on the AttributeSignal" do
               mock.proxy(predicate).after_first_retain
               operand.should_not be_retained_by(predicate)
               predicate.send(:subscriptions).should be_empty

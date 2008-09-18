@@ -36,13 +36,13 @@ module Unison
       end
 
       context "when the #source_signal changes" do
-        it "triggers the on_update event with the result of the transform's application to the #value of the #source_signal" do
+        it "triggers the on_change event with the result of the transform's application to the #value of the #source_signal" do
           new_name = "Ari"
           expected_old_value = transform.call(source_signal.value)
           expected_new_value = transform.call(new_name)
 
           on_update_arguments = []
-          derived_signal.on_update(retainer) do |*args|
+          derived_signal.on_change(retainer) do |*args|
             on_update_arguments.push(args)
           end
 

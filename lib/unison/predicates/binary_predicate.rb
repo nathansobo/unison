@@ -6,7 +6,7 @@ module Unison
       retain :subscribable_operands
       subscribe do
         subscribable_operands.map do |operand|
-          operand.on_update do
+          operand.on_change do
             update_subscription_node.call
           end
         end

@@ -50,11 +50,11 @@ module Unison
           end
         end
 
-        describe "#on_update" do
+        describe "#on_change" do
           context "when a child Predicate is updated" do
             it "triggers update Subscriptions" do
               on_update_called = false
-              predicate.on_update(retainer) do
+              predicate.on_change(retainer) do
                 on_update_called = true
               end
 

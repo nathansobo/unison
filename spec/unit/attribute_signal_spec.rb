@@ -60,16 +60,16 @@ module Unison
           end
         end
 
-        describe "#on_update" do
+        describe "#on_change" do
           context "when passed a block" do
             it "returns a Subscription" do
-              signal.on_update(retainer) {}.class.should == Subscription
+              signal.on_change(retainer) {}.class.should == Subscription
             end
 
             context "when the #attribute's value is updated on the Tuple" do
               it "invokes the block" do
                 on_update_arguments = []
-                signal.on_update(retainer) do |*args|
+                signal.on_change(retainer) do |*args|
                   on_update_arguments.push(args)
                 end
 
@@ -84,7 +84,7 @@ module Unison
 
             context "when another #attribute's value is updated on the Tuple" do
               it "does not invoke the block" do
-                signal.on_update(retainer) do |*args|
+                signal.on_change(retainer) do |*args|
                   raise "Do not call me"
                 end
 
@@ -103,11 +103,11 @@ module Unison
           end
         end
 
-        describe "#on_update" do
+        describe "#on_change" do
           context "when passed a block" do
             it "raises an error" do
               lambda do
-                signal.on_update {}
+                signal.on_change {}
               end.should raise_error
             end
           end
