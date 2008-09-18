@@ -4,10 +4,10 @@ module Unison
 
     retain :source_signal
     subscribe do
-      source_signal.on_update do |object, source_old_value, source_new_value|
+      source_signal.on_update do |source_old_value, source_new_value|
         old_value = @value || transform.call(source_old_value)
         @value = transform.call(source_new_value)
-        update_subscription_node.call(source_signal, old_value, value)
+        update_subscription_node.call(old_value, value)
       end
     end
 

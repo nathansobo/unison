@@ -83,7 +83,7 @@ module Unison
                 new_name = "Joe Bob"
                 user[:name] = new_name
                 on_update_arguments.should == [
-                  [user, old_name, new_name]
+                  [old_name, new_name]
                 ]
               end
             end

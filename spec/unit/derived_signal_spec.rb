@@ -48,7 +48,7 @@ module Unison
           end
 
           tuple.name = new_name
-          on_update_arguments.should == [[source_signal, expected_old_value, expected_new_value]]
+          on_update_arguments.should == [[expected_old_value, expected_new_value]]
         end
       end
     end
