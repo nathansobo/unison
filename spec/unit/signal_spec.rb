@@ -100,6 +100,25 @@ module Unison
           end
         end
       end
+
+      context "when not #retained?" do
+        describe "#value" do
+          it "returns the #attribute value from the #tuple" do
+            user[:name].should_not be_nil
+            signal.value.should == user[:name]
+          end
+        end
+
+        describe "#on_update" do
+          context "when passed a block" do
+            it "raises an error" do
+              lambda do
+                signal.on_update {}
+              end.should raise_error
+            end
+          end
+        end
+      end
     end
   end
 end
