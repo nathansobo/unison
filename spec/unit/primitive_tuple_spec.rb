@@ -740,7 +740,7 @@ module Unison
               @signal = user.signal(:name)
             end
 
-            it "returns a Signal with the corresponding Attribute from the Tuple's Relation" do
+            it "returns an AttributeSignal with the corresponding Attribute from the Tuple's Relation" do
               signal.attribute.should == users_set[:name]
             end
           end
@@ -750,7 +750,7 @@ module Unison
               @signal = user.signal(users_set[:name])
             end
 
-            it "returns a Signal with #attribute set to the passed in Attribute" do
+            it "returns an AttributeSignal with #attribute set to the passed in Attribute" do
               signal.attribute.should == users_set[:name]
             end
           end

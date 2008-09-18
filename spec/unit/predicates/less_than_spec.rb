@@ -26,8 +26,8 @@ module Unison
           predicate.eval(Account.new(:employee_id => operand_2)).should be_false
         end
 
-        context "when one of the operands is a Signal" do
-          it "uses the value of the Signal in the predication" do
+        context "when one of the operands is an AttributeSignal" do
+          it "uses the value of the AttributeSignal in the predication" do
             tuple = Account.new(:employee_id => 1)
             LessThan.new(1, tuple.signal(:employee_id)).eval(tuple).should be_false
             LessThan.new(tuple.signal(:employee_id), 3).eval(tuple).should be_true

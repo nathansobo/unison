@@ -1,5 +1,5 @@
 module Unison
-  class Signal
+  class AttributeSignal
     include Retainable
     attr_reader :tuple, :attribute
 
@@ -30,7 +30,7 @@ module Unison
     end
 
     def ==(other)
-      return false unless other.is_a?(Signal)
+      return false unless other.is_a?(AttributeSignal)
       other.attribute == attribute && other.tuple == tuple
     end
 

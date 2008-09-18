@@ -2,7 +2,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
   module Tuple
-    describe Signal do
+    describe AttributeSignal do
       attr_reader :user, :attribute, :signal
       before do
         @user = User.find("nathan")
@@ -17,7 +17,7 @@ module Unison
       end
 
       describe "#==" do
-        context "when other is a Signal" do
+        context "when other is an AttributeSignal" do
           context "when other.attribute == #attribute and other.tuple == #tuple" do
             it "returns true" do
               signal.should == user.signal(attribute)
@@ -41,7 +41,7 @@ module Unison
           end
         end
 
-        context "when other is not a Signal" do
+        context "when other is not an AttributeSignal" do
           it "returns false" do
             signal.should_not == Object.new
           end

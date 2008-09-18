@@ -33,7 +33,7 @@ module Unison
         end
 
         describe ".predicate" do
-          it "compares a Signal of the :id attribute with the value of the #foreign_key on the #parent_tuple" do
+          it "compares an AttributeSignal of the :id attribute with the value of the #foreign_key on the #parent_tuple" do
             belongs_to.operand.predicate.should == Team[:id].eq(parent_tuple.signal(belongs_to.foreign_key))
           end
         end

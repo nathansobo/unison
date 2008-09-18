@@ -211,7 +211,7 @@ module Unison
     end
 
     def signal(attribute_or_symbol)
-      Signal.new(self, attribute_for(attribute_or_symbol))
+      AttributeSignal.new(self, attribute_for(attribute_or_symbol))
     end
 
     def inspect

@@ -41,7 +41,7 @@ module Unison
 
       def subscribable_operands
         operands.find_all do |operand|
-          operand.is_a?(Signal)
+          operand.is_a?(AttributeSignal)
         end
       end
 
@@ -50,7 +50,7 @@ module Unison
       end
 
       def eval_operand(operand)
-        operand.is_a?(Signal) ? operand.value : operand
+        operand.is_a?(AttributeSignal) ? operand.value : operand
       end
     end
   end

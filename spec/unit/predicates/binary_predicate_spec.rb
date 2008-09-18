@@ -27,8 +27,8 @@ module Unison
       end      
 
       describe "#eval" do
-        context "when one of the operands is a Signal" do
-          it "uses the value of the Signal in the predication" do
+        context "when one of the operands is an AttributeSignal" do
+          it "uses the value of the AttributeSignal in the predication" do
             user = User.new(:id => "nathan", :name => "Nathan")
             EqualTo.new("nathan", user.signal(:id)).eval(user).should be_true
             EqualTo.new(user.signal(:id), "nathan").eval(user).should be_true
@@ -46,8 +46,8 @@ module Unison
         describe "#after_last_release" do
           context "when #operand_1 and #operand_2 are not Signals" do
             before do
-              operand_1.should_not be_instance_of(Signal)
-              operand_2.should_not be_instance_of(Signal)
+              operand_1.should_not be_instance_of(AttributeSignal)
+              operand_2.should_not be_instance_of(AttributeSignal)
             end
 
             it "does not raise an error" do
@@ -55,7 +55,7 @@ module Unison
             end
           end
 
-          context "when #operand_1 is a Signal" do
+          context "when #operand_1 is an AttributeSignal" do
             attr_reader :user
 
             before do
@@ -80,7 +80,7 @@ module Unison
             end
           end
 
-          context "when #operand_2 is a Signal" do
+          context "when #operand_2 is an AttributeSignal" do
             attr_reader :user
             before do
               publicize operand, :update_subscription_node
@@ -110,7 +110,7 @@ module Unison
             predicate.on_update(retainer) {}.class.should == Subscription
           end
 
-          context "when #operand_1 is a Signal" do
+          context "when #operand_1 is an AttributeSignal" do
             attr_reader :user
 
             def operand_1
@@ -132,7 +132,7 @@ module Unison
             end
           end
 
-          context "when #operand_2 is a Signal" do
+          context "when #operand_2 is an AttributeSignal" do
             attr_reader :user
 
             def operand_2
@@ -158,7 +158,7 @@ module Unison
 
       context "when not #retained?" do
         describe "#after_first_retain" do
-          context "when #operand_1 is a Signal" do
+          context "when #operand_1 is an AttributeSignal" do
             attr_reader :user
 
             before do
@@ -171,7 +171,7 @@ module Unison
             end
             alias_method :operand, :operand_1
             
-            it "#retains and #subscribes to #on_update on the Signal" do
+            it "#retains and #subscribes to #on_update on the AttributeSignal" do
               mock.proxy(predicate).after_first_retain
               operand.should_not be_retained_by(predicate)
               predicate.should_not be_subscribed_to(operand.update_subscription_node)
@@ -183,7 +183,7 @@ module Unison
             end
           end
 
-          context "when #operand_2 is a Signal" do
+          context "when #operand_2 is an AttributeSignal" do
             attr_reader :user, :operand
             before do
               @user = User.find("nathan")
@@ -191,7 +191,7 @@ module Unison
               @operand = predicate.operand_2
             end
 
-            it "#retains and #subscribes to #on_update on the Signal" do
+            it "#retains and #subscribes to #on_update on the AttributeSignal" do
               mock.proxy(predicate).after_first_retain
               operand.should_not be_retained_by(predicate)
               predicate.send(:subscriptions).should be_empty
