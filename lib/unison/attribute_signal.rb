@@ -1,6 +1,5 @@
 module Unison
-  class AttributeSignal
-    include Retainable
+  class AttributeSignal < Signal
     attr_reader :tuple, :attribute
 
     retain :tuple
@@ -13,28 +12,17 @@ module Unison
     end
 
     def initialize(tuple, attribute)
+      super()
       @tuple, @attribute = tuple, attribute
-      @update_subscription_node = SubscriptionNode.new(self)
     end
 
     def value
       tuple[attribute]
     end
 
-    def on_update(*args, &block)
-      update_subscription_node.subscribe(*args, &block)
-    end
-
-    def to_arel
-      value.to_arel
-    end
-
     def ==(other)
       return false unless other.is_a?(AttributeSignal)
       other.attribute == attribute && other.tuple == tuple
     end
-
-    protected
-    attr_reader :update_subscription_node
   end
 end

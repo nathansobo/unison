@@ -10,12 +10,6 @@ module Unison
         @signal = user.signal(attribute)
       end
 
-      describe "#to_arel" do
-        it "delegates to #value.to_arel" do
-          signal.to_arel.should == user[:name].to_arel
-        end
-      end
-
       describe "#==" do
         context "when other is an AttributeSignal" do
           context "when other.attribute == #attribute and other.tuple == #tuple" do

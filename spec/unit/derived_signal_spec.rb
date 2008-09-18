@@ -18,7 +18,6 @@ module Unison
       end
     end
 
-
     describe "#value" do
       it "returns the result of calling the given tranform on the #value of the #source_signal" do
         derived_signal.value.should == transform.call(source_signal.value)    
