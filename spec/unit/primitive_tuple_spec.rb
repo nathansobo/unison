@@ -203,6 +203,39 @@ module Unison
             end
           end
         end
+
+        describe ".synthetic_attribute" do
+          attr_reader :user
+          before do
+            User.synthetic_attribute :team_name do
+              team.signal(:name)
+            end
+            @user = User.create(:team_id => "mangos")
+          end
+
+          it "adds a method to the Tuple that returns the value of the #signal returned by instance eval'ing the given block" do
+            user.team_name.should == user.team.name
+            new_name = "The Bananas"
+            user.team.name = new_name
+            user.team_name.should == new_name
+          end
+
+          it "causes PrimitiveTuple#signal, when passed the name of a synthetic attribute, to return the Signal upon which it is based" do
+            signal = user.signal(:team_name)
+            signal.retain_with(retainer = Object.new)
+
+            signal.value.should == user.team.name
+            on_change_args = []
+            signal.on_change(retainer) do |*args|
+              on_change_args.push(args)
+            end
+
+            expected_old_name = user.team.name
+            new_name = "The Tacos"
+            user.team.name = new_name
+            on_change_args.should == [[expected_old_name, new_name]]
+          end
+        end
         
         describe ".relates_to_many" do
           it "creates an instance method representing the given Relation" do

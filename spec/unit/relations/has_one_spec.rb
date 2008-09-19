@@ -6,6 +6,7 @@ module Unison
       attr_reader :has_one
       before do
         @has_one = HasOne.new(parent_tuple, name, options)
+        publicize has_one, :foreign_key
       end
 
       def parent_tuple

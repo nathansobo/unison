@@ -6,6 +6,8 @@ module Unison
       attr_reader :has_many
       before do
         @has_many = HasMany.new(parent_tuple, name, options)
+        publicize has_many, :foreign_key
+
       end
 
       def parent_tuple

@@ -59,6 +59,13 @@ module Unison
         end
       end
 
+      def synthetic_attribute(name, &definition)
+        synthetic_attribute_definitions[name] = definition
+        define_method(name) do
+          synthetic_attribute_signals[name].value
+        end
+      end
+
       def attribute_accessor(name, type, options={})
         attribute_reader(name, type, options)
         attribute_writer(name, type, options)
@@ -118,6 +125,10 @@ module Unison
       def instance_relation_definitions_on_self
         @instance_relation_definitions_on_self ||= []
       end
+
+      def synthetic_attribute_definitions
+        @synthetic_attribute_definitions ||= {}
+      end
     end
     def self.included(a_module)
       a_module.extend ClassMethods
@@ -128,9 +139,11 @@ module Unison
       @new = true
       @dirty = false
       @attribute_values = {}
+      @synthetic_attribute_signals = {}
 
       initialize_attribute_values(initial_attributes)
       initialize_instance_relations
+      initialize_synthetic_attribute_signals
     end
 
     def [](attribute)
@@ -211,7 +224,11 @@ module Unison
     end
 
     def signal(attribute_or_symbol)
-      AttributeSignal.new(self, attribute_for(attribute_or_symbol))
+      if signal = synthetic_attribute_signals[attribute_or_symbol]
+        return signal
+      else
+        AttributeSignal.new(self, attribute_for(attribute_or_symbol))
+      end
     end
 
     def inspect
@@ -219,7 +236,7 @@ module Unison
     end
 
     protected
-    attr_reader :attribute_values
+    attr_reader :attribute_values, :synthetic_attribute_signals
 
     def after_create
     end  
@@ -248,6 +265,16 @@ module Unison
         next if initial_attributes.has_key?(attribute)
         self[attribute] = default_value.is_a?(Proc)? instance_eval(&default_value) : default_value
       end
+    end
+
+    def initialize_synthetic_attribute_signals
+      synthetic_attribute_definitions.each do |name, definition|
+        synthetic_attribute_signals[name] = instance_eval(&definition)
+      end
+    end
+
+    def synthetic_attribute_definitions
+      self.class.send(:synthetic_attribute_definitions)
     end
 
     def convert_symbol_keys_to_attributes(attributes)

@@ -1,6 +1,7 @@
 module Unison
   module Relations
     module TupleRelationMethods
+      protected
       attr_reader :owner, :name, :options
       def target_relation
         target_class.set

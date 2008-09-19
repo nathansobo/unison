@@ -6,6 +6,7 @@ module Unison
       attr_reader :has_many_through
       before do
         @has_many_through = HasManyThrough.new(parent_tuple, name, options)
+        publicize has_many_through, :target_relation
       end
 
       def parent_tuple
