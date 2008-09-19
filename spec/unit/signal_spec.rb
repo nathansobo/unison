@@ -14,5 +14,25 @@ module Unison
         signal.to_arel.should == user[:name].to_arel
       end
     end
+
+    describe "#signal" do
+      context "when passed a block" do
+        it "returns a DerivedSignal with self as its #source_signal and the given block as its #transform" do
+          derived_signal = signal.signal do |value|
+            "#{value} the Neurotic"
+          end
+          derived_signal.class.should == DerivedSignal
+          derived_signal.value.should == "Nathan the Neurotic"
+        end
+      end
+
+      context "when not passed a block" do
+        it "raises an ArgumentError" do
+          lambda do
+            signal.signal
+          end.should raise_error(ArgumentError)
+        end
+      end
+    end
   end
 end

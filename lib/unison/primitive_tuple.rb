@@ -223,12 +223,9 @@ module Unison
       false
     end
 
-    def signal(attribute_or_symbol)
-      if signal = synthetic_attribute_signals[attribute_or_symbol]
-        return signal
-      else
-        AttributeSignal.new(self, attribute_for(attribute_or_symbol))
-      end
+    def signal(attribute_or_symbol, &block)
+      signal = synthetic_attribute_signals[attribute_or_symbol] || AttributeSignal.new(self, attribute_for(attribute_or_symbol))
+      block ? signal.signal(&block) : signal
     end
 
     def inspect

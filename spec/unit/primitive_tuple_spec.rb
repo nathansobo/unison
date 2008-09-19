@@ -219,22 +219,6 @@ module Unison
             user.team.name = new_name
             user.team_name.should == new_name
           end
-
-          it "causes PrimitiveTuple#signal, when passed the name of a synthetic attribute, to return the Signal upon which it is based" do
-            signal = user.signal(:team_name)
-            signal.retain_with(retainer = Object.new)
-
-            signal.value.should == user.team.name
-            on_change_args = []
-            signal.on_change(retainer) do |*args|
-              on_change_args.push(args)
-            end
-
-            expected_old_name = user.team.name
-            new_name = "The Tacos"
-            user.team.name = new_name
-            on_change_args.should == [[expected_old_name, new_name]]
-          end
         end
         
         describe ".relates_to_many" do
@@ -768,31 +752,99 @@ module Unison
             @user = User.find("nathan")
           end
 
+
           context "when passed a Symbol" do
             before do
               @signal = user.signal(:name)
             end
 
-            it "returns an AttributeSignal with the corresponding Attribute from the Tuple's Relation" do
-              signal.attribute.should == users_set[:name]
+            context "when the Symbol is the #name of an Attribute in the PrimitiveTuple's #set" do
+              it "returns an AttributeSignal for the corresponding Attribute" do
+                signal.attribute.should == users_set[:name]
+              end
+
+              context "when passed a block" do
+                it "returns a DerivedSignal with the AttributeSignal as its #source_signal" do
+                  derived_signal = user.signal(:name) do |value|
+                    "#{value} the Terrible"
+                  end
+                  derived_signal.class.should == DerivedSignal
+                  derived_signal.value.should == "#{user.name} the Terrible"
+                end
+              end
+            end
+
+            context "when the Symbol names a synthetic attribute" do
+              before do
+                User.synthetic_attribute :team_name do
+                  team.signal(:name)
+                end
+                @user = User.create(:team_id => "mangos")
+              end
+
+              it "returns the Signal upon which the synthetic attribute is based" do
+                signal = user.signal(:team_name)
+                signal.retain_with(retainer = Object.new)
+
+                signal.value.should == user.team.name
+                on_change_args = []
+                signal.on_change(retainer) do |*args|
+                  on_change_args.push(args)
+                end
+
+                expected_old_name = user.team.name
+                new_name = "The Tacos"
+                user.team.name = new_name
+                on_change_args.should == [[expected_old_name, new_name]]
+              end
+
+              context "when passed a block" do
+                it "returns a DerivedSignal with the signal associated with the synthetic attribute as its #source_signal" do
+                  derived_signal = user.signal(:team_name) do |value|
+                    "#{value} Suck!"
+                  end
+                  derived_signal.class.should == DerivedSignal
+                  derived_signal.value.should == "#{user.team_name} Suck!"
+                end
+              end
+            end
+
+            context "when the Symbol is not the #name of an Attribute in the PrimitiveTuple's #set or a synthetic attribute" do
+              it "raises an ArgumentError" do
+                lambda do
+                  @signal = user.signal(:bullshit)
+                end.should raise_error(ArgumentError)
+              end
             end
           end
 
-          context "when passed an Attribute from the Relation" do
-            before do
-              @signal = user.signal(users_set[:name])
+          context "when passed an Attribute" do
+            context "when the Attribute belongs to the PrimitiveTuple's #set" do
+              before do
+                @signal = user.signal(users_set[:name])
+              end
+
+              it "returns an AttributeSignal with #attribute set to the passed in Attribute" do
+                signal.attribute.should == users_set[:name]
+              end
+
+              context "when passed a block" do
+                it "returns a DerivedSignal with the AttributeSignal as its #source_signal" do
+                  derived_signal = user.signal(users_set[:name]) do |value|
+                    "#{value} the Terrible"
+                  end
+                  derived_signal.class.should == DerivedSignal
+                  derived_signal.value.should == "#{user.name} the Terrible"
+                end
+              end
             end
 
-            it "returns an AttributeSignal with #attribute set to the passed in Attribute" do
-              signal.attribute.should == users_set[:name]
-            end
-          end
-
-          context "when passed an Attribute not from the Relation" do
-            it "raises an ArgumentError" do
-              lambda do
-                @signal = user.signal(photos_set[:name])
-              end.should raise_error(ArgumentError)
+            context "when the Attribute does not belong to the PrimitiveTuple's #set" do
+              it "raises an ArgumentError" do
+                lambda do
+                  @signal = user.signal(photos_set[:name])
+                end.should raise_error(ArgumentError)
+              end
             end
           end
         end
