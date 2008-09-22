@@ -85,7 +85,7 @@ module Unison
             context "when another #attribute's value is updated on the Tuple" do
               it "does not invoke the block" do
                 signal.on_change(retainer) do |*args|
-                  raise "Do not call me"
+                  raise "Don't taze me bro"
                 end
 
                 user[:id] = 100

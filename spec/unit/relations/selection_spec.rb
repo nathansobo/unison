@@ -255,7 +255,7 @@ module Unison
 
             it "does not trigger the on_insert event" do
               selection.on_insert(retainer) do |tuple|
-                raise "Don't call me"
+                raise "Don't taze me"
               end
               photos_set.insert(photo)
             end
@@ -307,7 +307,7 @@ module Unison
 
             it "does not trigger the on_insert event" do
               selection.on_insert(retainer) do |tuple|
-                raise "Dont call me"
+                raise "Don't taze me bro"
               end
 
               photo[:user_id] = "ross"
@@ -367,7 +367,7 @@ module Unison
 
             it "does not trigger the on_delete event" do
               selection.on_delete(retainer) do |tuple|
-                raise "Don't call me"
+                raise "Don't taze me"
               end
               photos_set.delete(photo)
             end
@@ -426,10 +426,10 @@ module Unison
 
             it "does not trigger the on_insert or on_delete event" do
               selection.on_insert(retainer) do |tuple|
-                raise "Dont call me"
+                raise "Don't taze me bro"
               end
               selection.on_delete(retainer) do |tuple|
-                raise "Dont call me"
+                raise "Don't taze me bro"
               end
 
               photo[:name] = "New Name"

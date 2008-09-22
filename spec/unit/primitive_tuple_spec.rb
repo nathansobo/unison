@@ -645,7 +645,7 @@ module Unison
           context "when the passed in value is the same than the original value" do
             it "does not trigger the on_update event" do
               tuple.on_update(retainer) do |attribute, old_value, new_value|
-                raise "Dont call me"
+                raise "Don't taze me bro"
               end
               
               tuple[:name] = tuple[:name]

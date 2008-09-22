@@ -595,10 +595,10 @@ module Unison
 
               it "does not trigger the on_insert or on_delete event" do
                 join.on_insert(retainer) do |tuple|
-                  raise "Dont call me"
+                  raise "Don't taze me bro"
                 end
                 join.on_delete(retainer) do |tuple|
-                  raise "Dont call me"
+                  raise "Don't taze me bro"
                 end
                 user[:name] = "Joe"
               end
@@ -711,10 +711,10 @@ module Unison
 
               it "does not trigger the on_insert or on_delete event" do
                 join.on_insert(retainer) do |tuple|
-                  raise "Dont call me"
+                  raise "Don't taze me bro"
                 end
                 join.on_delete(retainer) do |tuple|
-                  raise "Dont call me"
+                  raise "Don't taze me bro"
                 end
                 photo[:name] = "A great naked show part 3"
               end

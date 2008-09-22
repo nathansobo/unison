@@ -14,7 +14,7 @@ module Unison
 
       describe "#initialize" do
         it "sets the #operand" do
-          singleton_relation.operand.should == accounts_set
+          operand.should == accounts_set
         end
       end
 
@@ -197,7 +197,16 @@ module Unison
                 old_first_tuple.should be_retained_by(singleton_relation)
                 operand.set.insert(new_first_tuple)
                 old_first_tuple.should_not be_retained_by(singleton_relation)
-              end              
+              end
+
+              it "triggers the on_change event with self" do
+                on_change_arguments = []
+                singleton_relation.on_change(retainer) do |*args|
+                  on_change_arguments.push(args)
+                end
+                operand.set.insert(new_first_tuple)
+                on_change_arguments.should == [[singleton_relation]]
+              end
             end
 
             context "when #operand.tuples.size == 0" do
@@ -227,7 +236,7 @@ module Unison
 
               it "does not trigger the on_delete event" do
                 singleton_relation.on_delete(retainer) do |tuple|
-                  raise "Don't call me"
+                  raise "Don't taze me"
                 end
                 operand.set.insert(new_first_tuple)
               end
@@ -236,6 +245,15 @@ module Unison
                 new_first_tuple.should_not be_retained_by(singleton_relation)
                 operand.set.insert(new_first_tuple)
                 new_first_tuple.should be_retained_by(singleton_relation)
+              end
+
+              it "triggers the on_change event with self" do
+                on_change_arguments = []
+                singleton_relation.on_change(retainer) do |*args|
+                  on_change_arguments.push(args)
+                end
+                operand.set.insert(new_first_tuple)
+                on_change_arguments.should == [[singleton_relation]]
               end
             end
           end
@@ -254,14 +272,21 @@ module Unison
 
             it "does not trigger the on_insert event" do
               singleton_relation.on_insert(retainer) do
-                raise "Don't call me"
+                raise "Don't taze me"
               end
               operand.set.insert(new_tuple)
             end
 
             it "does not trigger the on_delete event" do
               singleton_relation.on_delete(retainer) do
-                raise "Don't call me"
+                raise "Don't taze me"
+              end
+              operand.set.insert(new_tuple)
+            end
+
+            it "does not trigger the on_change event" do
+              singleton_relation.on_change(retainer) do |*args|
+                raise "Don't taze me bro"
               end
               operand.set.insert(new_tuple)
             end
@@ -315,6 +340,15 @@ module Unison
                 operand.set.delete(old_first_tuple)
                 old_first_tuple.should_not be_retained_by(singleton_relation)
               end
+
+              it "triggers the on_change event with self" do
+                on_change_arguments = []
+                singleton_relation.on_change(retainer) do |*args|
+                  on_change_arguments.push(args)
+                end
+                operand.set.delete(old_first_tuple)
+                on_change_arguments.should == [[singleton_relation]]
+              end
             end
 
             context "when #operand.tuples.size == 1" do
@@ -345,7 +379,7 @@ module Unison
 
               it "does not trigger the on_insert event" do
                 singleton_relation.on_insert(retainer) do |tuple|
-                  raise "Don't call me"
+                  raise "Don't taze me"
                 end
                 operand.set.delete(old_first_tuple)
               end
@@ -355,38 +389,247 @@ module Unison
                 operand.set.delete(old_first_tuple)
                 old_first_tuple.should_not be_retained_by(singleton_relation)
               end
+
+              it "triggers the on_change event with self" do
+                on_change_arguments = []
+                singleton_relation.on_change(retainer) do |*args|
+                  on_change_arguments.push(args)
+                end
+                operand.set.delete(old_first_tuple)
+                on_change_arguments.should == [[singleton_relation]]
+              end
             end
           end
 
           context "when the Tuple was not first in the #operand" do
+            attr_reader :first_tuple, :not_first_tuple
+            before do
+              @first_tuple = operand.tuples.first
+              @not_first_tuple = operand.tuples[1]
+              not_first_tuple.should_not == first_tuple
+            end
 
+            it "does not change #tuple" do
+              operand.set.delete(not_first_tuple)
+              singleton_relation.tuple.should == first_tuple
+            end
+
+            it "does not trigger the on_insert event" do
+              singleton_relation.on_insert(retainer) do
+                raise "Don't taze me"
+              end
+              operand.set.delete(not_first_tuple)
+            end
+
+            it "does not trigger the on_delete event" do
+              singleton_relation.on_delete(retainer) do
+                raise "Don't taze me"
+              end
+              operand.set.delete(not_first_tuple)
+            end
+
+            it "does not trigger the on_change event" do
+              singleton_relation.on_change(retainer) do |*args|
+                raise "Don't taze me bro"
+              end
+              operand.set.delete(not_first_tuple)
+            end            
           end
         end
 
         context "when a Tuple in the #operand is updated" do
-          context "when the Tuple is first in the #operand" do
-            it "triggers the on_tuple_update event with the inserted Tuple after the #tuple has changed" do
-              on_tuple_update_arguments = []
-              singleton_relation.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
-                on_tuple_update_arguments.push([tuple, attribute, old_value, new_value])
+          context "when the Tuple is first in #operand" do
+            attr_reader :updated_tuple
+            before do
+              @updated_tuple = singleton_relation.tuple
+            end
+            
+            context "when the Tuple remains first in #operand" do
+              attr_reader :old_name, :new_name
+              before do
+                @old_name = singleton_relation.tuple.name
+                @new_name = "#{old_name} that is changed"
               end
-              old_name = singleton_relation.tuple.name
-              new_name = "#{old_name} that is changed"
-              singleton_relation.tuple.name = new_name
-              on_tuple_update_arguments.should == [[singleton_relation.tuple, operand.set[:name], old_name, new_name]]
+
+              it "does not change #tuple" do
+                updated_tuple.name = new_name
+                singleton_relation.tuple.should == updated_tuple
+              end
+
+              it "triggers the on_tuple_update event with the inserted Tuple after the #tuple has changed" do
+                on_tuple_update_arguments = []
+                singleton_relation.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
+                  on_tuple_update_arguments.push([tuple, attribute, old_value, new_value])
+                end
+                updated_tuple.name = new_name
+                on_tuple_update_arguments.should == [[updated_tuple, operand.set[:name], old_name, new_name]]
+              end
+
+              it "does not trigger the on_delete event" do
+                singleton_relation.on_delete(retainer) do |*args|
+                  raise "Don't taze me bro"
+                end
+                updated_tuple.name = new_name
+              end
+
+              it "does not trigger the on_insert event" do
+                singleton_relation.on_insert(retainer) do |*args|
+                  raise "Don't taze me bro"
+                end
+                updated_tuple.name = new_name
+              end
+
+              it "triggers the on_change event with self after the #tuple has changed" do
+                on_change_arguments = []
+                singleton_relation.on_change(retainer) do |*args|
+                  on_change_arguments.push(args)
+                end
+                updated_tuple.name = new_name
+                on_change_arguments.should == [[singleton_relation]]
+              end
+            end
+
+            context "when the update causes the Tuple to no longer be the first in #operand" do
+              it "changes #tuple to the new first Tuple in #operand" do
+                updated_tuple.employee_id = 9999
+                operand.tuples.first.should_not == updated_tuple
+                singleton_relation.tuple.should == operand.tuples.first
+              end
+              
+              it "does not trigger the on_tuple_update event" do
+                singleton_relation.on_tuple_update(retainer) do
+                  raise "Don't taze me bro"
+                end
+                updated_tuple.employee_id = 9999
+                operand.tuples.first.should_not == updated_tuple
+              end
+
+              it "triggers the on_delete event with the updated Tuple" do
+                on_delete_args = []
+                singleton_relation.on_delete(retainer) do |*args|
+                  on_delete_args.push(args)
+                end
+                updated_tuple.employee_id = 9999
+                operand.tuples.first.should_not == updated_tuple
+                on_delete_args.should == [[updated_tuple]]
+              end
+
+              it "triggers the on_insert event with the new first Tuple in #operand" do
+                on_insert_args = []
+                singleton_relation.on_insert(retainer) do |*args|
+                  on_insert_args.push(args)
+                end
+                updated_tuple.employee_id = 9999
+                operand.tuples.first.should_not == updated_tuple
+                on_insert_args.should == [[operand.tuples.first]]
+              end
+
+              it "triggers the on_change event with self" do
+                on_change_args = []
+                singleton_relation.on_change(retainer) do |*args|
+                  on_change_args.push(args)
+                end
+                updated_tuple.employee_id = 9999
+                operand.tuples.first.should_not == updated_tuple
+                on_change_args.should == [[singleton_relation]]
+              end
             end
           end
 
           context "when the Tuple is not first in the #operand" do
-            it "does not trigger the on_tuple_update event" do
-              singleton_relation.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
-                raise "Don't call me"
+            attr_reader :updated_tuple
+            before do
+              @updated_tuple = operand.tuples[1]
+            end
+
+            context "when the Tuple remains not first in #operand" do
+              attr_reader :old_name, :new_name
+              before do
+                @old_name = singleton_relation.tuple.name
+                @new_name = "#{old_name} that is changed"
               end
-              old_name = singleton_relation.tuple.name
-              new_name = "#{old_name} that is changed"
-              operand.tuples.length.should be > 1
-              operand.tuples.last.name = new_name
-            end            
+              
+              it "does not change #tuple" do
+                lambda do
+                  updated_tuple.name = new_name
+                end.should_not change {singleton_relation.tuple}
+              end              
+
+              it "does not trigger the on_tuple_update event" do
+                singleton_relation.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
+                  raise "Don't taze me"
+                end
+                updated_tuple.name = new_name
+              end
+
+              it "does not trigger the on_delete event" do
+                singleton_relation.on_delete(retainer) do |*args|
+                  raise "Don't taze me bro"
+                end
+                updated_tuple.name = new_name
+              end
+
+              it "does not trigger the on_insert event" do
+                singleton_relation.on_insert(retainer) do |*args|
+                  raise "Don't taze me bro"
+                end
+                updated_tuple.name = new_name
+              end
+
+              it "does not trigger the on_change event" do
+                singleton_relation.on_change(retainer) do |*args|
+                  raise "Don't taze me bro"
+                end
+                updated_tuple.name = new_name
+              end
+            end
+
+            context "when the update causes the Tuple to be the first in #operand" do
+              it "changes #tuple to be the updated Tuple" do
+                updated_tuple.employee_id = 0
+                updated_tuple.should == operand.tuples.first
+                singleton_relation.tuple.should == updated_tuple
+              end
+
+              it "does not trigger the on_tuple_update event" do
+                singleton_relation.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
+                  raise "Don't taze me"
+                end
+                updated_tuple.employee_id = 0
+                updated_tuple.should == operand.tuples.first
+              end
+
+              it "triggers the on_delete event with old value of #tuple" do
+                old_tuple = singleton_relation.tuple
+                on_delete_args = []
+                singleton_relation.on_delete(retainer) do |*args|
+                  on_delete_args.push(args)
+                end
+                updated_tuple.employee_id = 0
+                updated_tuple.should == operand.tuples.first
+                on_delete_args.should == [[old_tuple]]
+              end
+
+              it "triggers the on_insert event with the updated Tuple" do
+                on_insert_args = []
+                singleton_relation.on_insert(retainer) do |*args|
+                  on_insert_args.push(args)
+                end
+                updated_tuple.employee_id = 0
+                updated_tuple.should == operand.tuples.first
+                on_insert_args.should == [[updated_tuple]]
+              end
+
+              it "triggers the on_change event with self" do
+                on_change_args = []
+                singleton_relation.on_change(retainer) do |*args|
+                  on_change_args.push(args)
+                end
+                updated_tuple.employee_id = 0
+                updated_tuple.should == operand.tuples.first
+                on_change_args.should == [[singleton_relation]]
+              end
+            end
           end
         end
       end
