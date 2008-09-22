@@ -809,7 +809,15 @@ module Unison
               end
             end
 
-            context "when the Symbol is not the #name of an Attribute in the PrimitiveTuple's #set or a synthetic attribute" do
+            context "when the Symbol names a SingletonRelation" do
+              it "returns a SingletonRelationSignal with the Relation as its #value" do
+                signal = user.signal(:team)
+                signal.class.should == Signals::SingletonRelationSignal
+                signal.value.should == user.team
+              end
+            end
+
+            context "when the Symbol is not the #name of any kind of attribute or relation" do
               it "raises an ArgumentError" do
                 lambda do
                   @signal = user.signal(:bullshit)

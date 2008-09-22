@@ -224,7 +224,16 @@ module Unison
     end
 
     def signal(attribute_or_symbol, &block)
-      signal = synthetic_attribute_signals[attribute_or_symbol] || Signals::AttributeSignal.new(self, attribute_for(attribute_or_symbol))
+      signal =
+        if has_synthetic_attribute?(attribute_or_symbol)
+          synthetic_attribute_signals[attribute_or_symbol]
+        elsif has_singleton_relation?(attribute_or_symbol)
+          Signals::SingletonRelationSignal.new(send(attribute_or_symbol))
+        elsif has_attribute?(attribute_or_symbol)
+          Signals::AttributeSignal.new(self, attribute_for(attribute_or_symbol))
+        else
+          raise ArgumentError, "There is no attribute or relation #{attribute_or_symbol.inspect} on #{self.inspect}"
+        end
       block ? signal.signal(&block) : signal
     end
 
@@ -288,6 +297,17 @@ module Unison
 
     def instance_relation_definitions
       self.class.send(:instance_relation_definitions)
+    end
+
+    def has_synthetic_attribute?(name)
+      synthetic_attribute_definitions.has_key?(name)
+    end
+
+    def has_singleton_relation?(name)
+      instance_relation_definitions.any? do |definition|
+        definition.name == name &&
+          self.send(name).is_a?(Relations::SingletonRelation)
+      end
     end
 
     def customize_relation(relation, &customization_block)
