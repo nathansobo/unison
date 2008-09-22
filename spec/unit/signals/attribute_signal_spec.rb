@@ -1,7 +1,7 @@
-require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
+require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 
 module Unison
-  module Tuple
+  module Signals
     describe AttributeSignal do
       attr_reader :user, :attribute, :signal
       before do

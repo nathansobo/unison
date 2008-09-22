@@ -768,7 +768,7 @@ module Unison
                   derived_signal = user.signal(:name) do |value|
                     "#{value} the Terrible"
                   end
-                  derived_signal.class.should == DerivedSignal
+                  derived_signal.class.should == Signals::DerivedSignal
                   derived_signal.value.should == "#{user.name} the Terrible"
                 end
               end
@@ -803,7 +803,7 @@ module Unison
                   derived_signal = user.signal(:team_name) do |value|
                     "#{value} Suck!"
                   end
-                  derived_signal.class.should == DerivedSignal
+                  derived_signal.class.should == Signals::DerivedSignal
                   derived_signal.value.should == "#{user.team_name} Suck!"
                 end
               end
@@ -833,7 +833,7 @@ module Unison
                   derived_signal = user.signal(users_set[:name]) do |value|
                     "#{value} the Terrible"
                   end
-                  derived_signal.class.should == DerivedSignal
+                  derived_signal.class.should == Signals::DerivedSignal
                   derived_signal.value.should == "#{user.name} the Terrible"
                 end
               end

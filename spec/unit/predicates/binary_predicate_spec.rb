@@ -46,8 +46,8 @@ module Unison
         describe "#after_last_release" do
           context "when #operand_1 and #operand_2 are not Signals" do
             before do
-              operand_1.should_not be_instance_of(AttributeSignal)
-              operand_2.should_not be_instance_of(AttributeSignal)
+              operand_1.should_not be_instance_of(Signals::AttributeSignal)
+              operand_2.should_not be_instance_of(Signals::AttributeSignal)
             end
 
             it "does not raise an error" do

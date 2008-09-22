@@ -224,7 +224,7 @@ module Unison
     end
 
     def signal(attribute_or_symbol, &block)
-      signal = synthetic_attribute_signals[attribute_or_symbol] || AttributeSignal.new(self, attribute_for(attribute_or_symbol))
+      signal = synthetic_attribute_signals[attribute_or_symbol] || Signals::AttributeSignal.new(self, attribute_for(attribute_or_symbol))
       block ? signal.signal(&block) : signal
     end
 
