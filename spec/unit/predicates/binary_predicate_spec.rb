@@ -59,7 +59,7 @@ module Unison
             attr_reader :user
 
             before do
-              publicize operand, :update_subscription_node              
+              publicize operand, :change_subscription_node              
             end
 
             def operand_1
@@ -70,12 +70,12 @@ module Unison
 
             it "unsubscribes from and releases #operand_1" do
               operand.should be_retained_by(predicate)
-              predicate.should be_subscribed_to(operand.update_subscription_node)
+              predicate.should be_subscribed_to(operand.change_subscription_node)
 
               mock.proxy(predicate).after_last_release
               predicate.release_from(retainer)
               
-              predicate.should_not be_subscribed_to(operand.update_subscription_node)
+              predicate.should_not be_subscribed_to(operand.change_subscription_node)
               operand.should_not be_retained_by(predicate)
             end
           end
@@ -83,7 +83,7 @@ module Unison
           context "when #operand_2 is an AttributeSignal" do
             attr_reader :user
             before do
-              publicize operand, :update_subscription_node
+              publicize operand, :change_subscription_node
             end
 
             def operand_2
@@ -94,12 +94,12 @@ module Unison
 
             it "unsubscribes from and releases #operand_2" do
               operand.should be_retained_by(predicate)
-              predicate.should be_subscribed_to(operand.update_subscription_node)
+              predicate.should be_subscribed_to(operand.change_subscription_node)
 
               mock.proxy(predicate).after_last_release
               predicate.release_from(retainer)
 
-              predicate.should_not be_subscribed_to(operand.update_subscription_node)
+              predicate.should_not be_subscribed_to(operand.change_subscription_node)
               operand.should_not be_retained_by(predicate)
             end
           end
@@ -162,7 +162,7 @@ module Unison
             attr_reader :user
 
             before do
-              publicize operand, :update_subscription_node              
+              publicize operand, :change_subscription_node
             end
 
             def operand_1
@@ -174,12 +174,12 @@ module Unison
             it "#retains and #subscribes to #on_change on the AttributeSignal" do
               mock.proxy(predicate).after_first_retain
               operand.should_not be_retained_by(predicate)
-              predicate.should_not be_subscribed_to(operand.update_subscription_node)
+              predicate.should_not be_subscribed_to(operand.change_subscription_node)
 
               predicate.retain_with(Object.new)
               
               operand.should be_retained_by(predicate)
-              predicate.should be_subscribed_to(operand.update_subscription_node)
+              predicate.should be_subscribed_to(operand.change_subscription_node)
             end
           end
 

@@ -3,16 +3,16 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 module Unison
   module Signals
     describe SingletonRelationSignal do
-      attr_reader :relation, :signal
+      attr_reader :value, :signal
       before do
-        @relation = User.where(User[:id].eq("nathan")).singleton
-        @signal = SingletonRelationSignal.new(relation)
+        @value = User.where(User[:id].eq("nathan")).singleton
+        @signal = SingletonRelationSignal.new(value)
       end
 
       describe "#initialize" do
         context "when passed a SingletonRelation" do
           it "sets #value to the passed-in SingletonRelation" do
-            signal.value.should == relation
+            signal.value.should == value
           end
         end
 
@@ -29,14 +29,14 @@ module Unison
         context "when other is an SingletonRelationSignal" do
           context "when other.value == #value" do
             it "returns true" do
-              signal.should == SingletonRelationSignal.new(relation)
+              signal.should == SingletonRelationSignal.new(value)
             end
           end
 
           context "when other.value != value" do
             it "returns true" do
               other_relation = User.where(User[:id].eq("corey")).singleton
-              relation.should_not == other_relation
+              value.should_not == other_relation
               signal.should_not == SingletonRelationSignal.new(other_relation)
             end
           end
@@ -57,20 +57,26 @@ module Unison
         end
 
         it "retains its #value" do
-          relation.should be_retained_by(signal)
+          value.should be_retained_by(signal)
         end
         
         context "when the #value changes" do
           it "triggers the on_change event" do
-            pending "SingletonRelation#on_change" do
-              on_update_arguments = []
-              signal.on_change(retainer) do |*args|
-                on_update_arguments.push(args)
-              end
+            value.retain_with(retainer)
 
-              relation.tuple[:name] = "Sobot"
-              on_update_arguments.should == [[signal.value]]
+            singleton_on_change_called = false
+            value.on_change(retainer) do
+              singleton_on_change_called = true
             end
+            
+            on_change_arguments = []
+            signal.on_change(retainer) do |*args|
+              on_change_arguments.push(args)
+            end
+
+            value.tuple[:name] = "Sobot"
+            singleton_on_change_called.should be_true
+            on_change_arguments.should == [[value]]
           end
         end
       end

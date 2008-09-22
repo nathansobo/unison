@@ -6,7 +6,7 @@ module Unison
         source_signal.on_change do |source_old_value, source_new_value|
           old_value = @value || transform.call(source_old_value)
           @value = transform.call(source_new_value)
-          update_subscription_node.call(old_value, value)
+          change_subscription_node.call(old_value, value)
         end
       end
 

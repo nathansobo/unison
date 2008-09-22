@@ -4,11 +4,11 @@ module Unison
       include Retainable
 
       def initialize
-        @update_subscription_node = SubscriptionNode.new(self)
+        @change_subscription_node = SubscriptionNode.new(self)
       end
 
       def on_change(*args, &block)
-        update_subscription_node.subscribe(*args, &block)
+        change_subscription_node.subscribe(*args, &block)
       end
 
       def to_arel
@@ -21,7 +21,7 @@ module Unison
       end
 
       protected
-      attr_reader :update_subscription_node
-    end    
+      attr_reader :change_subscription_node
+    end
   end
 end
