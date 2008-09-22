@@ -1,23 +1,30 @@
 module Unison
   module Signals
     class DerivedSignal < Signal
-      retain :source_signal
+      retain :source
       subscribe do
-        source_signal.on_change do |source_old_value, source_new_value|
-          old_value = @value || transform.call(source_old_value)
-          @value = transform.call(source_new_value)
-          change_subscription_node.call(old_value, value)
+        source.on_change do |source_old_value, source_new_value|
+          old_value = @value || apply_transform(source_old_value)
+          @value = apply_transform(source_new_value)
+          change_subscription_node.call(old_value, value) unless old_value == value
         end
       end
 
-      attr_reader :source_signal, :transform
-      def initialize(source_signal, &transform)
+      attr_reader :source, :method_name, :transform
+      def initialize(source, method_name = nil, &transform)
         super()
-        @source_signal, @transform = source_signal, transform
+        @source, @method_name, @transform = source, method_name, transform
       end
 
       def value
-        @value ||= transform.call(source_signal.value)
+        @value ||= transform.call(source.value)
+      end
+
+      protected
+      def apply_transform(value)
+        value = value.send(method_name) if method_name
+        value = transform.call(value) if transform
+        value
       end
     end
   end

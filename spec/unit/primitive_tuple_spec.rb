@@ -764,7 +764,7 @@ module Unison
               end
 
               context "when passed a block" do
-                it "returns a DerivedSignal with the AttributeSignal as its #source_signal" do
+                it "returns a DerivedSignal with the AttributeSignal as its #source" do
                   derived_signal = user.signal(:name) do |value|
                     "#{value} the Terrible"
                   end
@@ -799,7 +799,7 @@ module Unison
               end
 
               context "when passed a block" do
-                it "returns a DerivedSignal with the signal associated with the synthetic attribute as its #source_signal" do
+                it "returns a DerivedSignal with the signal associated with the synthetic attribute as its #source" do
                   derived_signal = user.signal(:team_name) do |value|
                     "#{value} Suck!"
                   end
@@ -837,7 +837,7 @@ module Unison
               end
 
               context "when passed a block" do
-                it "returns a DerivedSignal with the AttributeSignal as its #source_signal" do
+                it "returns a DerivedSignal with the AttributeSignal as its #source" do
                   derived_signal = user.signal(users_set[:name]) do |value|
                     "#{value} the Terrible"
                   end

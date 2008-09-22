@@ -18,7 +18,7 @@ module Unison
 
       describe "#signal" do
         context "when passed a block" do
-          it "returns a DerivedSignal with self as its #source_signal and the given block as its #transform" do
+          it "returns a DerivedSignal with self as its #source and the given block as its #transform" do
             derived_signal = signal.signal do |value|
               "#{value} the Neurotic"
             end

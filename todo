@@ -4,6 +4,12 @@ game.signal(:current_round) # singleton relation signal
 
 game.current_round.signal(:mode) # tuple signal
 game.signal(:current_round).signal(:mode) # derived tuple signal
+game.signal(:current_round).signal(:mode) # derived tuple signal
+
+
+game.signal(:current_round).signal do |round|
+  round.mode
+end
 
 
 game.signal(:game_sessions) do |game_sessions| # relation signal
