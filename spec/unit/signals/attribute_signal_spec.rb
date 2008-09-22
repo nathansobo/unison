@@ -102,16 +102,6 @@ module Unison
             signal.value.should == user[:name]
           end
         end
-
-        describe "#on_change" do
-          context "when passed a block" do
-            it "raises an error" do
-              lambda do
-                signal.on_change {}
-              end.should raise_error
-            end
-          end
-        end
       end
     end
   end

@@ -1,8 +1,6 @@
 module Unison
   module Signals
     class DerivedSignal < Signal
-      include Retainable
-
       retain :source_signal
       subscribe do
         source_signal.on_change do |source_old_value, source_new_value|
@@ -22,6 +20,5 @@ module Unison
         @value ||= transform.call(source_signal.value)
       end
     end
-    
   end
 end
