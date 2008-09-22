@@ -7,7 +7,7 @@ module Unison
       subscribe do
         tuple.on_update do |updated_attribute, old_value, new_value|
           if attribute == updated_attribute
-            change_subscription_node.call(old_value, new_value)
+            change_subscription_node.call(new_value)
           end
         end
       end

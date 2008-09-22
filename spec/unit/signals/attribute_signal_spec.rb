@@ -73,12 +73,9 @@ module Unison
                   on_update_arguments.push(args)
                 end
 
-                old_name = user[:name]
                 new_name = "Joe Bob"
                 user[:name] = new_name
-                on_update_arguments.should == [
-                  [old_name, new_name]
-                ]
+                on_update_arguments.should == [[new_name]]
               end
             end
 

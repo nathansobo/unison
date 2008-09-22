@@ -795,7 +795,7 @@ module Unison
                 expected_old_name = user.team.name
                 new_name = "The Tacos"
                 user.team.name = new_name
-                on_change_args.should == [[expected_old_name, new_name]]
+                on_change_args.should == [[new_name]]
               end
 
               context "when passed a block" do
