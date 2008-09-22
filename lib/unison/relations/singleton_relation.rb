@@ -7,14 +7,7 @@ module Unison
       subscribe do
         operand.on_insert do |inserted|
           if inserted == operand.tuples.first
-            old_tuple = tuple
-            insert_without_callback(inserted)
-            if old_tuple
-              delete_without_callback(old_tuple)
-              delete_subscription_node.call(old_tuple)
-            end
-            insert_subscription_node.call(tuple)
-            change_subscription_node.call(self)
+            swap_tuple(inserted)
           end
         end
       end
@@ -22,13 +15,7 @@ module Unison
       subscribe do
         operand.on_delete do |deleted|
           if deleted == tuple
-            delete_without_callback(deleted)
-            if operand.tuples.first
-              insert_without_callback(operand.tuples.first)
-              insert_subscription_node.call(tuple)
-            end
-            delete_subscription_node.call(deleted)
-            change_subscription_node.call(self)
+            swap_tuple(operand.tuples.first)
           end
         end
       end
@@ -37,22 +24,13 @@ module Unison
         operand.on_tuple_update do |updated_tuple, attribute, old_value, new_value|
           if updated_tuple == tuple
             if updated_tuple == operand.tuples.first
-              tuple_update_subscription_node.call(updated_tuple, attribute, old_value, new_value)
+              tuple_updated(attribute, old_value, new_value)
             else
-              delete_without_callback(updated_tuple)
-              insert_without_callback(operand.tuples.first)
-              delete_subscription_node.call(updated_tuple)
-              insert_subscription_node.call(operand.tuples.first)
+              swap_tuple(operand.tuples.first)
             end
-            change_subscription_node.call(self)
           else
             if updated_tuple == operand.tuples.first
-              old_tuple = tuple
-              delete_without_callback(old_tuple)
-              insert_without_callback(updated_tuple)
-              delete_subscription_node.call(old_tuple)
-              insert_subscription_node.call(updated_tuple)
-              change_subscription_node.call(self)
+              swap_tuple(updated_tuple)
             end
           end
         end
@@ -107,6 +85,20 @@ module Unison
 
       protected
       attr_reader :change_subscription_node
+
+      def tuple_updated(attribute, old_value, new_value)
+        tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
+        change_subscription_node.call(self)
+      end
+
+      def swap_tuple(new_tuple)
+        old_tuple = tuple
+        delete_without_callback(old_tuple) unless old_tuple.nil?
+        insert_without_callback(new_tuple) unless new_tuple.nil?
+        delete_subscription_node.call(old_tuple) unless old_tuple.nil?
+        insert_subscription_node.call(new_tuple) unless new_tuple.nil?
+        change_subscription_node.call(self)
+      end      
 
       def initial_read
         [operand.tuples.first].compact
