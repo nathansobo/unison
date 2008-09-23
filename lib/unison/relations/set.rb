@@ -11,7 +11,7 @@ module Unison
 
       def tuple_class
         @tuple_class ||= begin
-          tuple_class = Class.new(Unison::PrimitiveTuple::Base)
+          tuple_class = Class.new(Unison::PrimitiveTuple)
           tuple_class.set = self
           tuple_class
         end

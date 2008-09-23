@@ -19,7 +19,7 @@ module Unison
         end
         it "sets the #tuple_class of the Set to a subclass of Tuple::Base, and sets its #relation to itself" do
           tuple_class = set.tuple_class
-          tuple_class.superclass.should == PrimitiveTuple::Base
+          tuple_class.superclass.should == PrimitiveTuple
           tuple_class.set.should == set
         end
       end

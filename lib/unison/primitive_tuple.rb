@@ -1,10 +1,8 @@
 module Unison
-  module PrimitiveTuple
-    include Tuple
+  class PrimitiveTuple < Tuple
     include Enumerable
-    module ClassMethods
-      include Tuple::ClassMethods
 
+    class << self
       def new(attrs={})
         instance = polymorphic_allocate(attrs)
         instance.send(:initialize, attrs)
@@ -129,9 +127,6 @@ module Unison
       def synthetic_attribute_definitions
         @synthetic_attribute_definitions ||= {}
       end
-    end
-    def self.included(a_module)
-      a_module.extend ClassMethods
     end
 
     def initialize(initial_attributes={})
@@ -312,11 +307,6 @@ module Unison
 
     def customize_relation(relation, &customization_block)
       customization_block ? instance_exec(relation, &customization_block) : relation
-    end
-
-    public
-    class Base
-      include PrimitiveTuple
     end
   end
 end

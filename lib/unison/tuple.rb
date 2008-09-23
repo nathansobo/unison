@@ -1,9 +1,9 @@
 module Unison
-  module Tuple
+  class Tuple
     include Unison
     include Retainable
-    module ClassMethods
-      include Retainable::ClassMethods
+    
+    class << self
       def [](attribute)
         set[attribute]
       end
@@ -19,9 +19,6 @@ module Unison
       def basename
         name.split("::").last
       end
-    end
-    def self.included(mod)
-      mod.extend(ClassMethods)
     end
 
     def initialize

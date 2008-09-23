@@ -84,7 +84,7 @@ Spec::Runner.configure do |config|
 
 
     Object.class_eval do
-      const_set(:Team, Class.new(Unison::PrimitiveTuple::Base) do
+      const_set(:Team, Class.new(Unison::PrimitiveTuple) do
         member_of Unison::Relations::Set.new(:teams)
 
         attribute_accessor :id, :string
@@ -97,7 +97,7 @@ Spec::Runner.configure do |config|
         has_many :friendships_to_users, :through => :users, :foreign_key => :to_id, :class_name => "Friendship"
       end)
 
-      const_set(:User, Class.new(Unison::PrimitiveTuple::Base) do
+      const_set(:User, Class.new(Unison::PrimitiveTuple) do
         member_of Unison::Relations::Set.new(:users)
         
         attribute_accessor :id, :string
@@ -142,7 +142,7 @@ Spec::Runner.configure do |config|
 
       end)
 
-      const_set(:LifeGoal, Class.new(Unison::PrimitiveTuple::Base) do
+      const_set(:LifeGoal, Class.new(Unison::PrimitiveTuple) do
         member_of Unison::Relations::Set.new(:life_goals)
         attribute_accessor :id, :string
         attribute_accessor :user_id, :string
@@ -150,7 +150,7 @@ Spec::Runner.configure do |config|
         belongs_to :user
       end)
 
-      const_set(:Friendship, Class.new(Unison::PrimitiveTuple::Base) do
+      const_set(:Friendship, Class.new(Unison::PrimitiveTuple) do
         member_of Unison::Relations::Set.new(:friendships)
         attribute_accessor :id, :string
         attribute_accessor :from_id, :string
@@ -160,7 +160,7 @@ Spec::Runner.configure do |config|
         belongs_to :to, :class_name => :User
       end)
 
-      const_set(:Profile, Class.new(Unison::PrimitiveTuple::Base) do
+      const_set(:Profile, Class.new(Unison::PrimitiveTuple) do
         member_of Unison::Relations::Set.new(:profiles)
         attribute_reader :id, :string
         attribute_accessor :owner_id, :string
@@ -174,7 +174,7 @@ Spec::Runner.configure do |config|
         has_many :friendships_from_me, :through => :owner, :foreign_key => :from_id, :class_name => :Friendship
       end)
 
-      const_set(:Photo, Class.new(Unison::PrimitiveTuple::Base) do
+      const_set(:Photo, Class.new(Unison::PrimitiveTuple) do
         member_of Unison::Relations::Set.new(:photos)
         attribute_accessor :id, :string
         attribute_accessor :user_id, :string
@@ -185,7 +185,7 @@ Spec::Runner.configure do |config|
         belongs_to :camera
       end)
 
-      const_set(:Camera, Class.new(Unison::PrimitiveTuple::Base) do
+      const_set(:Camera, Class.new(Unison::PrimitiveTuple) do
         member_of Unison::Relations::Set.new(:cameras)
         attribute_accessor :id, :string
         attribute_accessor :name, :string
@@ -193,7 +193,7 @@ Spec::Runner.configure do |config|
         has_many :photos
       end)
 
-      const_set(:Account, Class.new(Unison::PrimitiveTuple::Base) do
+      const_set(:Account, Class.new(Unison::PrimitiveTuple) do
         member_of Unison::Relations::Set.new(:accounts)
 
         class << self

@@ -11,6 +11,55 @@ game.signal(:current_round).signal do |round|
   round.mode
 end
 
+domain = set of named relations
+tuple = a set of named attributes + a set of named relations
+topic = a set of named relations plus a representation
+
+
+class Game < PT:Base
+  topic do
+    {
+      :games => active_games,
+      :
+    }
+  end
+end
+
+class GameTopic < Topic
+  expose :games, :fruits, :veggies
+
+  relates_to_many :games
+  relates_to_many :active_games do
+    games.where active
+  end
+
+  expose :answers
+
+  :answers_without_correct
+  :answers_with_correct
+
+  def answers
+    choice
+  end
+
+
+  def representation
+  end
+end
+
+GameTopic.new(game).to_hash
+GameTopic.new(game).to_json
+
+game_topic.topic.to_json
+
+relation1
+
+
+game.exposed_domain = game.project(
+  :games => active_games,
+  :groups => active_games.join...
+
+)
 
 game.signal(:game_sessions) do |game_sessions| # relation signal
 end

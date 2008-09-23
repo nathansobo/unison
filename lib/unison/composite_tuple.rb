@@ -1,6 +1,5 @@
 module Unison
-  class CompositeTuple
-    include Tuple
+  class CompositeTuple < Tuple
     attr_reader :nested_tuples
     retain :nested_tuples
 

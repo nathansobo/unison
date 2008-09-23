@@ -27,7 +27,7 @@ module Unison
 
     describe ".basename" do
       it "returns the last segment of name" do
-        tuple_class = Class.new(PrimitiveTuple::Base)
+        tuple_class = Class.new(PrimitiveTuple)
         stub(tuple_class).name {"Foo::Bar::Baz"}
         tuple_class.basename.should == "Baz"
       end
