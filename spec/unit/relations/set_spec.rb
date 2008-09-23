@@ -137,13 +137,6 @@ module Unison
             set.tuples.should include(tuple)
           end
 
-          it "retains the inserted Tuple" do
-            tuple = set.tuple_class.new(:id => "nathan", :name => "Nathan")
-            tuple.should_not be_retained_by(set)
-            set.insert(tuple)
-            tuple.should be_retained_by(set)
-          end
-
           context "when an Tuple with the same #id exists in the Set" do
             before do
               set.insert(set.tuple_class.new(:id => "nathan"))
@@ -220,12 +213,6 @@ module Unison
             set.tuples.should include(tuple)
             set.delete(tuple)
             set.tuples.should_not include(tuple)
-          end
-
-          it "releases the Tuple" do
-            tuple.should be_retained_by(set)
-            set.delete(tuple)
-            tuple.should_not be_retained_by(set)
           end
         end
 

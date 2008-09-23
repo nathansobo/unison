@@ -925,9 +925,9 @@ module Unison
             user = User.new
             publicize user, :initialize_attribute_values
 
-            dont_allow(user).__send__(:[]=, :name, "Einstein")
-            mock.proxy(user).__send__(:[]=, User[:name], "Einstein")
-            stub.proxy(user).__send__(:[]=, anything, anything)
+            dont_allow(user).set_attribute_value(:name, "Einstein")
+            mock.proxy(user).set_attribute_value(User[:name], "Einstein")
+            stub.proxy(user).set_attribute_value(anything, anything)
             user.initialize_attribute_values(:name => "Einstein")
           end
         end

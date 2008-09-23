@@ -160,15 +160,10 @@ module Unison
       end
 
       def []=(attribute_or_symbol, new_value)
-        attribute = attribute_for(attribute_or_symbol)
-        old_value = attribute_values[attribute]
-        converted_new_value = attribute.convert(new_value)
-        if old_value != converted_new_value
-          attribute_values[attribute] = converted_new_value
+        set_attribute_value(attribute_or_symbol, new_value) do |attribute, old_value, converted_new_value|
           update_subscription_node.call(attribute, old_value, converted_new_value)
-          @dirty = true unless new?
+          set.notify_update_subscription_subscribers(self, attribute, old_value, converted_new_value)
         end
-        converted_new_value
       end
 
       def has_attribute?(attribute)
@@ -258,16 +253,31 @@ module Unison
         end
 
         initial_attributes.each do |attribute, attribute_value|
-          self[attribute] = attribute_value
+          set_attribute_value(attribute, attribute_value)
         end
 
         assign_default_attribute_values(initial_attributes)
       end
 
+      def set_attribute_value(attribute_or_symbol, new_value)
+        attribute = attribute_for(attribute_or_symbol)
+        old_value = attribute_values[attribute]
+        converted_new_value = attribute.convert(new_value)
+        if old_value != converted_new_value
+          attribute_values[attribute] = converted_new_value
+          yield(attribute, old_value, converted_new_value) if block_given?
+          @dirty = true unless new?
+        end
+        converted_new_value
+      end
+      
       def assign_default_attribute_values(initial_attributes)
         default_attribute_values.each do |attribute, default_value|
           next if initial_attributes.has_key?(attribute)
-          self[attribute] = default_value.is_a?(Proc)? instance_eval(&default_value) : default_value
+          set_attribute_value(
+            attribute,
+            default_value.is_a?(Proc)? instance_eval(&default_value) : default_value
+          )
         end
       end
 

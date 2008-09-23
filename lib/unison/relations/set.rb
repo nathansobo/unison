@@ -67,16 +67,11 @@ module Unison
         tuples.push(tuple)
         tuple.send(:after_create) if tuple.new?
         insert_subscription_node.call(tuple)
-        tuple.retain_with(self)
-        tuple.on_update do |attribute, old_value, new_value|
-          tuple_update_subscription_node.call tuple, attribute, old_value, new_value
-        end
         tuple
       end
 
       def delete(tuple)
         raise ArgumentError, "Tuple: #{tuple.inspect}\nis not in the set" unless tuples.include?(tuple)
-        tuple.release_from(self)
         tuples.delete(tuple)
         delete_subscription_node.call(tuple)
         tuple
@@ -99,6 +94,10 @@ module Unison
 
       def inspect
         "<#{self.class}:#{object_id} @name=#{name.inspect}>"
+      end
+
+      def notify_update_subscription_subscribers(tuple, attribute, old_value, new_value)
+        tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
       end
 
       protected
