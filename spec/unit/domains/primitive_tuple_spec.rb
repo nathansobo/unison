@@ -1,7 +1,7 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 
 module Unison
-  module Domains
+  module Tuples
     describe PrimitiveTuple do
       attr_reader :tuple
 

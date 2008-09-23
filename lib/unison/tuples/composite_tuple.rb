@@ -1,5 +1,5 @@
 module Unison
-  module Domains
+  module Tuples
     class CompositeTuple < Tuple
       attr_reader :nested_tuples
       retain :nested_tuples

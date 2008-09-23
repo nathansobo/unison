@@ -20,7 +20,7 @@ require "#{dir}/unison/relations"
 require "#{dir}/unison/predicates"
 require "#{dir}/unison/attribute"
 require "#{dir}/unison/signals"
-require "#{dir}/unison/domains"
+require "#{dir}/unison/tuples"
 require "#{dir}/unison/relation_definition"
 require "#{dir}/unison/subscription"
 require "#{dir}/unison/subscription_node"
@@ -47,7 +47,7 @@ module Unison
       @test_mode ||= false
     end
   end
-  Domains.constants.each do |constant_name|
-    const_set(constant_name, Domains.const_get(constant_name))
+  Tuples.constants.each do |constant_name|
+    const_set(constant_name, Tuples.const_get(constant_name))
   end
 end

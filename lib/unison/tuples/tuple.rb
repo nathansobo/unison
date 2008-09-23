@@ -1,6 +1,8 @@
 module Unison
-  module Domains
-    class Tuple < Domain
+  module Tuples
+    class Tuple
+      include Unison
+      include Retainable      
       class << self
         def [](attribute)
           set[attribute]
@@ -21,7 +23,6 @@ module Unison
 
       def initialize
         @update_subscription_node = SubscriptionNode.new(self)
-        super
       end
 
       def bind(expression)

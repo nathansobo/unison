@@ -1,7 +1,7 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 
 module Unison
-  module Domains
+  module Tuples
     describe CompositeTuple do
       attr_reader :tuple_class, :tuple
 

@@ -1,6 +1,6 @@
 module Unison
-  module Domains
-    class Topic < Domain
+  module Tuples
+    class Topic < PrimitiveTuple
       class << self
         def expose(*names)
           exposed_method_names.concat(names)
@@ -24,6 +24,10 @@ module Unison
         self.class.send(:exposed_method_names).map do |name|
           self.send(name)
         end
+      end
+
+      def to_hash
+        
       end
 
       protected
