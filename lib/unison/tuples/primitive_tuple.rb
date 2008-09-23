@@ -162,7 +162,7 @@ module Unison
       def []=(attribute_or_symbol, new_value)
         set_attribute_value(attribute_or_symbol, new_value) do |attribute, old_value, converted_new_value|
           update_subscription_node.call(attribute, old_value, converted_new_value)
-          set.notify_update_subscription_subscribers(self, attribute, old_value, converted_new_value)
+          set.notify_update_subscribers(self, attribute, old_value, converted_new_value)
         end
       end
 
