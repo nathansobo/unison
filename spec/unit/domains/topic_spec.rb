@@ -6,16 +6,20 @@ module Unison
       attr_reader :topic_class, :topic, :subject
       before do
         @subject = User.find("nathan")
-        @topic_class = Class.new(Unison::Topic) do
+        @topic_class = Class.new(Topic) do
           member_of Relations::Set.new(:topics)
           attribute_reader :id, :string
+          attribute_reader :user_id, :string
+
+          belongs_to :user
+          subject :user
 
           expose :accounts, :photos
           relates_to_many :accounts do
             subject.accounts
           end
         end
-        @topic = topic_class.new(subject)
+        @topic = topic_class.new(:user_id => subject.id)
       end
 
       describe ".expose" do
@@ -25,12 +29,36 @@ module Unison
           topic_class.exposed_method_names.should include(:accounts)
           topic_class.exposed_method_names.should include(:photos)
         end
-      end
-
-      describe ".expose" do
+        
         it "causes #exposed_objects to contain the return value of each exposed method name" do
           topic.exposed_objects.should include(topic.accounts)
           topic.exposed_objects.should include(topic.photos)
+        end
+      end
+
+      describe ".subject" do
+        it "causes #subject to delegate to the passed-in method name" do
+          topic.subject.should == topic.user
+        end
+      end
+
+      describe "#subject" do
+        context "when .subject was called" do
+          it "delegates to the method name passed to .subject" do
+            topic.subject.should == topic.user
+          end
+        end
+
+        context "when .subject was not called" do
+          it "raises a NoSubjectError" do
+            invalid_topic_class = Class.new(Topic) do
+              member_of Relations::Set.new(:topics)
+              attribute_reader :id, :string
+            end
+            lambda do
+              invalid_topic_class.new.subject
+            end.should raise_error(Topic::NoSubjectError)
+          end
         end
       end
 

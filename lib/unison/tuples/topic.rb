@@ -2,8 +2,13 @@ module Unison
   module Tuples
     class Topic < PrimitiveTuple
       class << self
+        attr_reader :subject_method_name
         def expose(*names)
           exposed_method_names.concat(names)
+        end
+
+        def subject(name)
+          @subject_method_name = name
         end
 
         protected
@@ -14,16 +19,16 @@ module Unison
 
       retain :exposed_objects
 
-      attr_reader :subject
-      def initialize(subject)
-        @subject = subject
-        super()
-      end
-
       def exposed_objects
         self.class.send(:exposed_method_names).map do |name|
           self.send(name)
         end
+      end
+
+      def subject
+        subject_method_name = self.class.subject_method_name
+        raise(NoSubjectError, "You must define a .subject on #{self.class}") unless subject_method_name
+        send(subject_method_name)
       end
 
       def to_hash
@@ -36,6 +41,10 @@ module Unison
       rescue NoMethodError => e
         e.message.replace("undefined method `#{method_name}' for #{inspect}")
         raise e
+      end
+
+      public
+      class NoSubjectError < RuntimeError
       end
     end
   end
