@@ -420,9 +420,23 @@ module Unison
 
         describe ".set" do
           context "when .member_of was not called" do
-            it "returns nil" do
-              tuple_class = Class.new(PrimitiveTuple)
-              tuple_class.set.should be_nil
+            attr_reader :tuple_class, :set
+            before do
+              @tuple_class = Class.new(PrimitiveTuple)
+              stub(tuple_class).name {"MyShoe"}
+              @set = tuple_class.set
+            end
+
+            it "returns a new Set whose name is underscored and pluralized class name" do
+              set.name.should == "my_shoes"
+            end
+
+            it "retains the new Set" do
+              set.should be_retained_by(tuple_class)
+            end
+
+            it "sets the #tuple_class of the new Set to self" do
+              set.tuple_class.should == tuple_class
             end
           end
 

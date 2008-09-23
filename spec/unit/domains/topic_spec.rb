@@ -7,7 +7,7 @@ module Unison
       before do
         @subject = User.find("nathan")
         @topic_class = Class.new(Topic) do
-          member_of Relations::Set.new(:topics)
+          def self.name; "UserTopic"; end
           attribute_reader :id, :string
           attribute_reader :user_id, :string
 

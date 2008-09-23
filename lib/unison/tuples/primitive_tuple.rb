@@ -15,13 +15,14 @@ module Unison
         end
 
         def set
-          @set || (superclass.respond_to?(:set) ? superclass.set : nil)
+          @set ||= single_set_inheritance_subclass?? superclass.set : member_of(create_default_set)
         end
         attr_writer :set
 
         def member_of(set)
           @set = set.retain_with(self)
           set.tuple_class = self
+          set
         end
 
         def default_attribute_values
@@ -115,6 +116,14 @@ module Unison
         end
 
         protected
+        def single_set_inheritance_subclass?
+          superclass != PrimitiveTuple && superclass != Topic
+        end
+
+        def create_default_set
+          Relations::Set.new(basename.underscore.pluralize)
+        end
+        
         def relation_definitions
           responders_in_inheritance_chain(:relation_definitions_on_self).inject([]) do |definitions, klass|
             definitions.concat(klass.send(:relation_definitions_on_self))

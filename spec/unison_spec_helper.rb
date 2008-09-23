@@ -62,7 +62,7 @@ end
 
 Spec::Runner.configure do |config|
   config.mock_with :rr
-  
+
   config.before do
     Unison.test_mode = true
 
@@ -99,7 +99,7 @@ Spec::Runner.configure do |config|
 
       const_set(:User, Class.new(Unison::PrimitiveTuple) do
         member_of Unison::Relations::Set.new(:users)
-        
+
         attribute_accessor :id, :string
         attribute_accessor :name, :string
         attribute_accessor :hobby, :string
