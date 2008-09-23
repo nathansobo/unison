@@ -47,7 +47,6 @@ module Unison
       @test_mode ||= false
     end
   end
-  include Domains
   Domains.constants.each do |constant_name|
     const_set(constant_name, Domains.const_get(constant_name))
   end
