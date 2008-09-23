@@ -28,13 +28,13 @@ module Unison
         exposed_objects.map do |exposed_relation|
           [
             exposed_relation.on_insert do |tuple|
-              add_to_hash_representation(hash_representation, tuple)
+              add_to_hash_representation(tuple)
             end,
             exposed_relation.on_delete do |tuple|
-              remove_from_hash_representation(hash_representation, tuple)
+              remove_from_hash_representation(tuple)
             end,
             exposed_relation.on_tuple_update do |tuple, attribute, old_value, new_value|
-              update_in_hash_representation(hash_representation, tuple, attribute, new_value)
+              update_in_hash_representation(tuple, attribute, new_value)
             end
           ]
         end.flatten
@@ -70,22 +70,22 @@ module Unison
         exposed_objects.each do |relation|
           tuple_class_name = relation.tuple_class.basename
           relation.tuples.each do |tuple|
-            add_to_hash_representation(hash, tuple, tuple_class_name)
+            add_to_hash_representation(tuple, hash, tuple_class_name)
           end
         end
         hash
       end
 
-      def add_to_hash_representation(hash_representation, tuple, tuple_class_name=tuple.class.basename)
+      def add_to_hash_representation(tuple, hash_representation=self.hash_representation, tuple_class_name=tuple.class.basename)
         hash_representation[tuple_class_name] ||= {}
         hash_representation[tuple_class_name][tuple.id] = tuple.attributes.stringify_keys
       end
 
-      def remove_from_hash_representation(hash_representation, tuple)
+      def remove_from_hash_representation(tuple)
         hash_representation[tuple.class.basename].delete(tuple.id)
       end
 
-      def update_in_hash_representation(hash_representation, tuple, attribute, new_value)
+      def update_in_hash_representation(tuple, attribute, new_value)
         hash_representation[tuple.class.basename][tuple.id][attribute.name.to_s] = new_value
       end
 
