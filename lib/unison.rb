@@ -20,10 +20,8 @@ require "#{dir}/unison/relations"
 require "#{dir}/unison/predicates"
 require "#{dir}/unison/attribute"
 require "#{dir}/unison/signals"
-require "#{dir}/unison/tuple"
+require "#{dir}/unison/domains"
 require "#{dir}/unison/instance_relation_definition"
-require "#{dir}/unison/primitive_tuple"
-require "#{dir}/unison/composite_tuple"
 require "#{dir}/unison/subscription"
 require "#{dir}/unison/subscription_node"
 require "#{dir}/unison/partial_inner_join"
@@ -48,5 +46,9 @@ module Unison
     def test_mode?
       @test_mode ||= false
     end
+  end
+  include Domains
+  Domains.constants.each do |constant_name|
+    const_set(constant_name, Domains.const_get(constant_name))
   end
 end
