@@ -103,7 +103,7 @@ module Unison
         @synthetic_attribute_signals = {}
         @update_subscription_node = SubscriptionNode.new(self)
         initialize_attribute_values(initial_attributes)
-        initialize_instance_relations
+        initialize_relations
         initialize_synthetic_attribute_signals
       end
 

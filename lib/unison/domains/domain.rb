@@ -5,13 +5,13 @@ module Unison
       include Retainable      
       class << self
         def relates_to_many(name, &definition)
-          relation_definitions_on_self.push(InstanceRelationDefinition.new(name, definition, caller, false))
+          relation_definitions_on_self.push(RelationDefinition.new(name, definition, caller, false))
           attr_reader "#{name}_relation"
           alias_method name, "#{name}_relation"
         end
 
         def relates_to_one(name, &definition)
-          relation_definitions_on_self.push(InstanceRelationDefinition.new(name, definition, caller, true))
+          relation_definitions_on_self.push(RelationDefinition.new(name, definition, caller, true))
           relation_method_name = "#{name}_relation"
           attr_reader relation_method_name
           method_definition_line = __LINE__ + 1
@@ -40,13 +40,13 @@ module Unison
       end
 
       def initialize
-        initialize_instance_relations
+        initialize_relations
       end      
 
       protected
-      def initialize_instance_relations
-        relation_definitions.each do |instance_relation_definition|
-          instance_relation_definition.initialize_instance_relation(self)
+      def initialize_relations
+        relation_definitions.each do |relation_definition|
+          relation_definition.initialize_relation(self)
         end
       end
 

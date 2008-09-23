@@ -1,11 +1,11 @@
 module Unison
-  class InstanceRelationDefinition
+  class RelationDefinition
     attr_reader :name, :definition, :definition_backtrace, :is_singleton
     def initialize(name, definition, definition_backtrace, is_singleton)
       @name, @definition, @definition_backtrace, @is_singleton = name, definition, definition_backtrace, is_singleton
     end
 
-    def initialize_instance_relation(tuple_instance)
+    def initialize_relation(tuple_instance)
       begin
         definition_relation = tuple_instance.instance_eval(&definition)
         relation = singleton?? definition_relation.singleton : definition_relation
