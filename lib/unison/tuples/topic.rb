@@ -29,12 +29,15 @@ module Unison
           [
             exposed_relation.on_insert do |tuple|
               add_to_hash_representation(tuple)
+              attribute_mutated(:hash_representation)
             end,
             exposed_relation.on_delete do |tuple|
               remove_from_hash_representation(tuple)
+              attribute_mutated(:hash_representation)
             end,
             exposed_relation.on_tuple_update do |tuple, attribute, old_value, new_value|
               update_in_hash_representation(tuple, attribute, new_value)
+              attribute_mutated(:hash_representation)
             end
           ]
         end.flatten
@@ -92,6 +95,11 @@ module Unison
       def update_in_hash_representation(tuple, attribute, new_value)
         hash_representation[tuple.class.basename][tuple.id][attribute.name.to_s] = new_value
       end
+
+      def attribute_mutated(attribute_or_name)
+        attribute = attribute_for(attribute_or_name)
+        update_subscription_node.call(attribute, self[attribute], self[attribute])
+      end      
 
       def method_missing(method_name, *args, &block)
         subject.send(method_name, *args, &block)

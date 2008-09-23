@@ -119,6 +119,16 @@ module Unison
               inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
               representation["Account"]["nathan_inserted_account"].should == inserted_account.attributes.stringify_keys
             end
+
+            it "triggers the on_update event with the :hash_representation Attribute and the updated hash as both the old and new values" do
+              update_args = []
+              topic.on_update(retainer) do |attribute, old_value, new_value|
+                update_args.push [attribute, old_value, new_value]
+              end
+
+              inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
+              update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
+            end
           end
 
           context "when a delete event is triggered in an exposed Relation" do
@@ -128,6 +138,16 @@ module Unison
 
               Account.find("nathan_pivotal_account").delete
               representation["Account"].should_not have_key("nathan_pivotal_account")
+            end
+
+            it "triggers the on_update event with the :hash_representation Attribute and the updated hash as both the old and new values" do
+              update_args = []
+              topic.on_update(retainer) do |attribute, old_value, new_value|
+                update_args.push [attribute, old_value, new_value]
+              end
+
+              Account.find("nathan_pivotal_account").delete
+              update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
             end
           end
 
@@ -142,6 +162,17 @@ module Unison
 
               account.name = new_value
               representation["Account"]["nathan_pivotal_account"]["name"].should == new_value
+            end
+
+            it "triggers the on_update event with the :hash_representation Attribute and the updated hash as both the old and new values" do
+              update_args = []
+              topic.on_update(retainer) do |attribute, old_value, new_value|
+                update_args.push [attribute, old_value, new_value]
+              end
+
+              account = Account.find("nathan_pivotal_account")
+              account.name = "#{account.name} with more baggage"
+              update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
             end
           end          
         end
