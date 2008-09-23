@@ -29,7 +29,7 @@ module Unison
 
     attr_reader :set, :name, :type
 
-    VALID_TYPES = [:integer, :boolean, :string, :symbol, :datetime]
+    VALID_TYPES = [:integer, :boolean, :string, :symbol, :datetime, :object]
 
     def initialize(set, name, type)
       raise ArgumentError, "Type #{type.inspect} is invalid. Valid types are #{VALID_TYPES.inspect}" unless VALID_TYPES.include?(type)
@@ -120,6 +120,10 @@ module Unison
           local_time.usec
         )
       end
+    end
+
+    def convert_to_object(value)
+      value
     end
   end
 end

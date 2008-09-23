@@ -141,6 +141,19 @@ module Unison
           attribute.convert(now.to_i).should == Time.at(now.to_i).utc
         end
       end
+
+      context "when #type is :object" do
+        before do
+          @attribute = Attribute.new(set, :my_custom_object, :object)
+        end
+
+        send("when passed nil, returns nil")
+
+        it "returns the passed-in argument" do
+          object = Object.new
+          attribute.convert(object).should equal(object)
+        end
+      end
     end
 
     describe "#==" do
