@@ -84,6 +84,19 @@ module Unison
           end
         end
 
+        it "sets the :hash_representation Attribute value to a class name => id => attributes Hash of the exposed objects" do
+          topic[:hash_representation].should == {
+              "Account" => {
+                "nathan_pivotal_account" => Account.find("nathan_pivotal_account").attributes.stringify_keys,
+                "nathan_account_2" => Account.find("nathan_account_2").attributes.stringify_keys,
+              },
+              "Photo" => {
+                "nathan_photo_1" => Photo.find("nathan_photo_1").attributes.stringify_keys,
+                "nathan_photo_2" => Photo.find("nathan_photo_2").attributes.stringify_keys
+              }
+            }
+        end
+
         describe "#hash_representation" do
           it "returns a class name => id => attributes Hash of the exposed objects" do
             topic.hash_representation.should == {
@@ -131,6 +144,14 @@ module Unison
               representation["Account"]["nathan_pivotal_account"]["name"].should == new_value
             end
           end          
+        end
+
+        context "after last release" do
+          it "sets the :hash_representation Attribute value to nil" do
+            topic[:hash_representation].should_not be_nil
+            topic.release_from(retainer)
+            topic[:hash_representation].should be_nil
+          end
         end
       end
 

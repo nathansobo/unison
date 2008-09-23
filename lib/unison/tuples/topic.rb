@@ -53,11 +53,7 @@ module Unison
       end
 
       def hash_representation
-        if retained?
-          self[:hash_representation] ||= create_hash_representation
-        else
-          create_hash_representation
-        end
+        self[:hash_representation] || create_hash_representation
       end
 
       def to_hash
@@ -65,6 +61,14 @@ module Unison
       end
 
       protected
+      def after_first_retain
+        self[:hash_representation] = create_hash_representation
+      end
+
+      def after_last_release
+        self[:hash_representation] = nil
+      end
+
       def create_hash_representation
         hash = {}
         exposed_objects.each do |relation|
