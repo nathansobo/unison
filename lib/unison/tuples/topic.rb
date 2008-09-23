@@ -15,10 +15,30 @@ module Unison
         def exposed_method_names
           @exposed_method_names ||= []
         end
+
+        def inherited(subclass)
+          super
+          subclass.attribute(:hash_representation, :object)
+        end
       end
 
       retain :exposed_objects
-      attribute :hash_representation, :object
+
+      subscribe do
+        exposed_objects.map do |exposed_relation|
+          [
+            exposed_relation.on_insert do |tuple|
+              add_to_hash_representation(hash_representation, tuple)
+            end,
+            exposed_relation.on_delete do |tuple|
+              remove_from_hash_representation(hash_representation, tuple)
+            end,
+            exposed_relation.on_tuple_update do |tuple, attribute, old_value, new_value|
+              update_in_hash_representation(hash_representation, tuple, attribute, new_value)
+            end
+          ]
+        end.flatten
+      end
 
       def exposed_objects
         self.class.send(:exposed_method_names).map do |name|
@@ -33,15 +53,11 @@ module Unison
       end
 
       def hash_representation
-        hash = {}
-        exposed_objects.each do |relation|
-          tuple_class_name = relation.tuple_class.basename
-          relation.tuples.each do |tuple|
-            hash[tuple_class_name] ||= {}
-            hash[tuple_class_name][tuple.id] = tuple.attributes.stringify_keys
-          end
+        if retained?
+          self[:hash_representation] ||= create_hash_representation
+        else
+          create_hash_representation
         end
-        hash
       end
 
       def to_hash
@@ -49,6 +65,30 @@ module Unison
       end
 
       protected
+      def create_hash_representation
+        hash = {}
+        exposed_objects.each do |relation|
+          tuple_class_name = relation.tuple_class.basename
+          relation.tuples.each do |tuple|
+            add_to_hash_representation(hash, tuple, tuple_class_name)
+          end
+        end
+        hash
+      end
+
+      def add_to_hash_representation(hash_representation, tuple, tuple_class_name=tuple.class.basename)
+        hash_representation[tuple_class_name] ||= {}
+        hash_representation[tuple_class_name][tuple.id] = tuple.attributes.stringify_keys
+      end
+
+      def remove_from_hash_representation(hash_representation, tuple)
+        hash_representation[tuple.class.basename].delete(tuple.id)
+      end
+
+      def update_in_hash_representation(hash_representation, tuple, attribute, new_value)
+        hash_representation[tuple.class.basename][tuple.id][attribute.name.to_s] = new_value
+      end
+
       def method_missing(method_name, *args, &block)
         subject.send(method_name, *args, &block)
       rescue NoMethodError => e
