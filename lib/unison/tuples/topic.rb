@@ -18,6 +18,7 @@ module Unison
       end
 
       retain :exposed_objects
+      attribute :hash_representation, :object
 
       def exposed_objects
         self.class.send(:exposed_method_names).map do |name|
@@ -31,8 +32,20 @@ module Unison
         send(subject_method_name)
       end
 
+      def hash_representation
+        hash = {}
+        exposed_objects.each do |relation|
+          tuple_class_name = relation.tuple_class.basename
+          relation.tuples.each do |tuple|
+            hash[tuple_class_name] ||= {}
+            hash[tuple_class_name][tuple.id] = tuple.attributes.stringify_keys
+          end
+        end
+        hash
+      end
+
       def to_hash
-        
+        hash_representation
       end
 
       protected

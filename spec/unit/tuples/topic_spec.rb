@@ -87,7 +87,20 @@ module Unison
       end
 
       context "when not #retained?" do
-        
+        describe "#hash_representation" do
+          it "returns a class name => id => attributes Hash of the exposed objects" do
+            topic.hash_representation.should == {
+              "Account" => {
+                "nathan_pivotal_account" => Account.find("nathan_pivotal_account").attributes.stringify_keys,
+                "nathan_account_2" => Account.find("nathan_account_2").attributes.stringify_keys,
+              },
+              "Photo" => {
+                "nathan_photo_1" => Photo.find("nathan_photo_1").attributes.stringify_keys,
+                "nathan_photo_2" => Photo.find("nathan_photo_2").attributes.stringify_keys
+              }
+            }
+          end
+        end
       end
     end
   end

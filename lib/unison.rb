@@ -13,6 +13,8 @@ class String
 end
 
 require "#{dir}/unison/extensions/object"
+require "#{dir}/unison/subscription_node"
+require "#{dir}/unison/subscription"
 require "#{dir}/unison/adapters"
 require "#{dir}/unison/repository"
 require "#{dir}/unison/retainable"
@@ -22,8 +24,6 @@ require "#{dir}/unison/attribute"
 require "#{dir}/unison/signals"
 require "#{dir}/unison/tuples"
 require "#{dir}/unison/relation_definition"
-require "#{dir}/unison/subscription"
-require "#{dir}/unison/subscription_node"
 require "#{dir}/unison/partial_inner_join"
 
 module Unison
