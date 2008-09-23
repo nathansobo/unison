@@ -96,7 +96,7 @@ module Unison
         "<#{self.class}:#{object_id} @name=#{name.inspect}>"
       end
 
-      def notify_update_subscribers(tuple, attribute, old_value, new_value)
+      def notify_tuple_update_subscribers(tuple, attribute, old_value, new_value)
         tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
       end
 
