@@ -255,7 +255,7 @@ module Unison
       end
 
       def has_singleton_relation?(name)
-        instance_relation_definitions.any? do |definition|
+        relation_definitions.any? do |definition|
           definition.name == name &&
             self.send(name).is_a?(Relations::SingletonRelation)
         end
