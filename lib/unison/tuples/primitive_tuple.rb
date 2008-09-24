@@ -140,7 +140,6 @@ module Unison
 
       def initialize(initial_attributes={})
         @new = true
-        @dirty = false
         @synthetic_attribute_signals = {}
         super()
         @fields = create_fields
@@ -161,7 +160,7 @@ module Unison
       end
 
       def []=(attribute_or_symbol, new_value)
-        set_attribute_value(attribute_or_symbol, new_value) do |attribute, old_value, converted_new_value|
+        fields[attribute_for(attribute_or_symbol)].set_value(new_value) do |attribute, old_value, converted_new_value|
           update_subscription_node.call(attribute, old_value, converted_new_value)
           set.notify_tuple_update_subscribers(self, attribute, old_value, converted_new_value)
         end
@@ -190,7 +189,9 @@ module Unison
 
       def pushed
         @new = false
-        @dirty = false
+        fields.values.each do |field|
+          field.pushed
+        end
         self
       end
 
@@ -203,7 +204,7 @@ module Unison
       end
 
       def dirty?
-        @dirty
+        !new? && fields.values.any? {|field| field.dirty?}
       end
 
       def set
@@ -266,29 +267,16 @@ module Unison
         end
 
         initial_attributes.each do |attribute, attribute_value|
-          set_attribute_value(attribute, attribute_value)
+          fields[attribute].set_value(attribute_value)
         end
 
         assign_default_attribute_values(initial_attributes)
       end
 
-      def set_attribute_value(attribute_or_symbol, new_value)
-        attribute = attribute_for(attribute_or_symbol)
-        old_value = fields[attribute].value
-        converted_new_value = attribute.convert(new_value)
-        if old_value != converted_new_value
-          fields[attribute].value = converted_new_value
-          yield(attribute, old_value, converted_new_value) if block_given?
-          @dirty = true unless new?
-        end
-        converted_new_value
-      end
-      
       def assign_default_attribute_values(initial_attributes)
         default_attribute_values.each do |attribute, default_value|
           next if initial_attributes.has_key?(attribute)
-          set_attribute_value(
-            attribute,
+          fields[attribute].set_value(
             default_value.is_a?(Proc)? instance_eval(&default_value) : default_value
           )
         end

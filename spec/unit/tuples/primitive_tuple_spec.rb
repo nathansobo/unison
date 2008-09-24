@@ -977,18 +977,6 @@ module Unison
             end
           end
         end
-
-        describe "#initialize_attribute_values" do
-          it "transforms Symbol keys into their corresponding Attribute objects" do
-            user = User.new
-            publicize user, :initialize_field_values
-
-            dont_allow(user).set_attribute_value(:name, "Einstein")
-            mock.proxy(user).set_attribute_value(User[:name], "Einstein")
-            stub.proxy(user).set_attribute_value(anything, anything)
-            user.initialize_field_values(:name => "Einstein")
-          end
-        end
       end
     end
   end
