@@ -374,7 +374,7 @@ module Unison
             relation.on_tuple_update(retainer) {}.class.should == Subscription
           end
 
-          it "invokes the block with the (Attribute, old_value, new_value) when a member Tuple is updated" do
+          it "invokes the block with the (PrimitiveAttribute, old_value, new_value) when a member Tuple is updated" do
             arguments = []
             relation.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
               arguments.push [tuple, attribute, old_value, new_value]

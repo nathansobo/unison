@@ -265,7 +265,7 @@ module Unison
             @attribute = users_set[:name]
           end
 
-          context "and the updated Attribute is in #projected_set" do
+          context "and the updated PrimitiveAttribute is in #projected_set" do
             attr_reader :old_value, :new_value
             before do
               operand.tuples.select do |tuple|
@@ -289,7 +289,7 @@ module Unison
               on_tuple_update_arguments.should == [[projected_tuple, attribute, old_value, new_value]]
             end
 
-            context "when the same Attribute on a different Tuple is subsequently updated from the same old value to the same new value" do
+            context "when the same PrimitiveAttribute on a different Tuple is subsequently updated from the same old value to the same new value" do
               attr_reader :another_compound_tuple, :another_projected_tuple
               before do
                 @another_compound_tuple = operand.tuples.find do |tuple|
@@ -315,7 +315,7 @@ module Unison
               end
             end
 
-            context "when a different Attribute on the same Tuple is subsequently updated from the same old value to the same new value" do
+            context "when a different PrimitiveAttribute on the same Tuple is subsequently updated from the same old value to the same new value" do
               before do
                 operand_projected_tuple[:hobby] = old_value
                 operand_projected_tuple[:name] = new_value
@@ -335,7 +335,7 @@ module Unison
             end
           end
 
-          context "and the updated Attribute is not in #projected_set" do
+          context "and the updated PrimitiveAttribute is not in #projected_set" do
             attr_reader :photo
             before do
               @photo = operand_compound_tuple[photos_set]

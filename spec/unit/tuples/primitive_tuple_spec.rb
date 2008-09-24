@@ -39,13 +39,13 @@ module Unison
           end
 
           context "when passed :default option" do
-            it "defaults the Attribute value to the passed-in :default option value" do
+            it "defaults the PrimitiveAttribute value to the passed-in :default option value" do
               User.attribute_reader(:nick_name, :string, :default => "Bobo")
               User.new.nick_name.should == "Bobo"
             end
 
             context "when subclassed" do
-              it "defaults the Attribute value to the :default option value passed-in to the superclass" do
+              it "defaults the PrimitiveAttribute value to the :default option value passed-in to the superclass" do
                 User.attribute_reader(:nick_name, :string, :default => "Bobo")
                 Developer.new.nick_name.should == "Bobo"
               end
@@ -53,7 +53,7 @@ module Unison
           end
 
           context "when passed a block" do
-            it "causes #[] to return the result of applying the block to the Attribute's value" do
+            it "causes #[] to return the result of applying the block to the PrimitiveAttribute's value" do
               User.attribute_reader(:nick_name, :string) do |value|
                 "homeboy #{value}"
               end
@@ -612,7 +612,7 @@ module Unison
               tuple[:name].should_not == new_value
             end
 
-            it "converts the passed in value using the Attribute" do
+            it "converts the passed in value using the PrimitiveAttribute" do
               tuple = Account.find("nathan_pivotal_account")
               attribute = Account[:deactivated_at]
 
@@ -624,14 +624,14 @@ module Unison
               tuple[attribute].to_s.should == new_time.to_s
             end
 
-            it "sets the value for an Attribute defined on the set of the Tuple class" do
+            it "sets the value for an PrimitiveAttribute defined on the set of the Tuple class" do
               tuple[User.set[:id]] = "corey"
               tuple[User.set[:id]].should == "corey"
               tuple[User.set[:name]] = new_value
               tuple[User.set[:name]].should == new_value
             end
 
-            it "sets the value for a Symbol corresponding to a name of an Attribute defined on the #set of the Tuple class" do
+            it "sets the value for a Symbol corresponding to a name of an PrimitiveAttribute defined on the #set of the Tuple class" do
               tuple[:id] = "corey"
               tuple[:id].should == "corey"
               tuple[:name] = new_value
@@ -793,8 +793,8 @@ module Unison
               @signal = user.signal(:name)
             end
 
-            context "when the Symbol is the #name of an Attribute in the PrimitiveTuple's #set" do
-              it "returns an AttributeSignal for the corresponding Attribute" do
+            context "when the Symbol is the #name of a PrimitiveAttribute in the PrimitiveTuple's #set" do
+              it "returns an AttributeSignal for the corresponding PrimitiveAttribute" do
                 signal.attribute.should == users_set[:name]
               end
 
@@ -809,7 +809,7 @@ module Unison
               end
             end
 
-            context "when the Symbol names a synthetic attribute" do
+            context "when the Symbol is the #name of a SyntheticAttribute in the PrimitiveTuple's #set" do
               before do
                 User.synthetic_attribute :team_name do
                   team.signal(:name)
@@ -817,7 +817,7 @@ module Unison
                 @user = User.create(:team_id => "mangos")
               end
 
-              it "returns the Signal upon which the synthetic attribute is based" do
+              it "returns the Signal defined by the SyntheticAttribute for this PrimitiveTuple" do
                 signal = user.signal(:team_name)
                 signal.retain_with(retainer = Object.new)
 
@@ -861,13 +861,13 @@ module Unison
             end
           end
 
-          context "when passed an Attribute" do
-            context "when the Attribute belongs to the PrimitiveTuple's #set" do
+          context "when passed an PrimitiveAttribute" do
+            context "when the PrimitiveAttribute belongs to the PrimitiveTuple's #set" do
               before do
                 @signal = user.signal(users_set[:name])
               end
 
-              it "returns an AttributeSignal with #attribute set to the passed in Attribute" do
+              it "returns an AttributeSignal with #attribute set to the passed in PrimitiveAttribute" do
                 signal.attribute.should == users_set[:name]
               end
 
@@ -882,7 +882,7 @@ module Unison
               end
             end
 
-            context "when the Attribute does not belong to the PrimitiveTuple's #set" do
+            context "when the PrimitiveAttribute does not belong to the PrimitiveTuple's #set" do
               it "raises an ArgumentError" do
                 lambda do
                   @signal = user.signal(photos_set[:name])

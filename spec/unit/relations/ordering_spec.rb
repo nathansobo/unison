@@ -156,7 +156,7 @@ module Unison
         end
 
         describe "when a Tuple is updated in the #operand" do
-          describe "when the updated Attribute is the sort #order_by_attributes for the ordering" do
+          describe "when the updated PrimitiveAttribute is the sort #order_by_attributes for the ordering" do
             context "when the #order_by_attributes is #ascending?" do
               before do
                 order_by_attribute_1.should be_ascending

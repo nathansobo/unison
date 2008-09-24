@@ -26,7 +26,7 @@ module Unison
             raise ArgumentError, "Attribute #{name} already exists with type #{attributes[name].inspect}. You tried to change the type to #{type.inspect}, which is an illegal operation."
           end
         else
-          attributes[name] = Attribute.new(self, name, type, &transform)
+          attributes[name] = PrimitiveAttribute.new(self, name, type, &transform)
         end
       end
 
@@ -42,7 +42,7 @@ module Unison
         case candidate_attribute
         when Set
           return self == candidate_attribute
-        when Attribute
+        when PrimitiveAttribute
           attributes.detect {|name, attribute| candidate_attribute == attribute}
         when Symbol
           attributes[candidate_attribute] ? true : false
@@ -55,7 +55,7 @@ module Unison
           attributes.detect {|name, attribute| candidate_attribute == attribute}
         when Symbol
           (attributes[candidate_attribute] && attributes[candidate_attribute].is_a?(SyntheticAttribute)) ? true : false
-        when Attribute
+        when PrimitiveAttribute
           false
         else
           raise ArgumentError, "#{candidate_attribute.inspect} is not a SyntheticAttribute or Symbol."
@@ -69,7 +69,7 @@ module Unison
 
       def primitive_attributes
         attributes.values.find_all do |attribute|
-          attribute.is_a?(Attribute)
+          attribute.is_a?(PrimitiveAttribute)
         end
       end
 

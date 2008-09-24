@@ -1,5 +1,5 @@
 module Unison
-  class SyntheticAttribute
+  class SyntheticAttribute < Attribute
     attr_reader :set, :name, :definition
 
     def initialize(set, name, &definition)

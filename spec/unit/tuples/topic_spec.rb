@@ -84,7 +84,7 @@ module Unison
           end
         end
 
-        it "sets the :hash_representation Attribute value to a class name => id => attributes Hash of the exposed objects" do
+        it "sets the :hash_representation PrimitiveAttribute value to a class name => id => attributes Hash of the exposed objects" do
           topic[:hash_representation].should == {
               "Account" => {
                 "nathan_pivotal_account" => Account.find("nathan_pivotal_account").attributes.stringify_keys,
@@ -127,7 +127,7 @@ module Unison
             representation["Account"]["nathan_inserted_account"].should == inserted_account.attributes.stringify_keys
           end
 
-          it "triggers the on_update event for the :hash_representation Attribute" do
+          it "triggers the on_update event for the :hash_representation PrimitiveAttribute" do
             update_args = []
             topic.on_update(retainer) do |attribute, old_value, new_value|
               update_args.push [attribute, old_value, new_value]
@@ -171,7 +171,7 @@ module Unison
             representation["Account"].should_not have_key("nathan_pivotal_account")
           end
 
-          it "triggers the on_update event for the :hash_representation Attribute" do
+          it "triggers the on_update event for the :hash_representation PrimitiveAttribute" do
             update_args = []
             topic.on_update(retainer) do |attribute, old_value, new_value|
               update_args.push [attribute, old_value, new_value]
@@ -198,7 +198,7 @@ module Unison
         end
 
         context "after last release" do
-          it "no longer memoizes the :hash_representation Attribute" do
+          it "no longer memoizes the :hash_representation PrimitiveAttribute" do
             dont_allow(topic).create_hash_representation
             memoized_hash_representation = topic[:hash_representation]
             topic[:hash_representation].should equal(memoized_hash_representation)
