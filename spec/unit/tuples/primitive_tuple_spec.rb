@@ -508,7 +508,7 @@ module Unison
           end
 
           it "sets dirty? to true" do
-            tuple.should_not be_dirty
+            tuple.should be_dirty
           end
 
           context "when Unison.test_mode? is true" do
@@ -650,23 +650,13 @@ module Unison
               update_args.should == [[tuple.set[:id], old_value, new_value]]
             end
 
-            context "when not new? and not dirty?" do
+            context "when not dirty?" do
               it "sets dirty? to true" do
-                tuple.pushed.should_not be_new
+                tuple.pushed
                 tuple.should_not be_dirty
 
                 tuple[:name] = new_value
                 tuple.should be_dirty
-              end
-            end
-
-            context "when new? and not dirty?" do
-              it "does not set dirty? to true" do
-                tuple.should be_new
-                tuple.should_not be_dirty
-
-                tuple[:name] = new_value
-                tuple.should_not be_dirty
               end
             end
           end

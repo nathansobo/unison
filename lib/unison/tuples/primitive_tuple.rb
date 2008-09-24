@@ -204,7 +204,7 @@ module Unison
       end
 
       def dirty?
-        !new? && fields.values.any? {|field| field.dirty?}
+        fields.values.any? {|field| field.dirty?}
       end
 
       def set

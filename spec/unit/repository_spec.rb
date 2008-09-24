@@ -197,15 +197,13 @@ module Unison
             it "does not update PrimitiveTuples that are not dirty?" do
               photos_set.pull(origin)
               pushed_photos = photos_set.select do |photo|
-                !photo.new?
+                !photo.dirty?
+              end
+              pushed_photos.should_not be_empty
+              pushed_photos.each do |pushed_photo|
+                dont_allow(origin).update_tuple(origin.connection[:photos], pushed_photo)
               end
 
-              table = origin.connection[:photos]
-              stub(origin.connection)[:photos].returns {table}
-
-              dont_allow(table).filter
-              photos_set.any? {|photo| !photo.new?}.should be_true
-              photos_set.all? {|photo| !photo.dirty?}.should be_true
               origin.push(photos_set)
             end
           end

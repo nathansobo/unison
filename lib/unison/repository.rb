@@ -31,9 +31,13 @@ module Unison
       if tuple.new?
         table << tuple.attributes
       elsif tuple.dirty?
-        table.filter("id=?", tuple.id).update(tuple.attributes)
+        update_tuple(table, tuple)
       end
       tuple.pushed
+    end
+
+    def update_tuple(table, tuple)
+      table.filter("id=?", tuple.id).update(tuple.attributes)
     end
   end
 end
