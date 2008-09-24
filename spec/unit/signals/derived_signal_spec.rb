@@ -166,8 +166,16 @@ module Unison
                 end
 
                 tuple.name = new_name
-              end              
+              end
             end
+          end
+        end
+        
+        context "when not instantiated with a Symbol or a transform block" do
+          it "raises an ArgumentError" do
+            lambda do
+              DerivedSignal.new(source)
+            end.should raise_error(ArgumentError)
           end
         end
       end

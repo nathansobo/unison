@@ -18,7 +18,14 @@ module Unison
 
         def inherited(subclass)
           super
-          subclass.attribute(:hash_representation, :object)
+
+          subclass.attribute_reader(:hash_representation, :object) do |value|
+            value || create_hash_representation
+          end
+
+          subclass.synthetic_attribute(:json_representation) do
+            signal(:hash_representation).signal(:to_json)
+          end
         end
       end
 
@@ -55,12 +62,12 @@ module Unison
         send(subject_method_name)
       end
 
-      def hash_representation
-        self[:hash_representation] || create_hash_representation
-      end
-
       def to_hash
         hash_representation
+      end
+
+      def to_json
+        json_representation
       end
 
       protected

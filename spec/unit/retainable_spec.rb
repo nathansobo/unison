@@ -15,22 +15,26 @@ module Unison
     end
 
     describe ".retain" do
-      attr_reader :retainable, :retainable_class, :child, :children
+      attr_reader :retainable, :retainable_class, :child, :children, :hash_children
       before do
         @child = anonymous_retainable_object
         @children = [anonymous_retainable_object, anonymous_retainable_object]
+        @hash_children = {
+          1 => anonymous_retainable_object,
+          2 => anonymous_retainable_object
+        }
 
         @retainable_class = Class.new do
           include Retainable
-          attr_reader :child, :children
+          attr_reader :child, :children, :hash_children
 
-          retain :child, :children
+          retain :child, :children, :hash_children
 
-          def initialize(child, children)
-            @child, @children = child, children
+          def initialize(child, children, hash_children)
+            @child, @children, @hash_children = child, children, hash_children
           end
         end
-        @retainable = retainable_class.new(child, children)
+        @retainable = retainable_class.new(child, children, hash_children)
       end
 
       def self.should_retain_its_children
@@ -39,12 +43,18 @@ module Unison
           children.each do |child_in_children|
             child_in_children.should_not be_retained_by(retainable)
           end
+          hash_children.values.each do |hash_child|
+            hash_child.should_not be_retained_by(retainable)
+          end
 
           retainable.retain_with(retainer)
 
           child.should be_retained_by(retainable)
           children.each do |child_in_children|
             child_in_children.should be_retained_by(retainable)
+          end
+          hash_children.values.each do |hash_child|
+            hash_child.should be_retained_by(retainable)
           end
         end
 
@@ -54,12 +64,18 @@ module Unison
           children.each do |child_in_children|
             child_in_children.should be_retained_by(retainable)
           end
+          hash_children.values.each do |hash_child|
+            hash_child.should be_retained_by(retainable)
+          end
 
           retainable.release_from(retainer)
 
           child.should_not be_retained_by(retainable)
           children.each do |child_in_children|
             child_in_children.should_not be_retained_by(retainable)
+          end
+          hash_children.values.each do |hash_child|
+            hash_child.should_not be_retained_by(retainable)
           end
         end
       end
@@ -69,7 +85,7 @@ module Unison
       context "when .retain is invoked by the superclass" do
         before do
           retainable_subclass = Class.new(retainable_class)
-          @retainable = retainable_subclass.new(child, children)
+          @retainable = retainable_subclass.new(child, children, hash_children)
         end
 
         should_retain_its_children

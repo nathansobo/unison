@@ -51,6 +51,17 @@ module Unison
               end
             end
           end
+
+          context "when passed a block" do
+            it "causes #[] to return the result of applying the block to the Attribute's value" do
+              User.attribute_reader(:nick_name, :string) do |value|
+                "homeboy #{value}"
+              end
+              user = User.new(:nick_name => "Bobo")
+              user[:nick_name].should == "homeboy Bobo"
+              user.nick_name.should == "homeboy Bobo"
+            end
+          end
         end
 
         describe ".attribute_reader" do
@@ -932,6 +943,6 @@ module Unison
           end
         end
       end
-    end    
+    end
   end
 end

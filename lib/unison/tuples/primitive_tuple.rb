@@ -36,24 +36,24 @@ module Unison
           @default_attribute_values_on_self ||= {}
         end
 
-        def attribute(name, type, options={})
-          attribute = set.has_attribute(name, type)
+        def attribute(name, type, options={}, &transform)
+          attribute = set.has_attribute(name, type, &transform)
           if options.has_key?(:default)
             default_attribute_values_on_self[attribute] = options[:default]
           end
           attribute
         end
 
-        def attribute_reader(name, type, options={})
-          attribute = self.attribute(name, type, options)
+        def attribute_reader(name, type, options={}, &transform)
+          attribute = self.attribute(name, type, options, &transform)
           define_method(name) do
             self[attribute]
           end
           alias_method "#{name}?", name if type == :boolean
         end
 
-        def attribute_writer(name, type, options={})
-          attribute = self.attribute(name, type, options)
+        def attribute_writer(name, type, options={}, &transform)
+          attribute = self.attribute(name, type, options, &transform)
           define_method("#{name}=") do |value|
             self[attribute] = value
           end
@@ -66,9 +66,9 @@ module Unison
           end
         end
 
-        def attribute_accessor(name, type, options={})
-          attribute_reader(name, type, options)
-          attribute_writer(name, type, options)
+        def attribute_accessor(name, type, options={}, &transform)
+          attribute_reader(name, type, options, &transform)
+          attribute_writer(name, type, options, &transform)
         end
 
         def has_many(name, options={}, &customization_block)
@@ -150,12 +150,14 @@ module Unison
         initialize_synthetic_attribute_signals
       end
 
-      def [](attribute)
-        if attribute.is_a?(Relations::Set)
-          raise "#attribute is only defined for Attribute's of this Tuple's #relation or its #relation itself" unless attribute == set
+      def [](attribute_or_symbol)
+        if attribute_or_symbol.is_a?(Relations::Set)
+          raise "#attribute is only defined for Attribute's of this Tuple's #relation or its #relation itself" unless attribute_or_symbol == set
           self
         else
-          attribute_values[attribute_for(attribute)]
+          attribute = attribute_for(attribute_or_symbol)
+          value = attribute_values[attribute]
+          attribute.transform ? instance_exec(value, &attribute.transform) : value
         end
       end
 

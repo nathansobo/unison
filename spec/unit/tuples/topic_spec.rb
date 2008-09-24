@@ -110,78 +110,105 @@ module Unison
               }
             }
           end
+        end
 
-          context "when an insert event is triggered in an exposed Relation" do
-            it "inserts the Tuple's #attributes into the memoized #hash_representation" do
-              representation = topic.hash_representation
-              representation["Account"]["nathan_inserted_account"].should be_nil
+        describe "#json_representation" do
+          it "returns #hash_representation.to_json" do
+            JSON.parse(topic.json_representation).should == JSON.parse(topic.hash_representation.to_json)
+          end
+        end
 
-              inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
-              representation["Account"]["nathan_inserted_account"].should == inserted_account.attributes.stringify_keys
-            end
+        context "when an insert event is triggered in an exposed Relation" do
+          it "inserts the Tuple's #attributes into the memoized #hash_representation" do
+            representation = topic.hash_representation
+            representation["Account"]["nathan_inserted_account"].should be_nil
 
-            it "triggers the on_update event with the :hash_representation Attribute and the updated hash as both the old and new values" do
-              update_args = []
-              topic.on_update(retainer) do |attribute, old_value, new_value|
-                update_args.push [attribute, old_value, new_value]
-              end
-
-              inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
-              update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
-            end
+            inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
+            representation["Account"]["nathan_inserted_account"].should == inserted_account.attributes.stringify_keys
           end
 
-          context "when a delete event is triggered in an exposed Relation" do
-            it "removes the Tuple's #attributes from the memoized #hash_representation" do
-              representation = topic.hash_representation
-              representation["Account"]["nathan_pivotal_account"].should_not be_nil
-
-              Account.find("nathan_pivotal_account").delete
-              representation["Account"].should_not have_key("nathan_pivotal_account")
+          it "triggers the on_update event for the :hash_representation Attribute" do
+            update_args = []
+            topic.on_update(retainer) do |attribute, old_value, new_value|
+              update_args.push [attribute, old_value, new_value]
             end
 
-            it "triggers the on_update event with the :hash_representation Attribute and the updated hash as both the old and new values" do
-              update_args = []
-              topic.on_update(retainer) do |attribute, old_value, new_value|
-                update_args.push [attribute, old_value, new_value]
-              end
-
-              Account.find("nathan_pivotal_account").delete
-              update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
-            end
+            inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
+            update_args.should == [ [topic.set[:hash_representation], topic.hash_representation, topic.hash_representation] ]
           end
 
-          context "when a tuple_update event is triggered in an exposed Relation" do
-            it "updates the changed Tuple's #attributes in the memoized #hash_representation" do
-              representation = topic.hash_representation
-
-              account = Account.find("nathan_pivotal_account")
-              old_value = account.name
-              new_value = "#{old_value} with more baggage"
-              representation["Account"]["nathan_pivotal_account"]["name"].should == old_value
-
-              account.name = new_value
-              representation["Account"]["nathan_pivotal_account"]["name"].should == new_value
+          it "updates AttributeSignals based on :hash_representation" do
+            change_args = []
+            signal = topic.signal(:hash_representation)
+            signal.retain_with(retainer)
+            signal.on_change(retainer) do |*args|
+              change_args.push(args)
             end
 
-            it "triggers the on_update event with the :hash_representation Attribute and the updated hash as both the old and new values" do
-              update_args = []
-              topic.on_update(retainer) do |attribute, old_value, new_value|
-                update_args.push [attribute, old_value, new_value]
-              end
+            inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
+            change_args.should == [[topic.hash_representation]]
+          end
 
-              account = Account.find("nathan_pivotal_account")
-              account.name = "#{account.name} with more baggage"
-              update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
+          it "updates DerivedSignals based on AttributeSignals based on :hash_representation" do
+            change_args = []
+            signal = topic.signal(:hash_representation).signal(:to_json)
+            signal.retain_with(retainer)
+            signal.on_change(retainer) do |*args|
+              change_args.push(args)
             end
-          end          
+
+            inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
+            JSON.parse(change_args.first.first).should == JSON.parse(topic.hash_representation.to_json)
+          end
+        end
+
+        context "when a delete event is triggered in an exposed Relation" do
+          it "removes the Tuple's #attributes from the memoized #hash_representation" do
+            representation = topic.hash_representation
+            representation["Account"]["nathan_pivotal_account"].should_not be_nil
+
+            Account.find("nathan_pivotal_account").delete
+            representation["Account"].should_not have_key("nathan_pivotal_account")
+          end
+
+          it "triggers the on_update event for the :hash_representation Attribute" do
+            update_args = []
+            topic.on_update(retainer) do |attribute, old_value, new_value|
+              update_args.push [attribute, old_value, new_value]
+            end
+
+            Account.find("nathan_pivotal_account").delete
+            update_args.should == [ [topic.set[:hash_representation], topic.hash_representation, topic.hash_representation] ]
+          end
+        end
+
+        context "when a tuple_update event is triggered in an exposed Relation" do
+          it "updates the changed Tuple's #attributes in the memoized #hash_representation" do
+            representation = topic.hash_representation
+
+            account = Account.find("nathan_pivotal_account")
+            old_value = account.name
+            new_value = "#{old_value} with more baggage"
+            representation["Account"]["nathan_pivotal_account"]["name"].should == old_value
+
+            account = Account.find("nathan_pivotal_account")
+            account.name = "#{account.name} with more baggage"
+            representation["Account"]["nathan_pivotal_account"]["name"].should == new_value
+          end
         end
 
         context "after last release" do
-          it "sets the :hash_representation Attribute value to nil" do
-            topic[:hash_representation].should_not be_nil
+          it "no longer memoizes the :hash_representation Attribute" do
+            dont_allow(topic).create_hash_representation
+            memoized_hash_representation = topic[:hash_representation]
+            topic[:hash_representation].should equal(memoized_hash_representation)
+            
             topic.release_from(retainer)
-            topic[:hash_representation].should be_nil
+            topic.should_not be_retained
+
+            mock.proxy(topic).create_hash_representation.twice
+            topic[:hash_representation].should == memoized_hash_representation
+            topic[:hash_representation].should_not equal(memoized_hash_representation)
           end
         end
       end
@@ -199,6 +226,12 @@ module Unison
                 "nathan_photo_2" => Photo.find("nathan_photo_2").attributes.stringify_keys
               }
             }
+          end
+        end
+
+        describe "#json_representation" do
+          it "returns #hash_representation.to_json" do
+            JSON.parse(topic.json_representation).should == JSON.parse(topic.hash_representation.to_json)
           end
         end
       end

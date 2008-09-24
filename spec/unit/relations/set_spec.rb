@@ -32,9 +32,12 @@ module Unison
             set.attributes.should == {:name => Attribute.new(set, :name, :string)}
           end
 
-          it "returns the Attribute" do
+          it "returns the Attribute with the block as its #transform" do
             set = Set.new(:user)
-            set.has_attribute(:name, :string).should == Attribute.new(set, :name, :string)
+            transform = lambda {|value| "#{value} transformed"}
+            attribute = set.has_attribute(:name, :string, &transform)
+            attribute.should == Attribute.new(set, :name, :string, &transform)
+            attribute.transform.should == transform
           end
         end
 

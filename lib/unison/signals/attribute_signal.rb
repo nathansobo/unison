@@ -24,7 +24,7 @@ module Unison
       def ==(other)
         return false unless other.is_a?(AttributeSignal)
         other.attribute == attribute && other.tuple == tuple
-      end
+      end  
     end    
   end
 end

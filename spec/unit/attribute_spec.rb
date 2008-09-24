@@ -2,10 +2,11 @@ require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
   describe Attribute do
-    attr_reader :set, :attribute
+    attr_reader :set, :attribute, :transform
     before do
       @set = Relations::Set.new(:users)
-      @attribute = Attribute.new(set, :name, :string)
+      @transform = lambda {|value| value}
+      @attribute = Attribute.new(set, :name, :string, &transform)
       set.attributes[attribute.name] = attribute
     end
 
@@ -157,10 +158,11 @@ module Unison
     end
 
     describe "#==" do
-      it "returns true for Attributes of the same set and name and false otherwise" do
-        attribute.should == Attribute.new(set, :name, :string)
+      it "returns true for Attributes of the same #set, #name, and #transform and returns false otherwise" do
+        attribute.should == Attribute.new(set, :name, :string, &transform)
         attribute.should_not == Attribute.new(Relations::Set.new(:foo), :name, :string)
         attribute.should_not == Attribute.new(set, :foo, :string)
+        attribute.should_not == Attribute.new(set, :name, :string) {}
         attribute.should_not == Object.new
       end
     end

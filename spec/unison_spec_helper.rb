@@ -105,6 +105,11 @@ Spec::Runner.configure do |config|
         attribute_accessor :hobby, :string
         attribute_accessor :team_id, :string
         attribute_accessor :developer, :boolean
+        synthetic_attribute :conqueror_name do
+          signal(:name) do |name|
+            "#{name} the Great!"
+          end
+        end
 
         def polymorphic_allocate(attrs)
           if attrs[:developer]

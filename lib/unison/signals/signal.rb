@@ -15,9 +15,8 @@ module Unison
         value.to_arel
       end
 
-      def signal(&block)
-        raise ArgumentError, "You must pass a transform block to make a DerivedSignal" unless block
-        DerivedSignal.new(self, &block)
+      def signal(method_name=nil, &block)
+        DerivedSignal.new(self, method_name, &block)
       end
 
       protected

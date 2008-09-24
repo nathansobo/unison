@@ -17,7 +17,15 @@ module Unison
       end
 
       describe "#signal" do
-        context "when passed a block" do
+        context "when passed a Symbol and not a block" do
+          it "returns a DerivedSignal with self as its #source and passed-in Symbol as #method_name" do
+            derived_signal = signal.signal(:length)
+            derived_signal.class.should == DerivedSignal
+            derived_signal.value.should == user.name.length
+          end
+        end
+
+        context "when not passed a Symbol and a block" do
           it "returns a DerivedSignal with self as its #source and the given block as its #transform" do
             derived_signal = signal.signal do |value|
               "#{value} the Neurotic"
@@ -27,11 +35,13 @@ module Unison
           end
         end
 
-        context "when not passed a block" do
-          it "raises an ArgumentError" do
-            lambda do
-              signal.signal
-            end.should raise_error(ArgumentError)
+        context "when passed a Symbol and a block" do
+          it "returns a DerivedSignal with self as its #source and passed-in Symbol as #method_name and the given block as its #transform" do
+            derived_signal = signal.signal(:length) do |value|
+              value * 2
+            end
+            derived_signal.class.should == DerivedSignal
+            derived_signal.value.should == (user.name.length * 2)
           end
         end
       end

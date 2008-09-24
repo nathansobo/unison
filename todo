@@ -1,3 +1,13 @@
+old_dogs = users.where(users[:dog_years_age].gt(50))
+
+class User
+  synthetic_attribute :dog_years_age do
+    signal(:age) do |age|
+      age * 7
+    end
+  end
+end
+
 Signal Ideas
 game.signal(:mode) # tuple signal
 game.signal(:current_round) # singleton relation signal

@@ -6,6 +6,7 @@ require "collections"
 require "rubygems"
 require "sequel"
 require "guid"
+require "json"
 
 # TODO: Make a better fix
 class String

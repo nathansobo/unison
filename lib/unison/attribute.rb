@@ -27,13 +27,13 @@ module Unison
     end
     include PredicateConstructors
 
-    attr_reader :set, :name, :type
+    attr_reader :set, :name, :type, :transform
 
     VALID_TYPES = [:integer, :boolean, :string, :symbol, :datetime, :object]
 
-    def initialize(set, name, type)
+    def initialize(set, name, type, &transform)
       raise ArgumentError, "Type #{type.inspect} is invalid. Valid types are #{VALID_TYPES.inspect}" unless VALID_TYPES.include?(type)
-      @set, @name, @type = set, name, type
+      @set, @name, @type, @transform = set, name, type, transform
       @ascending = true
     end
 
@@ -64,7 +64,7 @@ module Unison
 
     def ==(other)
       return false unless other.instance_of?(Attribute)
-      set.equal?(other.set) && name == other.name
+      set.equal?(other.set) && name == other.name && transform == other.transform
     end
 
     def to_arel

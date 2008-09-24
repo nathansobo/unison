@@ -18,7 +18,7 @@ module Unison
       end
       attr_writer :tuple_class
 
-      def has_attribute(name, type)
+      def has_attribute(name, type, &transform)
         if attributes[name]
           if attributes[name].type == type
             attributes[name]
@@ -26,7 +26,7 @@ module Unison
             raise ArgumentError, "Attribute #{name} already exists with type #{attributes[name].inspect}. You tried to change the type to #{type.inspect}, which is an illegal operation."
           end
         else
-          attributes[name] = Attribute.new(self, name, type)
+          attributes[name] = Attribute.new(self, name, type, &transform)
         end
       end
 

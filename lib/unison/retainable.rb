@@ -129,8 +129,11 @@ module Unison
     def children_to_retain
       self.class.send(:names_of_children_to_retain).inject([]) do |children, name|
         child = send(name)
-        if child.is_a?(Retainable)
+        case child
+        when Retainable
           children.push(child)
+        when Hash
+          children.concat(child.values)
         else
           children.concat(child)
         end
