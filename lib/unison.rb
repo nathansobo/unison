@@ -23,6 +23,7 @@ require "#{dir}/unison/relations"
 require "#{dir}/unison/predicates"
 require "#{dir}/unison/attributes"
 require "#{dir}/unison/signals"
+require "#{dir}/unison/field"
 require "#{dir}/unison/tuples"
 require "#{dir}/unison/relation_definition"
 

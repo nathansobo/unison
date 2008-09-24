@@ -760,13 +760,13 @@ module Unison
 
         describe "#attributes" do
           it "returns the #attribute_values, keyed by the name of their corresponding Attribute" do
-            expected_attributes = {}
-            tuple.send(:attribute_values).each do |attribute, value|
-              expected_attributes[attribute.name] = value
-            end
-            expected_attributes.should_not be_empty
-
-            tuple.attributes.should == expected_attributes
+            tuple.attributes.should == {
+              :id => "nathan",
+              :hobby => nil,
+              :name => "Nathan",
+              :team_id => nil,
+              :developer => nil
+            }
           end
         end
 
@@ -956,7 +956,8 @@ module Unison
           context "when other Tuple#attribute_values == #attribute_values" do
             before do
               @other_tuple = User.new(:id => "nathan", :name => "Nathan")
-              other_tuple.send(:attribute_values).should == tuple.send(:attribute_values)
+              publicize other_tuple, :fields
+              other_tuple.fields.should == tuple.fields
             end
 
             it "returns true" do
@@ -967,7 +968,8 @@ module Unison
           context "when other Tuple#attributes != #attributes" do
             before do
               @other_tuple = User.new(:id => "nathan_clone", :name => "Nathan's Clone")
-              other_tuple.send(:attribute_values).should_not == tuple.send(:attribute_values)
+              publicize other_tuple, :fields
+              other_tuple.fields.should_not == tuple.fields
             end
 
             it "returns false" do
@@ -979,12 +981,12 @@ module Unison
         describe "#initialize_attribute_values" do
           it "transforms Symbol keys into their corresponding Attribute objects" do
             user = User.new
-            publicize user, :initialize_attribute_values
+            publicize user, :initialize_field_values
 
             dont_allow(user).set_attribute_value(:name, "Einstein")
             mock.proxy(user).set_attribute_value(User[:name], "Einstein")
             stub.proxy(user).set_attribute_value(anything, anything)
-            user.initialize_attribute_values(:name => "Einstein")
+            user.initialize_field_values(:name => "Einstein")
           end
         end
       end

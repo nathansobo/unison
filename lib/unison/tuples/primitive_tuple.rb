@@ -136,13 +136,15 @@ module Unison
         end
       end
 
+      attr_reader :fields
+
       def initialize(initial_attributes={})
         @new = true
         @dirty = false
-        @attribute_values = {}
         @synthetic_attribute_signals = {}
         super()
-        initialize_attribute_values(initial_attributes)
+        @fields = create_fields
+        initialize_field_values(initial_attributes)
         initialize_relations
         initialize_synthetic_attribute_signals
       end
@@ -153,7 +155,7 @@ module Unison
           self
         else
           attribute = attribute_for(attribute_or_symbol)
-          value = attribute_values[attribute]
+          value = fields[attribute].value
           attribute.transform ? instance_exec(value, &attribute.transform) : value
         end
       end
@@ -175,8 +177,8 @@ module Unison
 
       def attributes
         attributes = {}
-        attribute_values.each do |attribute, value|
-          attributes[attribute.name] = value
+        set.primitive_attributes.each do |attribute|
+          attributes[attribute.name] = self[attribute]
         end
         attributes
       end
@@ -210,7 +212,7 @@ module Unison
 
       def ==(other)
         return false unless other.is_a?(PrimitiveTuple)
-        attribute_values == other.send(:attribute_values)
+        fields == other.send(:fields)
       end
 
       def <=>(other)
@@ -244,12 +246,20 @@ module Unison
       end
 
       protected
-      attr_reader :attribute_values, :synthetic_attribute_signals
+      attr_reader :synthetic_attribute_signals
 
       def after_create
       end
 
-      def initialize_attribute_values(initial_attributes)
+      def create_fields
+        set.attributes.inject({}) do |fields, symbol_attribute_pair|
+          symbol, attribute = symbol_attribute_pair
+          fields[attribute] = Field.new(attribute)
+          fields
+        end
+      end
+
+      def initialize_field_values(initial_attributes)
         initial_attributes = convert_symbol_keys_to_attributes(initial_attributes)
         if initial_attributes[set[:id]] && !Unison.test_mode?
           raise "You can only assign the :id attribute in test mode"
@@ -264,10 +274,10 @@ module Unison
 
       def set_attribute_value(attribute_or_symbol, new_value)
         attribute = attribute_for(attribute_or_symbol)
-        old_value = attribute_values[attribute]
+        old_value = fields[attribute].value
         converted_new_value = attribute.convert(new_value)
         if old_value != converted_new_value
-          attribute_values[attribute] = converted_new_value
+          fields[attribute].value = converted_new_value
           yield(attribute, old_value, converted_new_value) if block_given?
           @dirty = true unless new?
         end
