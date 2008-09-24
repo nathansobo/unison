@@ -29,14 +29,14 @@ module Unison
           it "adds a PrimitiveAttribute to the Set by the given name" do
             set = Set.new(:user)
             set.add_primitive_attribute(:name, :string)
-            set.attributes.should == {:name => PrimitiveAttribute.new(set, :name, :string)}
+            set.attributes.should == {:name => Attributes::PrimitiveAttribute.new(set, :name, :string)}
           end
 
           it "returns the PrimitiveAttribute with the block as its #transform" do
             set = Set.new(:user)
             transform = lambda {|value| "#{value} transformed"}
             attribute = set.add_primitive_attribute(:name, :string, &transform)
-            attribute.should == PrimitiveAttribute.new(set, :name, :string, &transform)
+            attribute.should == Attributes::PrimitiveAttribute.new(set, :name, :string, &transform)
             attribute.transform.should == transform
           end
         end
@@ -82,7 +82,7 @@ module Unison
         context "when an Attribute with the same name has not already been added" do
           it "adds a SyntheticAttribute to the Set by the given name and returns it" do
             attribute = set.add_synthetic_attribute(:name_length, &definition)
-            attribute.should == SyntheticAttribute.new(set, :name_length, &definition)
+            attribute.should == Attributes::SyntheticAttribute.new(set, :name_length, &definition)
             set.attributes[:name_length].should == attribute
           end
         end
@@ -102,8 +102,8 @@ module Unison
 
       describe "#has_attribute?" do
         it "when passed a PrimitiveAttribute, returns true if the #attributes contains the argument and false otherwise" do
-          set.should have_attribute(PrimitiveAttribute.new(set, :name, :string))
-          set.should_not have_attribute(PrimitiveAttribute.new(set, :bogus, :integer))
+          set.should have_attribute(Attributes::PrimitiveAttribute.new(set, :name, :string))
+          set.should_not have_attribute(Attributes::PrimitiveAttribute.new(set, :bogus, :integer))
         end
 
         it "when passed a Symbol, returns true if the #attributes contains an Attribute with that symbol as its name and false otherwise" do
@@ -124,7 +124,7 @@ module Unison
         context "when passed a SyntheticAttribute" do
           it "returns true if the #attributes contains the argument and false otherwise" do
             set.should have_synthetic_attribute(set[:conqueror_name])
-            set.should_not have_synthetic_attribute(SyntheticAttribute.new(set, :name_length) { signal(:name).signal(:length)})
+            set.should_not have_synthetic_attribute(Attributes::SyntheticAttribute.new(set, :name_length) { signal(:name).signal(:length)})
           end
         end
 
@@ -152,8 +152,8 @@ module Unison
 
       describe "#attribute" do
         it "retrieves the Set's Attribute by the given name" do
-          set.attribute(:id).should == PrimitiveAttribute.new(set, :id, :integer)
-          set.attribute(:name).should == PrimitiveAttribute.new(set, :name, :string)
+          set.attribute(:id).should == Attributes::PrimitiveAttribute.new(set, :id, :integer)
+          set.attribute(:name).should == Attributes::PrimitiveAttribute.new(set, :name, :string)
         end
         
         context "when no Attribute with the passed-in name is defined" do

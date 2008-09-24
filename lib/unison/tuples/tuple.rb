@@ -27,7 +27,7 @@ module Unison
 
       def bind(expression)
         case expression
-        when Attribute
+        when Attributes::Attribute
           self[expression]
         else
           expression
@@ -46,7 +46,7 @@ module Unison
           raise ArgumentError, "Attribute #{attribute_or_name.inspect} must be part of the Tuple's Set"
         end
         case attribute_or_name
-        when Attribute
+        when Attributes::Attribute
           attribute_or_name
         when Symbol
           set[attribute_or_name]

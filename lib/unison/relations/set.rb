@@ -26,7 +26,7 @@ module Unison
             raise ArgumentError, "Attribute #{name} already exists with type #{attributes[name].inspect}. You tried to change the type to #{type.inspect}, which is an illegal operation."
           end
         else
-          attributes[name] = PrimitiveAttribute.new(self, name, type, &transform)
+          attributes[name] = Attributes::PrimitiveAttribute.new(self, name, type, &transform)
         end
       end
 
@@ -34,7 +34,7 @@ module Unison
         if attributes[name]
           raise ArgumentError, "Attribute #{name} already exists."
         else
-          attributes[name] = SyntheticAttribute.new(self, name, &definition)
+          attributes[name] = Attributes::SyntheticAttribute.new(self, name, &definition)
         end
       end
 
@@ -42,7 +42,7 @@ module Unison
         case candidate_attribute
         when Set
           return self == candidate_attribute
-        when PrimitiveAttribute
+        when Attributes::PrimitiveAttribute
           attributes.detect {|name, attribute| candidate_attribute == attribute}
         when Symbol
           attributes[candidate_attribute] ? true : false
@@ -51,11 +51,11 @@ module Unison
 
       def has_synthetic_attribute?(candidate_attribute)
         case candidate_attribute
-        when SyntheticAttribute
+        when Attributes::SyntheticAttribute
           attributes.detect {|name, attribute| candidate_attribute == attribute}
         when Symbol
-          (attributes[candidate_attribute] && attributes[candidate_attribute].is_a?(SyntheticAttribute)) ? true : false
-        when PrimitiveAttribute
+          (attributes[candidate_attribute] && attributes[candidate_attribute].is_a?(Attributes::SyntheticAttribute)) ? true : false
+        when Attributes::PrimitiveAttribute
           false
         else
           raise ArgumentError, "#{candidate_attribute.inspect} is not a SyntheticAttribute or Symbol."
@@ -69,13 +69,13 @@ module Unison
 
       def primitive_attributes
         attributes.values.find_all do |attribute|
-          attribute.is_a?(PrimitiveAttribute)
+          attribute.is_a?(Attributes::PrimitiveAttribute)
         end
       end
 
       def synthetic_attributes
         attributes.values.find_all do |attribute|
-          attribute.is_a?(SyntheticAttribute)
+          attribute.is_a?(Attributes::SyntheticAttribute)
         end
       end
 
