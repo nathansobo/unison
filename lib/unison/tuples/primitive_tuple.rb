@@ -37,7 +37,7 @@ module Unison
         end
 
         def attribute(name, type, options={}, &transform)
-          attribute = set.has_attribute(name, type, &transform)
+          attribute = set.add_primitive_attribute(name, type, &transform)
           if options.has_key?(:default)
             default_attribute_values_on_self[attribute] = options[:default]
           end
@@ -60,7 +60,7 @@ module Unison
         end
 
         def synthetic_attribute(name, &definition)
-          synthetic_attribute = set.has_synthetic_attribute(name, &definition)
+          synthetic_attribute = set.add_synthetic_attribute(name, &definition)
           define_method(name) do
             synthetic_attribute_signals[name].value
           end

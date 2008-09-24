@@ -7,8 +7,8 @@ module Unison
       before do
         @set = Set.new(:users)
         @retainer = Object.new
-        set.has_attribute(:id, :string)
-        set.has_attribute(:name, :string)
+        set.add_primitive_attribute(:id, :string)
+        set.add_primitive_attribute(:name, :string)
         set.retain_with(retainer)
       end
 
@@ -24,18 +24,18 @@ module Unison
         end
       end
 
-      describe "#has_attribute" do
+      describe "#add_primitive_attribute" do
         context "when an PrimitiveAttribute with the same name has not already been added" do
           it "adds a PrimitiveAttribute to the Set by the given name" do
             set = Set.new(:user)
-            set.has_attribute(:name, :string)
+            set.add_primitive_attribute(:name, :string)
             set.attributes.should == {:name => PrimitiveAttribute.new(set, :name, :string)}
           end
 
           it "returns the PrimitiveAttribute with the block as its #transform" do
             set = Set.new(:user)
             transform = lambda {|value| "#{value} transformed"}
-            attribute = set.has_attribute(:name, :string, &transform)
+            attribute = set.add_primitive_attribute(:name, :string, &transform)
             attribute.should == PrimitiveAttribute.new(set, :name, :string, &transform)
             attribute.transform.should == transform
           end
@@ -46,11 +46,11 @@ module Unison
             attr_reader :set, :attribute
             before do
               @set = Set.new(:user)
-              @attribute = set.has_attribute(:name, :string)
+              @attribute = set.add_primitive_attribute(:name, :string)
             end
 
             it "returns the previously added Attribute" do
-              set.has_attribute(:name, :string).should equal(attribute)
+              set.add_primitive_attribute(:name, :string).should equal(attribute)
             end
           end
 
@@ -58,19 +58,19 @@ module Unison
             attr_reader :set
             before do
               @set = Set.new(:user)
-              set.has_attribute(:name, :string)
+              set.add_primitive_attribute(:name, :string)
             end
 
             it "raises an ArgumentError" do
               lambda do
-                set.has_attribute(:name, :symbol)
+                set.add_primitive_attribute(:name, :symbol)
               end.should raise_error(ArgumentError)
             end
           end
         end
       end
 
-      describe "#has_synthetic_attribute" do
+      describe "#add_synthetic_attribute" do
         attr_reader :set, :definition
         before do
           @set = users_set
@@ -81,7 +81,7 @@ module Unison
 
         context "when an Attribute with the same name has not already been added" do
           it "adds a SyntheticAttribute to the Set by the given name and returns it" do
-            attribute = set.has_synthetic_attribute(:name_length, &definition)
+            attribute = set.add_synthetic_attribute(:name_length, &definition)
             attribute.should == SyntheticAttribute.new(set, :name_length, &definition)
             set.attributes[:name_length].should == attribute
           end
@@ -89,12 +89,12 @@ module Unison
 
         context "when an Attribute with the same name has already been added" do
           before do
-            set.has_synthetic_attribute(:name_length, &definition)
+            set.add_synthetic_attribute(:name_length, &definition)
           end
 
           it "raises an ArgumentError" do
             lambda do
-              set.has_synthetic_attribute(:name_length, &definition)
+              set.add_synthetic_attribute(:name_length, &definition)
             end.should raise_error(ArgumentError)
           end
         end
@@ -116,7 +116,7 @@ module Unison
         end
       end
 
-      describe "#has_synthetic_attribute?" do
+      describe "#add_synthetic_attribute?" do
         before do
           @set = users_set
         end
@@ -168,7 +168,7 @@ module Unison
       describe "#primitive_attributes" do
         attr_reader :synthetic_attribute, :attribute_2
         before do
-          @synthetic_attribute = set.has_synthetic_attribute(:name_length) do
+          @synthetic_attribute = set.add_synthetic_attribute(:name_length) do
             signal(:name).signal(:length)
           end
         end
@@ -181,10 +181,10 @@ module Unison
       describe "#synthetic_attributes" do
         attr_reader :attribute_1, :attribute_2
         before do
-          @attribute_1 = set.has_synthetic_attribute(:name_length) do
+          @attribute_1 = set.add_synthetic_attribute(:name_length) do
             signal(:name).signal(:length)
           end
-          @attribute_2 = set.has_synthetic_attribute(:name_length_times_2) do
+          @attribute_2 = set.add_synthetic_attribute(:name_length_times_2) do
             signal(:name).signal(:length) do |length|
               length * 2
             end
@@ -288,7 +288,7 @@ module Unison
         context "when not #retained?" do
           before do
             @set = Set.new(:users)
-            set.has_attribute(:id, :integer)
+            set.add_primitive_attribute(:id, :integer)
             set.should_not be_retained
           end
 

@@ -34,7 +34,7 @@ module Unison
 
         describe ".attribute" do
           it "delegates to .set" do
-            mock.proxy(User.set).has_attribute(:nick_name, :string)
+            mock.proxy(User.set).add_primitive_attribute(:nick_name, :string)
             User.attribute(:nick_name, :string)
           end
 
@@ -66,7 +66,7 @@ module Unison
 
         describe ".attribute_reader" do
           it "creates an attribute on the .set" do
-            mock.proxy(User.set).has_attribute(:nick_name, :string)
+            mock.proxy(User.set).add_primitive_attribute(:nick_name, :string)
             User.attribute_reader(:nick_name, :string)
           end
 
@@ -130,7 +130,7 @@ module Unison
 
         describe ".attribute_writer" do
           it "creates an attribute on the .set" do
-            mock.proxy(User.set).has_attribute(:nick_name, :string)
+            mock.proxy(User.set).add_primitive_attribute(:nick_name, :string)
             User.attribute_writer(:nick_name, :string)
           end
 
@@ -176,7 +176,7 @@ module Unison
 
         describe ".attribute_accessor" do
           it "creates an attribute on the .set" do
-            mock.proxy(User.set).has_attribute(:nick_name, :string).at_least(1)
+            mock.proxy(User.set).add_primitive_attribute(:nick_name, :string).at_least(1)
             User.attribute_accessor(:nick_name, :string)
           end
 

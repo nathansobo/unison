@@ -243,7 +243,7 @@ module Unison
         context "when the Relation is not retained" do
           before do
             @relation = Relations::Set.new(:unretained_set)
-            relation.has_attribute(:id, :integer)
+            relation.add_primitive_attribute(:id, :integer)
             relation.should_not be_retained
           end
 

@@ -18,7 +18,7 @@ module Unison
       end
       attr_writer :tuple_class
 
-      def has_attribute(name, type, &transform)
+      def add_primitive_attribute(name, type, &transform)
         if attributes[name]
           if attributes[name].type == type
             attributes[name]
@@ -30,7 +30,7 @@ module Unison
         end
       end
 
-      def has_synthetic_attribute(name, &definition)
+      def add_synthetic_attribute(name, &definition)
         if attributes[name]
           raise ArgumentError, "Attribute #{name} already exists."
         else
