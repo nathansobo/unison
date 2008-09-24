@@ -159,6 +159,17 @@ module Unison
       def delegate_to_read(method_name, *args, &block)
         tuples.send(method_name, *args, &block)
       end
+
+      class PartialInnerJoin
+        attr_reader :operand_1, :operand_2
+        def initialize(operand_1, operand_2)
+          @operand_1, @operand_2 = operand_1, operand_2
+        end
+
+        def on(predicate)
+          Relations::InnerJoin.new(operand_1, operand_2, predicate)
+        end
+      end      
     end
   end
 end

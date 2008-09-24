@@ -25,7 +25,6 @@ require "#{dir}/unison/attributes"
 require "#{dir}/unison/signals"
 require "#{dir}/unison/tuples"
 require "#{dir}/unison/relation_definition"
-require "#{dir}/unison/partial_inner_join"
 
 module Unison
   class << self
