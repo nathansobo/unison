@@ -116,6 +116,40 @@ module Unison
         end
       end
 
+      describe "#has_synthetic_attribute?" do
+        before do
+          @set = users_set
+        end
+
+        context "when passed a SyntheticAttribute" do
+          it "returns true if the #attributes contains the argument and false otherwise" do
+            set.should have_synthetic_attribute(set[:conqueror_name])
+            set.should_not have_synthetic_attribute(SyntheticAttribute.new(set, :name_length) { signal(:name).signal(:length)})
+          end
+        end
+
+        context "when passed a Symbol" do
+          it "returns true if the #attributes contains an Attribute with that symbol as its name and false otherwise" do
+            set.should have_synthetic_attribute(:conqueror_name)
+            set.should_not have_synthetic_attribute(:bogus)
+          end
+        end
+
+        context "when passed an Attribute" do
+          it "returns false" do
+            set.should_not have_synthetic_attribute(set[:id])
+          end
+        end
+
+        context "when passed an object that is not a SyntheticAttribute or Symbol" do
+          it "raises an ArgumentError" do
+            lambda do
+              set.has_synthetic_attribute?(Object.new)
+            end.should raise_error(ArgumentError)
+          end
+        end
+      end
+
       describe "#attribute" do
         it "retrieves the Set's Attribute by the given name" do
           set.attribute(:id).should == Attribute.new(set, :id, :integer)
@@ -128,6 +162,37 @@ module Unison
               set.attribute(:i_dont_exist)
             end.should raise_error(ArgumentError)
           end
+        end
+      end
+
+      describe "#primitive_attributes" do
+        attr_reader :synthetic_attribute, :attribute_2
+        before do
+          @synthetic_attribute = set.has_synthetic_attribute(:name_length) do
+            signal(:name).signal(:length)
+          end
+        end
+
+        it "returns an array of all SyntheticAttributes in #attributes" do
+          set.primitive_attributes.should == (set.attributes.values - [synthetic_attribute])
+        end
+      end
+
+      describe "#synthetic_attributes" do
+        attr_reader :attribute_1, :attribute_2
+        before do
+          @attribute_1 = set.has_synthetic_attribute(:name_length) do
+            signal(:name).signal(:length)
+          end
+          @attribute_2 = set.has_synthetic_attribute(:name_length_times_2) do
+            signal(:name).signal(:length) do |length|
+              length * 2
+            end
+          end
+        end
+
+        it "returns an array of all SyntheticAttributes in #attributes" do
+          set.synthetic_attributes.should == [attribute_1, attribute_2]
         end
       end
 

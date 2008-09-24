@@ -8,7 +8,7 @@ module Unison
         end
         
         def columns(*args)
-          set.attributes.values
+          set.primitive_attributes
         end
 
         def quote_table_name(name)

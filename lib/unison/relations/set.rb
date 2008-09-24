@@ -49,9 +49,34 @@ module Unison
         end
       end
 
+      def has_synthetic_attribute?(candidate_attribute)
+        case candidate_attribute
+        when SyntheticAttribute
+          attributes.detect {|name, attribute| candidate_attribute == attribute}
+        when Symbol
+          (attributes[candidate_attribute] && attributes[candidate_attribute].is_a?(SyntheticAttribute)) ? true : false
+        when Attribute
+          false
+        else
+          raise ArgumentError, "#{candidate_attribute.inspect} is not a SyntheticAttribute or Symbol."
+        end
+      end
+
       def attribute(attribute_name)
         attributes[attribute_name] ||
           raise(ArgumentError, "Attribute with name #{attribute_name.inspect} is not defined on Set with name #{name.inspect}.")
+      end
+
+      def primitive_attributes
+        attributes.values.find_all do |attribute|
+          attribute.is_a?(Attribute)
+        end
+      end
+
+      def synthetic_attributes
+        attributes.values.find_all do |attribute|
+          attribute.is_a?(SyntheticAttribute)
+        end
       end
 
       def compound?

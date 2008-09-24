@@ -216,9 +216,9 @@ module Unison
         end
 
         describe ".synthetic_attribute" do
-          attr_reader :user
+          attr_reader :user, :attribute
           before do
-            User.synthetic_attribute :team_name do
+            @attribute = User.synthetic_attribute :team_name do
               team.signal(:name)
             end
             @user = User.create(:team_id => "mangos")
@@ -229,6 +229,10 @@ module Unison
             new_name = "The Bananas"
             user.team.name = new_name
             user.team_name.should == new_name
+          end
+
+          it "adds a SyntheticAttribute to the #set.attributes" do
+            User.set[:team_name].should == attribute
           end
         end
 
@@ -745,6 +749,12 @@ module Unison
         describe "#has_attribute?" do
           it "delegates to #set" do
             tuple.has_attribute?(:id).should == tuple.set.has_attribute?(:id)
+          end
+        end
+
+        describe "#has_synthetic_attribute?" do
+          it "delegates to #set" do
+            tuple.has_synthetic_attribute?(:conqueror_name).should == tuple.set.has_synthetic_attribute?(:conqueror_name)
           end
         end
 

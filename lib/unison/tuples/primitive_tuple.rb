@@ -60,10 +60,11 @@ module Unison
         end
 
         def synthetic_attribute(name, &definition)
-          synthetic_attribute_definitions[name] = definition
+          synthetic_attribute = set.has_synthetic_attribute(name, &definition)
           define_method(name) do
             synthetic_attribute_signals[name].value
           end
+          synthetic_attribute
         end
 
         def attribute_accessor(name, type, options={}, &transform)
@@ -133,10 +134,6 @@ module Unison
         def relation_definitions_on_self
           @relation_definitions_on_self ||= []
         end
-
-        def synthetic_attribute_definitions
-          @synthetic_attribute_definitions ||= {}
-        end        
       end
 
       def initialize(initial_attributes={})
@@ -170,6 +167,10 @@ module Unison
 
       def has_attribute?(attribute)
         set.has_attribute?(attribute)
+      end
+
+      def has_synthetic_attribute?(name)
+        set.has_synthetic_attribute?(name)
       end
 
       def attributes
@@ -284,8 +285,8 @@ module Unison
       end
 
       def initialize_synthetic_attribute_signals
-        synthetic_attribute_definitions.each do |name, definition|
-          synthetic_attribute_signals[name] = instance_eval(&definition)
+        set.synthetic_attributes.each do |synthetic_attribute|
+          synthetic_attribute_signals[synthetic_attribute.name] = instance_eval(&synthetic_attribute.definition)
         end
       end
 
@@ -299,10 +300,6 @@ module Unison
         self.class.send(:relation_definitions)
       end
 
-      def synthetic_attribute_definitions
-        self.class.send(:synthetic_attribute_definitions)
-      end
-
       def convert_symbol_keys_to_attributes(attributes)
         attributes.inject({}) do |normalized_hash, pair|
           key, value = pair
@@ -313,10 +310,6 @@ module Unison
 
       def default_attribute_values
         self.class.default_attribute_values
-      end
-
-      def has_synthetic_attribute?(name)
-        synthetic_attribute_definitions.has_key?(name)
       end
 
       def has_singleton_relation?(name)

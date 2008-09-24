@@ -11,9 +11,9 @@ module Unison
         end
 
         describe "#columns" do
-          it "returns #set.attributes.values regardless of the passed in argument(s)" do
-            engine.columns("users").should == set.attributes.values
-            engine.columns("anything", "anything").should == set.attributes.values
+          it "returns #set.primitive_attributes regardless of the passed in argument(s)" do
+            engine.columns("users").should == set.primitive_attributes
+            engine.columns("anything", "anything").should == set.primitive_attributes
           end
         end
       end
