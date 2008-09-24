@@ -42,8 +42,9 @@ module Unison
         case candidate_attribute
         when Set
           return self == candidate_attribute
-        when Attributes::PrimitiveAttribute
-          attributes.detect {|name, attribute| candidate_attribute == attribute}
+        when Attributes::Attribute
+          attribute = attributes[candidate_attribute.name]
+          attribute == candidate_attribute
         when Symbol
           attributes[candidate_attribute] ? true : false
         end

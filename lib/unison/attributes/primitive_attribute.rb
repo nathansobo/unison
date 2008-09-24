@@ -28,13 +28,14 @@ module Unison
       end
       include PredicateConstructors
 
-      attr_reader :set, :name, :type, :transform
+      attr_reader :type, :transform
 
       VALID_TYPES = [:integer, :boolean, :string, :symbol, :datetime, :object]
 
       def initialize(set, name, type, &transform)
         raise ArgumentError, "Type #{type.inspect} is invalid. Valid types are #{VALID_TYPES.inspect}" unless VALID_TYPES.include?(type)
-        @set, @name, @type, @transform = set, name, type, transform
+        super(set, name)
+        @type, @transform = type, transform
         @ascending = true
       end
 

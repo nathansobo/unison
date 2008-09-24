@@ -101,9 +101,16 @@ module Unison
       end
 
       describe "#has_attribute?" do
-        it "when passed a PrimitiveAttribute, returns true if the #attributes contains the argument and false otherwise" do
-          set.should have_attribute(Attributes::PrimitiveAttribute.new(set, :name, :string))
+        before do
+          @set = users_set
+        end
+
+        it "when passed an Attribute, returns true if the #attributes contains the argument and false otherwise" do
+          set.should have_attribute(set[:name])
           set.should_not have_attribute(Attributes::PrimitiveAttribute.new(set, :bogus, :integer))
+
+          set.should have_attribute(set[:conqueror_name])
+          set.should_not have_attribute(Attributes::SyntheticAttribute.new(set, :bogus_name) {})
         end
 
         it "when passed a Symbol, returns true if the #attributes contains an Attribute with that symbol as its name and false otherwise" do

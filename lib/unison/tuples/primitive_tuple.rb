@@ -62,7 +62,7 @@ module Unison
         def synthetic_attribute(name, &definition)
           synthetic_attribute = set.add_synthetic_attribute(name, &definition)
           define_method(name) do
-            synthetic_attribute_signals[name].value
+            synthetic_attribute_signals[synthetic_attribute].value
           end
           synthetic_attribute
         end
@@ -228,7 +228,7 @@ module Unison
       def signal(attribute_or_symbol, &block)
         signal =
           if has_synthetic_attribute?(attribute_or_symbol)
-            synthetic_attribute_signals[attribute_or_symbol]
+            synthetic_attribute_signals[attribute_for(attribute_or_symbol)]
           elsif has_singleton_relation?(attribute_or_symbol)
             Signals::SingletonRelationSignal.new(send(attribute_or_symbol))
           elsif has_attribute?(attribute_or_symbol)
@@ -286,7 +286,7 @@ module Unison
 
       def initialize_synthetic_attribute_signals
         set.synthetic_attributes.each do |synthetic_attribute|
-          synthetic_attribute_signals[synthetic_attribute.name] = instance_eval(&synthetic_attribute.definition)
+          synthetic_attribute_signals[synthetic_attribute] = instance_eval(&synthetic_attribute.definition)
         end
       end
 
