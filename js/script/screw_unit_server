@@ -1,8 +1,0 @@
-#!/usr/bin/env ruby
-
-dir = File.dirname(__FILE__)
-implementation_dir = "#{dir}/../lib"
-spec_dir = "#{dir}/../spec"
-server_script = "#{dir}/../vendor/screw-unit-server/bin/screw_unit_server"
-
-`#{server_script} #{spec_dir} #{implementation_dir} #{implementation_dir}`

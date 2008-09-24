@@ -1,7 +1,0 @@
---- 
-format: 1
-handler: 
-  commit: 32df13c595609e43e563c9a99c6e112841527fa4
-lock: false
-repository_url: git://github.com/grockit/screw-unit-server.git
-repository_class: Piston::Git::Repository
