@@ -10,7 +10,7 @@ module Unison
         end
       end
 
-      attr_reader :source, :method_name, :transform#, :value
+      attr_reader :source, :method_name, :transform
       def initialize(source, method_name = nil, &transform)
         raise(ArgumentError, "You must provide a method_name and/or a transform block") unless method_name || transform
         super()

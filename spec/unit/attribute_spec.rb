@@ -11,9 +11,10 @@ module Unison
     end
 
     describe "#initialize" do
-      it "sets the #set and #name" do
+      it "sets the #set, #name, and #transform" do
         attribute.set.should == set
         attribute.name.should == :name
+        attribute.transform.should == transform
       end
 
       context "when passed an 'invalid' type" do

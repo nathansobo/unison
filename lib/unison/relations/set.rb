@@ -30,6 +30,14 @@ module Unison
         end
       end
 
+      def has_synthetic_attribute(name, &definition)
+        if attributes[name]
+          raise ArgumentError, "Attribute #{name} already exists."
+        else
+          attributes[name] = SyntheticAttribute.new(self, name, &definition)
+        end
+      end
+
       def has_attribute?(candidate_attribute)
         case candidate_attribute
         when Set

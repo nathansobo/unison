@@ -70,6 +70,36 @@ module Unison
         end
       end
 
+      describe "#has_synthetic_attribute" do
+        attr_reader :set, :definition
+        before do
+          @set = users_set
+          @definition = lambda do
+            signal(:name).signal(:length)
+          end
+        end
+
+        context "when an Attribute with the same name has not already been added" do
+          it "adds a SyntheticAttribute to the Set by the given name and returns it" do
+            attribute = set.has_synthetic_attribute(:name_length, &definition)
+            attribute.should == SyntheticAttribute.new(set, :name_length, &definition)
+            set.attributes[:name_length].should == attribute
+          end
+        end
+
+        context "when an Attribute with the same name has already been added" do
+          before do
+            set.has_synthetic_attribute(:name_length, &definition)
+          end
+
+          it "raises an ArgumentError" do
+            lambda do
+              set.has_synthetic_attribute(:name_length, &definition)
+            end.should raise_error(ArgumentError)
+          end
+        end
+      end
+
       describe "#has_attribute?" do
         it "when passed an Attribute, returns true if the #attributes contains the argument and false otherwise" do
           set.should have_attribute(Attribute.new(set, :name, :string))
