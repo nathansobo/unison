@@ -39,9 +39,5 @@ module Unison
     def ==(other)
       other.is_a?(Field) && other.attribute == attribute && other.value == value
     end
-
-    def inspect
-      "<#{self.class.name}>"
-    end
   end
 end
