@@ -3,12 +3,13 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 module Unison
   module Attributes
     describe PrimitiveAttribute do
-      attr_reader :set, :attribute, :transform
+      attr_reader :set, :tuple, :attribute, :transform
       before do
         @set = Relations::Set.new(:users)
         @transform = lambda {|value| value}
         @attribute = create_attribute
         set.attributes[attribute.name] = attribute
+        @tuple = User.create(:id => "bob", :name => "Bobby")
       end
 
       def create_attribute
@@ -244,6 +245,15 @@ module Unison
           attribute.should_not == PrimitiveAttribute.new(set, :foo, :string)
           attribute.should_not == PrimitiveAttribute.new(set, :name, :string) {}
           attribute.should_not == Object.new
+        end
+      end
+
+      describe "#field" do
+        it "returns a Field instance with the passed-in #tuple and self set to #attribute" do
+          field = attribute.field(tuple)
+          field.class.should == Field
+          field.tuple.should == tuple
+          field.attribute.should == attribute
         end
       end
 

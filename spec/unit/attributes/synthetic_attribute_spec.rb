@@ -3,12 +3,13 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 module Unison
   module Attributes
     describe SyntheticAttribute do
-      attr_reader :set, :attribute, :definition
+      attr_reader :set, :attribute, :definition, :tuple
       before do
-        @set = Relations::Set.new(:users)
+        @set = users_set
         @definition = lambda {signal(:name).signal(:length)}
         @attribute = SyntheticAttribute.new(set, :name_length, &definition)
         set.attributes[attribute.name] = attribute
+        @tuple = User.create(:id => "bob", :name => "Bobby")
       end
 
       describe "#initialize" do
@@ -26,6 +27,15 @@ module Unison
           attribute.should_not == SyntheticAttribute.new(set, :foo)
           attribute.should_not == SyntheticAttribute.new(set, :name_length) {}
           attribute.should_not == Object.new
+        end
+      end
+
+      describe "#field" do
+        it "returns a Field instance with the passed-in #tuple and self set to #attribute" do
+          field = attribute.field(tuple)
+          field.class.should == Field
+          field.tuple.should == tuple
+          field.attribute.should == attribute
         end
       end
     end

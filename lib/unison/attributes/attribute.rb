@@ -33,6 +33,10 @@ module Unison
       def initialize(set, name)
         @set, @name = set, name
       end
+
+      def field(tuple)
+        Field.new(tuple, self)
+      end
     end
   end
 end
