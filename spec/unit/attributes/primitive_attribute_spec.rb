@@ -7,8 +7,12 @@ module Unison
       before do
         @set = Relations::Set.new(:users)
         @transform = lambda {|value| value}
-        @attribute = PrimitiveAttribute.new(set, :name, :string, &transform)
+        @attribute = create_attribute
         set.attributes[attribute.name] = attribute
+      end
+
+      def create_attribute
+        PrimitiveAttribute.new(set, :name, :string, &transform)
       end
 
       describe "#initialize" do
@@ -25,6 +29,80 @@ module Unison
             end.should raise_error(ArgumentError)
           end
         end
+
+        context "when name == :id" do
+          context "when passed a :default option" do
+            def create_attribute
+              PrimitiveAttribute.new(set, :id, :string, :default => "Hello")
+            end
+
+            it "sets the #default to the converted value of the passed in option" do
+              attribute.default.should == "Hello"
+            end
+
+            context "when :default is false" do
+              def create_attribute
+                PrimitiveAttribute.new(set, :is_awesome, :boolean, :default => false)
+              end
+
+              it "sets #default to false" do
+                attribute.default.should == false
+              end
+            end
+          end
+
+          context "when not passed a :default option" do
+            def create_attribute
+              PrimitiveAttribute.new(set, :id, :string)
+            end
+
+            it "sets the #default a Proc generating a Guid string" do
+              new_guid = nil
+              mock.proxy(Guid).new do |guid|
+                new_guid = guid
+              end
+              attribute.default.call.should == new_guid.to_s
+            end
+          end
+        end
+
+        context "when name != :id" do
+          context "when passed a :default option" do
+            def create_attribute
+              PrimitiveAttribute.new(set, :name, :string, :default => 999, &transform)
+            end
+
+            it "sets the #default to the converted value of the passed in option" do
+              attribute.default.should == 999
+            end
+
+            context "when name == :id" do
+              def create_attribute
+                PrimitiveAttribute.new(set, :id, :string, :default => "Hello")
+              end
+
+              it "sets the #default to the converted value of the passed in option" do
+                attribute.default.should == "Hello"
+              end
+
+              context "when :default is false" do
+                def create_attribute
+                  PrimitiveAttribute.new(set, :is_awesome, :boolean, :default => false)
+                end
+
+                it "sets #default to false" do
+                  attribute.default.should == false
+                end
+              end
+            end
+          end
+
+          context "when not passed a :default option" do
+            it "sets #default to nil" do
+              attribute.default.should be_nil
+            end
+          end
+        end
       end
 
       class << self
@@ -33,7 +111,7 @@ module Unison
             attribute.convert(nil).should == nil
           end
         end
-      end
+      end      
 
       describe "#convert" do
         context "when #type is :integer" do

@@ -18,7 +18,7 @@ module Unison
       end
       attr_writer :tuple_class
 
-      def add_primitive_attribute(name, type, &transform)
+      def add_primitive_attribute(name, type, options={}, &transform)
         if attributes[name]
           if attributes[name].type == type
             attributes[name]
@@ -26,7 +26,7 @@ module Unison
             raise ArgumentError, "Attribute #{name} already exists with type #{attributes[name].inspect}. You tried to change the type to #{type.inspect}, which is an illegal operation."
           end
         else
-          attributes[name] = Attributes::PrimitiveAttribute.new(self, name, type, &transform)
+          attributes[name] = Attributes::PrimitiveAttribute.new(self, name, type, options, &transform)
         end
       end
 

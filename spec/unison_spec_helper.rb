@@ -102,7 +102,7 @@ Spec::Runner.configure do |config|
 
         attribute_accessor :id, :string
         attribute_accessor :name, :string
-        attribute_accessor :hobby, :string
+        attribute_accessor :hobby, :string, :default => "Bomb construction"
         attribute_accessor :team_id, :string
         attribute_accessor :developer, :boolean
         synthetic_attribute :conqueror_name do

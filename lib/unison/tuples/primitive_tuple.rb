@@ -25,23 +25,8 @@ module Unison
           set
         end
 
-        def default_attribute_values
-          responders = responders_in_inheritance_chain(:default_attribute_values_on_self)
-          responders.inject({self[:id] => lambda {Guid.new.to_s}}) do |defaults, klass|
-            defaults.merge(klass.default_attribute_values_on_self)
-          end
-        end
-
-        def default_attribute_values_on_self
-          @default_attribute_values_on_self ||= {}
-        end
-
         def attribute(name, type, options={}, &transform)
-          attribute = set.add_primitive_attribute(name, type, &transform)
-          if options.has_key?(:default)
-            default_attribute_values_on_self[attribute] = options[:default]
-          end
-          attribute
+          set.add_primitive_attribute(name, type, options, &transform)
         end
 
         def attribute_reader(name, type, options={}, &transform)
@@ -255,7 +240,7 @@ module Unison
       def create_fields
         set.attributes.inject({}) do |fields, symbol_attribute_pair|
           symbol, attribute = symbol_attribute_pair
-          fields[attribute] = Field.new(attribute)
+          fields[attribute] = Field.new(self, attribute)
           fields
         end
       end
@@ -270,15 +255,13 @@ module Unison
           fields[attribute].set_value(attribute_value)
         end
 
-        assign_default_attribute_values(initial_attributes)
+        assign_default_field_values(initial_attributes)
       end
 
-      def assign_default_attribute_values(initial_attributes)
-        default_attribute_values.each do |attribute, default_value|
+      def assign_default_field_values(initial_attributes)
+        set.primitive_attributes.each do |attribute|
           next if initial_attributes.has_key?(attribute)
-          fields[attribute].set_value(
-            default_value.is_a?(Proc)? instance_eval(&default_value) : default_value
-          )
+          fields[attribute].set_default_value
         end
       end
 
@@ -304,10 +287,6 @@ module Unison
           normalized_hash[set[key]] = value
           normalized_hash
         end
-      end
-
-      def default_attribute_values
-        self.class.default_attribute_values
       end
 
       def has_singleton_relation?(name)

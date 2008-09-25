@@ -1,11 +1,20 @@
 module Unison
   class Field
-    attr_reader :attribute
-    attr_reader :value
-    
-    def initialize(attribute)
-      @attribute = attribute
+    attr_reader :tuple, :attribute, :value
+
+    def initialize(tuple, attribute)
+      @tuple, @attribute = tuple, attribute
       @dirty = false
+    end
+
+    def set_default_value
+      if attribute.is_a?(Attributes::PrimitiveAttribute)
+        if attribute.default.is_a?(Proc)
+          set_value(tuple.instance_eval(&attribute.default))
+        else
+          set_value(attribute.default) unless attribute.default.nil?
+        end
+      end
     end
     
     def set_value(new_value)
@@ -29,6 +38,10 @@ module Unison
 
     def ==(other)
       other.is_a?(Field) && other.attribute == attribute && other.value == value
+    end
+
+    def inspect
+      "<#{self.class.name}>"
     end
   end
 end
