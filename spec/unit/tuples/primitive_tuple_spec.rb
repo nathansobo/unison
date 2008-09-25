@@ -605,37 +605,26 @@ module Unison
             tuple.retain_with(retainer)
           end
 
+
+          context "when passed an Attribute as the index argument" do
+            it "delegates to #set_value on the Field matching the given Attribute" do
+              mock.proxy(tuple.fields[tuple.set[:name]]).set_value("New Name")
+              tuple[tuple.set[:name]] = "New Name"
+            end
+          end
+
+          context "when passed a Symbol as the index argument" do
+            it "delegates to #set_value on the Field matching the Attribute named by the Symbol" do
+              mock.proxy(tuple.fields[tuple.set[:name]]).set_value("New Name")
+              tuple[:name] = "New Name"
+            end
+          end
+
           context "when the passed in value is different than the original value" do
             attr_reader :new_value
             before do
               @new_value = "Corey"
               tuple[:name].should_not == new_value
-            end
-
-            it "converts the passed in value using the PrimitiveAttribute" do
-              tuple = Account.find("nathan_pivotal_account")
-              attribute = Account[:deactivated_at]
-
-              new_time = Time.now.utc
-              mock.proxy(attribute).convert(new_time.to_s)
-
-              tuple[attribute] = new_time.to_s
-              tuple[attribute].class.should == Time
-              tuple[attribute].to_s.should == new_time.to_s
-            end
-
-            it "sets the value for an PrimitiveAttribute defined on the set of the Tuple class" do
-              tuple[User.set[:id]] = "corey"
-              tuple[User.set[:id]].should == "corey"
-              tuple[User.set[:name]] = new_value
-              tuple[User.set[:name]].should == new_value
-            end
-
-            it "sets the value for a Symbol corresponding to a name of an PrimitiveAttribute defined on the #set of the Tuple class" do
-              tuple[:id] = "corey"
-              tuple[:id].should == "corey"
-              tuple[:name] = new_value
-              tuple[:name].should == new_value
             end
 
             it "triggers the on_update event" do
@@ -649,16 +638,6 @@ module Unison
               tuple[:id] = new_value
               update_args.should == [[tuple.set[:id], old_value, new_value]]
             end
-
-            context "when not dirty?" do
-              it "sets dirty? to true" do
-                tuple.pushed
-                tuple.should_not be_dirty
-
-                tuple[:name] = new_value
-                tuple.should be_dirty
-              end
-            end
           end
 
           context "when the passed in value is the same than the original value" do
@@ -669,15 +648,26 @@ module Unison
 
               tuple[:name] = tuple[:name]
             end
+          end
+        end
 
-            context "when not new? and not dirty?" do
-              it "does not set dirty? to true" do
-                tuple.pushed.should_not be_new
-                tuple.should_not be_dirty
+        describe "#dirty?" do
+          context "when any Field is #dirty?" do
+            it "returns true" do
+              tuple.fields.values.any? do |field|
+                field.dirty?
+              end.should be_true
+              tuple.should be_dirty
+            end
+          end
 
-                tuple[:name] = tuple[:name]
-                tuple.should_not be_dirty
-              end
+          context "when no Fields are #dirty?" do
+            it "returns false" do
+              tuple.pushed
+              tuple.fields.values.any? do |field|
+                field.dirty?
+              end.should be_false
+              tuple.should_not be_dirty
             end
           end
         end
