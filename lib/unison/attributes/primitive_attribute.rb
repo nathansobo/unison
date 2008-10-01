@@ -10,10 +10,10 @@ module Unison
         super(set, name)
         @type, @transform = type, transform
         @ascending = true
-        @default = if options[:default].nil?
-          name == :id ? lambda {Guid.new.to_s} : nil
+        if name == :id && !options.has_key?(:default)
+          @default = lambda { Guid.new.to_s }
         else
-          options[:default]
+          @default = options[:default]
         end
       end
 

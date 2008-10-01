@@ -57,7 +57,7 @@ module Unison
               PrimitiveAttribute.new(set, :id, :string)
             end
 
-            it "sets the #default a Proc generating a Guid string" do
+            it "sets the #default to a Proc generating a Guid string" do
               new_guid = nil
               mock.proxy(Guid).new do |guid|
                 new_guid = guid

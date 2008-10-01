@@ -1,2 +1,4 @@
-PrimitiveTuple#attributes transforms the values of the Fields. Do we want to do this on persist?
-Add PrimitiveTuple#persistent_attributes
+PrimitiveAttributeSpec -> make create_attribute a lazy attr reader for the spec
+Refactor setting of default values on fields. When assigning field values, iterate over the fields instead of the attributes
+PrimitiveTuple#attributes calls the transform block on field values. Do we want to do this on persist? If not, add PrimitiveTuple#persistent_attributes
+
