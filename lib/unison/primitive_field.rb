@@ -3,6 +3,9 @@ module Unison
     attr_reader :value
 
     def initialize(tuple, attribute)
+      unless attribute.instance_of?(Attributes::PrimitiveAttribute)
+        raise ArgumentError, "PrimitiveFields can only be constructed for PrimitiveAttributes"
+      end
       super
       @dirty = false
     end

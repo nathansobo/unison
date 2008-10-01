@@ -9,6 +9,25 @@ module Unison
       @field = SyntheticField.new(tuple, attribute)
     end
 
+    describe "#initialize" do
+      context "when passed a Tuple and SyntheticAttribute" do
+        it "sets #tuple and #attribute" do
+          field.tuple.should == tuple
+          field.attribute.should == attribute
+        end
+      end
+
+      context "when passed a Tuple and anything other than a SyntheticAttribute" do
+        it "raises an ArgumentError" do
+          attribute = User[:name]
+          attribute.class.should_not == Attributes::SyntheticAttribute
+          lambda do
+            SyntheticField.new(tuple, attribute)
+          end.should raise_error(ArgumentError)
+        end
+      end
+    end
+
     describe "#value" do
       it "delegates to the result of #signal" do
         expected_value = field.signal.value
@@ -39,7 +58,7 @@ module Unison
 
       context "when passed a SyntheticField with a different #attribute" do
         it "returns false" do
-          other = SyntheticField.new(field.tuple, User[:id])
+          other = SyntheticField.new(field.tuple, Attributes::SyntheticAttribute.new(users_set, :bogus))
           other.attribute.should_not == field.attribute
           field.should_not == other
         end

@@ -16,9 +16,21 @@ module Unison
     end
 
     describe "#initialize" do
-      it "sets the #tuple and #attribute" do
-        field.attribute.should == attribute
-        field.tuple.should == tuple
+      context "when passed a Tuple and a PrimitiveAttribute" do
+        it "sets the #tuple and #attribute" do
+          field.attribute.should == attribute
+          field.tuple.should == tuple
+        end
+      end
+
+      context "when passed a Tuple and anything other than a PrimitiveAttribute" do
+        it "raises an ArgumentError" do
+          attribute = User[:conqueror_name]
+          attribute.class.should_not == Attributes::PrimitiveAttribute
+          lambda do
+            PrimitiveField.new(tuple, attribute)
+          end.should raise_error(ArgumentError)
+        end
       end
     end
 
