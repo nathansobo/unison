@@ -129,7 +129,7 @@ module Unison
         @new = true
         super()
         @fields = create_fields
-        initialize_field_values(initial_attributes)
+        initialize_primitive_field_values(initial_attributes)
         initialize_relations
       end
 
@@ -251,25 +251,19 @@ module Unison
         end
       end
 
-      def initialize_field_values(initial_attributes)
+      def initialize_primitive_field_values(initial_attributes)
         initial_attributes = convert_symbol_keys_to_attributes(initial_attributes)
         if initial_attributes[set[:id]] && !Unison.test_mode?
           raise "You can only assign the :id attribute in test mode"
         end
-
         initial_attributes.each do |attribute, attribute_value|
           fields[attribute].set_value(attribute_value)
         end
-
-        assign_default_field_values(initial_attributes)
-      end
-
-      def assign_default_field_values(initial_attributes)
-        set.primitive_attributes.each do |attribute|
-          next if initial_attributes.has_key?(attribute)
-          fields[attribute].set_default_value
+        primitive_fields.each do |field|
+          field.set_default_value unless initial_attributes.has_key?(field.attribute)
         end
       end
+
 
       def initialize_relations
         relation_definitions.each do |relation_definition|
