@@ -238,10 +238,10 @@ module Unison
       end
 
       def create_fields
-        set.attributes.inject({}) do |fields, symbol_attribute_pair|
-          symbol, attribute = symbol_attribute_pair
-          fields[attribute] = Field.new(self, attribute)
-          fields
+        returning({}) do |fields|
+          set.attributes.values.each do |attribute|
+            fields[attribute] = attribute.create_field(self)
+          end
         end
       end
 

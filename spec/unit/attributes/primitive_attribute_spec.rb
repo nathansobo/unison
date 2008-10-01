@@ -249,7 +249,7 @@ module Unison
 
       describe "#field" do
         it "returns a Field instance with the passed-in #tuple and self set to #attribute" do
-          field = attribute.field(tuple)
+          field = attribute.create_field(tuple)
           field.class.should == Field
           field.tuple.should == tuple
           field.attribute.should == attribute

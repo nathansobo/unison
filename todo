@@ -1,4 +1,6 @@
-PrimitiveAttributeSpec -> make create_attribute a lazy attr reader for the spec
-Refactor setting of default values on fields. When assigning field values, iterate over the fields instead of the attributes
+change
+Introduce PrimitiveField and SyntheticField
+iterate over primitive fields only in the default values pass
+
 PrimitiveTuple#attributes calls the transform block on field values. Do we want to do this on persist? If not, add PrimitiveTuple#persistent_attributes
 

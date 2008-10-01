@@ -34,7 +34,7 @@ module Unison
         @set, @name = set, name
       end
 
-      def field(tuple)
+      def create_field(tuple)
         Field.new(tuple, self)
       end
     end
