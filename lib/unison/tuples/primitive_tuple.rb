@@ -35,6 +35,7 @@ module Unison
             self[attribute]
           end
           alias_method "#{name}?", name if type == :boolean
+          attribute
         end
 
         def attribute_writer(name, type, options={}, &transform)
@@ -42,12 +43,13 @@ module Unison
           define_method("#{name}=") do |value|
             self[attribute] = value
           end
+          attribute
         end
 
         def synthetic_attribute(name, &definition)
           synthetic_attribute = set.add_synthetic_attribute(name, &definition)
           define_method(name) do
-            synthetic_attribute_signals[synthetic_attribute].value
+            self[synthetic_attribute]
           end
           synthetic_attribute
         end
@@ -125,22 +127,20 @@ module Unison
 
       def initialize(initial_attributes={})
         @new = true
-        @synthetic_attribute_signals = {}
         super()
         @fields = create_fields
         initialize_field_values(initial_attributes)
         initialize_relations
-        initialize_synthetic_attribute_signals
       end
 
       def [](attribute_or_symbol)
         if attribute_or_symbol.is_a?(Relations::Set)
-          raise "#attribute is only defined for Attribute's of this Tuple's #relation or its #relation itself" unless attribute_or_symbol == set
+          raise "#attribute is only defined for Attributes of this Tuple's #relation or its #relation itself" unless attribute_or_symbol == set
           self
         else
           attribute = attribute_for(attribute_or_symbol)
           value = fields[attribute].value
-          attribute.transform ? instance_exec(value, &attribute.transform) : value
+          (attribute.respond_to?(:transform) && attribute.transform) ? instance_exec(value, &attribute.transform) : value
         end
       end
 
@@ -223,12 +223,10 @@ module Unison
 
       def signal(attribute_or_symbol, &block)
         signal =
-          if has_synthetic_attribute?(attribute_or_symbol)
-            synthetic_attribute_signals[attribute_for(attribute_or_symbol)]
+          if has_attribute?(attribute_or_symbol)
+            fields[attribute_for(attribute_or_symbol)].signal
           elsif has_singleton_relation?(attribute_or_symbol)
             Signals::SingletonRelationSignal.new(send(attribute_or_symbol))
-          elsif has_attribute?(attribute_or_symbol)
-            Signals::AttributeSignal.new(self, attribute_for(attribute_or_symbol))
           else
             raise ArgumentError, "There is no attribute or relation #{attribute_or_symbol.inspect} on #{self.inspect}"
           end
@@ -270,12 +268,6 @@ module Unison
         set.primitive_attributes.each do |attribute|
           next if initial_attributes.has_key?(attribute)
           fields[attribute].set_default_value
-        end
-      end
-
-      def initialize_synthetic_attribute_signals
-        set.synthetic_attributes.each do |synthetic_attribute|
-          synthetic_attribute_signals[synthetic_attribute] = instance_eval(&synthetic_attribute.definition)
         end
       end
 

@@ -28,6 +28,10 @@ module Unison
       converted_new_value
     end
 
+    def signal
+      Signals::AttributeSignal.new(tuple, attribute)
+    end
+
     def dirty?
       @dirty ? true : false
     end

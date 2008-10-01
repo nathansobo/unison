@@ -1,4 +1,9 @@
+do transform in PrimitiveField and not the [] reader
+check PrimitiveTuple#[] specs
+SyntheticField should die if you pass a non synthetic attr
 Use SyntheticFields in synthetic attribute logic
+initialize_field_values ==> initialize_primitive_fields
+fields[attribute_for(attribute_or_symbol)] ==> #field_for
 where are we passing blocks into Field#set_value?
 iterate over primitive fields only in the default values pass
 

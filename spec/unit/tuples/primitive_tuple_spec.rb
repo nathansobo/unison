@@ -654,7 +654,7 @@ module Unison
         describe "#dirty?" do
           context "when any PrimitiveField is #dirty?" do
             it "returns true" do
-              tuple.fields.values.any? do |field|
+              tuple.primitive_fields.any? do |field|
                 field.dirty?
               end.should be_true
               tuple.should be_dirty
@@ -788,7 +788,6 @@ module Unison
           before do
             @user = User.find("nathan")
           end
-
 
           context "when passed a Symbol" do
             before do

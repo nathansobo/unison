@@ -141,6 +141,14 @@ module Unison
       end
     end
 
+    describe "#signal" do
+      it "returns an AttributeSignal with its #tuple and #attribute" do
+        signal = field.signal
+        signal.tuple.should == tuple
+        signal.attribute.should == attribute
+      end
+    end
+
     describe "#==" do
       context "when passed a PrimitiveField with the same #attribute and #value" do
         it "returns true" do

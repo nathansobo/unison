@@ -5,8 +5,28 @@ module Unison
     attr_reader :tuple, :attribute, :field
     before do
       @tuple = User.find("nathan")
-      @attribute = User[:name]
+      @attribute = User[:conqueror_name]
       @field = SyntheticField.new(tuple, attribute)
+    end
+
+    describe "#value" do
+      it "delegates to the result of #signal" do
+        expected_value = field.signal.value
+        mock.proxy(field.signal).value
+        field.value.should == expected_value
+      end
+    end
+
+    describe "#signal" do
+      it "returns the result of instance evaling the #attribute's #definition block in #tuple" do
+        expected_signal = tuple.instance_eval(&attribute.definition)
+        field.signal.value.should == expected_signal.value 
+      end
+
+      it "memoizes its result" do
+        signal = field.signal
+        field.signal.should equal(signal)
+      end
     end
 
     describe "#==" do
