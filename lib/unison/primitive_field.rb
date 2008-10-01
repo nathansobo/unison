@@ -1,9 +1,9 @@
 module Unison
-  class PrimitiveField
-    attr_reader :tuple, :attribute, :value
+  class PrimitiveField < Field
+    attr_reader :value
 
     def initialize(tuple, attribute)
-      @tuple, @attribute = tuple, attribute
+      super
       @dirty = false
     end
 

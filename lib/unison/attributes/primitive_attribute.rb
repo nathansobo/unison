@@ -51,6 +51,10 @@ module Unison
         set.to_arel[name]
       end
 
+      def create_field(tuple)
+        PrimitiveField.new(tuple, self)
+      end
+      
       protected
       def convert_to_integer(value)
         Integer(value)

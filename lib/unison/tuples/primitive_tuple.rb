@@ -167,6 +167,14 @@ module Unison
         attributes
       end
 
+      def primitive_fields
+        fields.values.select {|field| field.instance_of?(PrimitiveField)}
+      end
+
+      def synthetic_fields
+        fields.values.select {|field| field.instance_of?(SyntheticField)}
+      end
+
       def push
         Unison.origin.push(self)
         pushed
@@ -174,7 +182,7 @@ module Unison
 
       def pushed
         @new = false
-        fields.values.each do |field|
+        primitive_fields.each do |field|
           field.pushed
         end
         self
@@ -189,7 +197,7 @@ module Unison
       end
 
       def dirty?
-        fields.values.any? {|field| field.dirty?}
+        primitive_fields.any? {|field| field.dirty?}
       end
 
       def set

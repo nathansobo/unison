@@ -661,10 +661,10 @@ module Unison
             end
           end
 
-          context "when no Fields are #dirty?" do
+          context "when no #primitive_fields are #dirty?" do
             it "returns false" do
               tuple.pushed
-              tuple.fields.values.any? do |field|
+              tuple.primitive_fields.any? do |field|
                 field.dirty?
               end.should be_false
               tuple.should_not be_dirty
@@ -747,6 +747,28 @@ module Unison
               :team_id => nil,
               :developer => nil
             }
+          end
+        end
+
+        describe "#primitive_fields" do
+          it "returns an Array of all PrimitiveFields from the #fields hash" do
+            tuple.fields.values.any? {|field| field.instance_of?(SyntheticField)}.should be_true
+            primitive_fields = tuple.primitive_fields
+            primitive_fields.should_not be_empty
+            primitive_fields.each do |field|
+              field.class.should == PrimitiveField
+            end
+          end
+        end
+
+        describe "#synthetic_fields" do
+          it "returns an Array of all SyntheticFields from the #fields hash" do
+            tuple.fields.values.any? {|field| field.instance_of?(PrimitiveField)}.should be_true
+            synthetic_fields = tuple.synthetic_fields
+            synthetic_fields.should_not be_empty
+            synthetic_fields.each do |field|
+              field.class.should == SyntheticField
+            end
           end
         end
 
@@ -933,7 +955,7 @@ module Unison
             end
           end
 
-          context "when other Tuple#attribute_values == #attribute_values" do
+          context "when other Tuple#fields == #fields" do
             before do
               @other_tuple = User.new(:id => "nathan", :name => "Nathan")
               publicize other_tuple, :fields

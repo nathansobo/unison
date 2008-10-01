@@ -33,10 +33,6 @@ module Unison
       def initialize(set, name)
         @set, @name = set, name
       end
-
-      def create_field(tuple)
-        PrimitiveField.new(tuple, self)
-      end
     end
   end
 end

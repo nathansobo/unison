@@ -1,5 +1,5 @@
-change
-Introduce PrimitiveField and SyntheticField
+Use SyntheticFields in synthetic attribute logic
+where are we passing blocks into Field#set_value?
 iterate over primitive fields only in the default values pass
 
 PrimitiveTuple#attributes calls the transform block on field values. Do we want to do this on persist? If not, add PrimitiveTuple#persistent_attributes
