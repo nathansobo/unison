@@ -7,13 +7,12 @@ module Unison
       before do
         @set = Relations::Set.new(:users)
         @transform = lambda {|value| value}
-        @attribute = create_attribute
         set.attributes[attribute.name] = attribute
         @tuple = User.create(:id => "bob", :name => "Bobby")
       end
 
-      def create_attribute
-        PrimitiveAttribute.new(set, :name, :string, &transform)
+      def attribute
+        @attribute ||= PrimitiveAttribute.new(set, :name, :string, &transform)
       end
 
       describe "#initialize" do
@@ -33,8 +32,8 @@ module Unison
 
         context "when name == :id" do
           context "when passed a :default option" do
-            def create_attribute
-              PrimitiveAttribute.new(set, :id, :string, :default => "Hello")
+            def attribute
+              @attribute ||= PrimitiveAttribute.new(set, :id, :string, :default => "Hello")
             end
 
             it "sets the #default to the converted value of the passed in option" do
@@ -42,8 +41,8 @@ module Unison
             end
 
             context "when :default is false" do
-              def create_attribute
-                PrimitiveAttribute.new(set, :is_awesome, :boolean, :default => false)
+              def attribute
+                @attribute ||= PrimitiveAttribute.new(set, :is_awesome, :boolean, :default => false)
               end
 
               it "sets #default to false" do
@@ -53,8 +52,8 @@ module Unison
           end
 
           context "when not passed a :default option" do
-            def create_attribute
-              PrimitiveAttribute.new(set, :id, :string)
+            def attribute
+              @attribute ||= PrimitiveAttribute.new(set, :id, :string)
             end
 
             it "sets the #default to a Proc generating a Guid string" do
@@ -69,8 +68,8 @@ module Unison
 
         context "when name != :id" do
           context "when passed a :default option" do
-            def create_attribute
-              PrimitiveAttribute.new(set, :name, :string, :default => 999, &transform)
+            def attribute
+              @attribute ||= PrimitiveAttribute.new(set, :name, :string, :default => 999, &transform)
             end
 
             it "sets the #default to the converted value of the passed in option" do
@@ -78,8 +77,8 @@ module Unison
             end
 
             context "when name == :id" do
-              def create_attribute
-                PrimitiveAttribute.new(set, :id, :string, :default => "Hello")
+              def attribute
+                @attribute ||= PrimitiveAttribute.new(set, :id, :string, :default => "Hello")
               end
 
               it "sets the #default to the converted value of the passed in option" do
@@ -87,8 +86,8 @@ module Unison
               end
 
               context "when :default is false" do
-                def create_attribute
-                  PrimitiveAttribute.new(set, :is_awesome, :boolean, :default => false)
+                def attribute
+                  @attribute ||= PrimitiveAttribute.new(set, :is_awesome, :boolean, :default => false)
                 end
 
                 it "sets #default to false" do
