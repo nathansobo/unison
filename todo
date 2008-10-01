@@ -1,9 +1,11 @@
 Backlog
 --------
-where are we passing blocks into Field#set_value?
+Topic#expose should work for signals with relations as the values
+Introduce the ability to project specific attributes
+cleanup PrimitiveTuple#[] specs
 
 Icebox
 --------
-check PrimitiveTuple#[] specs
-do transform in PrimitiveField and not the [] reader
-PrimitiveTuple#attributes calls the transform block on field values. Do we want to do this on persist? If not, add PrimitiveTuple#persistent_attributes
+Potentially rip out support for referencing hash_representation on unretained Topics... OR
+  do transform in PrimitiveField and not the [] reader, which means we need to address the following:
+  PrimitiveTuple#attributes calls the transform block on field values. Do we want to do this on persist? If not, add PrimitiveTuple#persistent_attributes

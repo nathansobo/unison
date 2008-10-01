@@ -77,7 +77,7 @@ module Unison
           topic.retain_with(retainer)
         end
 
-        it "retains all exposed Relations" do
+        it "retains all exposed Objects" do
           publicize topic_class, :exposed_method_names
           topic.exposed_objects.each do |exposed_object|
             exposed_object.should be_retained_by(topic)
@@ -95,21 +95,6 @@ module Unison
                 "nathan_photo_2" => Photo.find("nathan_photo_2").attributes.stringify_keys
               }
             }
-        end
-
-        describe "#hash_representation" do
-          it "returns a class name => id => attributes Hash of the exposed objects" do
-            topic.hash_representation.should == {
-              "Account" => {
-                "nathan_pivotal_account" => Account.find("nathan_pivotal_account").attributes.stringify_keys,
-                "nathan_account_2" => Account.find("nathan_account_2").attributes.stringify_keys,
-              },
-              "Photo" => {
-                "nathan_photo_1" => Photo.find("nathan_photo_1").attributes.stringify_keys,
-                "nathan_photo_2" => Photo.find("nathan_photo_2").attributes.stringify_keys
-              }
-            }
-          end
         end
 
         describe "#json_representation" do
@@ -134,31 +119,7 @@ module Unison
             end
 
             inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
-            update_args.should == [ [topic.set[:hash_representation], topic.hash_representation, topic.hash_representation] ]
-          end
-
-          it "updates AttributeSignals based on :hash_representation" do
-            change_args = []
-            signal = topic.signal(:hash_representation)
-            signal.retain_with(retainer)
-            signal.on_change(retainer) do |*args|
-              change_args.push(args)
-            end
-
-            inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
-            change_args.should == [[topic.hash_representation]]
-          end
-
-          it "updates DerivedSignals based on AttributeSignals based on :hash_representation" do
-            change_args = []
-            signal = topic.signal(:hash_representation).signal(:to_json)
-            signal.retain_with(retainer)
-            signal.on_change(retainer) do |*args|
-              change_args.push(args)
-            end
-
-            inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
-            JSON.parse(change_args.first.first).should == JSON.parse(topic.hash_representation.to_json)
+            update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
           end
         end
 
@@ -185,16 +146,29 @@ module Unison
         context "when a tuple_update event is triggered in an exposed Relation" do
           it "updates the changed Tuple's #attributes in the memoized #hash_representation" do
             representation = topic.hash_representation
-
             account = Account.find("nathan_pivotal_account")
-            old_value = account.name
-            new_value = "#{old_value} with more baggage"
-            representation["Account"]["nathan_pivotal_account"]["name"].should == old_value
+            new_value = "#{account.name} with more baggage"
 
-            account = Account.find("nathan_pivotal_account")
-            account.name = "#{account.name} with more baggage"
+            representation["Account"]["nathan_pivotal_account"]["name"].should_not == new_value
+            account.name = new_value
             representation["Account"]["nathan_pivotal_account"]["name"].should == new_value
           end
+
+          it "triggers the on_update event for the :hash_representation PrimitiveAttribute" do
+            representation = topic.hash_representation
+            account = Account.find("nathan_pivotal_account")
+            new_value = "#{account.name} with more baggage"
+
+            update_args = []
+            topic.on_update(retainer) do |attribute, old_value, new_value|
+              update_args.push [attribute, old_value, new_value]
+            end
+
+            account.name = new_value
+
+            update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
+          end
+
         end
 
         context "after last release" do
