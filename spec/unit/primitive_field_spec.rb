@@ -1,7 +1,7 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
-  describe Field do
+  describe PrimitiveField do
     describe "#set_default_value" do
       attr_reader :tuple, :attribute
 
@@ -18,13 +18,13 @@ module Unison
           end
 
           it "sets #value to the value of #attribute.default" do
-            field = Field.new(tuple, attribute)
+            field = PrimitiveField.new(tuple, attribute)
             field.set_default_value
             field.value.should == attribute.default
           end
 
           it "does not set #dirty? to true" do
-            field = Field.new(tuple, attribute)
+            field = PrimitiveField.new(tuple, attribute)
             field.set_default_value
             field.should be_dirty
           end
@@ -38,13 +38,13 @@ module Unison
           end
 
           it "sets #value to the converted result of #tuple.instance_eval(&the_passed_in_Proc)" do
-            field = Field.new(tuple, attribute)
+            field = PrimitiveField.new(tuple, attribute)
             field.set_default_value
             field.value.should == (tuple.name.length * 2).to_s
           end
 
           it "does not set #dirty? to true" do
-            field = Field.new(tuple, attribute)
+            field = PrimitiveField.new(tuple, attribute)
             field.set_default_value
             field.should be_dirty
           end
@@ -57,7 +57,7 @@ module Unison
           end
 
           it "sets #value to the value returned by #attribute.default" do
-            field = Field.new(tuple, attribute)
+            field = PrimitiveField.new(tuple, attribute)
             field.set_default_value
             field.value.should == false
           end
@@ -71,13 +71,13 @@ module Unison
         end
 
         it "calls #set_value with #attribute's #default" do
-          field = Field.new(tuple, attribute)
+          field = PrimitiveField.new(tuple, attribute)
           field.set_default_value
           field.value.should be_nil
         end
 
         it "does not set #dirty? to true" do
-          field = Field.new(tuple, attribute)
+          field = PrimitiveField.new(tuple, attribute)
           field.set_default_value
           field.should_not be_dirty
         end

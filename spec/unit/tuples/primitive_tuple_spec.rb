@@ -607,14 +607,14 @@ module Unison
 
 
           context "when passed an Attribute as the index argument" do
-            it "delegates to #set_value on the Field matching the given Attribute" do
+            it "delegates to #set_value on the PrimitiveField matching the given Attribute" do
               mock.proxy(tuple.fields[tuple.set[:name]]).set_value("New Name")
               tuple[tuple.set[:name]] = "New Name"
             end
           end
 
           context "when passed a Symbol as the index argument" do
-            it "delegates to #set_value on the Field matching the Attribute named by the Symbol" do
+            it "delegates to #set_value on the PrimitiveField matching the Attribute named by the Symbol" do
               mock.proxy(tuple.fields[tuple.set[:name]]).set_value("New Name")
               tuple[:name] = "New Name"
             end
@@ -652,7 +652,7 @@ module Unison
         end
 
         describe "#dirty?" do
-          context "when any Field is #dirty?" do
+          context "when any PrimitiveField is #dirty?" do
             it "returns true" do
               tuple.fields.values.any? do |field|
                 field.dirty?

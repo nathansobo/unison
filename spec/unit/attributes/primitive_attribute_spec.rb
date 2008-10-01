@@ -248,9 +248,9 @@ module Unison
       end
 
       describe "#field" do
-        it "returns a Field instance with the passed-in #tuple and self set to #attribute" do
+        it "returns a PrimitiveField instance with the passed-in #tuple and self set to #attribute" do
           field = attribute.create_field(tuple)
-          field.class.should == Field
+          field.class.should == PrimitiveField
           field.tuple.should == tuple
           field.attribute.should == attribute
         end

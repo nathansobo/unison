@@ -35,7 +35,7 @@ module Unison
       end
 
       def create_field(tuple)
-        Field.new(tuple, self)
+        PrimitiveField.new(tuple, self)
       end
     end
   end

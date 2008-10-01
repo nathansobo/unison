@@ -1,5 +1,5 @@
 module Unison
-  class Field
+  class PrimitiveField
     attr_reader :tuple, :attribute, :value
 
     def initialize(tuple, attribute)
@@ -37,7 +37,7 @@ module Unison
     end
 
     def ==(other)
-      other.is_a?(Field) && other.attribute == attribute && other.value == value
+      other.is_a?(PrimitiveField) && other.attribute == attribute && other.value == value
     end
   end
 end
