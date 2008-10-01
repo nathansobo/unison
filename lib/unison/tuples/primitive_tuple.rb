@@ -145,7 +145,7 @@ module Unison
       end
 
       def []=(attribute_or_symbol, new_value)
-        fields[attribute_for(attribute_or_symbol)].set_value(new_value) do |attribute, old_value, converted_new_value|
+        field_for(attribute_or_symbol).set_value(new_value) do |attribute, old_value, converted_new_value|
           update_subscription_node.call(attribute, old_value, converted_new_value)
           set.notify_tuple_update_subscribers(self, attribute, old_value, converted_new_value)
         end
@@ -224,7 +224,7 @@ module Unison
       def signal(attribute_or_symbol, &block)
         signal =
           if has_attribute?(attribute_or_symbol)
-            fields[attribute_for(attribute_or_symbol)].signal
+            field_for(attribute_or_symbol).signal
           elsif has_singleton_relation?(attribute_or_symbol)
             Signals::SingletonRelationSignal.new(send(attribute_or_symbol))
           else
@@ -238,8 +238,6 @@ module Unison
       end
 
       protected
-      attr_reader :synthetic_attribute_signals
-
       def after_create
       end
 
@@ -292,6 +290,10 @@ module Unison
 
       def customize_relation(relation, &customization_block)
         customization_block ? instance_exec(relation, &customization_block) : relation
+      end
+
+      def field_for(attribute_or_symbol)
+        fields[attribute_for(attribute_or_symbol)]
       end
     end    
   end
