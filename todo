@@ -4,8 +4,18 @@ Backlog
 Topic#expose should work for signals with relations as the values
 cleanup PrimitiveTuple#[] specs
 
+
+
 Icebox
 --------
+
+Make it possible to pull AttributeProjections and InnerJoins:
+  Rather than implementing #set of every relation that tells Repository where to put the results of pulling that relation's
+  SQL query, implement #insert on every relation. Insert will be in charge of taking a given row and multiplexing the data
+  contained therein to underlying models. This will require that AttributeProjections and InnerJoins implement #tuple_class,
+  so that the repository can instantiate an instance thereof.
+
+
 Potentially rip out support for referencing hash_representation on unretained Topics... OR
   do transform in PrimitiveField and not the [] reader, which means we need to address the following:
   PrimitiveTuple#attributes calls the transform block on field values. Do we want to do this on persist? If not, add PrimitiveTuple#persistent_attributes
