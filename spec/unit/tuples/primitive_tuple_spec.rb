@@ -772,6 +772,42 @@ module Unison
           end
         end
 
+        describe "#field_for" do
+          context "when passed an Attribute in the PrimitiveTuple" do
+            it "returns the Field corresponding to the Attribute" do
+              attribute = User[:id]
+              field = tuple.field_for(attribute)
+              field.tuple.should == tuple
+              field.attribute.should == attribute
+            end
+          end
+
+          context "when passed a Symbol that names an Attribute in the PrimitiveTuple" do
+            it "returns the Field corresponding to the Attribute" do
+              attribute = User[:id]
+              field = tuple.field_for(:id)
+              field.tuple.should == tuple
+              field.attribute.should == attribute
+            end
+          end
+
+          context "when passed an Attribute that is not in the PrimitiveTuple" do
+            it "raises an ArgumentError" do
+              lambda do
+                field = tuple.field_for(Photo[:id])
+              end.should raise_error(ArgumentError)
+            end
+          end
+
+          context "when passed a Symbol that does not name an Attribute in the PrimitiveTuple" do
+            it "raises an ArgumentError" do
+              lambda do
+                field = tuple.field_for(:hello_there)
+              end.should raise_error(ArgumentError)
+            end
+          end
+        end
+
         describe "#<=>" do
           it "sorts on the :id attribute" do
             tuple_1 = Photo.find("nathan_photo_1")

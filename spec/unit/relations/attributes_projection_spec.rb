@@ -72,50 +72,97 @@ module Unison
           end
         end
       end
-#
-#      context "when #retained?" do
-#        attr_reader :retainer
-#        before do
-#          @retainer = Object.new
-#          projection.retain_with(retainer)
-#        end
-#
-#        describe "#merge" do
-#          it "calls #merge on the #projected_set" do
-#            tuple = User.new(:id => 100, :name => "Jan")
-#            mock.proxy(projected_set).merge([tuple])
-#            projected_set.should_not include(tuple)
-#            projection.merge([tuple])
-#            projected_set.should include(tuple)
-#          end
-#        end
-#
-#        context "when the a Tuple is inserted into the #operand" do
-#          attr_reader :user
-#          context "when the inserted Tuple restricted by #projected_set is not in the SetProjection" do
-#            before do
-#              @user = User.create(:id => 100, :name => "Brian")
-#            end
-#
-#            it "inserts the Tuple restricted by #projected_set into itself" do
-#              projection.tuples.should_not include(user)
-#              lambda do
-#                Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-#              end.should change{projection.tuples.length}.by(1)
-#              projection.tuples.should include(user)
-#            end
-#
-#            it "triggers the on_insert event" do
-#              inserted = nil
-#              projection.on_insert(retainer) do |tuple|
-#                inserted = tuple
-#              end
-#              Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-#
-#              inserted.should == user
-#            end
-#          end
-#
+
+      describe "#initial_read" do
+        before do
+          publicize projection, :initial_read
+        end
+
+        it "returns an Array of ProjectedTuples corresponding to every Tuple in the #operand" do
+          initial_read = projection.initial_read
+          operand.tuples.each do |tuple|
+            initial_read.select do |projected_tuple|
+              projected_tuple[:id] == tuple[:id] &&
+              projected_tuple[:name] == tuple[:name] &&
+              projected_tuple[:hobby] == tuple[:hobby]
+            end.length.should == 1
+          end
+        end
+      end
+
+      context "when #retained?" do
+        attr_reader :retainer
+        before do
+          @retainer = Object.new
+          projection.retain_with(retainer)
+        end
+
+        context "when the a Tuple is inserted into the #operand" do
+          attr_reader :user
+
+          context "when the projection of the inserted Tuple is unique" do
+            attr_reader :attributes
+            before do
+              User.find(Unison.and(
+                User[:id].eq("brian"),
+                User[:name].eq("Brian"),
+                User[:hobby].eq("Chess")
+              )).should be_nil
+
+              @attributes = {
+                :id => "brian",
+                :name => "Brian",
+                :hobby => "Chess"
+              }
+            end
+
+            it "inserts a ProjectedTuple with the #projected_attributes into itself" do
+              pending "not yet implemented"
+              projection.find(User[:id].eq(attributes[:id])).should be_nil
+
+              user = nil
+              lambda do
+                user = User.create(attributes)
+              end.should change{projection.tuples.length}.by(1)
+
+              projected_tuple = projection.find(User[:id].eq(attributes[:id]))
+              projected_tuple[:id].should == user[:id]
+              projected_tuple[:name].should == user[:name]
+              projected_tuple[:hobby].should == user[:hobby]
+            end
+          end
+
+
+          context "when the inserted Tuple has different values for #projected_attributes than any existing Tuple" do
+            before do
+              @user = User.create(:id => 100, :name => "Brian")
+            end
+
+            it "inserts the Tuple restricted by #projected_set into itself" do
+              pending "not yet implemented"
+              projection.tuples.should_not include(user)
+              lambda do
+                Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
+              end.should change{projection.tuples.length}.by(1)
+              projection.tuples.should include(user)
+            end
+
+            it "triggers the on_insert event" do
+              pending "not yet implemented"
+              inserted = nil
+              projection.on_insert(retainer) do |tuple|
+                inserted = tuple
+              end
+              Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
+
+              inserted.should == user
+            end
+          end
+
+          context "when the projection of the inserted Tuple is not unique" do
+
+          end
+
 #          context "when the inserted Tuple restricted by #projected_set is in the SetProjection" do
 #            before do
 #              @user = projection.tuples.first
@@ -136,7 +183,7 @@ module Unison
 #              Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
 #            end
 #          end
-#        end
+        end
 #
 #        context "when a Tuple is deleted from the #operand" do
 #          attr_reader :user
@@ -311,7 +358,7 @@ module Unison
 #            end
 #          end
 #        end
-#      end
+      end
 #
 #      context "when not #retained?" do
 #        describe "#tuples" do

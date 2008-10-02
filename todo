@@ -9,6 +9,8 @@ cleanup PrimitiveTuple#[] specs
 Icebox
 --------
 
+Need to add specs for #initial_read on all Relation classes
+
 Make it possible to pull AttributeProjections and InnerJoins:
   Rather than implementing #set of every relation that tells Repository where to put the results of pulling that relation's
   SQL query, implement #insert on every relation. Insert will be in charge of taking a given row and multiplexing the data

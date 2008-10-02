@@ -175,6 +175,10 @@ module Unison
         fields.values.select {|field| field.instance_of?(SyntheticField)}
       end
 
+      def field_for(attribute_or_symbol)
+        fields[attribute_for(attribute_or_symbol)]
+      end
+
       def push
         Unison.origin.push(self)
         pushed
@@ -284,7 +288,7 @@ module Unison
       def has_singleton_relation?(name)
         relation_definitions.any? do |definition|
           definition.name == name &&
-            self.send(name).is_a?(Relations::SingletonRelation)
+          self.send(name).is_a?(Relations::SingletonRelation)
         end
       end
 
@@ -292,9 +296,6 @@ module Unison
         customization_block ? instance_exec(relation, &customization_block) : relation
       end
 
-      def field_for(attribute_or_symbol)
-        fields[attribute_for(attribute_or_symbol)]
-      end
-    end    
+    end
   end
 end
