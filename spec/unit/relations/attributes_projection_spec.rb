@@ -6,6 +6,7 @@ module Unison
       attr_reader :operand, :projection, :projected_attributes
       before do
         @projection = AttributesProjection.new(operand, projected_attributes)
+        publicize projection, :projected_tuple_for
       end
 
       def operand
@@ -94,9 +95,9 @@ module Unison
           
           initial_read = projection.initial_read
 
-          initial_read.should include(ProjectedTuple.new(user_1.field_for(:name), user_1.field_for(:hobby)))
-          initial_read.should include(ProjectedTuple.new(user_2.field_for(:name), user_2.field_for(:hobby)))
-          initial_read.should include(ProjectedTuple.new(user_3.field_for(:name), user_3.field_for(:hobby)))
+          initial_read.should include(projection.projected_tuple_for(user_1))
+          initial_read.should include(projection.projected_tuple_for(user_2))
+          initial_read.should include(projection.projected_tuple_for(user_3))
           initial_read.length.should == 2
         end
       end
@@ -111,31 +112,20 @@ module Unison
         context "when the a Tuple is inserted into the #operand" do
           attr_reader :user
 
-          context "when the projection of the inserted Tuple is unique" do
-            attr_reader :attributes
+          context "when #tuples does not contain the ProjectedTuple corresponding to the inserted Tuple" do
+            attr_reader :base_tuple, :projected_tuple
             before do
-              User.find(Unison.and(
-                User[:name].eq("Brian"),
-                User[:hobby].eq("Chess")
-              )).should be_nil
-
-              @attributes = {
-                :name => "Brian",
-                :hobby => "Chess"
-              }
+              @base_tuple = User.new(:name => "Brian", :hobby => "Chess")
+              @projected_tuple = projection.projected_tuple_for(base_tuple)
+              projection.tuples.should_not include(projected_tuple)
             end
 
-            it "inserts a ProjectedTuple with the #projected_attributes into itself" do
-              projection.find(User[:name].eq(attributes[:name])).should be_nil
-
-              user = nil
+            it "inserts the corresponding ProjectedTuple into itself" do
               lambda do
-                user = User.create(attributes)
+                users_set.insert(base_tuple)
               end.should change{projection.tuples.length}.by(1)
 
-              projected_tuple = projection.find(User[:name].eq(attributes[:name]))
-              projected_tuple[:name].should == user[:name]
-              projected_tuple[:hobby].should == user[:hobby]
+              projection.tuples.should include(projected_tuple)
             end
 
             it "triggers the on_insert event" do
@@ -144,32 +134,24 @@ module Unison
                 inserted = tuple
               end
 
-              user = User.create(attributes)
+              users_set.insert(base_tuple)
               
-              inserted[:name].should == user[:name]
-              inserted[:hobby].should == user[:hobby]
+              inserted.should == projected_tuple
             end
           end
 
           context "when the ProjectedTuple for the inserted Tuple is already included in #tuples" do
-            attr_reader :attributes
+            attr_reader :base_tuple, :projected_tuple
+
             before do
-              User.find(Unison.and(
-                User[:name].eq("Nathan"),
-                User[:hobby].eq("Yoga")
-              )).should_not be_nil
-
-              @attributes = {
-                :name => "Nathan",
-                :hobby => "Yoga"
-              }
-
-              projection.find(User[:name].eq(attributes[:name])).should_not be_nil
+              @base_tuple = User.new(:name => "Nathan", :hobby => "Yoga")
+              @projected_tuple = projection.projected_tuple_for(base_tuple)
+              projection.tuples.should include(projected_tuple)
             end
 
             it "does not insert the new ProjectedTuple into itself" do
               lambda do
-                User.create(attributes)
+                users_set.insert(base_tuple)
               end.should_not change{projection.tuples.length}
             end
 
@@ -178,30 +160,46 @@ module Unison
                 raise "Don't taze me bro"
               end
 
-              User.create(attributes)
+              users_set.insert(base_tuple)
+            end
+          end
+        end
+
+        context "when a Tuple is deleted from the #operand" do
+          context "when no other Tuple in the operand projects to an equivalent ProjectedTuple" do
+            attr_reader :base_tuple, :projected_tuple
+            before do
+              @base_tuple = operand.find("nathan")
+              @projected_tuple = projection.projected_tuple_for(base_tuple)
+              operand.tuples.each do |other_base_tuple|
+                unless other_base_tuple == base_tuple
+                  projection.projected_tuple_for(other_base_tuple).should_not == projected_tuple
+                end
+              end
+            end
+
+            it "removes the corresponding ProjectedTuple from #tuples" do
+              projection.tuples.should include(projected_tuple)
+              base_tuple.delete
+              projection.tuples.should_not include(projected_tuple)
+            end
+
+            it "triggers the on_delete event for the deleted ProjectedTuple" do
+              deleted = nil
+              projection.on_delete(retainer) do |tuple|
+                deleted = tuple
+              end
+
+              base_tuple.delete
+              deleted.should == projected_tuple
             end
           end
 
-#          context "when the inserted Tuple restricted by #projected_set is in the SetProjection" do
-#            before do
-#              @user = projection.tuples.first
-#              projection.tuples.should include(user)
-#            end
-#
-#            it "does not insert the Tuple restricted by #projected_set" do
-#              lambda do
-#                Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-#              end.should_not change{projection.tuples.length}
-#            end
-#
-#            it "does not trigger the on_insert event" do
-#              projection.on_insert(retainer) do |tuple|
-#                raise "I should not be called"
-#              end
-#
-#              Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-#            end
-#          end
+          context "when another Tuple in the operand projects to an equivalent ProjectedTuple" do
+            it "does not remove the corresponding ProjectedTuple from #tuples"
+
+            it "does not trigger the on_delete event for the corresponding ProjectedTuple"
+          end
         end
 #
 #        context "when a Tuple is deleted from the #operand" do

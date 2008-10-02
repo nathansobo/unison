@@ -12,6 +12,13 @@ module Unison
         end
       end
 
+      subscribe do
+        operand.on_delete do |deleted_tuple|
+          corresponding_projected_tuple = projected_tuple_for(deleted_tuple)
+          delete(corresponding_projected_tuple)
+        end
+      end
+
       def initialize(operand, projected_attributes)
         super()
         @operand = operand
