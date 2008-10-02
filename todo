@@ -4,8 +4,6 @@ Backlog
 Topic#expose should work for signals with relations as the values
 cleanup PrimitiveTuple#[] specs
 
-Rename projected_tuple_for to create_projected_tuple_for
-
 Icebox
 --------
 

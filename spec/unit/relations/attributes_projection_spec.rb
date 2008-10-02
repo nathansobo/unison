@@ -6,7 +6,7 @@ module Unison
       attr_reader :operand, :projection, :projected_attributes
       before do
         @projection = AttributesProjection.new(operand, projected_attributes)
-        publicize projection, :projected_tuple_for
+        publicize projection, :create_projected_tuple_for
       end
 
       def operand
@@ -95,9 +95,9 @@ module Unison
 
           initial_read = projection.initial_read
 
-          initial_read.should include(projection.projected_tuple_for(user_1))
-          initial_read.should include(projection.projected_tuple_for(user_2))
-          initial_read.should include(projection.projected_tuple_for(user_3))
+          initial_read.should include(projection.create_projected_tuple_for(user_1))
+          initial_read.should include(projection.create_projected_tuple_for(user_2))
+          initial_read.should include(projection.create_projected_tuple_for(user_3))
           initial_read.length.should == 2
         end
       end
@@ -116,7 +116,7 @@ module Unison
             attr_reader :base_tuple, :projected_tuple
             before do
               @base_tuple = User.new(:name => "Brian", :hobby => "Chess")
-              @projected_tuple = projection.projected_tuple_for(base_tuple)
+              @projected_tuple = projection.create_projected_tuple_for(base_tuple)
               projection.tuples.should_not include(projected_tuple)
             end
 
@@ -145,7 +145,7 @@ module Unison
 
             before do
               @base_tuple = User.new(:name => "Nathan", :hobby => "Yoga")
-              @projected_tuple = projection.projected_tuple_for(base_tuple)
+              @projected_tuple = projection.create_projected_tuple_for(base_tuple)
               projection.tuples.should include(projected_tuple)
             end
 
@@ -170,9 +170,9 @@ module Unison
             attr_reader :base_tuple, :projected_tuple
             before do
               @base_tuple = operand.find("nathan")
-              @projected_tuple = projection.projected_tuple_for(base_tuple)
+              @projected_tuple = projection.create_projected_tuple_for(base_tuple)
               (operand.tuples - [base_tuple]).each do |other_base_tuple|
-                projection.projected_tuple_for(other_base_tuple).should_not == projected_tuple
+                projection.create_projected_tuple_for(other_base_tuple).should_not == projected_tuple
               end
             end
 
@@ -197,10 +197,10 @@ module Unison
             attr_reader :base_tuple, :projected_tuple
             before do
               @base_tuple = User.create(:name => "Nathan", :hobby => "Yoga")
-              @projected_tuple = projection.projected_tuple_for(base_tuple)
+              @projected_tuple = projection.create_projected_tuple_for(base_tuple)
 
               operand.tuples.select do |other_base_tuple|
-                projection.projected_tuple_for(other_base_tuple) == projected_tuple
+                projection.create_projected_tuple_for(other_base_tuple) == projected_tuple
               end.length.should be > 1
             end
 
@@ -225,9 +225,9 @@ module Unison
               attr_reader :base_tuple, :projected_tuple
               before do
                 @base_tuple = User.find("nathan")
-                @projected_tuple = projection.projected_tuple_for(base_tuple)
+                @projected_tuple = projection.create_projected_tuple_for(base_tuple)
                 (operand.tuples - [base_tuple]).each do |other_base_tuple|
-                  projection.projected_tuple_for(other_base_tuple).should_not == projected_tuple
+                  projection.create_projected_tuple_for(other_base_tuple).should_not == projected_tuple
                 end
               end
 
@@ -235,9 +235,9 @@ module Unison
                 attr_reader :projected_tuple_to_update, :future_projected_tuple
                 before do
                   @projected_tuple_to_update = projection.tuples.detect {|tuple| tuple == projected_tuple}
-                  @future_projected_tuple = projection.projected_tuple_for(User.new(:name => "Jan", :hobby => "Yoga"))
+                  @future_projected_tuple = projection.create_projected_tuple_for(User.new(:name => "Jan", :hobby => "Yoga"))
                   (operand.tuples - [base_tuple]).each do |other_base_tuple|
-                    projection.projected_tuple_for(other_base_tuple).should_not == future_projected_tuple
+                    projection.create_projected_tuple_for(other_base_tuple).should_not == future_projected_tuple
                   end
                 end
 
@@ -270,24 +270,24 @@ module Unison
               before do
                 User.create(:name => "Nathan", :hobby => "Yoga")
                 @base_tuple = User.find("nathan")
-                @projected_tuple = projection.projected_tuple_for(base_tuple)
+                @projected_tuple = projection.create_projected_tuple_for(base_tuple)
                 operand.tuples.select do |other_base_tuple|
-                  projection.projected_tuple_for(other_base_tuple) == projected_tuple
+                  projection.create_projected_tuple_for(other_base_tuple) == projected_tuple
                 end.size.should be > 1
               end
 
               context "when no other Tuple in the #operand projects to the same ProjectedTuple as the updated Tuple after the update" do
                 before do
-                  future_projected_tuple = projection.projected_tuple_for(User.new(:name => "Jan", :hobby => "Yoga"))
+                  future_projected_tuple = projection.create_projected_tuple_for(User.new(:name => "Jan", :hobby => "Yoga"))
                   (operand.tuples - [base_tuple]).each do |other_base_tuple|
-                    projection.projected_tuple_for(other_base_tuple).should_not == future_projected_tuple
+                    projection.create_projected_tuple_for(other_base_tuple).should_not == future_projected_tuple
                   end
                 end
 
                 it "inserts the new ProjectedTuple into #tuples and leaves the existing one" do
                   old_projected_tuple = projected_tuple
                   base_tuple.name = "Jan"
-                  new_projected_tuple = projection.projected_tuple_for(base_tuple)
+                  new_projected_tuple = projection.create_projected_tuple_for(base_tuple)
 
                   projection.tuples.should include(old_projected_tuple)
                   projection.tuples.should include(new_projected_tuple)
@@ -300,16 +300,16 @@ module Unison
                   end
                   base_tuple.name = "Jan"
 
-                  inserted.should == projection.projected_tuple_for(base_tuple)
+                  inserted.should == projection.create_projected_tuple_for(base_tuple)
                 end
               end
 
               context "when another Tuple in the #operand projects to the same ProjectedTuple as the updated Tuple after the update" do
                 before do
                   other_tuple_with_same_projection = User.create(:name => "Farb", :hobby => "Yoga")
-                  future_projected_tuple = projection.projected_tuple_for(other_tuple_with_same_projection)
+                  future_projected_tuple = projection.create_projected_tuple_for(other_tuple_with_same_projection)
                   (operand.tuples - [base_tuple]).any? do |other_base_tuple|
-                    projection.projected_tuple_for(other_base_tuple) == future_projected_tuple
+                    projection.create_projected_tuple_for(other_base_tuple) == future_projected_tuple
                   end.should be_true
                 end
 
@@ -320,9 +320,9 @@ module Unison
                     base_tuple.name = "Farb"
                   end.should_not change { projection.tuples.length }
 
-                  new_projected_tuple = projection.projected_tuple_for(base_tuple)
+                  new_projected_tuple = projection.create_projected_tuple_for(base_tuple)
                   (operand.tuples - [base_tuple]).any? do |other_base_tuple|
-                    projection.projected_tuple_for(other_base_tuple) == new_projected_tuple
+                    projection.create_projected_tuple_for(other_base_tuple) == new_projected_tuple
                   end.should be_true
                 end
 

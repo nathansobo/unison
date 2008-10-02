@@ -7,21 +7,21 @@ module Unison
 
       subscribe do
         operand.on_insert do |inserted_tuple|
-          new_projected_tuple = projected_tuple_for(inserted_tuple)
+          new_projected_tuple = create_projected_tuple_for(inserted_tuple)
           insert(new_projected_tuple) unless tuples.include?(new_projected_tuple)
         end
       end
 
       subscribe do
         operand.on_delete do |deleted_tuple|
-          corresponding_projected_tuple = projected_tuple_for(deleted_tuple)
+          corresponding_projected_tuple = create_projected_tuple_for(deleted_tuple)
           delete(corresponding_projected_tuple) unless operand_contains_tuple_projecting_to?(corresponding_projected_tuple)
         end
       end
 
       subscribe do
         operand.on_tuple_update do |updated_tuple, attribute, old_value, new_value|
-          new_projected_tuple = projected_tuple_for(updated_tuple)
+          new_projected_tuple = create_projected_tuple_for(updated_tuple)
           old_projected_tuple = new_projected_tuple.deep_clone
           old_projected_tuple[attribute] = old_value
 
@@ -77,14 +77,14 @@ module Unison
         end
       end
 
-      def projected_tuple_for(tuple)
+      def create_projected_tuple_for(tuple)
         fields = projected_attributes.map {|attribute| tuple.field_for(attribute) }
         ProjectedTuple.new(*fields)
       end
 
       def operand_contains_tuple_projecting_to?(projected_tuple)
         operand.tuples.any? do |base_tuple|
-          projected_tuple_for(base_tuple) == projected_tuple
+          create_projected_tuple_for(base_tuple) == projected_tuple
         end
       end
     end
