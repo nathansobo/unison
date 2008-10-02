@@ -14,6 +14,7 @@ class String
 end
 
 require "#{dir}/unison/extensions/object"
+require "#{dir}/unison/extensions/array"
 require "#{dir}/unison/subscription_node"
 require "#{dir}/unison/subscription"
 require "#{dir}/unison/adapters"

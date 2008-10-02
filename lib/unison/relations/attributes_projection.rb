@@ -33,12 +33,14 @@ module Unison
       protected
       def initial_read
         projected_tuples = []
-        operand.tuples.map do |tuple|
+        operand.tuples.each do |tuple|
           fields = projected_attributes.map do |attribute|
             tuple.field_for(attribute)
           end
           new_projected_tuple = ProjectedTuple.new(*fields)
+          projected_tuples.push(new_projected_tuple) unless projected_tuples.include?(new_projected_tuple)
         end
+        projected_tuples
       end
 
       def translate_symbols_to_attributes(attributes_or_symbols)

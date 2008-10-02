@@ -5,8 +5,11 @@ module Unison
     describe AttributesProjection do
       attr_reader :operand, :projection, :projected_attributes
       before do
-        @operand = users_set
         @projection = AttributesProjection.new(operand, projected_attributes)
+      end
+
+      def operand
+        users_set
       end
 
       def projected_attributes
@@ -78,15 +81,23 @@ module Unison
           publicize projection, :initial_read
         end
 
+        def projected_attributes
+          [User[:name], User[:hobby]]
+        end
+
         it "returns an Array of ProjectedTuples corresponding to every Tuple in the #operand" do
+          users_set.clear
+
+          user_1 = User.create(:name => "Sloppy Joe", :hobby => "Beef")
+          user_2 = User.create(:name => "Rich Lather", :hobby => "Hair")
+          user_3 = User.create(:name => "Rich Lather", :hobby => "Hair")
+          
           initial_read = projection.initial_read
-          operand.tuples.each do |tuple|
-            initial_read.select do |projected_tuple|
-              projected_tuple[:id] == tuple[:id] &&
-              projected_tuple[:name] == tuple[:name] &&
-              projected_tuple[:hobby] == tuple[:hobby]
-            end.length.should == 1
-          end
+
+          initial_read.should include(ProjectedTuple.new(user_1.field_for(:name), user_1.field_for(:hobby)))
+          initial_read.should include(ProjectedTuple.new(user_2.field_for(:name), user_2.field_for(:hobby)))
+          initial_read.should include(ProjectedTuple.new(user_3.field_for(:name), user_3.field_for(:hobby)))
+          initial_read.length.should == 2
         end
       end
 

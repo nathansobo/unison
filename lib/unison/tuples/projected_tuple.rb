@@ -13,6 +13,11 @@ module Unison
         end
         raise ArgumentError, "Attribute #{attribute_or_symbol} must be the the name of a Field in the ProjectedTuple"
       end
+
+      def ==(other)
+        raise ArgumentError, "Argument to == must be an instance of ProjectedTuple" unless other.instance_of?(ProjectedTuple)
+        fields == other.fields
+      end
     end
   end
 end

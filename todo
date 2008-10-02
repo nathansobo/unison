@@ -21,3 +21,6 @@ Make it possible to pull AttributeProjections and InnerJoins:
 Potentially rip out support for referencing hash_representation on unretained Topics... OR
   do transform in PrimitiveField and not the [] reader, which means we need to address the following:
   PrimitiveTuple#attributes calls the transform block on field values. Do we want to do this on persist? If not, add PrimitiveTuple#persistent_attributes
+
+
+Set#clear... it proxies to the underlying Array. Not sure if this is actually kosher.
