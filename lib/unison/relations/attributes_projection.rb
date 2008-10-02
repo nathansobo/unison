@@ -19,6 +19,22 @@ module Unison
         end
       end
 
+      subscribe do
+        operand.on_tuple_update do |updated_tuple, attribute, old_value, new_value|
+          new_projected_tuple = projected_tuple_for(updated_tuple)
+          old_projected_tuple = new_projected_tuple.deep_clone
+          old_projected_tuple[attribute] = old_value
+
+          if operand_contains_tuple_projecting_to?(old_projected_tuple)
+            insert(new_projected_tuple) unless tuples.include?(new_projected_tuple)
+          else
+            projected_tuple_to_update = tuples.detect {|projected_tuple| projected_tuple == old_projected_tuple}
+            projected_tuple_to_update[attribute] = new_value
+            tuple_update_subscription_node.call(projected_tuple_to_update, attribute, old_value, new_value)
+          end
+        end
+      end
+
       def initialize(operand, projected_attributes)
         super()
         @operand = operand
