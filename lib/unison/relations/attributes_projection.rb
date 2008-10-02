@@ -5,6 +5,12 @@ module Unison
 
       retain :operand
 
+      subscribe do
+        operand.on_insert do |inserted_tuple|
+          insert(projected_tuple_for(inserted_tuple))
+        end
+      end
+
       def initialize(operand, projected_attributes)
         super()
         @operand = operand
@@ -43,6 +49,11 @@ module Unison
             operand.attribute(attribute_or_symbol)
           end
         end
+      end
+
+      def projected_tuple_for(tuple)
+        fields = projected_attributes.map {|attribute| tuple.field_for(attribute) }
+        ProjectedTuple.new(*fields)
       end
     end
   end

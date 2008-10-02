@@ -117,7 +117,6 @@ module Unison
             end
 
             it "inserts a ProjectedTuple with the #projected_attributes into itself" do
-              pending "not yet implemented"
               projection.find(User[:id].eq(attributes[:id])).should be_nil
 
               user = nil
@@ -130,32 +129,18 @@ module Unison
               projected_tuple[:name].should == user[:name]
               projected_tuple[:hobby].should == user[:hobby]
             end
-          end
-
-
-          context "when the inserted Tuple has different values for #projected_attributes than any existing Tuple" do
-            before do
-              @user = User.create(:id => 100, :name => "Brian")
-            end
-
-            it "inserts the Tuple restricted by #projected_set into itself" do
-              pending "not yet implemented"
-              projection.tuples.should_not include(user)
-              lambda do
-                Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-              end.should change{projection.tuples.length}.by(1)
-              projection.tuples.should include(user)
-            end
 
             it "triggers the on_insert event" do
-              pending "not yet implemented"
               inserted = nil
               projection.on_insert(retainer) do |tuple|
                 inserted = tuple
               end
-              Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
 
-              inserted.should == user
+              user = User.create(attributes)
+              
+              inserted[:id].should == user[:id]
+              inserted[:name].should == user[:name]
+              inserted[:hobby].should == user[:hobby]
             end
           end
 
