@@ -22,15 +22,22 @@ module Unison
       subscribe do
         operand.on_tuple_update do |updated_tuple, attribute, old_value, new_value|
           new_projected_tuple = create_projected_tuple_for(updated_tuple)
-          old_projected_tuple = new_projected_tuple.deep_clone
-          old_projected_tuple[attribute] = old_value
+          prototypical_old_projected_tuple = new_projected_tuple.deep_clone
+          prototypical_old_projected_tuple[attribute] = old_value
+          old_projected_tuple = tuples.detect {|projected_tuple| projected_tuple == prototypical_old_projected_tuple}
 
           if operand_contains_tuple_projecting_to?(old_projected_tuple)
-            insert(new_projected_tuple) unless tuples.include?(new_projected_tuple)
+            if operand_contains_multiple_tuples_projecting_to?(new_projected_tuple)
+              # noop
+            else
+              insert(new_projected_tuple)
+            end
           else
-            projected_tuple_to_update = tuples.detect {|projected_tuple| projected_tuple == old_projected_tuple}
-            projected_tuple_to_update[attribute] = new_value
-            tuple_update_subscription_node.call(projected_tuple_to_update, attribute, old_value, new_value)
+            if operand_contains_multiple_tuples_projecting_to?(new_projected_tuple)
+              delete(old_projected_tuple)
+            else
+              tuple_update(old_projected_tuple, attribute, old_value, new_value)
+            end
           end
         end
       end
@@ -87,6 +94,18 @@ module Unison
           create_projected_tuple_for(base_tuple) == projected_tuple
         end
       end
+
+      def operand_contains_multiple_tuples_projecting_to?(projected_tuple)
+        operand.tuples.select do |base_tuple|
+          create_projected_tuple_for(base_tuple) == projected_tuple
+        end.size > 1
+      end
+
+      def tuple_update(tuple, attribute, old_value, new_value)
+        tuple[attribute] = new_value
+        tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
+      end
+
     end
   end
 end

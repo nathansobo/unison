@@ -225,16 +225,15 @@ module Unison
               attr_reader :base_tuple, :projected_tuple
               before do
                 @base_tuple = User.find("nathan")
-                @projected_tuple = projection.create_projected_tuple_for(base_tuple)
+                @projected_tuple = projection.tuples.detect {|tuple| tuple == projection.create_projected_tuple_for(base_tuple)}
                 (operand.tuples - [base_tuple]).each do |other_base_tuple|
                   projection.create_projected_tuple_for(other_base_tuple).should_not == projected_tuple
                 end
               end
 
               context "when no other Tuple in the #operand projects to the same ProjectedTuple as the updated Tuple after the update" do
-                attr_reader :projected_tuple_to_update, :future_projected_tuple
+                attr_reader :future_projected_tuple
                 before do
-                  @projected_tuple_to_update = projection.tuples.detect {|tuple| tuple == projected_tuple}
                   @future_projected_tuple = projection.create_projected_tuple_for(User.new(:name => "Jan", :hobby => "Yoga"))
                   (operand.tuples - [base_tuple]).each do |other_base_tuple|
                     projection.create_projected_tuple_for(other_base_tuple).should_not == future_projected_tuple
@@ -243,7 +242,7 @@ module Unison
 
                 it "updates the ProjectedTuple to reflect the changes in the updated Tuple" do
                   base_tuple.name = "Jan"
-                  projected_tuple_to_update[:name].should == "Jan"
+                  projected_tuple[:name].should == "Jan"
                 end
 
                 it "triggers the on_tuple_update event with the updated ProjectedTuple, its old value and its new value" do
@@ -253,12 +252,30 @@ module Unison
                   end
 
                   base_tuple.name = "Jan"
-                  tuple_update_args.should == [[projected_tuple_to_update, User[:name], "Nathan", "Jan"]]
+                  tuple_update_args.should == [[projected_tuple, User[:name], "Nathan", "Jan"]]
                 end
               end
 
-              context "when another Tuple in the #operand projects to the same ProjectedTuple after the update" do
-                it "deletes the updated Tuple's original ProjectedTuple"
+              context "when another Tuple in the #operand projects to the same ProjectedTuple as the updated Tuple after the update" do
+                attr_reader :future_projected_tuple
+                before do
+                  other_tuple_with_same_projection = User.create(:name => "Farb", :hobby => "Yoga")
+                  @future_projected_tuple = projection.create_projected_tuple_for(other_tuple_with_same_projection)
+                  (operand.tuples - [base_tuple]).any? do |other_base_tuple|
+                    projection.create_projected_tuple_for(other_base_tuple) == future_projected_tuple
+                  end.should be_true
+                end
+
+                it "deletes the updated Tuple's original ProjectedTuple" do
+                  projection.tuples.should include(future_projected_tuple)
+                  projection.tuples.should include(projected_tuple)
+
+                  base_tuple[:name] = "Farb"
+
+                  projected_tuple[:name].should == "Nathan"
+                  projection.tuples.should include(future_projected_tuple)
+                  projection.tuples.should_not include(projected_tuple)
+                end
 
                 it "triggers the on_delete event for the updated Tuple's original ProjectedTuple"
               end
