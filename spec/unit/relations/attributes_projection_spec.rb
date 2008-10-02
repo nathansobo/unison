@@ -362,8 +362,42 @@ module Unison
             end
           end
 
-          context "when the update does not change the corresponding ProjectedTuple" do
+          context "when the update does not affect an Attribute in #projected_attributes" do
+            attr_reader :base_tuple, :projected_tuple, :attribute
+            before do
+              @base_tuple = User.find("nathan")
+              @projected_tuple = projection.tuples.detect {|tuple| tuple == projection.create_projected_tuple_for(base_tuple)}
+              @attribute = User[:team_id]
+              projection.projected_attributes.should_not include(attribute)
+            end
 
+            it "does not change the ProjectedTuple" do
+              lambda do
+                base_tuple[attribute] = "monkey"
+              end.should_not change {projected_tuple}
+            end
+
+            it "does not change the contents of #tuples" do
+              lambda do
+                base_tuple[attribute] = "monkey"
+              end.should_not change { projection.tuples.length }
+            end
+
+            it "does not trigger any events" do
+              projection.on_insert(retainer) do |inserted|
+                raise "Don't taze me bro"
+              end
+
+              projection.on_delete(retainer) do |deleted|
+                raise "Don't taze me bro"
+              end
+
+              projection.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
+                raise "Don't taze me bro"
+              end
+
+              base_tuple[attribute] = "monkey"
+            end
           end
         end
       end
