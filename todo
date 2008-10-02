@@ -24,3 +24,6 @@ Potentially rip out support for referencing hash_representation on unretained To
 
 
 Set#clear... it proxies to the underlying Array. Not sure if this is actually kosher.
+
+Give ProjectedTuple its own private values to avoid problems of in-place mutation of its Fields' values.
+

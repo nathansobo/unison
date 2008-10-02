@@ -203,7 +203,7 @@ module Unison
 
               operand.tuples.select do |other_base_tuple|
                 projection.projected_tuple_for(other_base_tuple) == projected_tuple
-              end.length.should == 2
+              end.length.should be > 1
             end
 
             it "does not remove the corresponding ProjectedTuple from #tuples" do
@@ -220,178 +220,47 @@ module Unison
             end
           end
         end
-#
-#        context "when a Tuple is deleted from the #operand" do
-#          attr_reader :user
-#
-#          context "when the deleted Tuple restricted by #projected_set is in the SetProjection" do
-#            context "and no other identical Tuple restricted by #projected_set is in the operand" do
-#              attr_reader :photo
-#              before do
-#                @user = User.create(:id => 100, :name => "Brian")
-#                @photo = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-#                projection.tuples.should include(user)
-#              end
-#
-#              it "removes the Tuple restricted by #projected_set" do
-#                lambda do
-#                  users_set.delete(user)
-#                end.should change{projection.tuples.length}.by(-1)
-#                projection.tuples.should_not include(user)
-#              end
-#
-#              it "triggers the on_delete event with the deleted Tuple restricted by #projected_set" do
-#                deleted = nil
-#                projection.on_delete(retainer) do |tuple|
-#                  deleted = tuple
-#                end
-#                users_set.delete(user)
-#
-#                deleted.should == user
-#              end
-#            end
-#
-#            context "and another identical Tuple restricted by #projected_set is in the operand" do
-#              attr_reader :photo_1, :photo_2
-#              before do
-#                @user = User.create(:id => 100, :name => "Brian")
-#                @photo_1 = Photo.create(:id => 100, :user_id => user[:id], :name => "Photo 100")
-#                @photo_2 = Photo.create(:id => 101, :user_id => user[:id], :name => "Photo 101")
-#                projection.tuples.should include(user)
-#              end
-#
-#              it "does not remove the Tuple restricted by #projected_set from the Tuples returned by #tuples" do
-#                lambda do
-#                  photos_set.delete(photo_1)
-#                end.should_not change{projection.tuples.length}
-#                projection.tuples.should include(user)
-#              end
-#
-#              it "does not trigger the on_delete event" do
-#                projection.on_delete(retainer) do |tuple|
-#                  raise "I should not be invoked"
-#                end
-#                photos_set.delete(photo_1)
-#              end
-#
-#            end
-#          end
-#
-#          context "when the deleted Tuple restricted by #projected_set is not in the SetProjection" do
-#            before do
-#              @user = User.create(:id => 100, :name => "Brian")
-#              projection.tuples.should_not include(user)
-#            end
-#
-#            it "does not remove the Tuple restricted by #projected_set" do
-#              lambda do
-#                users_set.delete(user)
-#              end.should_not change{projection.tuples.length}
-#              projection.tuples.should_not include(user)
-#            end
-#
-#            it "does not trigger the on_delete event with the Tuple restricted by #projected_set" do
-#              projection.on_delete(retainer) do |tuple|
-#                raise "I should not be invoked"
-#              end
-#              users_set.delete(user)
-#            end
-#          end
-#        end
-#
+
 #        context "when a Tuple is updated in the #operand" do
-#          attr_reader :operand_compound_tuple, :operand_projected_tuple, :projected_tuple, :attribute
-#          before do
-#            @operand_compound_tuple = operand.tuples.first
-#            @operand_projected_tuple = operand_compound_tuple[users_set]
-#            @projected_tuple = projection.tuples.find do |tuple|
-#              tuple == operand_projected_tuple
-#            end
-#            @attribute = users_set[:name]
-#          end
-#
-#          context "and the updated PrimitiveAttribute is in #projected_set" do
-#            attr_reader :old_value, :new_value
-#            before do
-#              operand.tuples.select do |tuple|
-#                tuple[users_set] == operand_projected_tuple
-#              end.size.should be > 1
-#              @old_value = operand_projected_tuple[:name]
-#              @new_value = "Joe"
-#            end
-#
-#            it "updates the projected Tuple's value in #tuples" do
-#              operand_projected_tuple[:name] = new_value
-#              projected_tuple[:name].should == "Joe"
-#            end
-#
-#            it "triggers #on_tuple_update subscriptions once" do
-#              on_tuple_update_arguments = []
-#              projection.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
-#                on_tuple_update_arguments.push [tuple, attribute, old_value, new_value]
-#              end
-#              operand_projected_tuple[:name] = new_value
-#              on_tuple_update_arguments.should == [[projected_tuple, attribute, old_value, new_value]]
-#            end
-#
-#            context "when the same PrimitiveAttribute on a different Tuple is subsequently updated from the same old value to the same new value" do
-#              attr_reader :another_compound_tuple, :another_projected_tuple
+#          context "when the update changes the corresponding ProjectedTuple" do
+#            context "when another Tuple in the #operand projects to the same ProjectedTuple before the update" do
 #              before do
-#                @another_compound_tuple = operand.tuples.find do |tuple|
-#                  tuple[users_set] != projected_tuple
-#                end
-#                @another_projected_tuple = another_compound_tuple[users_set]
-#                another_projected_tuple.should_not == projected_tuple
-#
-#                another_projected_tuple[:name] = old_value
-#                projected_tuple[:name] = new_value
+#                User.create(:name => "Nathan", :hobby => "Yoga")
+#                base_tuple = User.find("nathan")
+#                projected_tuple = projection.projected_tuple_for(base_tuple)
+#                operand.tuples.select do |other_base_tuple|
+#                  projection.projected_tuple_for(other_base_tuple) == projected_tuple
+#                end.size.should be > 1
 #              end
 #
-#              it "triggers #on_tuple_update subscriptions once" do
-#                on_tuple_update_arguments = []
-#                projection.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
-#                  on_tuple_update_arguments.push [tuple, attribute, old_value, new_value]
+#              context "when no other Tuple in the #operand projects to the same ProjectedTuple after the update" do
+#                base_tuple.name = "Jan"
+#                operand.tuples.select do |other_base_tuple|
+#                  unless other_base_tuple == base_tuple
+#                    projection.projected_tuple_for(other_base_tuple).should_not == projected_tuple
+#                  end
 #                end
 #
-#                another_projected_tuple[:name] = new_value
-#                on_tuple_update_arguments.should == [
-#                  [another_projected_tuple, attribute, old_value, new_value]
-#                ]
+#
+#              end
+#
+#
+#              context "when another Tuple in the #operand projects to the same ProjectedTuple after the update" do
+#
 #              end
 #            end
+#            context "when no other Tuple in the #operand projects to the same ProjectedTuple before the update" do
+#              context "when no other Tuple in the #operand projects to the same ProjectedTuple after the update" do
 #
-#            context "when a different PrimitiveAttribute on the same Tuple is subsequently updated from the same old value to the same new value" do
-#              before do
-#                operand_projected_tuple[:hobby] = old_value
-#                operand_projected_tuple[:name] = new_value
 #              end
+#              context "when another Tuple in the #operand projects to the same ProjectedTuple after the update" do
 #
-#              it "triggers #on_tuple_update subscriptions once" do
-#                on_tuple_update_arguments = []
-#                projection.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
-#                  on_tuple_update_arguments.push [tuple, attribute, old_value, new_value]
-#                end
-#
-#                operand_projected_tuple[:hobby] = new_value
-#                on_tuple_update_arguments.should == [
-#                  [projected_tuple, users_set[:hobby], old_value, new_value]
-#                ]
 #              end
 #            end
 #          end
 #
-#          context "and the updated PrimitiveAttribute is not in #projected_set" do
-#            attr_reader :photo
-#            before do
-#              @photo = operand_compound_tuple[photos_set]
-#            end
+#          context "when the update does not change the corresponding ProjectedTuple" do
 #
-#            it "does not trigger #on_tuple_update subscriptions" do
-#              projection.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
-#                raise "Don't taze me bro"
-#              end
-#              photo[:name] = "Freak show"
-#            end
 #          end
 #        end
       end
