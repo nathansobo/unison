@@ -196,9 +196,28 @@ module Unison
           end
 
           context "when another Tuple in the operand projects to an equivalent ProjectedTuple" do
-            it "does not remove the corresponding ProjectedTuple from #tuples"
+            attr_reader :base_tuple, :projected_tuple
+            before do
+              @base_tuple = User.create(:name => "Nathan", :hobby => "Yoga")
+              @projected_tuple = projection.projected_tuple_for(base_tuple)
 
-            it "does not trigger the on_delete event for the corresponding ProjectedTuple"
+              operand.tuples.select do |other_base_tuple|
+                projection.projected_tuple_for(other_base_tuple) == projected_tuple
+              end.length.should == 2
+            end
+
+            it "does not remove the corresponding ProjectedTuple from #tuples" do
+              projection.should include(projected_tuple)
+              base_tuple.delete
+              projection.should include(projected_tuple)
+            end
+
+            it "does not trigger the on_delete event for the corresponding ProjectedTuple" do
+              projection.on_delete(retainer) do |tuple|
+                raise "Don't taze me bro"
+              end
+              base_tuple.delete
+            end
           end
         end
 #
