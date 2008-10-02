@@ -13,7 +13,7 @@ module Unison
       end
 
       def projected_attributes
-        @projected_attributes ||= [User[:id], User[:name], User[:hobby]]
+        @projected_attributes ||= [User[:name], User[:hobby]]
       end
 
       describe "#initialize" do
@@ -26,11 +26,11 @@ module Unison
 
         context "when any of the given projected attributes are Symbols" do
           def projected_attributes
-            @projected_attributes ||= [User[:id], :name, :hobby]
+            @projected_attributes ||= [:name, :hobby]
           end
 
           it "translates the Symbols in the given projected attributes into Attributes" do
-            projection.projected_attributes.should == [User[:id], User[:name], User[:hobby]]
+            projection.projected_attributes.should == [User[:name], User[:hobby]]
           end
         end
       end
@@ -38,9 +38,9 @@ module Unison
       describe "#attribute" do
         context "when #projected_attributes includes an Attribute with the given name" do
           it "returns the Attribute with the given name" do
-            attribute = User[:id]
+            attribute = User[:name]
             projected_attributes.should include(attribute)
-            projection.attribute(:id).should == attribute
+            projection.attribute(:name).should == attribute
           end
         end
 
@@ -60,9 +60,9 @@ module Unison
       describe "#has_attribute?" do
         context "when #projected_attributes includes an Attribute with the given name" do
           it "returns true" do
-            attribute = User[:id]
+            attribute = User[:name]
             projected_attributes.should include(attribute)
-            projection.should have_attribute(:id)
+            projection.should have_attribute(:name)
           end
         end
 
@@ -115,28 +115,25 @@ module Unison
             attr_reader :attributes
             before do
               User.find(Unison.and(
-                User[:id].eq("brian"),
                 User[:name].eq("Brian"),
                 User[:hobby].eq("Chess")
               )).should be_nil
 
               @attributes = {
-                :id => "brian",
                 :name => "Brian",
                 :hobby => "Chess"
               }
             end
 
             it "inserts a ProjectedTuple with the #projected_attributes into itself" do
-              projection.find(User[:id].eq(attributes[:id])).should be_nil
+              projection.find(User[:name].eq(attributes[:name])).should be_nil
 
               user = nil
               lambda do
                 user = User.create(attributes)
               end.should change{projection.tuples.length}.by(1)
 
-              projected_tuple = projection.find(User[:id].eq(attributes[:id]))
-              projected_tuple[:id].should == user[:id]
+              projected_tuple = projection.find(User[:name].eq(attributes[:name]))
               projected_tuple[:name].should == user[:name]
               projected_tuple[:hobby].should == user[:hobby]
             end
@@ -149,14 +146,40 @@ module Unison
 
               user = User.create(attributes)
               
-              inserted[:id].should == user[:id]
               inserted[:name].should == user[:name]
               inserted[:hobby].should == user[:hobby]
             end
           end
 
-          context "when the projection of the inserted Tuple is not unique" do
+          context "when the ProjectedTuple for the inserted Tuple is already included in #tuples" do
+            attr_reader :attributes
+            before do
+              User.find(Unison.and(
+                User[:name].eq("Nathan"),
+                User[:hobby].eq("Yoga")
+              )).should_not be_nil
 
+              @attributes = {
+                :name => "Nathan",
+                :hobby => "Yoga"
+              }
+
+              projection.find(User[:name].eq(attributes[:name])).should_not be_nil
+            end
+
+            it "does not insert the new ProjectedTuple into itself" do
+              lambda do
+                User.create(attributes)
+              end.should_not change{projection.tuples.length}
+            end
+
+            it "does not trigger the on_insert event" do
+              projection.on_insert(retainer) do |tuple|
+                raise "Don't taze me bro"
+              end
+
+              User.create(attributes)
+            end
           end
 
 #          context "when the inserted Tuple restricted by #projected_set is in the SetProjection" do

@@ -7,7 +7,8 @@ module Unison
 
       subscribe do
         operand.on_insert do |inserted_tuple|
-          insert(projected_tuple_for(inserted_tuple))
+          new_projected_tuple = projected_tuple_for(inserted_tuple)
+          insert(new_projected_tuple) unless tuples.include?(new_projected_tuple)
         end
       end
 
