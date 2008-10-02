@@ -27,7 +27,7 @@ module Unison
         end
       end
 
-      context "when passed a Projection" do
+      context "when passed a SetProjection" do
         it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#to_sql" do
           projection = users_set \
             .join(photos_set) \

@@ -63,7 +63,7 @@ module Unison
       end
 
       def project(attributes)
-        Projection.new(self, attributes)
+        SetProjection.new(self, attributes)
       end
 
       def order_by(*attributes)

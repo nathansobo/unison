@@ -1,7 +1,7 @@
 Backlog
 --------
+* Introduce the ability to project specific attributes
 Topic#expose should work for signals with relations as the values
-Introduce the ability to project specific attributes
 cleanup PrimitiveTuple#[] specs
 
 Icebox

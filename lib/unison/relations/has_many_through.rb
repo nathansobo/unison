@@ -1,6 +1,6 @@
 module Unison
   module Relations
-    class HasManyThrough < Projection
+    class HasManyThrough < SetProjection
       include TupleRelationMethods
       
       attr_reader :foreign_key, :foreign_key_owner, :foreign_key_referrent

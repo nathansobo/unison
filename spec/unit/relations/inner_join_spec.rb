@@ -53,7 +53,7 @@ module Unison
         end
 
         context "when #composed_sets.size == 2" do
-          it "pushes a Projection of both composed_sets represented in the InnerJoin to the given Repository" do
+          it "pushes a SetProjection of both composed_sets represented in the InnerJoin to the given Repository" do
             users_projection = join.project(users_set)
             photos_projection = join.project(photos_set)
 
@@ -73,7 +73,7 @@ module Unison
             join.composed_sets.size.should == 3
           end
 
-          it "pushes a Projection of the three composed_sets represented in the InnerJoin to the given Repository" do
+          it "pushes a SetProjection of the three composed_sets represented in the InnerJoin to the given Repository" do
             users_projection = join.project(users_set)
             photos_projection = join.project(photos_set)
             cameras_projection = join.project(cameras_set)

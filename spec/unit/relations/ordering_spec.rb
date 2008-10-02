@@ -72,7 +72,7 @@ module Unison
             ordering.composed_sets.length.should == 2
           end
 
-          it "pushes a Projection of each Set represented in the Ordering to the given Repository" do
+          it "pushes a SetProjection of each Set represented in the Ordering to the given Repository" do
             users_projection = ordering.project(users_set)
             photos_projection = ordering.project(photos_set)
             mock.proxy(origin).push(users_projection)

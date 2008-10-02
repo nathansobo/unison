@@ -75,7 +75,7 @@ module Unison
             singleton_relation.composed_sets.length.should == 2
           end
 
-          it "pushes a Projection of each Set represented in the SingletonRelation to the given Repository" do
+          it "pushes a SetProjection of each Set represented in the SingletonRelation to the given Repository" do
             users_projection = singleton_relation.project(users_set)
             accounts_projection = singleton_relation.project(accounts_set)
             mock.proxy(origin).push(users_projection)

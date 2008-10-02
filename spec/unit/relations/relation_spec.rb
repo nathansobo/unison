@@ -166,9 +166,9 @@ module Unison
       end
 
       describe "#project" do
-        it "returns a Projection with the receiver as #operand and the argument as #attributes" do
+        it "returns a SetProjection with the receiver as #operand and the argument as #attributes" do
           join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
-          join.project(photos_set).should == Projection.new(join, photos_set)
+          join.project(photos_set).should == SetProjection.new(join, photos_set)
         end
       end
 
