@@ -1,0 +1,88 @@
+
+class GrockitModel
+  class << self
+    def active
+      self[:deactivated_at].eq(nil)
+    end
+    
+    def finished
+      self[:finished].eq(nil)
+    end
+  end
+end
+
+
+class Round < Unison::PrimitiveTuple
+  has_many :round_sessions do |round_sessions|
+    round_sessions.where(RoundSession.active)
+  end
+  relations_to :unfinished_round_sessions do
+    round_sessions.where(RoundSession.finished)
+  end
+  
+  subscribe do
+    unfinished_round_sessions.on_delete do |round_session|
+      advance if unfinished_round_sessions.empty?
+    end
+  end
+end
+
+class GameSessionTopic < Unison::Topic
+  expose :answers
+  
+  def answers
+    game.signal(:mode).signal do |mode|
+      case mode
+      when :answer
+        answers_without_correct
+      when :review
+        answers_with_correct
+      end
+    end
+  end
+
+  relates_to_many :answers_without_correct do
+    subject.answers.project(:id, :body, :order)
+  end
+  
+  relates_to_many :answers_with_correct do
+    subject.answers.project(:id, :body, :order, :explanation, :correct)
+  end
+end
+
+# we assume only one relation per tuple class is exposed
+def expose(signal)
+  signal.on_change do |relation|
+    unexpose_relation(exposed_relations[signal])
+    expose_relation(relation)
+    expose_relations[signal] = relation
+  end
+  
+  def unexpose_relation(relation, signal=nil)
+    exposed_relations[signal || relation] = nil
+    type = relation.tuple_class.basename
+    hash_representation[type] = nil
+  end
+  
+  def expose_relation(relation, signal=nil)
+    exposed_relations[signal || relation] = relation
+    
+    add_relation_to_hash_representation(relation)
+    relation.on_insert do |tuple|
+      add_tuple_to_hash_representation(tuple)
+    end
+    relation.on_delete do |tuple|
+      delete_tuple_from_hash_representation(tuple)
+    end
+    relation.on_tuple_update do |tuple, attribute, old_value, new_value|
+      update_tuple_in_hash_representation(tuple, attribute, new_value)
+    end
+  end
+  
+  def add_relation_to_hash_representation(relation)
+    type = relation.tuple_class.basename
+    relation.each do |tuple|
+      hash_representation[type][tuple[:id]] = tuple.hash_representation
+    end
+  end
+end
