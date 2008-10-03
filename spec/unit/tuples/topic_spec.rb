@@ -15,9 +15,30 @@ module Unison
           subject :user
 
           expose :accounts, :photos
+
           relates_to_many :accounts do
             subject.accounts
+            #.project(:id, :user_id, :name)
           end
+
+#          def photos
+#            subject.signal(:team_id) do |team_id|
+#              if team_id == "mangos"
+#                photos_with_camera_id
+#              else
+#                photos_without_camera_id
+#              end
+#            end
+#          end
+
+#          def photos_with_camera_id
+#            subject.photos
+#          end
+#
+#          def photos_without_camera_id
+#            subject.photos.project(:id, :user_id, :name)
+#          end
+
         end
         @topic = topic_class.new(:user_id => subject.id)
       end

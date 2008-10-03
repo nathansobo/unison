@@ -224,7 +224,7 @@ Spec::Runner.configure do |config|
     teams_set.insert(Team.new(:id => "chargers", :name => "San Diego Superchargers"))
 
     users_set.insert(User.new(:id => "nathan", :name => "Nathan", :hobby => "Yoga", :team_id => "chargers"))
-    users_set.insert(User.new(:id => "corey", :name => "Corey", :hobby => "Drugs & Art & Burning Man", :team_id => 1))
+    users_set.insert(User.new(:id => "corey", :name => "Corey", :hobby => "Drugs & Art & Burning Man", :team_id => "mangos"))
     users_set.insert(User.new(:id => "ross", :name => "Ross", :hobby => "Manicorn", :team_id => "mangos"))
 
     life_goals_set.insert(LifeGoal.new(:id => "nathan_goal", :user_id => "nathan"))

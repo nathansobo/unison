@@ -62,10 +62,14 @@ module Unison
         PartialInnerJoin.new(self, operand_2)
       end
 
-      def project(attributes)
-        SetProjection.new(self, attributes)
+      def project(*attributes)
+        if attributes.length == 1 && attributes.first.class == Set
+          SetProjection.new(self, attributes.first)
+        else
+          AttributesProjection.new(self, attributes)
+        end
       end
-
+      
       def order_by(*attributes)
         Ordering.new(self, *attributes)
       end

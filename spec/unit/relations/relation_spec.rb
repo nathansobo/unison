@@ -166,9 +166,24 @@ module Unison
       end
 
       describe "#project" do
-        it "returns a SetProjection with the receiver as #operand and the argument as #attributes" do
-          join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
-          join.project(photos_set).should == SetProjection.new(join, photos_set)
+
+        context "when passed a Set" do
+          it "returns a SetProjection with the receiver as #operand and the argument as #projected_set" do
+            join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
+            join.project(photos_set).should == SetProjection.new(join, photos_set)
+          end
+        end
+
+        context "when passed an Attribute" do
+          it "returns an AttributeProjection with the receiver as #operand and a singleton Array containing the argument as #projected_attributes" do
+            users_set.project(:id).should == AttributesProjection.new(users_set, [:id])
+          end
+        end
+
+        context "when passed an Array of Attributes" do
+          it "returns an AttributeProjection with the receiver as #operand and an Array containing the arguments as #projected_attributes" do
+            users_set.project(:id, :name).should == AttributesProjection.new(users_set, [:id, :name])
+          end
         end
       end
 
