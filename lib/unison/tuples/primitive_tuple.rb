@@ -123,12 +123,12 @@ module Unison
         end
       end
 
-      attr_reader :fields
+      attr_reader :fields_hash
 
       def initialize(initial_attributes={})
         @new = true
         super()
-        @fields = create_fields
+        @fields_hash = create_fields_hash
         initialize_primitive_field_values(initial_attributes)
         initialize_relations
       end
@@ -139,7 +139,7 @@ module Unison
           self
         else
           attribute = attribute_for(attribute_or_symbol)
-          value = fields[attribute].value
+          value = fields_hash[attribute].value
           (attribute.respond_to?(:transform) && attribute.transform) ? instance_exec(value, &attribute.transform) : value
         end
       end
@@ -169,22 +169,26 @@ module Unison
 
       def hash_representation
         returning({}) do |hash_representation|
-          fields.each do |attribute, field|
+          fields_hash.each do |attribute, field|
             hash_representation[attribute.name] = field.value          
           end
         end
       end
 
+      def fields
+        fields_hash.values
+      end
+
       def primitive_fields
-        fields.values.select {|field| field.instance_of?(PrimitiveField)}
+        fields.select {|field| field.instance_of?(PrimitiveField)}
       end
 
       def synthetic_fields
-        fields.values.select {|field| field.instance_of?(SyntheticField)}
+        fields.select {|field| field.instance_of?(SyntheticField)}
       end
 
       def field_for(attribute_or_symbol)
-        fields[attribute_for(attribute_or_symbol)]
+        fields_hash[attribute_for(attribute_or_symbol)]
       end
 
       def push
@@ -253,10 +257,10 @@ module Unison
       def after_create
       end
 
-      def create_fields
-        returning({}) do |fields|
+      def create_fields_hash
+        returning({}) do |fields_hash|
           set.attributes.values.each do |attribute|
-            fields[attribute] = attribute.create_field(self)
+            fields_hash[attribute] = attribute.create_field(self)
           end
         end
       end
@@ -267,7 +271,7 @@ module Unison
           raise "You can only assign the :id attribute in test mode"
         end
         initial_attributes.each do |attribute, attribute_value|
-          fields[attribute].set_value(attribute_value)
+          fields_hash[attribute].set_value(attribute_value)
         end
         primitive_fields.each do |field|
           field.set_default_value unless initial_attributes.has_key?(field.attribute)

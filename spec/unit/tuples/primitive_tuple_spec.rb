@@ -608,14 +608,14 @@ module Unison
 
           context "when passed an Attribute as the index argument" do
             it "delegates to #set_value on the PrimitiveField matching the given Attribute" do
-              mock.proxy(tuple.fields[tuple.set[:name]]).set_value("New Name")
+              mock.proxy(tuple.field_for(tuple.set[:name])).set_value("New Name")
               tuple[tuple.set[:name]] = "New Name"
             end
           end
 
           context "when passed a Symbol as the index argument" do
             it "delegates to #set_value on the PrimitiveField matching the Attribute named by the Symbol" do
-              mock.proxy(tuple.fields[tuple.set[:name]]).set_value("New Name")
+              mock.proxy(tuple.field_for(tuple.set[:name])).set_value("New Name")
               tuple[:name] = "New Name"
             end
           end
@@ -754,15 +754,22 @@ module Unison
           it "returns a Hash of attribute => value pairs for all #fields" do
             hash_representation = tuple.hash_representation
             hash_representation.keys.length.should == tuple.fields.length
-            tuple.fields.each do |attribute, field|
-              hash_representation[attribute.name].should == field.value
+            tuple.fields.each do |field|
+              hash_representation[field.attribute.name].should == field.value
             end
+          end
+        end
+
+        describe "#fields" do
+          it "returns an Array of all Fields" do
+            publicize tuple, :fields_hash
+            tuple.fields.should == tuple.fields_hash.values
           end
         end
 
         describe "#primitive_fields" do
           it "returns an Array of all PrimitiveFields from the #fields hash" do
-            tuple.fields.values.any? {|field| field.instance_of?(SyntheticField)}.should be_true
+            tuple.fields.any? {|field| field.instance_of?(SyntheticField)}.should be_true
             primitive_fields = tuple.primitive_fields
             primitive_fields.should_not be_empty
             primitive_fields.each do |field|
@@ -773,7 +780,7 @@ module Unison
 
         describe "#synthetic_fields" do
           it "returns an Array of all SyntheticFields from the #fields hash" do
-            tuple.fields.values.any? {|field| field.instance_of?(PrimitiveField)}.should be_true
+            tuple.fields.any? {|field| field.instance_of?(PrimitiveField)}.should be_true
             synthetic_fields = tuple.synthetic_fields
             synthetic_fields.should_not be_empty
             synthetic_fields.each do |field|
