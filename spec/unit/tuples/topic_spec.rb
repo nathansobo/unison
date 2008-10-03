@@ -17,8 +17,7 @@ module Unison
           expose :accounts, :photos
 
           relates_to_many :accounts do
-            subject.accounts
-            #.project(:id, :user_id, :name)
+            subject.accounts.project(:id, :user_id, :name)
           end
 
 #          def photos
@@ -107,8 +106,8 @@ module Unison
         it "sets the :hash_representation Attribute value to a Hash (type => id => attributes) of the exposed objects" do
           topic[:hash_representation].should == {
               "Account" => {
-                "nathan_pivotal_account" => Account.find("nathan_pivotal_account").hash_representation.stringify_keys,
-                "nathan_account_2" => Account.find("nathan_account_2").hash_representation.stringify_keys,
+                "nathan_pivotal_account" => topic.accounts.find("nathan_pivotal_account").hash_representation.stringify_keys,
+                "nathan_account_2" => topic.accounts.find("nathan_account_2").hash_representation.stringify_keys,
               },
               "Photo" => {
                 "nathan_photo_1" => Photo.find("nathan_photo_1").hash_representation.stringify_keys,
@@ -127,9 +126,8 @@ module Unison
           it "inserts the Tuple's #attributes into the memoized #hash_representation" do
             representation = topic.hash_representation
             representation["Account"]["nathan_inserted_account"].should be_nil
-
             inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
-            representation["Account"]["nathan_inserted_account"].should == inserted_account.hash_representation.stringify_keys
+            representation["Account"]["nathan_inserted_account"].should == topic.accounts.find("nathan_inserted_account").hash_representation.stringify_keys
           end
 
           it "triggers the on_update event for the :hash_representation PrimitiveAttribute" do
@@ -212,8 +210,8 @@ module Unison
           it "returns a class name => id => attributes Hash of the exposed objects" do
             topic.hash_representation.should == {
               "Account" => {
-                "nathan_pivotal_account" => Account.find("nathan_pivotal_account").hash_representation.stringify_keys,
-                "nathan_account_2" => Account.find("nathan_account_2").hash_representation.stringify_keys,
+                "nathan_pivotal_account" => topic.accounts.find("nathan_pivotal_account").hash_representation.stringify_keys,
+                "nathan_account_2" => topic.accounts.find("nathan_account_2").hash_representation.stringify_keys,
               },
               "Photo" => {
                 "nathan_photo_1" => Photo.find("nathan_photo_1").hash_representation.stringify_keys,

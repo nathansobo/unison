@@ -117,10 +117,8 @@ module Unison
         end
 
         context "when the argument is not a ProjectedTuple" do
-          it "raises an ArgumentError" do
-            lambda do
-              projected_tuple == Object.new
-            end.should raise_error(ArgumentError)
+          it "returns false" do
+            projected_tuple.should_not == Object.new
           end
         end
       end
@@ -131,6 +129,16 @@ module Unison
           clone.should == projected_tuple
           clone[:name] = "Jan"
           clone[:name].should_not == projected_tuple[:name]
+        end
+      end
+
+      describe "#hash_representation" do
+        it "returns a Hash of attribute => value pairs for all #fields" do
+          hash_representation = projected_tuple.hash_representation
+          hash_representation.keys.length.should == projected_tuple.fields.length
+          projected_tuple.fields.each do |field|
+            hash_representation[field.attribute.name].should == field.value
+          end
         end
       end
     end

@@ -102,6 +102,12 @@ module Unison
         end
       end
 
+      describe "#tuple_class" do
+        it "delegates to #operand" do
+          projection.tuple_class.should == operand.tuple_class
+        end
+      end
+
       context "when #retained?" do
         attr_reader :retainer
         before do

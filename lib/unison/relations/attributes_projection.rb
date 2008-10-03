@@ -63,6 +63,10 @@ module Unison
         end
       end
 
+      def tuple_class
+        operand.tuple_class
+      end
+
       protected
       def initial_read
         projected_tuples = []
@@ -107,7 +111,6 @@ module Unison
         tuple[attribute] = new_value
         tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
       end
-
     end
   end
 end

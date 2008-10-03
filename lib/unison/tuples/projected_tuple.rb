@@ -15,12 +15,20 @@ module Unison
       end
 
       def ==(other)
-        raise ArgumentError, "Argument to == must be an instance of ProjectedTuple" unless other.instance_of?(ProjectedTuple)
+        return false unless other.instance_of?(ProjectedTuple)
         fields == other.fields
       end
 
       def deep_clone
         ProjectedTuple.new(*(fields.map {|field| field.dup }))  
+      end
+
+      def hash_representation
+        returning({}) do |hash_representation|
+          fields.each do |field|
+            hash_representation[field.attribute.name] = field.value
+          end
+        end
       end
 
       protected
