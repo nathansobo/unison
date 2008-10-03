@@ -51,9 +51,13 @@ module Unison
       end
 
       def exposed_objects
-        self.class.send(:exposed_method_names).map do |name|
+        exposed_method_names.map do |name|
           self.send(name)
         end
+      end
+
+      def exposed_method_names
+        self.class.send(:exposed_method_names)
       end
 
       def subject
@@ -92,7 +96,7 @@ module Unison
 
       def add_to_hash_representation(tuple, hash_representation=self.hash_representation, tuple_class_name=tuple.class.basename)
         hash_representation[tuple_class_name] ||= {}
-        hash_representation[tuple_class_name][tuple.id] = tuple.attributes.stringify_keys
+        hash_representation[tuple_class_name][tuple.id] = tuple.persistent_hash_representation.stringify_keys
       end
 
       def remove_from_hash_representation(tuple)

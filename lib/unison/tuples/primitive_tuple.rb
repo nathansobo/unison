@@ -159,12 +159,20 @@ module Unison
         set.has_synthetic_attribute?(name)
       end
 
-      def attributes
-        attributes = {}
+      def persistent_hash_representation
+        persistent_hash_representation = {}
         set.primitive_attributes.each do |attribute|
-          attributes[attribute.name] = self[attribute]
+          persistent_hash_representation[attribute.name] = self[attribute]
         end
-        attributes
+        persistent_hash_representation
+      end
+
+      def hash_representation
+        returning({}) do |hash_representation|
+          fields.each do |attribute, field|
+            hash_representation[attribute.name] = field.value          
+          end
+        end
       end
 
       def primitive_fields
@@ -238,7 +246,7 @@ module Unison
       end
 
       def inspect
-        "<#{self.class.name} #attributes=#{attributes.inspect}>"
+        "<#{self.class.name} #attributes=#{persistent_hash_representation.inspect}>"
       end
 
       protected

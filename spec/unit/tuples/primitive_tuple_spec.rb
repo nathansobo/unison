@@ -738,15 +738,25 @@ module Unison
           end
         end
 
-        describe "#attributes" do
-          it "returns the #attribute_values, keyed by the name of their corresponding Attribute" do
-            tuple.attributes.should == {
+        describe "#persistent_hash_representation" do
+          it "returns a Hash of attribute => value pairs for only #primitive_fields" do
+            tuple.persistent_hash_representation.should == {
               :id => "nathan",
               :hobby => "Bomb construction",
               :name => "Nathan",
               :team_id => nil,
               :developer => nil
             }
+          end
+        end
+
+        describe "#hash_representation" do
+          it "returns a Hash of attribute => value pairs for all #fields" do
+            hash_representation = tuple.hash_representation
+            hash_representation.keys.length.should == tuple.fields.length
+            tuple.fields.each do |attribute, field|
+              hash_representation[attribute.name].should == field.value
+            end
           end
         end
 
@@ -1002,7 +1012,7 @@ module Unison
             end
           end
 
-          context "when other Tuple#attributes != #attributes" do
+          context "when other Tuple#fields != #fields" do
             before do
               @other_tuple = User.new(:id => "nathan_clone", :name => "Nathan's Clone")
               publicize other_tuple, :fields

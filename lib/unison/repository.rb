@@ -29,7 +29,7 @@ module Unison
     protected
     def push_tuple(table, tuple)
       if tuple.new?
-        table << tuple.attributes
+        table << tuple.persistent_hash_representation
       elsif tuple.dirty?
         update_tuple(table, tuple)
       end
@@ -37,7 +37,7 @@ module Unison
     end
 
     def update_tuple(table, tuple)
-      table.filter("id=?", tuple.id).update(tuple.attributes)
+      table.filter("id=?", tuple.id).update(tuple.persistent_hash_representation)
     end
   end
 end

@@ -4,6 +4,8 @@ Backlog
 Topic#expose should work for signals with relations as the values
 cleanup PrimitiveTuple#[] specs
 
+consider naming PrimitiveTuple#attributes to PrimitiveTuple#hash_representation
+
 Icebox
 --------
 

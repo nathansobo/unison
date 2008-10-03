@@ -13,7 +13,7 @@ module Arel
       end
       
       it "manufactures attributes associated with the projection relation" do
-        @projection.attributes.should == [@attribute].collect { |a| a.bind(@projection) }
+        @projection.persistent_hash_representation.should == [@attribute].collect { |a| a.bind(@projection) }
       end
     end
   

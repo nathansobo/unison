@@ -78,21 +78,20 @@ module Unison
         end
 
         it "retains all exposed Objects" do
-          publicize topic_class, :exposed_method_names
           topic.exposed_objects.each do |exposed_object|
             exposed_object.should be_retained_by(topic)
           end
         end
 
-        it "sets the :hash_representation PrimitiveAttribute value to a class name => id => attributes Hash of the exposed objects" do
+        it "sets the :hash_representation Attribute value to a Hash (type => id => attributes) of the exposed objects" do
           topic[:hash_representation].should == {
               "Account" => {
-                "nathan_pivotal_account" => Account.find("nathan_pivotal_account").attributes.stringify_keys,
-                "nathan_account_2" => Account.find("nathan_account_2").attributes.stringify_keys,
+                "nathan_pivotal_account" => Account.find("nathan_pivotal_account").hash_representation.stringify_keys,
+                "nathan_account_2" => Account.find("nathan_account_2").hash_representation.stringify_keys,
               },
               "Photo" => {
-                "nathan_photo_1" => Photo.find("nathan_photo_1").attributes.stringify_keys,
-                "nathan_photo_2" => Photo.find("nathan_photo_2").attributes.stringify_keys
+                "nathan_photo_1" => Photo.find("nathan_photo_1").hash_representation.stringify_keys,
+                "nathan_photo_2" => Photo.find("nathan_photo_2").hash_representation.stringify_keys
               }
             }
         end
@@ -109,7 +108,7 @@ module Unison
             representation["Account"]["nathan_inserted_account"].should be_nil
 
             inserted_account = Account.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
-            representation["Account"]["nathan_inserted_account"].should == inserted_account.attributes.stringify_keys
+            representation["Account"]["nathan_inserted_account"].should == inserted_account.hash_representation.stringify_keys
           end
 
           it "triggers the on_update event for the :hash_representation PrimitiveAttribute" do
@@ -192,12 +191,12 @@ module Unison
           it "returns a class name => id => attributes Hash of the exposed objects" do
             topic.hash_representation.should == {
               "Account" => {
-                "nathan_pivotal_account" => Account.find("nathan_pivotal_account").attributes.stringify_keys,
-                "nathan_account_2" => Account.find("nathan_account_2").attributes.stringify_keys,
+                "nathan_pivotal_account" => Account.find("nathan_pivotal_account").hash_representation.stringify_keys,
+                "nathan_account_2" => Account.find("nathan_account_2").hash_representation.stringify_keys,
               },
               "Photo" => {
-                "nathan_photo_1" => Photo.find("nathan_photo_1").attributes.stringify_keys,
-                "nathan_photo_2" => Photo.find("nathan_photo_2").attributes.stringify_keys
+                "nathan_photo_1" => Photo.find("nathan_photo_1").hash_representation.stringify_keys,
+                "nathan_photo_2" => Photo.find("nathan_photo_2").hash_representation.stringify_keys
               }
             }
           end
