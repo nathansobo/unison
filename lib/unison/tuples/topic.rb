@@ -32,22 +32,17 @@ module Unison
       retain :exposed_objects
 
       subscribe do
-        exposed_objects.map do |exposed_relation|
-          [
-            exposed_relation.on_insert do |tuple|
-              add_to_hash_representation(exposed_relation, tuple)
-              attribute_mutated(:hash_representation)
-            end,
-            exposed_relation.on_delete do |tuple|
-              remove_from_hash_representation(exposed_relation, tuple)
-              attribute_mutated(:hash_representation)
-            end,
-            exposed_relation.on_tuple_update do |tuple, attribute, old_value, new_value|
-              update_in_hash_representation(exposed_relation, tuple, attribute, new_value)
-              attribute_mutated(:hash_representation)
-            end
-          ]
+        exposed_relations.map do |object|
+          expose_relation(object)
         end.flatten
+      end
+
+      def exposed_relations
+        exposed_objects.select {|object| object.is_a?(Relations::Relation)}
+      end
+
+      def exposed_signals
+        exposed_objects.select {|object| object.is_a?(Signals::Signal)}
       end
 
       def exposed_objects
@@ -77,17 +72,54 @@ module Unison
       protected
       def after_first_retain
         self[:hash_representation] = create_hash_representation
+
+        exposed_signals.each do |signal|
+          relation = signal.value
+          relation.retain_with(self)
+          expose_relation(relation)
+        end
       end
 
       def after_last_release
         self[:hash_representation] = nil
       end
 
+
+      def expose_relation(relation)
+        [
+          relation.on_insert do |tuple|
+            add_to_hash_representation(relation, tuple)
+            attribute_mutated(:hash_representation)
+          end,
+          relation.on_delete do |tuple|
+            remove_from_hash_representation(relation, tuple)
+            attribute_mutated(:hash_representation)
+          end,
+          relation.on_tuple_update do |tuple, attribute, old_value, new_value|
+            update_in_hash_representation(relation, tuple, attribute, new_value)
+            attribute_mutated(:hash_representation)
+          end
+        ]
+      end
+
+      def expose_signal(signal)
+        relation = signal.value
+        relation.retain_with(self)
+        expose_relation(relation)
+      end
+
       def create_hash_representation
         hash = {}
-        exposed_objects.each do |relation|
-          relation.tuples.each do |tuple|
-            add_to_hash_representation(relation, tuple, hash)
+        exposed_objects.each do |object|
+          case object
+          when Relations::Relation
+            object.tuples.each do |tuple|
+              add_to_hash_representation(object, tuple, hash)
+            end
+          when Signals::DerivedSignal
+            object.value.tuples.each do |tuple|
+              add_to_hash_representation(object.value, tuple, hash)
+            end
           end
         end
         hash
