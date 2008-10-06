@@ -233,13 +233,13 @@ module Unison
           end
         end
 
-        context "when an event is triggered on a Relation that is the #value of an exposed Signal" do
+        context "when an event is triggered on a Relation that is the initial #value of an exposed Signal" do
           before do
             subject.team_id.should == "chargers"
             topic.photos.value.should == topic.photos_without_camera_id
           end
 
-          context "when an insert event is triggered on a Relation that is the #value of an exposed Signal" do
+          context "when an insert event is triggered on a Relation that is the initial #value of an exposed Signal" do
             it "inserts the Tuple's #attributes into the memoized #hash_representation" do
               representation = topic.hash_representation
               representation["Photo"]["nathan_photo_3"].should be_nil
@@ -258,7 +258,7 @@ module Unison
             end
           end
 
-          context "when a delete event is triggered on a Relation that is the #value of an exposed Signal" do
+          context "when a delete event is triggered on a Relation that is the initial #value of an exposed Signal" do
             it "removes the Tuple's #attributes from the memoized #hash_representation" do
               representation = topic.hash_representation
               representation["Photo"]["nathan_photo_1"].should_not be_nil
@@ -278,7 +278,7 @@ module Unison
             end
           end
 
-          context "when a tuple_update event is triggered on a Relation that is the #value of an exposed Signal" do
+          context "when a tuple_update event is triggered on a Relation that is the initial #value of an exposed Signal" do
             it "updates the changed Tuple's #attributes in the memoized #hash_representation" do
               representation = topic.hash_representation
               photo = Photo.find("nathan_photo_1")
