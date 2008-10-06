@@ -14,7 +14,7 @@ module Unison
           belongs_to :user
           subject :user
 
-          expose :accounts, :photos
+          expose :accounts, :team #,  :photos
 
           relates_to_many :accounts do
             subject.accounts.project(:id, :user_id, :name)
@@ -47,12 +47,12 @@ module Unison
           publicize topic_class, :exposed_method_names
 
           topic_class.exposed_method_names.should include(:accounts)
-          topic_class.exposed_method_names.should include(:photos)
+          topic_class.exposed_method_names.should include(:team)
         end
         
         it "causes #exposed_objects to contain the return value of each exposed method name" do
           topic.exposed_objects.should include(topic.accounts)
-          topic.exposed_objects.should include(topic.photos)
+          topic.exposed_objects.should include(topic.team)
         end
       end
 
@@ -109,9 +109,8 @@ module Unison
                 "nathan_pivotal_account" => topic.accounts.find("nathan_pivotal_account").hash_representation.stringify_keys,
                 "nathan_account_2" => topic.accounts.find("nathan_account_2").hash_representation.stringify_keys,
               },
-              "Photo" => {
-                "nathan_photo_1" => Photo.find("nathan_photo_1").hash_representation.stringify_keys,
-                "nathan_photo_2" => Photo.find("nathan_photo_2").hash_representation.stringify_keys
+              "Team" => {
+                "chargers" => Team.find("chargers").hash_representation.stringify_keys,
               }
             }
         end
@@ -213,9 +212,8 @@ module Unison
                 "nathan_pivotal_account" => topic.accounts.find("nathan_pivotal_account").hash_representation.stringify_keys,
                 "nathan_account_2" => topic.accounts.find("nathan_account_2").hash_representation.stringify_keys,
               },
-              "Photo" => {
-                "nathan_photo_1" => Photo.find("nathan_photo_1").hash_representation.stringify_keys,
-                "nathan_photo_2" => Photo.find("nathan_photo_2").hash_representation.stringify_keys
+              "Team" => {
+                "chargers" => Team.find("chargers").hash_representation.stringify_keys,
               }
             }
           end
