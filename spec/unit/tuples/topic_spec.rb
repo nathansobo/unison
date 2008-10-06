@@ -166,7 +166,7 @@ module Unison
         end
 
         context "when an event is triggered on a directly exposed Relation" do
-          context "when an insert event is triggered in an exposed Relation" do
+          context "when an insert event is triggered on a directly exposed Relation" do
             it "inserts the Tuple's #attributes into the memoized #hash_representation" do
               representation = topic.hash_representation
               representation["Account"]["nathan_inserted_account"].should be_nil
@@ -185,7 +185,7 @@ module Unison
             end
           end
 
-          context "when a delete event is triggered in an exposed Relation" do
+          context "when a delete event is triggered on a directly exposed Relation" do
             it "removes the Tuple's #attributes from the memoized #hash_representation" do
               representation = topic.hash_representation
               representation["Account"]["nathan_pivotal_account"].should_not be_nil
@@ -205,7 +205,7 @@ module Unison
             end
           end
 
-          context "when a tuple_update event is triggered in an exposed Relation" do
+          context "when a tuple_update event is triggered on a directly exposed Relation" do
             it "updates the changed Tuple's #attributes in the memoized #hash_representation" do
               representation = topic.hash_representation
               account = Account.find("nathan_pivotal_account")
@@ -239,7 +239,7 @@ module Unison
             topic.photos.value.should == topic.photos_without_camera_id
           end
 
-          context "when an insert event is triggered on a Relational that is the #value of an exposed Signal" do
+          context "when an insert event is triggered on a Relation that is the #value of an exposed Signal" do
             it "inserts the Tuple's #attributes into the memoized #hash_representation" do
               representation = topic.hash_representation
               representation["Photo"]["nathan_photo_3"].should be_nil
@@ -247,15 +247,62 @@ module Unison
               representation["Photo"]["nathan_photo_3"].should == topic.photos_without_camera_id.find("nathan_photo_3").hash_representation.stringify_keys
             end
 
-            it "triggers the on_update event for the :hash_representation PrimitiveAttribute" # do
-#              update_args = []
-#              topic.on_update(retainer) do |attribute, old_value, new_value|
-#                update_args.push [attribute, old_value, new_value]
-#              end
-#
-#              inserted_account = Photo.create(:id => "nathan_inserted_account", :user_id => "nathan", :name => "inserted account")
-#              update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
-#            end
+            it "triggers the on_update event for the :hash_representation PrimitiveAttribute" do
+              update_args = []
+              topic.on_update(retainer) do |attribute, old_value, new_value|
+                update_args.push [attribute, old_value, new_value]
+              end
+
+              inserted_photo = Photo.create(:id => "nathan_photo_3", :user_id => "nathan", :name => "another photo", :camera_id => "minolta_xd_11")
+              update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
+            end
+          end
+
+          context "when a delete event is triggered on a Relation that is the #value of an exposed Signal" do
+            it "removes the Tuple's #attributes from the memoized #hash_representation" do
+              representation = topic.hash_representation
+              representation["Photo"]["nathan_photo_1"].should_not be_nil
+
+              Photo.find("nathan_photo_1").delete
+              representation["Photo"].should_not have_key("nathan_photo_1")
+            end
+
+            it "triggers the on_update event for the :hash_representation PrimitiveAttribute" do
+              update_args = []
+              topic.on_update(retainer) do |attribute, old_value, new_value|
+                update_args.push [attribute, old_value, new_value]
+              end
+
+              Photo.find("nathan_photo_1").delete
+              update_args.should == [ [topic.set[:hash_representation], topic.hash_representation, topic.hash_representation] ]
+            end
+          end
+
+          context "when a tuple_update event is triggered on a Relation that is the #value of an exposed Signal" do
+            it "updates the changed Tuple's #attributes in the memoized #hash_representation" do
+              representation = topic.hash_representation
+              photo = Photo.find("nathan_photo_1")
+              new_value = "#{photo.name} with more baggage"
+
+              representation["Photo"]["nathan_photo_1"]["name"].should_not == new_value
+              photo.name = new_value
+              representation["Photo"]["nathan_photo_1"]["name"].should == new_value
+            end
+
+            it "triggers the on_update event for the :hash_representation PrimitiveAttribute" do
+              representation = topic.hash_representation
+              photo = Photo.find("nathan_photo_1")
+              new_value = "#{photo.name} with more baggage"
+
+              update_args = []
+              topic.on_update(retainer) do |attribute, old_value, new_value|
+                update_args.push [attribute, old_value, new_value]
+              end
+
+              photo.name = new_value
+
+              update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
+            end
           end
         end
 
