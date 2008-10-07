@@ -14,8 +14,8 @@ module Unison
       context "when passed a Set" do
         it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#to_sql" do
           origin.fetch(users_set).should == [
-            User.new(:id => "buffington", :name => "Buffington", :hobby => "Bots", :team_id => "mangos"),
-              User.new(:id => "keefa", :name => "Keefa", :hobby => "Begging", :team_id => "chargers")
+            User.new(:id => "buffington", :name => "Buffington", :hobby => "Bots", :team_id => "mangos", :show_fans => true),
+            User.new(:id => "keefa", :name => "Keefa", :hobby => "Begging", :team_id => "chargers", :show_fans => true)
           ]
         end
       end
@@ -23,7 +23,7 @@ module Unison
       context "when passed a Selection" do
         it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#to_sql" do
           selection = users_set.where(users_set[:name].eq("Buffington"))
-          origin.fetch(selection).should == [User.new(:id => "buffington", :name => "Buffington", :hobby => "Bots", :team_id => "mangos")]
+          origin.fetch(selection).should == [User.new(:id => "buffington", :name => "Buffington", :hobby => "Bots", :team_id => "mangos", :show_fans => true)]
         end
       end
 

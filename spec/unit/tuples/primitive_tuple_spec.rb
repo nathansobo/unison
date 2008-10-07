@@ -745,7 +745,8 @@ module Unison
               :hobby => "Bomb construction",
               :name => "Nathan",
               :team_id => nil,
-              :developer => nil
+              :developer => nil,
+              :show_fans => true
             }
           end
         end

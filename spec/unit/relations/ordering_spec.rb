@@ -21,11 +21,11 @@ module Unison
 
       describe "#to_sql" do
         it "returns the operand's SQL ordered by the #order_by_attributes" do
-          ordering.to_sql.should be_like(<<-SQL)
-            SELECT          `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`
+          ordering.to_sql.should be_like("
+            SELECT          `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`, `users`.`show_fans`
             FROM            `users`
             ORDER BY       `users`.`name`, `users`.`id`
-          SQL
+          ")
         end
       end
 

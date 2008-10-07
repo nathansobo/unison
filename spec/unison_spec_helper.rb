@@ -22,6 +22,7 @@ connection.create_table :users do
   column :hobby, :string
   column :team_id, :string
   column :developer, :integer
+  column :show_fans, :boolean
 end
 
 connection.create_table :life_goals do
@@ -68,8 +69,8 @@ Spec::Runner.configure do |config|
 
     users = connection[:users]
     users.delete
-    users << {:id => "buffington", :name => "Buffington", :hobby => "Bots", :team_id => "mangos"}
-    users << {:id => "keefa", :name => "Keefa", :hobby => "Begging", :team_id => "chargers"}
+    users << {:id => "buffington", :name => "Buffington", :hobby => "Bots", :team_id => "mangos", :show_fans => true}
+    users << {:id => "keefa", :name => "Keefa", :hobby => "Begging", :team_id => "chargers", :show_fans => true}
 
     photos = connection[:photos]
     photos.delete
@@ -105,6 +106,7 @@ Spec::Runner.configure do |config|
         attribute_accessor :hobby, :string, :default => "Bomb construction"
         attribute_accessor :team_id, :string
         attribute_accessor :developer, :boolean
+        attribute_accessor :show_fans, :boolean, :default => true
         synthetic_attribute :conqueror_name do
           signal(:name) do |name|
             "#{name} the Great!"
