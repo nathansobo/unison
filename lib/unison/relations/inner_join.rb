@@ -34,7 +34,7 @@ module Unison
 
       subscribe do
         operand_1.on_tuple_update do |operand_1_tuple, attribute, old_value, new_value|
-          operand_2.each do |operand_2_tuple|
+          operand_2.tuples.each do |operand_2_tuple|
             compound_tuple = find_compound_tuple(operand_1_tuple, operand_2_tuple)
             if compound_tuple
               if predicate.eval(compound_tuple)
@@ -51,7 +51,7 @@ module Unison
 
       subscribe do
         operand_2.on_tuple_update do |operand_2_tuple, attribute, old_value, new_value|
-          operand_1.each do |operand_1_tuple|
+          operand_1.tuples.each do |operand_1_tuple|
             compound_tuple = find_compound_tuple(operand_1_tuple, operand_2_tuple)
             if compound_tuple
               if predicate.eval(compound_tuple)
@@ -128,7 +128,7 @@ module Unison
 
       def find_compound_tuple(operand_1_tuple, operand_2_tuple)
         tuples.find do |compound_tuple|
-          compound_tuple[operand_1] == operand_1_tuple && compound_tuple[operand_2] == operand_2_tuple
+          compound_tuple[operand_1.set] == operand_1_tuple && compound_tuple[operand_2.set] == operand_2_tuple
         end
       end
     end

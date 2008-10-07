@@ -14,30 +14,21 @@ module Unison
           belongs_to :user
           subject :user
 
-          expose :accounts, :team, :photos
+          expose :accounts, :team, :example_signal
 
           relates_to_many :accounts do
             subject.accounts.project(:id, :user_id, :name)
           end
 
-          def photos
-            @photos ||= subject.signal(:team_id) do |team_id|
-              if team_id == "mangos"
-                photos_with_camera_id
+          def example_signal
+            @example_signal ||= subject.signal(:show_fans) do |show_fans|
+              if show_fans
+                subject.fans
               else
-                photos_without_camera_id
+                subject.heroes
               end
             end
           end
-
-          relates_to_many :photos_with_camera_id do
-            subject.photos
-          end
-
-          relates_to_many :photos_without_camera_id do
-            subject.photos.project(:id, :user_id, :name)
-          end
-
         end
         @topic = topic_class.new(:user_id => subject.id)
       end
@@ -53,7 +44,7 @@ module Unison
         it "causes #exposed_objects to contain the return value of each exposed method name" do
           topic.exposed_objects.should include(topic.accounts)
           topic.exposed_objects.should include(topic.team)
-          topic.exposed_objects.should include(topic.photos)
+          topic.exposed_objects.should include(topic.example_signal)
         end
       end
 
@@ -168,8 +159,8 @@ module Unison
             "Team" => {
               "mangos" => Team.find("mangos").hash_representation.stringify_keys,
             },
-            "Photo" => {
-              "corey_photo_1" => topic.photos_with_camera_id.find("corey_photo_1").hash_representation.stringify_keys
+            "User" => {
+              "nathan" => subject.fans.find("nathan").hash_representation.stringify_keys
             }
           }
         end
@@ -251,15 +242,15 @@ module Unison
         context "when an event is triggered on a Relation that is the initial #value of an exposed Signal" do
           before do
             subject.team_id.should == "mangos"
-            topic.photos.value.should == topic.photos_with_camera_id
+            topic.example_signal.value.should == subject.fans
           end
 
           context "when an insert event is triggered on a Relation that is the initial #value of an exposed Signal" do
             it "inserts the Tuple's #attributes into the memoized #hash_representation" do
               representation = topic.hash_representation
-              representation["Photo"]["corey_photo_2"].should be_nil
-              inserted_photo = Photo.create(:id => "corey_photo_2", :user_id => "corey", :name => "another photo", :camera_id => "minolta_xd_11")
-              representation["Photo"]["corey_photo_2"].should == topic.photos_with_camera_id.find("corey_photo_2").hash_representation.stringify_keys
+              representation["User"]["ross"].should be_nil
+              Friendship.create(:id => "ross_to_corey", :from_id => "ross", :to_id => "corey")
+              representation["User"]["ross"].should == subject.fans.find("ross").hash_representation.stringify_keys
             end
 
             it "triggers the on_update event for the :hash_representation PrimitiveAttribute" do
@@ -268,7 +259,7 @@ module Unison
                 update_args.push [attribute, old_value, new_value]
               end
 
-              inserted_photo = Photo.create(:id => "corey_photo_2", :user_id => "corey", :name => "another photo", :camera_id => "minolta_xd_11")
+              Friendship.create(:id => "ross_to_corey", :from_id => "ross", :to_id => "corey")
               update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
             end
           end
@@ -276,10 +267,10 @@ module Unison
           context "when a delete event is triggered on a Relation that is the initial #value of an exposed Signal" do
             it "removes the Tuple's #attributes from the memoized #hash_representation" do
               representation = topic.hash_representation
-              representation["Photo"]["corey_photo_1"].should_not be_nil
+              representation["User"]["nathan"].should_not be_nil
 
-              Photo.find("corey_photo_1").delete
-              representation["Photo"].should_not have_key("corey_photo_1")
+              User.find("nathan").delete
+              representation["User"].should_not have_key("nathan")
             end
 
             it "triggers the on_update event for the :hash_representation PrimitiveAttribute" do
@@ -288,7 +279,7 @@ module Unison
                 update_args.push [attribute, old_value, new_value]
               end
 
-              Photo.find("corey_photo_1").delete
+              User.find("nathan").delete
               update_args.should == [ [topic.set[:hash_representation], topic.hash_representation, topic.hash_representation] ]
             end
           end
@@ -296,25 +287,25 @@ module Unison
           context "when a tuple_update event is triggered on a Relation that is the initial #value of an exposed Signal" do
             it "updates the changed Tuple's #attributes in the memoized #hash_representation" do
               representation = topic.hash_representation
-              photo = Photo.find("corey_photo_1")
-              new_value = "#{photo.name} with more baggage"
+              user = User.find("nathan")
+              new_value = "#{user.name} with more baggage"
 
-              representation["Photo"]["corey_photo_1"]["name"].should_not == new_value
-              photo.name = new_value
-              representation["Photo"]["corey_photo_1"]["name"].should == new_value
+              representation["User"]["nathan"]["name"].should_not == new_value
+              user.name = new_value
+              representation["User"]["nathan"]["name"].should == new_value
             end
 
             it "triggers the on_update event for the :hash_representation PrimitiveAttribute" do
               representation = topic.hash_representation
-              photo = Photo.find("corey_photo_1")
-              new_value = "#{photo.name} with more baggage"
+              user = User.find("nathan")
+              new_value = "#{user.name} with more baggage"
 
               update_args = []
               topic.on_update(retainer) do |attribute, old_value, new_value|
                 update_args.push [attribute, old_value, new_value]
               end
 
-              photo.name = new_value
+              user.name = new_value
 
               update_args.should == [[topic.set[:hash_representation], topic.hash_representation, topic.hash_representation]]
             end
@@ -324,13 +315,13 @@ module Unison
         context "when the #value of an exposed Signal changes for the first time" do
           attr_reader :old_value, :new_value
           def change_signal_value
-            subject.team_id = "chargers"
-            @new_value = topic.photos.value
+            subject.show_fans = false
+            @new_value = topic.example_signal.value
             old_value.should_not == new_value
           end
 
           before do
-            @old_value = topic.photos.value
+            @old_value = topic.example_signal.value
           end
 
           it "releases the old #value of the exposed Signal" do
@@ -340,7 +331,7 @@ module Unison
           end
 
           it "it retains the new #value of the exposed Signal" do
-            expected_new_value = topic.photos_without_camera_id
+            expected_new_value = subject.heroes
             expected_new_value.should_not be_retained_by(topic)
 
             change_signal_value
@@ -350,37 +341,33 @@ module Unison
           end
 
           it "unsubscribes from the old #value of the exposed Signal" do
-            pending "better test data" do
-              publicize old_value, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
-              old_value.insert_subscription_node.should_not be_empty
-              old_value.delete_subscription_node.should_not be_empty
-              old_value.tuple_update_subscription_node.should_not be_empty
+            publicize old_value, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+            old_value.insert_subscription_node.should_not be_empty
+            old_value.delete_subscription_node.should_not be_empty
+            old_value.tuple_update_subscription_node.should_not be_empty
 
-              change_signal_value
+            change_signal_value
 
-              old_value.insert_subscription_node.should be_empty
-              old_value.delete_subscription_node.should be_empty
-              old_value.tuple_update_subscription_node.should be_empty
-            end
+            old_value.insert_subscription_node.should be_empty
+            old_value.delete_subscription_node.should be_empty
+            old_value.tuple_update_subscription_node.should be_empty
           end
 
           it "subscribes to the new #value of the exposed Signal" do
-            pending "better test data" do
-              expected_new_value = topic.photos_with_camera_id
+            expected_new_value = subject.heroes
 
-              publicize expected_new_value, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+            publicize expected_new_value, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
 
-              expected_new_value.insert_subscription_node.should be_empty
-              expected_new_value.delete_subscription_node.should be_empty
-              expected_new_value.tuple_update_subscription_node.should be_empty
+            expected_new_value.insert_subscription_node.should be_empty
+            expected_new_value.delete_subscription_node.should be_empty
+            expected_new_value.tuple_update_subscription_node.should be_empty
 
-              change_signal_value
-              new_value.should == expected_new_value
+            change_signal_value
+            new_value.should == expected_new_value
 
-              expected_new_value.insert_subscription_node.should_not be_empty
-              expected_new_value.delete_subscription_node.should_not be_empty
-              expected_new_value.tuple_update_subscription_node.should_not be_empty
-            end
+            expected_new_value.insert_subscription_node.should_not be_empty
+            expected_new_value.delete_subscription_node.should_not be_empty
+            expected_new_value.tuple_update_subscription_node.should_not be_empty
           end
         end
 
@@ -410,8 +397,8 @@ module Unison
               "Team" => {
                 "mangos" => Team.find("mangos").hash_representation.stringify_keys,
               },
-              "Photo" => {
-                "corey_photo_1" => topic.photos_with_camera_id.find("corey_photo_1").hash_representation.stringify_keys
+              "User" => {
+                "nathan" => subject.fans.find("nathan").hash_representation.stringify_keys
               }
             }
           end

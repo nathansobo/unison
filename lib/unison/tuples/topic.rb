@@ -117,7 +117,9 @@ module Unison
           exposed_signal_value_subscriptions[signal].each do |subscription|
             subscription.destroy
           end
+
           new_value.retain_with(self)
+          subscribe_to_relation(new_value)
         end
       end
 
