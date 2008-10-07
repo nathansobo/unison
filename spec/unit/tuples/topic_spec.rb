@@ -141,6 +141,23 @@ module Unison
           end
         end
 
+        it "retains the initial #value of all #exposed_signals" do
+          topic.exposed_signals.each do |signal|
+            signal.value.should be_retained_by(topic)
+          end
+        end
+
+        it "subscribes to the initial #value of all #exposed_signals" do
+          topic.exposed_signals.each do |signal|
+            relation = signal.value
+            publicize relation, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+
+            relation.insert_subscription_node.should_not be_empty
+            relation.delete_subscription_node.should_not be_empty
+            relation.tuple_update_subscription_node.should_not be_empty
+          end
+        end
+
         it "sets the :hash_representation Attribute value to a Hash (type => id => attributes) of the exposed objects" do
           subject.team_id.should == "chargers"
           
@@ -306,6 +323,12 @@ module Unison
           end
         end
 
+        context "when the #value of an exposed Signal changes" do
+          it "releases the old #value of the exposed Signal"
+          it "it retains the new #value of the exposed Signal"
+          it "unsubscribes from the old #value of the exposed Signal"
+          it "subscribes to the new #value of the exposed Signal"
+        end
 
         context "after last release" do
           it "no longer memoizes the :hash_representation PrimitiveAttribute" do
