@@ -114,6 +114,7 @@ module Unison
       def subscribe_to_signal(signal)
         signal.on_change do |new_value|
           exposed_signal_values[signal].release_from(self)
+          new_value.retain_with(self)
         end
       end
 

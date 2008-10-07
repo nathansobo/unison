@@ -336,12 +336,21 @@ module Unison
           end
 
           it "releases the old #value of the exposed Signal" do
+            pending "sorting out Relation#after_last_release"
             old_value.should be_retained_by(topic)
             change_signal_value
             old_value.should_not be_retained_by(topic)
           end
 
-          it "it retains the new #value of the exposed Signal"
+          it "it retains the new #value of the exposed Signal" do
+            pending "sorting out Relation#after_last_release"
+            expected_new_value = topic.photos_with_camera_id
+            expected_new_value.should_not be_retained_by(topic)
+            change_signal_value
+            new_value.should == expected_new_value
+            new_value.should be_retained_by(topic)
+          end
+
           it "unsubscribes from the old #value of the exposed Signal"
           it "subscribes to the new #value of the exposed Signal"
         end
