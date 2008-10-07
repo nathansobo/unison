@@ -246,62 +246,6 @@ module Unison
         end
       end
 
-      context "when #retained?" do
-        attr_reader :retainer
-        before do
-          @retainer = Object.new
-          @relation = users_set.where(Predicates::EqualTo.new(true, true)).retain_with(retainer)
-          publicize relation, :tuples, :initial_read
-        end
-
-
-        describe "#after_last_release" do
-          it "releases all #tuples" do
-            relation.should be_retained
-            relation.tuples.each do |tuple|
-              tuple.should be_retained_by(relation)
-            end
-
-            relation.release_from(retainer)
-
-            relation.should_not be_retained
-            relation.tuples.each do |tuple|
-              tuple.should_not be_retained_by(relation)
-            end
-          end
-        end
-
-      end
-
-      describe "#tuples" do
-        context "when the Relation is not retained" do
-          before do
-            @relation = Relations::Set.new(:unretained_set)
-            relation.add_primitive_attribute(:id, :integer)
-            relation.should_not be_retained
-          end
-
-          it "returns the result of #initial_read" do
-            mock(relation).initial_read {[:initial, :read, :result]}
-            relation.tuples.should == [:initial, :read, :result]
-          end
-        end
-
-        context "when the Relation is retained" do
-          attr_reader :retainer
-          before do
-            @relation = users_set
-            @retainer = Object.new
-            relation.retain_with(retainer)
-          end
-
-          it "returns the contents of @tuples without calling #initial_read" do
-            dont_allow(relation).initial_read
-            relation.tuples.should_not be_empty
-          end
-        end
-      end
-
       describe "#after_first_retain" do
         attr_reader :relation
         before do
@@ -326,98 +270,92 @@ module Unison
         end
       end
 
-      describe "#on_insert" do
-        context "when Relation is not retained" do
-          before do
-            @relation = Relations::Set.new(:unretained_set)
-            relation.should_not be_retained
-          end
-
-          it "raises an Error" do
-            lambda do
-              relation.on_insert(retainer) {}
-            end.should raise_error
-          end
+      context "when #retained?" do
+        attr_reader :retainer
+        before do
+          @retainer = Object.new
+          @relation = users_set.where(Predicates::EqualTo.new(true, true)).retain_with(retainer)
+          publicize relation, :tuples, :initial_read
         end
 
-        context "when Relation is retained" do
-          attr_reader :retainer
-          before do
-            @relation = users_set
-            @retainer = Object.new
-            relation.retain_with(retainer)
-          end
-
+        describe "#on_insert" do
           it "returns a Subscription" do
             relation.on_insert(retainer) {}.class.should == Subscription
           end
         end
-      end
 
-      describe "#on_delete" do
-        context "when Relation is not retained" do
-          before do
-            @relation = Relations::Set.new(:unretained_set)
-            relation.should_not be_retained
-          end
-
-          it "raises an Error" do
-            lambda do
-              relation.on_delete(retainer) {}
-            end.should raise_error
-          end
-        end
-
-        context "when Relation is retained" do
-          attr_reader :retainer
-          before do
-            @relation = users_set
-            @retainer = Object.new
-            relation.retain_with(retainer)
-          end
-
+        describe "#on_delete" do
           it "returns a Subscription" do
             relation.on_delete(retainer) {}.class.should == Subscription
           end
         end
-      end
 
-      describe "#on_tuple_update" do
-        context "when Relation is not retained" do
-          before do
-            @relation = Relations::Set.new(:unretained_set)
-            relation.should_not be_retained
-          end
-
-          it "raises an Error" do
-            lambda do
-              relation.on_tuple_update(retainer) {}
-            end.should raise_error
-          end
-        end
-
-        context "when Relation is retained" do
-          attr_reader :retainer
-          before do
-            @relation = users_set
-            @retainer = Object.new
-            relation.retain_with(retainer)
-          end
-
+        describe "#on_tuple_update" do
           it "returns a Subscription" do
             relation.on_tuple_update(retainer) {}.class.should == Subscription
           end
+        end
 
-          it "invokes the block with the (PrimitiveAttribute, old_value, new_value) when a member Tuple is updated" do
-            arguments = []
-            relation.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
-              arguments.push [tuple, attribute, old_value, new_value]
+        describe "#tuples" do
+          it "returns the contents of @tuples without calling #initial_read" do
+            dont_allow(relation).initial_read
+            relation.tuples.should_not be_empty
+          end
+        end
+
+        describe "#after_last_release" do
+          it "releases all #tuples" do
+            relation.should be_retained
+            relation.tuples.each do |tuple|
+              tuple.should be_retained_by(relation)
             end
 
-            user = relation.tuples.first
-            old_name = user[:name]
-            user[:name] = "Another Name"
-            arguments.should == [[user, users_set[:name], old_name, "Another Name"]]
+            relation.release_from(retainer)
+
+            relation.should_not be_retained
+            relation.tuples.each do |tuple|
+              tuple.should_not be_retained_by(relation)
+            end
+          end
+        end
+      end
+
+      context "when not #retained?" do
+        attr_reader :retainer
+        before do
+          @retainer = Object.new
+          @relation = users_set.where(Predicates::EqualTo.new(true, true))
+          publicize relation, :tuples, :initial_read
+        end
+
+        describe "#on_insert" do
+          it "raises an Error" do
+            lambda do
+              relation.on_insert(retainer) {}
+            end.should raise_error("Relation must be retained")
+          end
+        end
+
+        describe "#on_delete" do
+          it "raises an Error" do
+            lambda do
+              relation.on_delete(retainer) {}
+            end.should raise_error("Relation must be retained")
+          end
+        end
+
+        describe "#on_tuple_update" do
+          it "raises an Error" do
+            lambda do
+              relation.on_tuple_update(retainer) {}
+            end.should raise_error("Relation must be retained")
+          end
+        end
+
+        describe "#tuples" do
+          it "returns the result of #initial_read" do
+            mock(relation).initial_read {[:initial, :read, :result]}
+            relation.tuples.should == [:initial, :read, :result]
           end
         end
       end
