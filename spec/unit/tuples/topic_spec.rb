@@ -324,7 +324,23 @@ module Unison
         end
 
         context "when the #value of an exposed Signal changes" do
-          it "releases the old #value of the exposed Signal"
+          attr_reader :old_value, :new_value
+          def change_signal_value
+            subject.team_id = "mangos"
+            @new_value = topic.photos.value
+            old_value.should_not == new_value
+          end
+
+          before do
+            @old_value = topic.photos.value
+          end
+
+          it "releases the old #value of the exposed Signal" do
+            old_value.should be_retained_by(topic)
+            change_signal_value
+            old_value.should_not be_retained_by(topic)
+          end
+
           it "it retains the new #value of the exposed Signal"
           it "unsubscribes from the old #value of the exposed Signal"
           it "subscribes to the new #value of the exposed Signal"

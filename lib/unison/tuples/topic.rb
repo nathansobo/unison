@@ -32,9 +32,15 @@ module Unison
       retain :exposed_objects
 
       subscribe do
-        exposed_relations.map do |object|
-          expose_relation(object)
+        exposed_relations.map do |relation|
+          subscribe_to_relation(relation)
         end.flatten
+      end
+
+      subscribe do
+        exposed_signals.map do |signal|
+          subscribe_to_signal(signal)
+        end
       end
 
       def exposed_relations
@@ -70,13 +76,17 @@ module Unison
       end
 
       protected
+      attr_reader :exposed_signal_values
+
       def after_first_retain
         self[:hash_representation] = create_hash_representation
+        @exposed_signal_values = {}
 
         exposed_signals.each do |signal|
           relation = signal.value
+          exposed_signal_values[signal] = relation
           relation.retain_with(self)
-          expose_relation(relation)
+          subscribe_to_relation(relation)
         end
       end
 
@@ -84,8 +94,7 @@ module Unison
         self[:hash_representation] = nil
       end
 
-
-      def expose_relation(relation)
+      def subscribe_to_relation(relation)
         [
           relation.on_insert do |tuple|
             add_to_hash_representation(relation, tuple)
@@ -102,10 +111,10 @@ module Unison
         ]
       end
 
-      def expose_signal(signal)
-        relation = signal.value
-        relation.retain_with(self)
-        expose_relation(relation)
+      def subscribe_to_signal(signal)
+        signal.on_change do |new_value|
+          exposed_signal_values[signal].release_from(self)
+        end
       end
 
       def create_hash_representation
