@@ -152,6 +152,12 @@ module Unison
         end
       end
 
+      def after_last_release
+        tuples.each do |tuple|
+          tuple.release_from(self)
+        end
+      end
+
       def initial_read
         raise NotImplementedError
       end

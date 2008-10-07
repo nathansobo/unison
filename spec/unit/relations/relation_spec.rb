@@ -247,9 +247,28 @@ module Unison
       end
 
       context "when #retained?" do
+        attr_reader :retainer
         before do
-          @relation = users_set.where(Predicates::EqualTo.new(true, true)).retain_with(Object.new)
+          @retainer = Object.new
+          @relation = users_set.where(Predicates::EqualTo.new(true, true)).retain_with(retainer)
           publicize relation, :tuples, :initial_read
+        end
+
+
+        describe "#after_last_release" do
+          it "releases all #tuples" do
+            relation.should be_retained
+            relation.tuples.each do |tuple|
+              tuple.should be_retained_by(relation)
+            end
+
+            relation.release_from(retainer)
+
+            relation.should_not be_retained
+            relation.tuples.each do |tuple|
+              tuple.should_not be_retained_by(relation)
+            end
+          end
         end
 
       end

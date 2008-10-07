@@ -5,6 +5,9 @@ cleanup PrimitiveTuple#[] specs
 Instantiating an AttributesProjection with an operand that is composite raises an exception because we rely on #tuple_class
 Commonize PrimitiveTuple & ProjectedTuple as much as possible
 
+Sets should not have to be retained to support insert
+When a set is retained, it should retain its tuples, just like any other relation
+
 Icebox
 --------
 
