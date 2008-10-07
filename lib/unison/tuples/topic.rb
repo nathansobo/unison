@@ -76,17 +76,17 @@ module Unison
       end
 
       protected
-      attr_reader :exposed_signal_values
+      attr_reader :exposed_signal_values, :exposed_signal_value_subscriptions
 
       def after_first_retain
         self[:hash_representation] = create_hash_representation
         @exposed_signal_values = {}
+        @exposed_signal_value_subscriptions = {}
 
         exposed_signals.each do |signal|
           relation = signal.value
-          exposed_signal_values[signal] = relation
-          relation.retain_with(self)
-          subscribe_to_relation(relation)
+          exposed_signal_values[signal] = relation.retain_with(self)
+          exposed_signal_value_subscriptions[signal] = subscribe_to_relation(relation)
         end
       end
 
@@ -114,6 +114,9 @@ module Unison
       def subscribe_to_signal(signal)
         signal.on_change do |new_value|
           exposed_signal_values[signal].release_from(self)
+          exposed_signal_value_subscriptions[signal].each do |subscription|
+            subscription.destroy
+          end
           new_value.retain_with(self)
         end
       end
