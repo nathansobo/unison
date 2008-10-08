@@ -230,7 +230,7 @@ module Unison
           join.retain_with(retainer)
         end
 
-        context "when a Tuple inserted into #operand_1" do
+        context "when a Tuple is inserted into #operand_1" do
           context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
@@ -297,7 +297,7 @@ module Unison
           end
         end
 
-        context "when a Tuple inserted into #operand_2" do
+        context "when a Tuple is inserted into #operand_2" do
           context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
@@ -364,9 +364,9 @@ module Unison
           end
         end
 
-        context "when a Tuple deleted from #operand_1" do
+        context "when a Tuple is deleted from #operand_1" do
           attr_reader :user, :tuple_class
-          context "is a member of a CompositeTuple that matches the #predicate" do
+          context "when the Tuple is a component of some CompositeTuple in #tuples" do
             attr_reader :photo, :composite_tuple
             before do
               @tuple_class = CompositeTuple
@@ -400,7 +400,7 @@ module Unison
             end
           end
 
-          context "is not a member of a CompositeTuple that matches the #predicate" do
+          context "when the Tuple is not a component of any CompositeTuple in #tuples" do
             before do
               @tuple_class = CompositeTuple
               @user = User.create(:id => 100, :name => "Brian")
@@ -424,9 +424,9 @@ module Unison
           end
         end
 
-        context "when a Tuple deleted from #operand_2" do
+        context "when a Tuple is deleted from #operand_2" do
           attr_reader :photo, :tuple_class
-          context "is a member of a CompositeTuple that matches the #predicate" do
+          context "when the Tuple is a component of some CompositeTuple in #tuples" do
             attr_reader :user, :composite_tuple
             before do
               @tuple_class = CompositeTuple
@@ -460,7 +460,7 @@ module Unison
             end
           end
 
-          context "is not a member of a CompositeTuple that matches the #predicate" do
+          context "when the Tuple is not a component of any CompositeTuple in #tuples" do
             before do
               @tuple_class = CompositeTuple
               @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
@@ -485,7 +485,7 @@ module Unison
         end
 
         context "when a Tuple in #operand_1 is updated" do
-          context "when the Tuple is not a member of a CompositeTuple that matches the #predicate" do
+          context "when the Tuple is not a component of any CompositeTuple in #tuples" do
             attr_reader :user, :photo, :expected_composite_tuple
             before do
               @user = users_set.tuples.first
@@ -535,7 +535,7 @@ module Unison
             end
           end
 
-          context "when the Tuple is a member of a CompositeTuple that matches the #predicate" do
+          context "when the Tuple is a component of some CompositeTuple in #tuples" do
             attr_reader :composite_tuples, :user
             before do
               @user = User.find("nathan")
@@ -548,7 +548,7 @@ module Unison
               end
             end
 
-            context "and the update causes the CompositeTuple to not match the #predicate" do
+            context "when the update causes the CompositeTuple to not match the #predicate" do
               it "removes the Tuple from the result of #tuples" do
                 user[:id] = 100
                 composite_tuples.each do |composite_tuple|
@@ -576,7 +576,7 @@ module Unison
               end
             end
 
-            context "and the CompositeTuple continues to match the #predicate after the update" do
+            context "when the CompositeTuple continues to match the #predicate after the update" do
               it "does not remove that CompositeTuple from the results of #tuples" do
                 user[:name] = "Joe"
                 composite_tuples.each do |composite_tuple|
@@ -611,7 +611,7 @@ module Unison
         end
 
         context "when a Tuple in #operand_2 is updated" do
-          context "when the Tuple is not a member of a CompositeTuple that matches the #predicate" do
+          context "when the Tuple is not a component of any CompositeTuple in #tuples" do
             attr_reader :user, :photo, :expected_composite_tuple
             before do
               @user = users_set.tuples.first
@@ -661,7 +661,7 @@ module Unison
             end
           end
 
-          context "when the Tuple is a member of a CompositeTuple that matches the #predicate" do
+          context "when the Tuple is a component of some CompositeTuple in #tuples" do
             attr_reader :composite_tuple, :photo
             before do
               @photo = photos_set.tuples.first
@@ -671,7 +671,7 @@ module Unison
               join.should include(composite_tuple)
             end
 
-            context "and the update causes the CompositeTuple to not match the #predicate" do
+            context "when the update causes the CompositeTuple to not match the #predicate" do
               it "removes the Tuple from the result of #tuples" do
                 photo[:user_id] = 100
                 join.should_not include(composite_tuple)
@@ -696,7 +696,7 @@ module Unison
               end
             end
 
-            context "and the CompositeTuple continues to match the #predicate after the update" do
+            context "when the CompositeTuple continues to match the #predicate after the update" do
               it "does not remove that CompositeTuple from the results of #tuples" do
                 photo[:name] = "A great naked show"
                 join.should include(composite_tuple)
@@ -728,7 +728,9 @@ module Unison
 
         describe "#find_compound_tuple" do
           attr_reader :photo, :user
-
+          before do
+            publicize join, :find_compound_tuple
+          end
           context "when #tuples contains a CompositeTuple that contains both of the arguments" do
             before do
               @user = User.create(:id => 100, :name => "Brian")
@@ -741,7 +743,7 @@ module Unison
             end
 
             it "returns the CompositeTuple" do
-              composite_tuple = join.send(:find_compound_tuple, user, photo)
+              composite_tuple = join.find_compound_tuple(user, photo)
               composite_tuple[users_set].should == user
               composite_tuple[photos_set].should == photo
             end
@@ -764,7 +766,7 @@ module Unison
 
 
             it "returns nil" do
-              join.send(:find_compound_tuple, user, photo).should be_nil
+              join.find_compound_tuple(user, photo).should be_nil
             end
           end
 
@@ -784,7 +786,7 @@ module Unison
             end
 
             it "returns nil" do
-              join.send(:find_compound_tuple, user, photo).should be_nil
+              join.find_compound_tuple(user, photo).should be_nil
             end
           end
         end
@@ -873,7 +875,7 @@ module Unison
             join.retain_with(retainer)
           end
 
-          context "when a Tuple inserted into #operand_1" do
+          context "when a Tuple is inserted into #operand_1" do
             context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
               attr_reader :photo, :expected_tuple
               before do
@@ -930,7 +932,7 @@ module Unison
             end
           end
 
-          context "when a Tuple inserted into #operand_2" do
+          context "when a Tuple is inserted into #operand_2" do
             context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
               attr_reader :camera, :expected_tuple
               before do
@@ -1097,7 +1099,7 @@ module Unison
           end
 
           context "when a Tuple in #operand_1 is updated" do
-            context "when the Tuple is not a member of a CompositeTuple that matches the #predicate" do
+            context "when the Tuple is not a component of any CompositeTuple in #tuples" do
               attr_reader :user, :photo, :camera, :expected_composite_tuple
               before do
                 @user = User.find("nathan")
@@ -1146,7 +1148,7 @@ module Unison
               end
             end
 
-            context "when the Tuple is a member of a CompositeTuple that matches the #predicate" do
+            context "when the Tuple is a component of some CompositeTuple in #tuples" do
               attr_reader :composite_tuple, :photo
               before do
                 user = User.find("nathan")
@@ -1155,7 +1157,7 @@ module Unison
                 @composite_tuple = join.find(Photo[:id].eq(photo[:id]))
               end
 
-              context "and the update causes the CompositeTuple to not match the #predicate" do
+              context "when the update causes the CompositeTuple to not match the #predicate" do
                 it "removes the Tuple from the result of #tuples" do
                   join.tuples.should include(composite_tuple)
                   photo[:camera_id] = "das_kamera"
@@ -1178,7 +1180,7 @@ module Unison
                 end
               end
 
-              context "and the CompositeTuple continues to match the #predicate after the update" do
+              context "when the CompositeTuple continues to match the #predicate after the update" do
                 it "does not remove that CompositeTuple from the results of #tuples" do
                   join.tuples.should include(composite_tuple)
                   photo[:name] = "Sexy one"
@@ -1209,7 +1211,7 @@ module Unison
           end
 
           context "when a Tuple in #operand_2 is updated" do
-            context "when the Tuple is not a member of a CompositeTuple that matches the #predicate" do
+            context "when the Tuple is not a component of any CompositeTuple in #tuples" do
               attr_reader :photo, :camera, :expected_composite_tuple
               before do
                 user = User.find("nathan")
@@ -1258,7 +1260,7 @@ module Unison
               end
             end
 
-            context "when the Tuple is a member of a CompositeTuple that matches the #predicate" do
+            context "when the Tuple is a component of some CompositeTuple in #tuples" do
               attr_reader :camera, :composite_tuple
               before do
                 user = User.find("nathan")
@@ -1268,7 +1270,7 @@ module Unison
                 join.tuples.should include(composite_tuple)
               end
 
-              context "and the update causes the CompositeTuple to not match the #predicate" do
+              context "when the update causes the CompositeTuple to not match the #predicate" do
                 it "removes the Tuple from the result of #tuples" do
                   join.should include(composite_tuple)
                   camera[:id] = "el_camera_loco"
@@ -1291,7 +1293,7 @@ module Unison
                 end
               end
 
-              context "and the composite Tuple continues to match the #predicate after the update" do
+              context "when the composite Tuple continues to match the #predicate after the update" do
                 it "does not remove that composite Tuple from the results of #tuples" do
                   join.should include(composite_tuple)
                   camera[:name] = "A great naked camera"
