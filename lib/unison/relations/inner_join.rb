@@ -22,25 +22,25 @@ module Unison
 
       subscribe do
         operand_1.on_delete do |operand_1_tuple|
-          delete_if_member_of_compound_tuple :left, operand_1_tuple
+          delete_if_member_of_composite_tuple :left, operand_1_tuple
         end
       end
 
       subscribe do
         operand_2.on_delete do |operand_2_tuple|
-          delete_if_member_of_compound_tuple :right, operand_2_tuple
+          delete_if_member_of_composite_tuple :right, operand_2_tuple
         end
       end
 
       subscribe do
         operand_1.on_tuple_update do |operand_1_tuple, attribute, old_value, new_value|
           operand_2.tuples.each do |operand_2_tuple|
-            compound_tuple = find_compound_tuple(operand_1_tuple, operand_2_tuple)
-            if compound_tuple
-              if predicate.eval(compound_tuple)
-                tuple_update_subscription_node.call(compound_tuple, attribute, old_value, new_value)
+            composite_tuple = find_composite_tuple(operand_1_tuple, operand_2_tuple)
+            if composite_tuple
+              if predicate.eval(composite_tuple)
+                tuple_update_subscription_node.call(composite_tuple, attribute, old_value, new_value)
               else
-                delete(compound_tuple)
+                delete(composite_tuple)
               end
             else
               insert_if_predicate_matches(CompositeTuple.new(operand_1_tuple, operand_2_tuple))
@@ -52,12 +52,12 @@ module Unison
       subscribe do
         operand_2.on_tuple_update do |operand_2_tuple, attribute, old_value, new_value|
           operand_1.tuples.each do |operand_1_tuple|
-            compound_tuple = find_compound_tuple(operand_1_tuple, operand_2_tuple)
-            if compound_tuple
-              if predicate.eval(compound_tuple)
-                tuple_update_subscription_node.call(compound_tuple, attribute, old_value, new_value)
+            composite_tuple = find_composite_tuple(operand_1_tuple, operand_2_tuple)
+            if composite_tuple
+              if predicate.eval(composite_tuple)
+                tuple_update_subscription_node.call(composite_tuple, attribute, old_value, new_value)
               else
-                delete(compound_tuple)
+                delete(composite_tuple)
               end
             else
               insert_if_predicate_matches(CompositeTuple.new(operand_1_tuple, operand_2_tuple))
@@ -79,7 +79,7 @@ module Unison
         operand_1.to_arel.join(operand_2.to_arel).on(predicate.to_arel)
       end
 
-      def compound?
+      def composite?
         true
       end
 
@@ -100,14 +100,14 @@ module Unison
       end
 
       protected
-      def insert_if_predicate_matches(compound_tuple)
-        insert(compound_tuple) if predicate.eval(compound_tuple)
+      def insert_if_predicate_matches(composite_tuple)
+        insert(composite_tuple) if predicate.eval(composite_tuple)
       end
 
-      def delete_if_member_of_compound_tuple(which_operand, tuple)
-        tuples.each do |compound_tuple|
-          if compound_tuple.send(which_operand) == tuple
-            delete(compound_tuple)
+      def delete_if_member_of_composite_tuple(which_operand, tuple)
+        tuples.each do |composite_tuple|
+          if composite_tuple.send(which_operand) == tuple
+            delete(composite_tuple)
           end
         end
       end
@@ -126,9 +126,9 @@ module Unison
         tuples
       end
 
-      def find_compound_tuple(operand_1_tuple, operand_2_tuple)
-        tuples.find do |compound_tuple|
-          compound_tuple.left == operand_1_tuple && compound_tuple.right == operand_2_tuple
+      def find_composite_tuple(operand_1_tuple, operand_2_tuple)
+        tuples.find do |composite_tuple|
+          composite_tuple.left == operand_1_tuple && composite_tuple.right == operand_2_tuple
         end
       end
     end

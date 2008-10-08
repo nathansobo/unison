@@ -73,11 +73,11 @@ module Unison
         end
       end
 
-      describe "#compound?" do
+      describe "#composite?" do
         context "when #composed_sets.size == 1" do
           it "returns true" do
             users_set.composed_sets.size.should == 1
-            users_set.should_not be_compound
+            users_set.should_not be_composite
           end
         end
 
@@ -85,7 +85,7 @@ module Unison
           it "returns false" do
             join = users_set.join(photos_set).on(photos_set[:user_id].eq(users_set[:id]))
             join.composed_sets.size.should == 2
-            join.should be_compound
+            join.should be_composite
           end
         end
       end

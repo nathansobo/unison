@@ -36,7 +36,7 @@ module Unison
         false
       end
 
-      def compound?
+      def composite?
         true
       end
     end    

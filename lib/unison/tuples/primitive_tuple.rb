@@ -233,7 +233,7 @@ module Unison
         true
       end
 
-      def compound?
+      def composite?
         false
       end
 

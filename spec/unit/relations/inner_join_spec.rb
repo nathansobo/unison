@@ -95,9 +95,9 @@ module Unison
         end
       end
 
-      describe "#compound?" do
+      describe "#composite?" do
         it "returns true" do
-          join.should be_compound
+          join.should be_composite
         end
       end
 
@@ -726,10 +726,10 @@ module Unison
           end
         end
 
-        describe "#find_compound_tuple" do
+        describe "#find_composite_tuple" do
           attr_reader :photo, :user
           before do
-            publicize join, :find_compound_tuple
+            publicize join, :find_composite_tuple
           end
           context "when #tuples contains a CompositeTuple that contains both of the arguments" do
             before do
@@ -743,7 +743,7 @@ module Unison
             end
 
             it "returns the CompositeTuple" do
-              composite_tuple = join.find_compound_tuple(user, photo)
+              composite_tuple = join.find_composite_tuple(user, photo)
               composite_tuple[users_set].should == user
               composite_tuple[photos_set].should == photo
             end
@@ -766,7 +766,7 @@ module Unison
 
 
             it "returns nil" do
-              join.find_compound_tuple(user, photo).should be_nil
+              join.find_composite_tuple(user, photo).should be_nil
             end
           end
 
@@ -786,7 +786,7 @@ module Unison
             end
 
             it "returns nil" do
-              join.find_compound_tuple(user, photo).should be_nil
+              join.find_composite_tuple(user, photo).should be_nil
             end
           end
         end

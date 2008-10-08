@@ -36,7 +36,7 @@ module Unison
       end
 
       def push(repository=Unison.origin)
-        if compound?
+        if composite?
           composed_sets.each do |component_set|
             repository.push(self.project(component_set))
           end
@@ -78,7 +78,7 @@ module Unison
         retained?? @tuples : initial_read
       end
 
-      def compound?
+      def composite?
         composed_sets.size > 1
       end
 

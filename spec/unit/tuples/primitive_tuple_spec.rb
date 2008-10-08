@@ -540,9 +540,9 @@ module Unison
           end
         end
 
-        describe "#compound?" do
+        describe "#composite?" do
           it "should be false" do
-            tuple.should_not be_compound
+            tuple.should_not be_composite
           end
         end
 

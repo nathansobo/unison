@@ -80,7 +80,7 @@ module Unison
         end
       end
 
-      def compound?
+      def composite?
         false
       end
 

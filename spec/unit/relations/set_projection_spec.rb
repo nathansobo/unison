@@ -255,10 +255,10 @@ module Unison
         end
 
         context "when a Tuple is updated in the #operand" do
-          attr_reader :operand_compound_tuple, :operand_projected_tuple, :projected_tuple, :attribute
+          attr_reader :operand_composite_tuple, :operand_projected_tuple, :projected_tuple, :attribute
           before do
-            @operand_compound_tuple = operand.tuples.first
-            @operand_projected_tuple = operand_compound_tuple[users_set]
+            @operand_composite_tuple = operand.tuples.first
+            @operand_projected_tuple = operand_composite_tuple[users_set]
             @projected_tuple = projection.tuples.find do |tuple|
               tuple == operand_projected_tuple
             end
@@ -290,12 +290,12 @@ module Unison
             end
 
             context "when the same PrimitiveAttribute on a different Tuple is subsequently updated from the same old value to the same new value" do
-              attr_reader :another_compound_tuple, :another_projected_tuple
+              attr_reader :another_composite_tuple, :another_projected_tuple
               before do
-                @another_compound_tuple = operand.tuples.find do |tuple|
+                @another_composite_tuple = operand.tuples.find do |tuple|
                   tuple[users_set] != projected_tuple
                 end
-                @another_projected_tuple = another_compound_tuple[users_set]
+                @another_projected_tuple = another_composite_tuple[users_set]
                 another_projected_tuple.should_not == projected_tuple
 
                 another_projected_tuple[:name] = old_value
@@ -338,7 +338,7 @@ module Unison
           context "and the updated PrimitiveAttribute is not in #projected_set" do
             attr_reader :photo
             before do
-              @photo = operand_compound_tuple[photos_set]
+              @photo = operand_composite_tuple[photos_set]
             end
 
             it "does not trigger #on_tuple_update subscriptions" do

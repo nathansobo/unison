@@ -203,9 +203,9 @@ module Unison
         end
       end
 
-      describe "#compound?" do
+      describe "#composite?" do
         it "returns false" do
-          set.should_not be_compound
+          set.should_not be_composite
         end
       end
 

@@ -33,9 +33,9 @@ module Unison
         end
       end
 
-      describe "#compound?" do
+      describe "#composite?" do
         it "should be true" do
-          tuple.should be_compound
+          tuple.should be_composite
         end
       end
 
