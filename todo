@@ -1,9 +1,13 @@
 Backlog
 --------
-Topic#expose should work for signals with relations as the values
+* Topic#expose should work for signals with relations as the values
 cleanup PrimitiveTuple#[] specs
+cleanup InnerJoin specs for the simple case based on new understandings
+
 Instantiating an AttributesProjection with an operand that is composite raises an exception because we rely on #tuple_class
 Commonize PrimitiveTuple & ProjectedTuple as much as possible
+
+
 
 Sets should not have to be retained to support insert
 When a set is retained, it should retain its tuples, just like any other relation
