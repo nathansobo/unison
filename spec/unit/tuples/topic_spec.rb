@@ -312,62 +312,118 @@ module Unison
           end
         end
 
-        context "when the #value of an exposed Signal changes for the first time" do
+
+        context "when the #value of an exposed Signal changes" do
           attr_reader :old_value, :new_value
           def change_signal_value
-            subject.show_fans = false
+            subject.show_fans = !subject.show_fans
             @new_value = topic.example_signal.value
             old_value.should_not == new_value
           end
 
-          before do
-            @old_value = topic.example_signal.value
+          context "for the first time" do
+            before do
+              @old_value = topic.example_signal.value
+            end
+
+            it "releases the old #value of the exposed Signal" do
+              old_value.should be_retained_by(topic)
+              change_signal_value
+              old_value.should_not be_retained_by(topic)
+            end
+
+            it "retains the new #value of the exposed Signal" do
+              expected_new_value = subject.heroes
+              expected_new_value.should_not be_retained_by(topic)
+
+              change_signal_value
+              new_value.should == expected_new_value
+
+              new_value.should be_retained_by(topic)
+            end
+
+            it "unsubscribes from the old #value of the exposed Signal" do
+              publicize old_value, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+              old_value.insert_subscription_node.should_not be_empty
+              old_value.delete_subscription_node.should_not be_empty
+              old_value.tuple_update_subscription_node.should_not be_empty
+
+              change_signal_value
+
+              old_value.insert_subscription_node.should be_empty
+              old_value.delete_subscription_node.should be_empty
+              old_value.tuple_update_subscription_node.should be_empty
+            end
+
+            it "subscribes to the new #value of the exposed Signal" do
+              expected_new_value = subject.heroes
+
+              publicize expected_new_value, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+
+              expected_new_value.insert_subscription_node.should be_empty
+              expected_new_value.delete_subscription_node.should be_empty
+              expected_new_value.tuple_update_subscription_node.should be_empty
+
+              change_signal_value
+              new_value.should == expected_new_value
+
+              expected_new_value.insert_subscription_node.should_not be_empty
+              expected_new_value.delete_subscription_node.should_not be_empty
+              expected_new_value.tuple_update_subscription_node.should_not be_empty
+            end
           end
 
-          it "releases the old #value of the exposed Signal" do
-            old_value.should be_retained_by(topic)
-            change_signal_value
-            old_value.should_not be_retained_by(topic)
-          end
+          context "for the second time" do
+            before do
+              change_signal_value
+              @old_value = topic.example_signal.value
+            end
 
-          it "it retains the new #value of the exposed Signal" do
-            expected_new_value = subject.heroes
-            expected_new_value.should_not be_retained_by(topic)
+            it "releases the old #value of the exposed Signal" do
+              old_value.should be_retained_by(topic)
+              change_signal_value
+              old_value.should_not be_retained_by(topic)
+            end
 
-            change_signal_value
-            new_value.should == expected_new_value
+            it "retains the new #value of the exposed Signal" do
+              expected_new_value = subject.fans
+              expected_new_value.should_not be_retained_by(topic)
 
-            new_value.should be_retained_by(topic)
-          end
+              change_signal_value
+              new_value.should == expected_new_value
 
-          it "unsubscribes from the old #value of the exposed Signal" do
-            publicize old_value, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
-            old_value.insert_subscription_node.should_not be_empty
-            old_value.delete_subscription_node.should_not be_empty
-            old_value.tuple_update_subscription_node.should_not be_empty
+              new_value.should be_retained_by(topic)
+            end
 
-            change_signal_value
+            it "unsubscribes from the old #value of the exposed Signal" do
+              publicize old_value, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+              old_value.insert_subscription_node.should_not be_empty
+              old_value.delete_subscription_node.should_not be_empty
+              old_value.tuple_update_subscription_node.should_not be_empty
 
-            old_value.insert_subscription_node.should be_empty
-            old_value.delete_subscription_node.should be_empty
-            old_value.tuple_update_subscription_node.should be_empty
-          end
+              change_signal_value
 
-          it "subscribes to the new #value of the exposed Signal" do
-            expected_new_value = subject.heroes
+              old_value.insert_subscription_node.should be_empty
+              old_value.delete_subscription_node.should be_empty
+              old_value.tuple_update_subscription_node.should be_empty
+            end
 
-            publicize expected_new_value, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
+            it "subscribes to the new #value of the exposed Signal" do
+              expected_new_value = subject.fans
 
-            expected_new_value.insert_subscription_node.should be_empty
-            expected_new_value.delete_subscription_node.should be_empty
-            expected_new_value.tuple_update_subscription_node.should be_empty
+              publicize expected_new_value, :insert_subscription_node, :delete_subscription_node, :tuple_update_subscription_node
 
-            change_signal_value
-            new_value.should == expected_new_value
+              expected_new_value.insert_subscription_node.should be_empty
+              expected_new_value.delete_subscription_node.should be_empty
+              expected_new_value.tuple_update_subscription_node.should be_empty
 
-            expected_new_value.insert_subscription_node.should_not be_empty
-            expected_new_value.delete_subscription_node.should_not be_empty
-            expected_new_value.tuple_update_subscription_node.should_not be_empty
+              change_signal_value
+              new_value.should == expected_new_value
+
+              expected_new_value.insert_subscription_node.should_not be_empty
+              expected_new_value.delete_subscription_node.should_not be_empty
+              expected_new_value.tuple_update_subscription_node.should_not be_empty
+            end
           end
         end
 

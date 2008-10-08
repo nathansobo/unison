@@ -2,7 +2,6 @@ Backlog
 --------
 * Topic#expose should work for signals with relations as the values
 cleanup PrimitiveTuple#[] specs
-cleanup InnerJoin specs for the simple case based on new understandings
 
 In InnerJoin, rephrase operand_1 and operand_2 in terms of left and right to match new CompositeTuple vocab
 

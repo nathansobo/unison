@@ -118,8 +118,8 @@ module Unison
             subscription.destroy
           end
 
-          new_value.retain_with(self)
-          subscribe_to_relation(new_value)
+          exposed_signal_values[signal] = new_value.retain_with(self)
+          exposed_signal_value_subscriptions[signal] = subscribe_to_relation(new_value)
         end
       end
 
