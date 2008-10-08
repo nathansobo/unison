@@ -935,8 +935,8 @@ module Unison
               attr_reader :camera, :expected_tuple
               before do
                 user = User.find("nathan")
-                photo = Photo.create(:id => "nathan_photo_3", :user_id => "nathan", :camera_id => "canon")
-                @camera = Camera.new(:id => "canon")
+                photo = Photo.create(:id => "nathan_photo_3", :user_id => "nathan", :camera_id => "nikon")
+                @camera = Camera.new(:id => "nikon")
 
                 @expected_tuple = CompositeTuple.new(CompositeTuple.new(user, photo), camera)
                 predicate.eval(expected_tuple).should be_true
