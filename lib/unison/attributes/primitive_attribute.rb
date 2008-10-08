@@ -54,6 +54,10 @@ module Unison
       def create_field(tuple)
         PrimitiveField.new(tuple, self)
       end
+
+      def inspect
+        "#{set.inspect}[#{name.inspect}]"
+      end
       
       protected
       def convert_to_integer(value)

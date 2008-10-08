@@ -127,7 +127,7 @@ module Unison
       end
 
       def inspect
-        "<#{self.class}:#{object_id} @name=#{name.inspect}>"
+        tuple_class.name
       end
 
       def notify_tuple_update_subscribers(tuple, attribute, old_value, new_value)

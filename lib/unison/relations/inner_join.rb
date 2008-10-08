@@ -96,7 +96,7 @@ module Unison
       end
 
       def inspect
-        "<#{self.class}:#{object_id} @operand_1=#{operand_1.inspect} @operand_2=#{operand_2.inspect} @predicate=#{predicate.inspect}>"
+        "#{operand_1.inspect}.join(#{operand_2.inspect}).on(#{predicate.inspect})"
       end
 
       protected

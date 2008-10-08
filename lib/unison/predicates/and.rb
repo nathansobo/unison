@@ -12,6 +12,10 @@ module Unison
           acc ? acc.and(operand.to_arel) : operand.to_arel
         end
       end
+
+      def inspect
+        "and(#{operands.map {|operand| operand.inspect}.join(", ")})"
+      end
     end
   end
 end

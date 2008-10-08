@@ -67,6 +67,10 @@ module Unison
         operand.tuple_class
       end
 
+      def inspect
+        "#{operand.inspect}.project(#{projected_attributes.map {|attribute| attribute.inspect }.join(", ")})"
+      end
+
       protected
       def initial_read
         projected_tuples = []

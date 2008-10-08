@@ -71,7 +71,7 @@ module Unison
       end
 
       def inspect
-        "<#{self.class}:#{object_id} @operand=#{operand.inspect} @predicate=#{predicate.inspect}>"
+        "#{operand.inspect}.where(#{predicate.inspect})"
       end
 
       protected

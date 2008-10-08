@@ -74,7 +74,7 @@ module Unison
       end
 
       def inspect
-        "<#{self.class}:#{object_id} @operand=#{operand.inspect} @projected_set=#{projected_set.inspect}>"
+        "#{operand.inspect}.project(#{projected_set.inspect})"
       end
 
       protected

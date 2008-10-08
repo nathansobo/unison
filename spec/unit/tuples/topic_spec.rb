@@ -312,7 +312,6 @@ module Unison
           end
         end
 
-
         context "when the #value of an exposed Signal changes" do
           attr_reader :old_value, :new_value
           def change_signal_value
@@ -371,6 +370,26 @@ module Unison
               expected_new_value.delete_subscription_node.should_not be_empty
               expected_new_value.tuple_update_subscription_node.should_not be_empty
             end
+
+            it "removes the #tuples of the Signal's old #value from the #hash_representation" do
+              pending "going to make inspects better before figuring out why this fails" do
+                old_value.tuples.each do |tuple|
+                  topic[:hash_representation][tuple.set.tuple_class.basename][tuple[:id]].should == tuple.hash_representation.stringify_keys
+                end
+
+
+                change_signal_value
+
+
+                tuples_to_delete = old_value.tuples - new_value.tuples
+                tuples_to_delete.should_not be_empty
+                tuples_to_delete.each do |tuple|
+                  topic[:hash_representation][tuple.set.tuple_class.basename].should_not have_key(tuple[:id])
+                end
+              end
+            end
+
+            it "adds the #tuples of the Signal's new #value to the #hash_representation"
           end
 
           context "for the second time" do
@@ -424,6 +443,24 @@ module Unison
               expected_new_value.delete_subscription_node.should_not be_empty
               expected_new_value.tuple_update_subscription_node.should_not be_empty
             end
+          end
+        end
+
+        context "when a Relation that is the #value of an exposed Signal is modified" do
+          context "when the Relation is the initial #value of an exposed Signal" do
+            context "when a Tuple is inserted into the Relation" do
+              it "is inserted into the #hash_representation"
+            end
+            context "when a Tuple is deleted from the Relation" do
+              it "is delete from the #hash_representation"
+            end
+            context "when a Tuple is updated in the Relation" do
+              it "is updated in the #hash_representation"
+            end
+          end
+
+          context "when the #value of the exposed Signal has changed at least once" do
+            # same as above
           end
         end
 

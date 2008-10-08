@@ -48,7 +48,7 @@ module Unison
       end
 
       def inspect
-        "<#{self.class}:#{object_id} @operand=#{operand.inspect} @order_by_attributes=#{order_by_attributes.inspect}>"
+        "#{operand.inspect}.order_by(#{order_by_attributes.map {|attribute| attribute.inspect}.join(", ")})"
       end
 
       protected
