@@ -1012,6 +1012,12 @@ module Unison
                 photo.delete
                 deleted.should == composite_tuple
               end
+
+              it "#releases the Tuple" do
+                composite_tuple.should be_retained_by(join)
+                photo.delete
+                composite_tuple.should_not be_retained_by(join)
+              end
             end
 
             context "when the Tuple is not a component of any CompoundTuple in #tuples" do
@@ -1036,66 +1042,60 @@ module Unison
             end
           end
 
-#          context "when a Tuple deleted from #operand_2" do
-#            attr_reader :photo, :tuple_class
-#            context "is a member of a compound Tuple that matches the #predicate" do
-#              attr_reader :user, :compound_tuple
-#              before do
-#                @tuple_class = CompositeTuple
-#                @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-#                @user = User.create(:id => 100, :name => "Brian")
-#                @compound_tuple = join.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
-#                predicate.eval(compound_tuple).should be_true
-#                join.should include(compound_tuple)
-#              end
-#
-#              it "deletes the compound Tuple from the result of #tuples" do
-#                photos_set.delete(photo)
-#                join.should_not include(compound_tuple)
-#              end
-#
-#              it "triggers the on_delete event" do
-#                deleted = nil
-#                join.on_delete(retainer) do |deleted_tuple|
-#                  deleted = deleted_tuple
-#                end
-#
-#                photos_set.delete(photo)
-#                deleted.should == compound_tuple
-#              end
-#
-#              it "#releases the Tuple" do
-#                compound_tuple = join.where(photos_set[:id].eq(photo[:id])).first
-#                compound_tuple.should be_retained_by(join)
-#                photos_set.delete(photo)
-#                compound_tuple.should_not be_retained_by(join)
-#              end
-#            end
-#
-#            context "is not a member of a compound Tuple that matches the #predicate" do
-#              before do
-#                @tuple_class = CompositeTuple
-#                @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-#                join.any? do |compound_tuple|
-#                  compound_tuple[photos_set] == photo
-#                end.should be_false
-#              end
-#
-#              it "does not delete a compound Tuple from the result of #tuples" do
-#                lambda do
-#                  photos_set.delete(photo)
-#                end.should_not change{join.length}
-#              end
-#
-#              it "does not trigger the on_delete event" do
-#                join.on_delete(retainer) do |deleted_tuple|
-#                  raise "Don't taze me bro"
-#                end
-#                photos_set.delete(photo)
-#              end
-#            end
-#          end
-#
+          context "when a Tuple is deleted from #operand_2" do
+            context "when the Tuple is a component of some CompoundTuple in #tuples" do
+              attr_reader :camera, :composite_tuple
+              before do
+                @camera = Camera.find("minolta_xd_11")
+                @composite_tuple = join.find(cameras_set[:id].eq(camera[:id]))
+                composite_tuple.should_not be_nil
+              end
+
+              it "deletes the compound Tuple from the result of #tuples" do
+                join.should include(composite_tuple)
+                camera.delete
+                join.should_not include(composite_tuple)
+              end
+
+              it "triggers the on_delete event" do
+                deleted = []
+                join.on_delete(retainer) do |deleted_tuple|
+                  deleted.push(deleted_tuple)
+                end
+
+                camera.delete
+                deleted.should include(composite_tuple)
+              end
+
+              it "#releases the Tuple" do
+                composite_tuple.should be_retained_by(join)
+                camera.delete
+                composite_tuple.should_not be_retained_by(join)
+              end
+            end
+
+            context "when the Tuple is not a component of any CompoundTuple in #tuples" do
+              attr_reader :camera
+              before do
+                @camera = Camera.create(:id => "nikon")
+                join.find(cameras_set[:id].eq(camera[:id])).should be_nil
+              end
+
+              it "does not delete a compound Tuple from the result of #tuples" do
+                lambda do
+                  camera.delete
+                end.should_not change { join.tuples.length }
+              end
+
+              it "does not trigger the on_delete event" do
+                join.on_delete(retainer) do |deleted_tuple|
+                  raise "Don't taze me bro"
+                end
+                camera.delete
+              end
+            end
+          end
+
 #          context "when a Tuple in #operand_1 is updated" do
 #            context "when the Tuple is not a member of a compound Tuple that matches the #predicate" do
 #              attr_reader :user, :photo, :expected_compound_tuple
