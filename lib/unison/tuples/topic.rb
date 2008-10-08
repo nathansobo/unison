@@ -114,18 +114,24 @@ module Unison
       def subscribe_to_signal(signal)
         signal.on_change do |new_value|
           old_value = exposed_signal_values[signal]
-          remove_tuples_from_hash_representation(old_value)
-          old_value.release_from(self)
-          exposed_signal_value_subscriptions[signal].each do |subscription|
-            subscription.destroy
-          end
-
-          exposed_signal_values[signal] = new_value.retain_with(self)
-          exposed_signal_value_subscriptions[signal] = subscribe_to_relation(new_value)
-          add_tuples_to_hash_representation(new_value)
-
+          unexpose_signal_value(signal, old_value)
+          expose_signal_value(signal, new_value)
           attribute_mutated(:hash_representation) unless old_value.tuples.has_same_elements_as?(new_value.tuples)
         end
+      end
+
+      def unexpose_signal_value(signal, relation)
+        remove_tuples_from_hash_representation(relation)
+        relation.release_from(self)
+        exposed_signal_value_subscriptions[signal].each do |subscription|
+          subscription.destroy
+        end
+      end
+
+      def expose_signal_value(signal, relation)
+        exposed_signal_values[signal] = relation.retain_with(self)
+        exposed_signal_value_subscriptions[signal] = subscribe_to_relation(relation)
+        add_tuples_to_hash_representation(relation)
       end
 
       def create_hash_representation
