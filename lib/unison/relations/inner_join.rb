@@ -128,7 +128,7 @@ module Unison
 
       def find_compound_tuple(operand_1_tuple, operand_2_tuple)
         tuples.find do |compound_tuple|
-          compound_tuple[operand_1.set] == operand_1_tuple && compound_tuple[operand_2.set] == operand_2_tuple
+          compound_tuple.left == operand_1_tuple && compound_tuple.right == operand_2_tuple
         end
       end
     end

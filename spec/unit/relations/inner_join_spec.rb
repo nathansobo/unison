@@ -1096,41 +1096,39 @@ module Unison
             end
           end
 
-#          context "when a Tuple in #operand_1 is updated" do
-#            context "when the Tuple is not a member of a compound Tuple that matches the #predicate" do
-#              attr_reader :user, :photo, :expected_compound_tuple
-#              before do
-#                @user = users_set.tuples.first
-#                @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-#                @expected_compound_tuple = CompositeTuple.new(user, photo)
-#              end
-#
-#              context "when the update causes a compound Tuple to match the #predicate" do
-#                it "adds that compound Tuple to the result of #tuples" do
-#                  join.should_not include(expected_compound_tuple)
-#                  user[:id] = photo[:user_id]
-#                  join.should include(expected_compound_tuple)
-#                end
-#
-#                it "triggers the on_insert event" do
-#                  inserted = nil
-#                  join.on_insert(retainer) do |tuple|
-#                    inserted = tuple
-#                  end
-#                  user[:id] = photo[:user_id]
-#
-#                  predicate.eval(inserted).should be_true
-#                  inserted[photos_set].should == photo
-#                  inserted[users_set].should == user
-#                end
-#
-#                it "retains the CompositeTuple" do
-#                  join.where(photos_set[:id].eq(photo[:id])).should be_empty
-#                  user[:id] = photo[:user_id]
-#                  join.where(photos_set[:id].eq(photo[:id])).tuples.first.should be_retained_by(join)
-#                end
-#              end
-#
+          context "when a Tuple in #operand_1 is updated" do
+            context "when the Tuple is not a member of a compound Tuple that matches the #predicate" do
+              attr_reader :user, :photo, :camera, :expected_composite_tuple
+              before do
+                @user = User.find("nathan")
+                @photo = Photo.find("nathan_photo_1")
+                @camera = Camera.create(:id => "el_camera")
+                @expected_composite_tuple = CompositeTuple.new(CompositeTuple.new(user, photo), camera)
+              end
+
+              context "when the update causes a compound Tuple to match the #predicate" do
+                it "adds that compound Tuple to the result of #tuples" do
+                  join.should_not include(expected_composite_tuple)
+                  photo[:camera_id] = camera[:id]
+                  join.should include(expected_composite_tuple)
+                end
+
+                it "triggers the on_insert event" do
+                  inserted = nil
+                  join.on_insert(retainer) do |tuple|
+                    inserted = tuple
+                  end
+                  photo[:camera_id] = camera[:id]
+                  inserted.should == expected_composite_tuple
+                end
+
+                it "retains the CompositeTuple" do
+                  join.find(cameras_set[:id].eq(camera[:id])).should be_nil
+                  photo[:camera_id] = camera[:id]
+                  join.find(cameras_set[:id].eq(camera[:id])).should be_retained_by(join)
+                end
+              end
+
 #              context "when the update does not cause the Tuple to match the #predicate" do
 #                it "does not add the Tuple into the result of #tuples" do
 #                  join.should_not include(expected_compound_tuple)
@@ -1145,8 +1143,8 @@ module Unison
 #                  user[:id] = photo[:user_id] + "junk"
 #                end
 #              end
-#            end
-#
+            end
+
 #            context "when the Tuple is a member of a compound Tuple that matches the #predicate" do
 #              attr_reader :compound_tuples, :user
 #              before do
@@ -1220,8 +1218,8 @@ module Unison
 #                end
 #              end
 #            end
-#          end
-#
+          end
+
 #          context "when a Tuple in #operand_2 is updated" do
 #            context "when the Tuple is not a member of a compound Tuple that matches the #predicate" do
 #              attr_reader :user, :photo, :expected_compound_tuple
