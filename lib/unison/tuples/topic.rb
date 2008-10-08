@@ -97,11 +97,11 @@ module Unison
       def subscribe_to_relation(relation)
         [
           relation.on_insert do |tuple|
-            add_to_hash_representation(relation, tuple)
+            add_tuple_to_hash_representation(relation, tuple)
             attribute_mutated(:hash_representation)
           end,
           relation.on_delete do |tuple|
-            remove_from_hash_representation(relation, tuple)
+            remove_tuple_from_hash_representation(relation, tuple)
             attribute_mutated(:hash_representation)
           end,
           relation.on_tuple_update do |tuple, attribute, old_value, new_value|
@@ -113,13 +113,18 @@ module Unison
 
       def subscribe_to_signal(signal)
         signal.on_change do |new_value|
-          exposed_signal_values[signal].release_from(self)
+          old_value = exposed_signal_values[signal]
+          remove_tuples_from_hash_representation(old_value)
+          old_value.release_from(self)
           exposed_signal_value_subscriptions[signal].each do |subscription|
             subscription.destroy
           end
 
           exposed_signal_values[signal] = new_value.retain_with(self)
           exposed_signal_value_subscriptions[signal] = subscribe_to_relation(new_value)
+          add_tuples_to_hash_representation(new_value)
+
+          attribute_mutated(:hash_representation) unless old_value.tuples.has_same_elements_as?(new_value.tuples)
         end
       end
 
@@ -129,23 +134,35 @@ module Unison
           case object
           when Relations::Relation
             object.tuples.each do |tuple|
-              add_to_hash_representation(object, tuple, hash)
+              add_tuple_to_hash_representation(object, tuple, hash)
             end
           when Signals::DerivedSignal
             object.value.tuples.each do |tuple|
-              add_to_hash_representation(object.value, tuple, hash)
+              add_tuple_to_hash_representation(object.value, tuple, hash)
             end
           end
         end
         hash
       end
 
-      def add_to_hash_representation(relation, tuple, hash_representation=self.hash_representation)
+      def add_tuples_to_hash_representation(relation)
+        relation.tuples.each do |tuple|
+          add_tuple_to_hash_representation(relation, tuple)
+        end
+      end
+
+      def add_tuple_to_hash_representation(relation, tuple, hash_representation=self.hash_representation)
         hash_representation[relation.tuple_class.basename] ||= {}
         hash_representation[relation.tuple_class.basename][tuple[:id]] = tuple.hash_representation.stringify_keys
       end
 
-      def remove_from_hash_representation(relation, tuple)
+      def remove_tuples_from_hash_representation(relation)
+        relation.tuples.each do |tuple|
+          remove_tuple_from_hash_representation(relation, tuple)
+        end
+      end
+
+      def remove_tuple_from_hash_representation(relation, tuple)
         hash_representation[relation.tuple_class.basename].delete(tuple[:id])
       end
 

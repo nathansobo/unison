@@ -40,7 +40,7 @@ module Unison
           topic_class.exposed_method_names.should include(:accounts)
           topic_class.exposed_method_names.should include(:team)
         end
-        
+
         it "causes #exposed_objects to contain the return value of each exposed method name" do
           topic.exposed_objects.should include(topic.accounts)
           topic.exposed_objects.should include(topic.team)
@@ -151,7 +151,7 @@ module Unison
 
         it "sets the :hash_representation Attribute value to a Hash (type => id => attributes) of the exposed objects" do
           subject.team_id.should == "mangos"
-          
+
           topic[:hash_representation].should == {
             "Account" => {
               "corey_account" => topic.accounts.find("corey_account").hash_representation.stringify_keys,
@@ -160,7 +160,8 @@ module Unison
               "mangos" => Team.find("mangos").hash_representation.stringify_keys,
             },
             "User" => {
-              "nathan" => subject.fans.find("nathan").hash_representation.stringify_keys
+              "nathan" => subject.fans.find("nathan").hash_representation.stringify_keys,
+              "jan" => subject.fans.find("jan").hash_representation.stringify_keys
             }
           }
         end
@@ -371,15 +372,23 @@ module Unison
               expected_new_value.tuple_update_subscription_node.should_not be_empty
             end
 
-            it "removes the #tuples of the Signal's old #value from the #hash_representation" do
-              pending "going to make inspects better before figuring out why this fails" do
+            context "when #tuples of the old #value is different than #tuples of the new value" do
+              attr_reader :expected_new_value
+              before do
+                @expected_new_value = subject.heroes
+                expected_new_value.tuples.should_not have_same_elements_as(old_value.tuples)
+              end
+
+              after do
+                expected_new_value.should == new_value
+              end
+
+              it "removes the difference between the old #value's #tuples and new #value's #tuples to the #hash_representation" do
                 old_value.tuples.each do |tuple|
                   topic[:hash_representation][tuple.set.tuple_class.basename][tuple[:id]].should == tuple.hash_representation.stringify_keys
                 end
 
-
                 change_signal_value
-
 
                 tuples_to_delete = old_value.tuples - new_value.tuples
                 tuples_to_delete.should_not be_empty
@@ -387,9 +396,64 @@ module Unison
                   topic[:hash_representation][tuple.set.tuple_class.basename].should_not have_key(tuple[:id])
                 end
               end
+
+              it "adds the difference between the new #value's #tuples and old #value's #tuples to the #hash_representation" do
+                tuples_to_add = expected_new_value.tuples - old_value.tuples
+
+                tuples_to_add.each do |tuple|
+                  type = tuple.set.tuple_class.basename
+                  if topic[:hash_representation].has_key?(type)
+                    topic[:hash_representation][type].should_not have_key(tuple[:id])
+                  end
+                end
+
+                change_signal_value
+
+                tuples_to_add.each do |tuple|
+                  topic[:hash_representation][tuple.set.tuple_class.basename][tuple[:id]].should == tuple.hash_representation.stringify_keys
+                end
+              end
+
+              it "triggers an on_change event for the 'hash_representation' Attribute" do
+                update_args = []
+                topic.on_update(retainer) do |attribute, old, new|
+                  update_args.push([attribute, old, new])
+                end
+                
+                change_signal_value
+                
+                update_args.should == [[topic_class[:hash_representation], topic[:hash_representation], topic[:hash_representation]]]
+              end
             end
 
-            it "adds the #tuples of the Signal's new #value to the #hash_representation"
+            context "when #tuples of the old #value is identical to #tuples of the new value" do
+              attr_reader :expected_new_value
+              before do
+                Friendship.create(:id => "corey_to_jan", :from_id => "corey", :to_id => "jan")
+                Friendship.create(:id => "ross_to_corey", :from_id => "ross", :to_id => "corey")
+
+                @expected_new_value = subject.heroes
+                expected_new_value.tuples.should have_same_elements_as(old_value.tuples)
+              end
+
+              after do
+                expected_new_value.should == new_value
+              end
+
+              it "does not change 'hash_representation' Attribute" do
+                lambda do
+                  change_signal_value
+                end.should_not change { topic[:hash_representation] }
+              end
+
+              it "does not trigger an on_change event for the 'hash_representation' Attribute" do
+                topic.on_update(retainer) do |attribute, old_value, new_value|
+                  raise "Don't taze me bro"
+                end
+
+                change_signal_value
+              end
+            end
           end
 
           context "for the second time" do
@@ -469,7 +533,7 @@ module Unison
             dont_allow(topic).create_hash_representation
             memoized_hash_representation = topic[:hash_representation]
             topic[:hash_representation].should equal(memoized_hash_representation)
-            
+
             topic.release_from(retainer)
             topic.should_not be_retained
 
@@ -491,7 +555,8 @@ module Unison
                 "mangos" => Team.find("mangos").hash_representation.stringify_keys,
               },
               "User" => {
-                "nathan" => subject.fans.find("nathan").hash_representation.stringify_keys
+                "nathan" => subject.fans.find("nathan").hash_representation.stringify_keys,
+                "jan" => subject.fans.find("jan").hash_representation.stringify_keys
               }
             }
           end

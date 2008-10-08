@@ -228,29 +228,34 @@ Spec::Runner.configure do |config|
     users_set.insert(User.new(:id => "nathan", :name => "Nathan", :hobby => "Yoga", :team_id => "chargers"))
     users_set.insert(User.new(:id => "corey", :name => "Corey", :hobby => "Drugs & Art & Burning Man", :team_id => "mangos"))
     users_set.insert(User.new(:id => "ross", :name => "Ross", :hobby => "Manicorn", :team_id => "mangos"))
+    users_set.insert(User.new(:id => "jan", :name => "Jan", :hobby => "Assembling IKEA furniture", :team_id => "chargers"))
 
     life_goals_set.insert(LifeGoal.new(:id => "nathan_goal", :user_id => "nathan"))
     life_goals_set.insert(LifeGoal.new(:id => "corey_goal", :user_id => "corey"))
     life_goals_set.insert(LifeGoal.new(:id => "ross_goal", :user_id => "ross"))
+    life_goals_set.insert(LifeGoal.new(:id => "jan_goal", :user_id => "jan"))
 
     friendships_set.insert(Friendship.new(:id => "nathan_to_corey", :to_id => "corey", :from_id => "nathan"))
     friendships_set.insert(Friendship.new(:id => "nathan_to_ross", :to_id => "ross", :from_id => "nathan"))
     friendships_set.insert(Friendship.new(:id => "corey_to_nathan", :to_id => "nathan", :from_id => "corey"))
     friendships_set.insert(Friendship.new(:id => "corey_to_ross", :to_id => "ross", :from_id => "corey"))
     friendships_set.insert(Friendship.new(:id => "ross_to_nathan", :to_id => "nathan", :from_id => "ross"))
+    friendships_set.insert(Friendship.new(:id => "jan_to_corey", :to_id => "corey", :from_id => "jan"))
 
     profiles_set.insert(Profile.new(:id => "nathan_profile", :owner_id => "nathan"))
     profiles_set.insert(Profile.new(:id => "corey_profile", :owner_id => "corey"))
     profiles_set.insert(Profile.new(:id => "ross_profile", :owner_id => "ross"))
+    profiles_set.insert(Profile.new(:id => "jan_profile", :owner_id => "jan"))
 
     photos_set.insert(Photo.new(:id => "nathan_photo_1", :user_id => "nathan", :name => "Nathan Photo 1", :camera_id => "minolta"))
     photos_set.insert(Photo.new(:id => "nathan_photo_2", :user_id => "nathan", :name => "Nathan Photo 2", :camera_id => "minolta"))
     photos_set.insert(Photo.new(:id => "corey_photo_1", :user_id => "corey", :name => "Corey Photo 1", :camera_id => "minolta"))
 
     accounts_set.insert(Account.new(:id => "nathan_pivotal_account", :user_id => "nathan", :name => "Nathan's Pivotal Account", :deactivated_at => Time.utc(2008, 8, 31), :employee_id => 1))
-    accounts_set.insert(Account.new(:id => "nathan_account_2", :user_id => "nathan", :name => "Nathan's Account 2", :deactivated_at => nil, :employee_id => 2))
+    accounts_set.insert(Account.new(:id => "nathan_grockit_account", :user_id => "nathan", :name => "Nathan's Grockit Account", :deactivated_at => nil, :employee_id => 2))
     accounts_set.insert(Account.new(:id => "corey_account", :user_id => "corey", :name => "Corey's Account", :deactivated_at => nil, :employee_id => 3))
     accounts_set.insert(Account.new(:id => "ross_account", :user_id => "ross", :name => "Ross's Account", :deactivated_at => Time.utc(2008, 8, 2), :employee_id => 4))
+    accounts_set.insert(Account.new(:id => "jan_account", :user_id => "jan", :name => "Jan's Account", :deactivated_at => nil, :employee_id => 5))
 
     cameras_set.insert(Camera.new(:id => "minolta", :name => "Minolta"))
     cameras_set.insert(Camera.new(:id => "canon", :name => "Canon"))
