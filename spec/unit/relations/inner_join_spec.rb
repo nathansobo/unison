@@ -930,72 +930,62 @@ module Unison
             end
           end
 
-#          context "when a Tuple inserted into #operand_2" do
-#            context "when the inserted Tuple creates a compound Tuple that matches the #predicate" do
-#              attr_reader :photo, :user, :tuple_class, :expected_tuple
-#              before do
-#                @tuple_class = CompositeTuple
-#                @photo = Photo.new(:id => 100, :user_id => 100, :name => "Photo 100")
-#                @user = User.create(:id => 100, :name => "Brian")
-#                @expected_tuple = tuple_class.new(user, photo)
-#                predicate.eval(expected_tuple).should be_true
-#              end
-#
-#              it "adds the compound Tuple to the result of #tuples" do
-#                join.should_not include(expected_tuple)
-#                photos_set.insert(photo)
-#                join.should include(expected_tuple)
-#              end
-#
-#              it "trigger the on_insert event" do
-#                inserted = nil
-#                join.on_insert(retainer) do |tuple|
-#                  inserted = tuple
-#                end
-#                photos_set.insert(photo)
-#
-#                predicate.eval(inserted).should be_true
-#                inserted[photos_set].should == photo
-#                inserted[users_set].should == user
-#              end
-#
-#              it "retains the CompositeTuple" do
-#                join.where(photos_set[:id].eq(photo[:id])).should be_empty
-#                photos_set.insert(photo)
-#                join.where(photos_set[:id].eq(photo[:id])).first.should be_retained_by(join)
-#              end
-#            end
-#
-#            context "when the inserted Tuple creates a compound Tuple that does not match the #predicate" do
-#              attr_reader :photo, :user, :tuple_class, :expected_tuple
-#              before do
-#                @tuple_class = CompositeTuple
-#                @photo = Photo.new(:id => 100, :user_id => 999, :name => "Photo 100")
-#                @user = User.create(:id => 100, :name => "Brian")
-#                @expected_tuple = tuple_class.new(user, photo)
-#                predicate.eval(expected_tuple).should be_false
-#              end
-#
-#              it "does not add the compound Tuple to the result of #tuples" do
-#                join.should_not include(expected_tuple)
-#                photos_set.insert(photo)
-#                join.should_not include(expected_tuple)
-#              end
-#
-#              it "does not trigger the on_insert event" do
-#                join.on_insert(retainer) do |tuple|
-#                  raise "I should not be invoked"
-#                end
-#                photos_set.insert(photo)
-#              end
-#
-#              it "does not retain the CompositeTuple" do
-#                join.find(user.id).should be_nil
-#                photos_set.insert(photo)
-#                join.find(user.id).should be_nil
-#              end
-#            end
-#          end
+          context "when a Tuple inserted into #operand_2" do
+            context "when the inserted Tuple creates a compound Tuple that matches the #predicate" do
+              attr_reader :camera, :expected_tuple
+              before do
+                user = User.find("nathan")
+                photo = Photo.create(:id => "nathan_photo_3", :user_id => "nathan", :camera_id => "canon")
+                @camera = Camera.new(:id => "canon")
+
+                @expected_tuple = CompositeTuple.new(CompositeTuple.new(user, photo), camera)
+                predicate.eval(expected_tuple).should be_true
+              end
+
+              it "adds the compound Tuple to the result of #tuples" do
+                join.should_not include(expected_tuple)
+                cameras_set.insert(camera)
+                join.should include(expected_tuple)
+              end
+
+              it "trigger the on_insert event" do
+                inserted = nil
+                join.on_insert(retainer) do |tuple|
+                  inserted = tuple
+                end
+                cameras_set.insert(camera)
+                
+                inserted.should == expected_tuple
+              end
+
+              it "retains the CompositeTuple" do
+                join.find(cameras_set[:id].eq(camera.id)).should be_nil
+                cameras_set.insert(camera)
+                join.find(cameras_set[:id].eq(camera.id)).should be_retained_by(join)
+              end
+            end
+
+            context "when the inserted Tuple creates a compound Tuple that does not match the #predicate" do
+              attr_reader :camera
+              before do
+                @camera = Camera.new(:id => "nikon")
+                photos_set.find(photos_set[:camera_id].eq(camera[:id])).should be_nil
+              end
+
+              it "does not add the compound Tuple to the result of #tuples" do
+                lambda do
+                  cameras_set.insert(camera)
+                end.should_not change {join.tuples.length}
+              end
+
+              it "does not trigger the on_insert event" do
+                join.on_insert(retainer) do |tuple|
+                  raise "I should not be invoked"
+                end
+                cameras_set.insert(camera)
+              end
+            end
+          end
 #
 #          context "when a Tuple deleted from #operand_1" do
 #            attr_reader :user, :tuple_class
