@@ -243,16 +243,17 @@ Spec::Runner.configure do |config|
     profiles_set.insert(Profile.new(:id => "corey_profile", :owner_id => "corey"))
     profiles_set.insert(Profile.new(:id => "ross_profile", :owner_id => "ross"))
 
-    photos_set.insert(Photo.new(:id => "nathan_photo_1", :user_id => "nathan", :name => "Nathan Photo 1", :camera_id => "minolta_xd_11"))
-    photos_set.insert(Photo.new(:id => "nathan_photo_2", :user_id => "nathan", :name => "Nathan Photo 2", :camera_id => "minolta_xd_11"))
-    photos_set.insert(Photo.new(:id => "corey_photo_1", :user_id => "corey", :name => "Corey Photo 1", :camera_id => "minolta_xd_11"))
+    photos_set.insert(Photo.new(:id => "nathan_photo_1", :user_id => "nathan", :name => "Nathan Photo 1", :camera_id => "minolta"))
+    photos_set.insert(Photo.new(:id => "nathan_photo_2", :user_id => "nathan", :name => "Nathan Photo 2", :camera_id => "minolta"))
+    photos_set.insert(Photo.new(:id => "corey_photo_1", :user_id => "corey", :name => "Corey Photo 1", :camera_id => "minolta"))
 
     accounts_set.insert(Account.new(:id => "nathan_pivotal_account", :user_id => "nathan", :name => "Nathan's Pivotal Account", :deactivated_at => Time.utc(2008, 8, 31), :employee_id => 1))
     accounts_set.insert(Account.new(:id => "nathan_account_2", :user_id => "nathan", :name => "Nathan's Account 2", :deactivated_at => nil, :employee_id => 2))
     accounts_set.insert(Account.new(:id => "corey_account", :user_id => "corey", :name => "Corey's Account", :deactivated_at => nil, :employee_id => 3))
     accounts_set.insert(Account.new(:id => "ross_account", :user_id => "ross", :name => "Ross's Account", :deactivated_at => Time.utc(2008, 8, 2), :employee_id => 4))
 
-    cameras_set.insert(Camera.new(:id => "minolta_xd_11", :name => "Minolta XD-11"))
+    cameras_set.insert(Camera.new(:id => "minolta", :name => "Minolta"))
+    cameras_set.insert(Camera.new(:id => "canon", :name => "Canon"))
   end
 
   config.after do

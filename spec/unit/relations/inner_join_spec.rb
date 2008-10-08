@@ -878,7 +878,7 @@ module Unison
               attr_reader :photo, :expected_tuple
               before do
                 user = User.find("nathan")
-                camera = Camera.find("minolta_xd_11")
+                camera = Camera.find("minolta")
                 @photo = Photo.new(:id => "nathan_photo_3", :user_id => user[:id], :camera_id => camera[:id])
                 @expected_tuple = CompositeTuple.new(CompositeTuple.new(user, photo), camera)
                 predicate.eval(expected_tuple).should be_true
@@ -1046,7 +1046,7 @@ module Unison
             context "when the Tuple is a component of some CompoundTuple in #tuples" do
               attr_reader :camera, :composite_tuple
               before do
-                @camera = Camera.find("minolta_xd_11")
+                @camera = Camera.find("minolta")
                 @composite_tuple = join.find(cameras_set[:id].eq(camera[:id]))
                 composite_tuple.should_not be_nil
               end
@@ -1146,79 +1146,66 @@ module Unison
               end
             end
 
-#            context "when the Tuple is a member of a compound Tuple that matches the #predicate" do
-#              attr_reader :compound_tuples, :user
-#              before do
-#                @user = User.find("nathan")
-#                @compound_tuples = join.select do |compound_tuple|
-#                  compound_tuple[users_set] == user
-#                end
-#                compound_tuples.size.should be > 1
-#                compound_tuples.each do |compound_tuple|
-#                  join.should include(compound_tuple)
-#                end
-#              end
-#
-#              context "and the update causes the compound Tuple to not match the #predicate" do
-#                it "removes the Tuple from the result of #tuples" do
-#                  user[:id] = 100
-#                  compound_tuples.each do |compound_tuple|
-#                    join.should_not include(compound_tuple)
-#                  end
-#                end
-#
-#                it "triggers the on_delete event" do
-#                  deleted = []
-#                  join.on_delete(retainer) do |tuple|
-#                    deleted.push tuple
-#                  end
-#                  user[:id] = 100
-#                  deleted.size.should == compound_tuples.size
-#                  compound_tuples.each do |compound_tuple|
-#                    deleted.should include(compound_tuple)
-#                  end
-#                end
-#
-#                it "releases the CompositeTuple" do
-#                  compound_tuple = join.find(user.id)
-#                  compound_tuple.should be_retained_by(join)
-#                  user[:id] = 100
-#                  compound_tuple.should_not be_retained_by(join)
-#                end
-#              end
-#
-#              context "and the compound Tuple continues to match the #predicate after the update" do
-#                it "does not remove that compound Tuple from the results of #tuples" do
-#                  user[:name] = "Joe"
-#                  compound_tuples.each do |compound_tuple|
-#                    join.should include(compound_tuple)
-#                  end
-#                end
-#
-#                it "triggers the on_tuple_update event for the compound Tuple" do
-#                  updated = []
-#                  join.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
-#                    updated.push [tuple, attribute, old_value, new_value]
-#                  end
-#                  old_name = user[:name]
-#                  user[:name] = "Joe"
-#                  updated.size.should == compound_tuples.size
-#                  compound_tuples.each do |compound_tuple|
-#                    updated.should include([compound_tuple, users_set[:name], old_name, "Joe"])
-#                  end
-#                end
-#
-#                it "does not trigger the on_insert or on_delete event" do
-#                  join.on_insert(retainer) do |tuple|
-#                    raise "Don't taze me bro"
-#                  end
-#                  join.on_delete(retainer) do |tuple|
-#                    raise "Don't taze me bro"
-#                  end
-#                  user[:name] = "Joe"
-#                end
-#              end
-#            end
+            context "when the Tuple is a member of a compound Tuple that matches the #predicate" do
+              attr_reader :composite_tuple, :photo
+              before do
+                user = User.find("nathan")
+                @photo = Photo.find("nathan_photo_1")
+                camera = Camera.find(photo[:camera_id])
+                @composite_tuple = join.find(photos_set[:id].eq(photo[:id]))
+              end
+
+              context "and the update causes the compound Tuple to not match the #predicate" do
+                it "removes the Tuple from the result of #tuples" do
+                  join.tuples.should include(composite_tuple)
+                  photo[:camera_id] = "das_kamera"
+                  join.tuples.should_not include(composite_tuple)
+                end
+
+                it "triggers the on_delete event" do
+                  deleted = nil
+                  join.on_delete(retainer) do |tuple|
+                    deleted = tuple
+                  end
+                  photo[:camera_id] = "das_kamera"
+                  deleted.should == composite_tuple
+                end
+
+                it "releases the CompositeTuple" do
+                  composite_tuple.should be_retained_by(join)
+                  photo[:camera_id] = "das_kamera"
+                  composite_tuple.should_not be_retained_by(join)
+                end
+              end
+
+              context "and the compound Tuple continues to match the #predicate after the update" do
+                it "does not remove that compound Tuple from the results of #tuples" do
+                  join.tuples.should include(composite_tuple)
+                  photo[:name] = "Sexy one"
+                  join.tuples.should include(composite_tuple)
+                end
+
+                it "triggers the on_tuple_update event for the compound Tuple" do
+                  updated = []
+                  join.on_tuple_update(retainer) do |tuple, attribute, old_value, new_value|
+                    updated.push [tuple, attribute, old_value, new_value]
+                  end
+                  old_name = photo[:name]
+                  photo[:name] = "Moo"
+                  updated.should == [[composite_tuple, photos_set[:name], old_name, "Moo"]]
+                end
+
+                it "does not trigger the on_insert or on_delete event" do
+                  join.on_insert(retainer) do |tuple|
+                    raise "Don't taze me bro"
+                  end
+                  join.on_delete(retainer) do |tuple|
+                    raise "Don't taze me bro"
+                  end
+                  photo[:name] = "Barfing"
+                end
+              end
+            end
           end
 
 #          context "when a Tuple in #operand_2 is updated" do
