@@ -998,11 +998,9 @@ module Unison
               end
 
               it "deletes the CompositeTuple from the result of #tuples" do
-                pending "redesign of CompositeTuple access" do
-                  join.should include(composite_tuple)
-                  photo.delete
-                  join.should_not include(composite_tuple)
-                end
+                join.should include(composite_tuple)
+                photo.delete
+                join.should_not include(composite_tuple)
               end
 
 #              it "triggers the on_delete event" do

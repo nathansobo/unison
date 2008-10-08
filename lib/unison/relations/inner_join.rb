@@ -22,13 +22,13 @@ module Unison
 
       subscribe do
         operand_1.on_delete do |operand_1_tuple|
-          delete_if_member_of_compound_tuple operand_1, operand_1_tuple
+          delete_if_member_of_compound_tuple :left, operand_1_tuple
         end
       end
 
       subscribe do
         operand_2.on_delete do |operand_2_tuple|
-          delete_if_member_of_compound_tuple operand_2, operand_2_tuple
+          delete_if_member_of_compound_tuple :right, operand_2_tuple
         end
       end
 
@@ -104,9 +104,9 @@ module Unison
         insert(compound_tuple) if predicate.eval(compound_tuple)
       end
 
-      def delete_if_member_of_compound_tuple(operand, tuple)
+      def delete_if_member_of_compound_tuple(which_operand, tuple)
         tuples.each do |compound_tuple|
-          if compound_tuple[operand] == tuple
+          if compound_tuple.send(which_operand) == tuple
             delete(compound_tuple)
           end
         end

@@ -4,6 +4,8 @@ Backlog
 cleanup PrimitiveTuple#[] specs
 cleanup InnerJoin specs for the simple case based on new understandings
 
+In InnerJoin, rephrase operand_1 and operand_2 in terms of left and right to match new CompositeTuple vocab
+
 Instantiating an AttributesProjection with an operand that is composite raises an exception because we rely on #tuple_class
 Commonize PrimitiveTuple & ProjectedTuple as much as possible
 
