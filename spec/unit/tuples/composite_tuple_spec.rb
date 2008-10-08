@@ -13,16 +13,23 @@ module Unison
         end
       end
 
-      attr_reader :nested_tuple_1, :nested_tuple_2
+      attr_reader :left, :right
       before do
-        @nested_tuple_1 = User.new(:id => 1, :name => "Damon")
-        @nested_tuple_2 = Photo.new(:id => 1, :name => "Silly Photo", :user_id => 1)
-        @tuple = CompositeTuple.new(nested_tuple_1, nested_tuple_2)
+        @left = User.new(:id => 1, :name => "Damon")
+        @right = Photo.new(:id => 1, :name => "Silly Photo", :user_id => 1)
+        @tuple = CompositeTuple.new(left, right)
       end
 
       describe "#initialize" do
-        it "sets #nested_tuples to an array of the given operands" do
-          tuple.nested_tuples.should == [nested_tuple_1, nested_tuple_2]
+        it "sets #left and #right" do
+          tuple.left.should == left
+          tuple.right.should == right
+        end
+      end
+
+      describe "#nested_tuples" do
+        it "returns an Array of #left and #right" do
+          tuple.nested_tuples.should == [left, right]
         end
       end
 
@@ -42,15 +49,15 @@ module Unison
         context "when the #nested_tuples are PrimitiveTuples" do
           context "when passed an Attribute of a nested PrimitiveTuple" do
             it "retrieves the value from the PrimitiveTuple" do
-              tuple[users_set[:id]].should == nested_tuple_1[users_set[:id]]
-              tuple[photos_set[:id]].should == nested_tuple_2[photos_set[:id]]
+              tuple[users_set[:id]].should == left[users_set[:id]]
+              tuple[photos_set[:id]].should == right[photos_set[:id]]
             end
           end
 
           context "when passed a Relation" do
             it "retrieves the first nested Tuple belonging to that Relation" do
-              tuple[users_set].should == nested_tuple_1
-              tuple[photos_set].should == nested_tuple_2
+              tuple[users_set].should == left
+              tuple[photos_set].should == right
             end
           end
         end
@@ -58,24 +65,24 @@ module Unison
         context "when one of #nested_tuples is itself a CompositeTuple" do
           attr_reader :nested_tuple_3
           before do
-            @nested_tuple_1 = User.new(:id => 1, :name => "Damon")
-            @nested_tuple_2 = Photo.new(:id => 1, :name => "Silly Photo", :user_id => 1, :camera_id => 1)
+            @left = User.new(:id => 1, :name => "Damon")
+            @right = Photo.new(:id => 1, :name => "Silly Photo", :user_id => 1, :camera_id => 1)
             @nested_tuple_3 = Camera.new(:id => 1, :name => "Lomo")
-            @tuple = CompositeTuple.new(CompositeTuple.new(nested_tuple_1, nested_tuple_2), nested_tuple_3)
+            @tuple = CompositeTuple.new(CompositeTuple.new(left, right), nested_tuple_3)
           end
 
           context "when passed an Attribute of a doubly-nested PrimitiveTuple" do
             it "retrieves the value from the PrimitiveTuple" do
-              tuple[users_set[:id]].should == nested_tuple_1[users_set[:id]]
-              tuple[photos_set[:id]].should == nested_tuple_2[photos_set[:id]]
+              tuple[users_set[:id]].should == left[users_set[:id]]
+              tuple[photos_set[:id]].should == right[photos_set[:id]]
               tuple[cameras_set[:id]].should == nested_tuple_3[cameras_set[:id]]
             end
           end
 
           context "when passed a Relation" do
             it "retrieves the first nested PrimitiveTuple belonging to that relation" do
-              tuple[users_set].should == nested_tuple_1
-              tuple[photos_set].should == nested_tuple_2
+              tuple[users_set].should == left
+              tuple[photos_set].should == right
               tuple[cameras_set].should == nested_tuple_3
             end
           end
@@ -95,7 +102,7 @@ module Unison
           it "returns true if #has_attribute? on any nested Tuple returns true" do
             tuple.should have_attribute(users_set[:id])
             tuple.should have_attribute(photos_set[:id])
-            nested_tuple_1.should_not have_attribute(cameras_set[:id])
+            left.should_not have_attribute(cameras_set[:id])
             tuple.should_not have_attribute(cameras_set[:id])
           end
         end
@@ -111,14 +118,14 @@ module Unison
 
       describe "#after_first_retain" do
         it "retains the #nested_tuples" do
-          nested_tuple_1.should_not be_retained_by(tuple)
-          nested_tuple_2.should_not be_retained_by(tuple)
+          left.should_not be_retained_by(tuple)
+          right.should_not be_retained_by(tuple)
 
           mock.proxy(tuple).after_first_retain
           tuple.retain_with(Object.new)
 
-          nested_tuple_1.should be_retained_by(tuple)
-          nested_tuple_2.should be_retained_by(tuple)
+          left.should be_retained_by(tuple)
+          right.should be_retained_by(tuple)
         end
       end
 
@@ -126,13 +133,13 @@ module Unison
         it "#releases the #nested_tuples" do
           retainer = Object.new
           tuple.retain_with(retainer)
-          nested_tuple_1.should be_retained_by(tuple)
-          nested_tuple_2.should be_retained_by(tuple)
+          left.should be_retained_by(tuple)
+          right.should be_retained_by(tuple)
 
           mock.proxy(tuple).after_last_release
           tuple.release_from(retainer)
-          nested_tuple_1.should_not be_retained_by(tuple)
-          nested_tuple_2.should_not be_retained_by(tuple)
+          left.should_not be_retained_by(tuple)
+          right.should_not be_retained_by(tuple)
         end
       end
 
@@ -140,7 +147,7 @@ module Unison
         attr_reader :other_tuple
         context "when other Tuple#nested_tuples == #nested_tuples" do
           before do
-            @other_tuple = CompositeTuple.new(nested_tuple_1, nested_tuple_2)
+            @other_tuple = CompositeTuple.new(left, right)
             other_tuple.nested_tuples.should == tuple.nested_tuples
           end
 

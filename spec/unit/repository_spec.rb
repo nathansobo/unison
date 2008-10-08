@@ -230,7 +230,7 @@ module Unison
 
       context "when passed a CompositeTuple" do
         it "raises a NotImplementedError" do
-          tuple = CompositeTuple.new(users_set.tuples.first)
+          tuple = CompositeTuple.new(users_set.tuples[0], users_set.tuples[1])
           lambda do
             origin.push(tuple)
           end.should raise_error(NotImplementedError)

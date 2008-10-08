@@ -1,12 +1,16 @@
 module Unison
   module Tuples
     class CompositeTuple < Tuple
-      attr_reader :nested_tuples
-      retain :nested_tuples
+      attr_reader :left, :right
+      retain :left, :right
 
-      def initialize(*nested_tuples)
+      def initialize(left, right)
         super()
-        @nested_tuples = nested_tuples
+        @left, @right = left, right
+      end
+
+      def nested_tuples
+        [left, right]
       end
 
       def [](attribute)
