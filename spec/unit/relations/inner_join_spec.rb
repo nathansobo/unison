@@ -1101,9 +1101,10 @@ module Unison
               attr_reader :user, :photo, :camera, :expected_composite_tuple
               before do
                 @user = User.find("nathan")
-                @photo = Photo.find("nathan_photo_1")
+                @photo = Photo.create(:id => "nathan_photo_3", :user_id => "nathan", :camera_id => "no_camera_right_now")
                 @camera = Camera.create(:id => "el_camera")
                 @expected_composite_tuple = CompositeTuple.new(CompositeTuple.new(user, photo), camera)
+                join.find(photos_set[:id].eq(photo[:id])).should be_nil
               end
 
               context "when the update causes a compound Tuple to match the #predicate" do
@@ -1129,20 +1130,20 @@ module Unison
                 end
               end
 
-#              context "when the update does not cause the Tuple to match the #predicate" do
-#                it "does not add the Tuple into the result of #tuples" do
-#                  join.should_not include(expected_compound_tuple)
-#                  user[:id] = photo[:user_id] + "junk"
-#                  join.should_not include(expected_compound_tuple)
-#                end
-#
-#                it "does not trigger the on_insert event" do
-#                  join.on_insert(retainer) do |tuple|
-#                    raise "Do not call me"
-#                  end
-#                  user[:id] = photo[:user_id] + "junk"
-#                end
-#              end
+              context "when the update does not cause the Tuple to match the #predicate" do
+                it "does not add the Tuple into the result of #tuples" do
+                  lambda do
+                    photo[:camera_id] = "das_kamera"
+                  end.should_not change { join.tuples.length }
+                end
+
+                it "does not trigger the on_insert event" do
+                  join.on_insert(retainer) do |tuple|
+                    raise "Don't taze me bro"
+                  end
+                  photo[:camera_id] = "das_kamera"
+                end
+              end
             end
 
 #            context "when the Tuple is a member of a compound Tuple that matches the #predicate" do
