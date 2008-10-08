@@ -224,7 +224,7 @@ module Unison
 
               it "does not trigger the on_delete event" do
                 projection.on_delete(retainer) do |tuple|
-                  raise "I should not be invoked"
+                  raise "Don't taze me bro"
                 end
                 photos_set.delete(photo_1)
               end
@@ -247,7 +247,7 @@ module Unison
 
             it "does not trigger the on_delete event with the Tuple restricted by #projected_set" do
               projection.on_delete(retainer) do |tuple|
-                raise "I should not be invoked"
+                raise "Don't taze me bro"
               end
               users_set.delete(user)
             end

@@ -284,7 +284,7 @@ module Unison
 
             it "does not trigger the on_insert event" do
               join.on_insert(retainer) do |tuple|
-                raise "I should not be invoked"
+                raise "Don't taze me bro"
               end
               users_set.insert(user)
             end
@@ -351,7 +351,7 @@ module Unison
 
             it "does not trigger the on_insert event" do
               join.on_insert(retainer) do |tuple|
-                raise "I should not be invoked"
+                raise "Don't taze me bro"
               end
               photos_set.insert(photo)
             end
@@ -417,7 +417,7 @@ module Unison
 
             it "does not trigger the on_delete event" do
               join.on_delete(retainer) do |deleted_tuple|
-                raise "I should not be invoked"
+                raise "Don't taze me bro"
               end
               users_set.delete(user)
             end
@@ -477,7 +477,7 @@ module Unison
 
             it "does not trigger the on_delete event" do
               join.on_delete(retainer) do |deleted_tuple|
-                raise "I should not be invoked"
+                raise "Don't taze me bro"
               end
               photos_set.delete(photo)
             end
@@ -923,7 +923,7 @@ module Unison
 
               it "does not trigger the on_insert event" do
                 join.on_insert(retainer) do |tuple|
-                  raise "I should not be invoked"
+                  raise "Don't taze me bro"
                 end
                 photos_set.insert(photo)
               end
@@ -980,16 +980,16 @@ module Unison
 
               it "does not trigger the on_insert event" do
                 join.on_insert(retainer) do |tuple|
-                  raise "I should not be invoked"
+                  raise "Don't taze me bro"
                 end
                 cameras_set.insert(camera)
               end
             end
           end
 
-          context "when a Tuple deleted from #operand_1" do
+          context "when a Tuple is deleted from #operand_1" do
             attr_reader :user, :tuple_class
-            context "is a member of a compound Tuple that matches the #predicate" do
+            context "when the Tuple is a component of some CompoundTuple in #tuples" do
               attr_reader :photo, :composite_tuple
               before do
                 @photo = Photo.find("nathan_photo_1")
@@ -1003,46 +1003,37 @@ module Unison
                 join.should_not include(composite_tuple)
               end
 
-#              it "triggers the on_delete event" do
-#                deleted = nil
-#                join.on_delete(retainer) do |deleted_tuple|
-#                  deleted = deleted_tuple
-#                end
-#
-#                users_set.delete(user)
-#                deleted.should == compound_tuple
-#              end
-#
-#              it "#releases the Tuple" do
-#                compound_tuple = join.find(user.id)
-#                compound_tuple.should be_retained_by(join)
-#                users_set.delete(user)
-#                compound_tuple.should_not be_retained_by(join)
-#              end
+              it "triggers the on_delete event" do
+                deleted = nil
+                join.on_delete(retainer) do |deleted_tuple|
+                  deleted = deleted_tuple
+                end
+
+                photo.delete
+                deleted.should == composite_tuple
+              end
             end
 
-#            context "is not a member of a compound Tuple that matches the #predicate" do
-#              before do
-#                @tuple_class = CompositeTuple
-#                @user = User.create(:id => 100, :name => "Brian")
-#                join.any? do |compound_tuple|
-#                  compound_tuple[users_set] == user
-#                end.should be_false
-#              end
-#
-#              it "does not delete a compound Tuple from the result of #tuples" do
-#                lambda do
-#                  users_set.delete(user)
-#                end.should_not change{join.length}
-#              end
-#
-#              it "does not trigger the on_delete event" do
-#                join.on_delete(retainer) do |deleted_tuple|
-#                  raise "I should not be invoked"
-#                end
-#                users_set.delete(user)
-#              end
-#            end
+            context "when the Tuple is not a component of any CompoundTuple in #tuples" do
+              attr_reader :photo
+              before do
+                @photo = Photo.create(:id => "orphan", :user_id => "farbooooood")
+                join.find(photos_set[:id].eq(photo[:id])).should be_nil
+              end
+
+              it "does not delete a compound Tuple from the result of #tuples" do
+                lambda do
+                  photo.delete
+                end.should_not change { join.tuples.length }
+              end
+
+              it "does not trigger the on_delete event" do
+                join.on_delete(retainer) do |deleted_tuple|
+                  raise "Don't taze me bro"
+                end
+                photo.delete
+              end
+            end
           end
 
 #          context "when a Tuple deleted from #operand_2" do
@@ -1098,7 +1089,7 @@ module Unison
 #
 #              it "does not trigger the on_delete event" do
 #                join.on_delete(retainer) do |deleted_tuple|
-#                  raise "I should not be invoked"
+#                  raise "Don't taze me bro"
 #                end
 #                photos_set.delete(photo)
 #              end
