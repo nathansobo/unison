@@ -986,25 +986,25 @@ module Unison
               end
             end
           end
-#
-#          context "when a Tuple deleted from #operand_1" do
-#            attr_reader :user, :tuple_class
-#            context "is a member of a compound Tuple that matches the #predicate" do
-#              attr_reader :photo, :compound_tuple
-#              before do
-#                @tuple_class = CompositeTuple
-#                @photo = Photo.create(:id => 100, :user_id => 100, :name => "Photo 100")
-#                @user = User.create(:id => 100, :name => "Brian")
-#                @compound_tuple = join.detect {|tuple| tuple[users_set] == user && tuple[photos_set] == photo}
-#                predicate.eval(compound_tuple).should be_true
-#                join.should include(compound_tuple)
-#              end
-#
-#              it "deletes the compound Tuple from the result of #tuples" do
-#                users_set.delete(user)
-#                join.should_not include(compound_tuple)
-#              end
-#
+
+          context "when a Tuple deleted from #operand_1" do
+            attr_reader :user, :tuple_class
+            context "is a member of a compound Tuple that matches the #predicate" do
+              attr_reader :photo, :composite_tuple
+              before do
+                @photo = Photo.find("nathan_photo_1")
+                @composite_tuple = join.find(photos_set[:id].eq(photo[:id]))
+                composite_tuple.should_not be_nil
+              end
+
+              it "deletes the CompositeTuple from the result of #tuples" do
+                pending "redesign of CompositeTuple access" do
+                  join.should include(composite_tuple)
+                  photo.delete
+                  join.should_not include(composite_tuple)
+                end
+              end
+
 #              it "triggers the on_delete event" do
 #                deleted = nil
 #                join.on_delete(retainer) do |deleted_tuple|
@@ -1021,8 +1021,8 @@ module Unison
 #                users_set.delete(user)
 #                compound_tuple.should_not be_retained_by(join)
 #              end
-#            end
-#
+            end
+
 #            context "is not a member of a compound Tuple that matches the #predicate" do
 #              before do
 #                @tuple_class = CompositeTuple
@@ -1045,8 +1045,8 @@ module Unison
 #                users_set.delete(user)
 #              end
 #            end
-#          end
-#
+          end
+
 #          context "when a Tuple deleted from #operand_2" do
 #            attr_reader :photo, :tuple_class
 #            context "is a member of a compound Tuple that matches the #predicate" do
