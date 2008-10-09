@@ -513,18 +513,125 @@ module Unison
         context "when a Relation that is the #value of an exposed Signal is modified" do
           context "when the Relation is the initial #value of an exposed Signal" do
             context "when a Tuple is inserted into the Relation" do
-              it "is inserted into the #hash_representation"
+              it "is inserted into the #hash_representation" do
+                topic[:hash_representation]["User"].should_not have_key("ross")
+                Friendship.create(:id => "ross_to_corey", :from_id => "ross", :to_id => "corey")
+                topic[:hash_representation]["User"]["ross"].should == User.find("ross").hash_representation.stringify_keys
+              end
+
+              it "triggers an on_change event for the 'hash_representation' Attribute" do
+                update_args = []
+                topic.on_update(retainer) do |attribute, old, new|
+                  update_args.push([attribute, old, new])
+                end
+
+                Friendship.create(:id => "ross_to_corey", :from_id => "ross", :to_id => "corey")
+
+                update_args.should == [[topic_class[:hash_representation], topic[:hash_representation], topic[:hash_representation]]]
+              end
             end
+
             context "when a Tuple is deleted from the Relation" do
-              it "is delete from the #hash_representation"
+              it "is deleted from the #hash_representation" do
+                topic[:hash_representation]["User"]["jan"].should == User.find("jan").hash_representation.stringify_keys
+                Friendship.find("jan_to_corey").delete
+                topic[:hash_representation]["User"].should_not have_key("jan")
+              end
+
+              it "triggers an on_change event for the 'hash_representation' Attribute" do
+                update_args = []
+                topic.on_update(retainer) do |attribute, old, new|
+                  update_args.push([attribute, old, new])
+                end
+
+                Friendship.find("jan_to_corey").delete
+
+                update_args.should == [[topic_class[:hash_representation], topic[:hash_representation], topic[:hash_representation]]]
+              end
             end
+
             context "when a Tuple is updated in the Relation" do
-              it "is updated in the #hash_representation"
+              it "is updated in the #hash_representation" do
+                User.find("jan").name = "Jan-Christian"
+                topic[:hash_representation]["User"]["jan"]["name"].should == "Jan-Christian"
+              end
+
+              it "triggers an on_change event for the 'hash_representation' Attribute" do
+                update_args = []
+                topic.on_update(retainer) do |attribute, old, new|
+                  update_args.push([attribute, old, new])
+                end
+
+                User.find("jan").name = "Jan-Christian"
+
+                update_args.should == [[topic_class[:hash_representation], topic[:hash_representation], topic[:hash_representation]]]
+              end
             end
           end
 
           context "when the #value of the exposed Signal has changed at least once" do
-            # same as above
+            before do
+              topic.example_signal.value.should == subject.fans
+              subject.show_fans = false
+              topic.example_signal.value.should == subject.heroes
+            end
+
+            context "when a Tuple is inserted into the Relation" do
+              it "is inserted into the #hash_representation" do
+                topic[:hash_representation]["User"].should_not have_key("jan")
+                Friendship.create(:id => "corey_to_jan", :from_id => "corey", :to_id => "jan")
+                topic[:hash_representation]["User"]["jan"].should == User.find("jan").hash_representation.stringify_keys
+              end
+
+              it "triggers an on_change event for the 'hash_representation' Attribute" do
+                update_args = []
+                topic.on_update(retainer) do |attribute, old, new|
+                  update_args.push([attribute, old, new])
+                end
+
+                Friendship.create(:id => "corey_to_jan", :from_id => "corey", :to_id => "jan")
+
+                update_args.should == [[topic_class[:hash_representation], topic[:hash_representation], topic[:hash_representation]]]
+              end
+            end
+
+            context "when a Tuple is deleted from the Relation" do
+              it "is deleted from the #hash_representation" do
+                topic[:hash_representation]["User"]["ross"].should == User.find("ross").hash_representation.stringify_keys
+                Friendship.find("corey_to_ross").delete
+                topic[:hash_representation]["User"].should_not have_key("ross")
+              end
+
+              it "triggers an on_change event for the 'hash_representation' Attribute" do
+                update_args = []
+                topic.on_update(retainer) do |attribute, old, new|
+                  update_args.push([attribute, old, new])
+                end
+
+                Friendship.find("corey_to_ross").delete
+
+                update_args.should == [[topic_class[:hash_representation], topic[:hash_representation], topic[:hash_representation]]]
+              end
+            end
+
+            context "when a Tuple is updated in the Relation" do
+              it "is updated in the #hash_representation" do
+                User.find("ross").name = "Jan-Christian"
+                topic[:hash_representation]["User"]["ross"]["name"].should == "Jan-Christian"
+              end
+
+              it "triggers an on_change event for the 'hash_representation' Attribute" do
+                update_args = []
+                topic.on_update(retainer) do |attribute, old, new|
+                  update_args.push([attribute, old, new])
+                end
+
+                User.find("ross").name = "Jan-Christian"
+
+                update_args.should == [[topic_class[:hash_representation], topic[:hash_representation], topic[:hash_representation]]]
+              end
+            end
+
           end
         end
 
