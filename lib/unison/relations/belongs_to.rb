@@ -1,7 +1,7 @@
 module Unison
   module Relations
     class BelongsTo < SingletonRelation
-      include TupleRelationMethods
+      include CommonInferredRelationMethods
 
       def initialize(owner, name, options)
         @owner, @name, @options = owner, name, options

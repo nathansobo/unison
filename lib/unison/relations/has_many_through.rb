@@ -1,7 +1,7 @@
 module Unison
   module Relations
     class HasManyThrough < SetProjection
-      include TupleRelationMethods
+      include CommonInferredRelationMethods
       
       attr_reader :foreign_key, :foreign_key_owner, :foreign_key_referrent
       def initialize(owner, name, options)
