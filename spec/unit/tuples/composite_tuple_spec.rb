@@ -122,10 +122,13 @@ module Unison
           right.should_not be_retained_by(tuple)
 
           mock.proxy(tuple).after_first_retain
-          tuple.retain_with(Object.new)
+          retainer = Object.new
+          tuple.retain_with(retainer)
 
           left.should be_retained_by(tuple)
           right.should be_retained_by(tuple)
+
+          tuple.release_from(retainer)
         end
       end
 

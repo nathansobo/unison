@@ -12,6 +12,20 @@ module Unison
         set.retain_with(retainer)
       end
 
+      after do
+        set.release_from(retainer)
+      end
+
+      describe ".clear_all" do
+        it "deletes all Tuples from every instance of Set" do
+          users_set.should_not be_empty
+          cameras_set.should_not be_empty
+          Set.clear_all
+          users_set.should be_empty
+          cameras_set.should be_empty
+        end
+      end
+
       describe "#initialize" do
         it "sets the name of the set" do
           set.name.should == :users
@@ -379,6 +393,32 @@ module Unison
             set.merge(tuples)
             set.should include(not_in_set)
           end
+        end
+      end
+
+      describe "#clear" do
+        attr_reader :retainer
+        before do
+          @retainer = Object.new
+          users_set.retain_with(retainer)
+        end
+
+        after do
+          users_set.release_from(retainer)
+        end
+
+        it "deletes all #tuples in the Set" do
+          expected_deleted_tuples = users_set.tuples.dup
+          deleted_tuples = []
+          users_set.on_delete(retainer) do |deleted|
+            deleted_tuples.push(deleted)
+          end
+
+          users_set.should_not be_empty
+          users_set.clear
+          users_set.should be_empty
+          
+          deleted_tuples.should have_same_elements_as(expected_deleted_tuples)
         end
       end
 

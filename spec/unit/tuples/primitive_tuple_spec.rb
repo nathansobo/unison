@@ -605,6 +605,9 @@ module Unison
             tuple.retain_with(retainer)
           end
 
+          after do
+            tuple.release_from(retainer)
+          end
 
           context "when passed an Attribute as the index argument" do
             it "delegates to #set_value on the PrimitiveField matching the given Attribute" do
@@ -886,6 +889,8 @@ module Unison
                 new_name = "The Tacos"
                 user.team.name = new_name
                 on_change_args.should == [[new_name]]
+
+                signal.release_from(retainer)
               end
 
               context "when passed a block" do
@@ -968,6 +973,8 @@ module Unison
               new_name = "The Tacos"
               user.team.name = new_name
               on_change_args.should == [[new_name]]
+
+              signal.release_from(retainer)
             end
 
             context "when passed a block" do

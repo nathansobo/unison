@@ -50,6 +50,10 @@ module Unison
     def or(*args)
       Predicates::Or.new(*args)
     end
+    
+    def clear_all_sets
+      Relations::Set.clear_all
+    end
 
     attr_writer :test_mode
     def test_mode?

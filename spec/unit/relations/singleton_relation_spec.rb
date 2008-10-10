@@ -140,6 +140,10 @@ module Unison
           singleton_relation.tuples
         end
 
+        after do
+          singleton_relation.release_from(retainer)
+        end
+
         describe "#merge" do
           it "calls #merge on the #operand" do
             tuple = Account.new(:employee_id => 0)
@@ -636,18 +640,25 @@ module Unison
 
       context "when not #retained?" do
         describe "#after_first_retain" do
+          attr_reader :retainer
           before do
+            @retainer = Object.new
             mock.proxy(singleton_relation).after_first_retain
           end
 
+          after do
+            singleton_relation.release_from(retainer)
+          end
+
           it "retains the Tuples inserted by #initial_read" do
-            singleton_relation.retain_with(Object.new)
+            singleton_relation.retain_with(retainer)
             singleton_relation.tuples.should_not be_empty
             singleton_relation.tuples.each do |tuple|
               tuple.should be_retained_by(singleton_relation)
             end
           end
         end
+
 
         describe "#tuple" do
           it "returns #operand.tuples.first" do

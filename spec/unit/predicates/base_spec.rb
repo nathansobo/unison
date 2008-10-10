@@ -31,6 +31,10 @@ module Unison
           predicate.retain_with(retainer)
         end
 
+        after do
+          predicate.release_from(retainer)
+        end
+
         it "returns a Subscription" do
           predicate.on_change(retainer) {}.class.should == Subscription
         end

@@ -135,6 +135,10 @@ module Unison
           selection.tuples
         end
 
+        after do
+          selection.release_from(retainer)
+        end
+
         describe "#merge" do
           it "calls #merge on the #operand" do
             tuple = Photo.new(:id => "photo_100", :user_id => "nathan", :name => "Photo 100")
@@ -158,6 +162,10 @@ module Unison
             old_photos.length.should == 2
             @new_photos = [ Photo.create(:id => "photo_100", :user_id => "new_id", :name => "Photo 100"),
                             Photo.create(:id => "photo_101", :user_id => "new_id", :name => "Photo 101") ]
+          end
+
+          after do
+            selection.release_from(retainer)
           end
 
           context "for Tuples that match the new Predicate but not the old one" do
@@ -450,12 +458,18 @@ module Unison
 
       context "when not #retained?" do
         describe "#after_first_retain" do
+          attr_reader :retainer
           before do
+            @retainer = Object.new
             mock.proxy(selection).after_first_retain
           end
 
+          after do
+            selection.release_from(retainer)
+          end
+
           it "retains the Tuples inserted by #initial_read" do
-            selection.retain_with(Object.new)
+            selection.retain_with(retainer)
             selection.should_not be_empty
             selection.each do |tuple|
               tuple.should be_retained_by(selection)

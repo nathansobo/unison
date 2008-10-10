@@ -115,6 +115,10 @@ module Unison
           projection.retain_with(retainer)
         end
 
+        after do
+          projection.release_from(retainer)
+        end
+
         context "when the a Tuple is inserted into the #operand" do
           attr_reader :user
 

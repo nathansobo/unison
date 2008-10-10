@@ -230,6 +230,10 @@ module Unison
           join.retain_with(retainer)
         end
 
+        after do
+          join.release_from(retainer)
+        end
+
         context "when a Tuple is inserted into #operand_1" do
           context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
@@ -794,8 +798,17 @@ module Unison
 
       context "when not #retained?" do
         describe "#after_first_retain" do
+          attr_reader :retainer
+          before do
+            @retainer = Object.new
+          end
+
+          after do
+            join.release_from(retainer)
+          end
+
           it "retains the Tuples inserted by #initial_read" do
-            join.retain_with(Object.new)
+            join.retain_with(retainer)
             join.should_not be_empty
             join.each do |tuple|
               tuple.should be_retained_by(join)
@@ -873,6 +886,10 @@ module Unison
           before do
             @retainer = Object.new
             join.retain_with(retainer)
+          end
+
+          after do
+            join.release_from(retainer)
           end
 
           context "when a Tuple is inserted into #operand_1" do

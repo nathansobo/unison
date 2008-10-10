@@ -49,6 +49,10 @@ module Unison
           signal.retain_with(retainer)
         end
 
+        after do
+          signal.release_from(retainer)
+        end
+
         it "retains its Tuple" do
           user.should be_retained_by(signal)
         end

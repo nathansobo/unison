@@ -30,6 +30,10 @@ module Unison
           predicate.retain_with(retainer)
         end
 
+        after do
+          predicate.release_from(retainer)
+        end
+
         describe "#==" do
           context "when other And has the same #operands" do
             it "returns true" do

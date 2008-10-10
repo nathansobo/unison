@@ -1,12 +1,24 @@
 module Unison
   module Relations
     class Set < Relation
+      class << self
+        def clear_all
+          instances.each {|set| set.clear}
+        end
+
+        def instances
+          @instances ||= []
+        end
+      end
+
+
       attr_reader :name, :attributes
 
       def initialize(name)
         super()
         @name = name
         @attributes = SequencedHash.new
+        self.class.instances.push(self)
       end
 
       def tuple_class
@@ -114,6 +126,12 @@ module Unison
       def merge(tuples)
         tuples.each do |tuple|
           insert(tuple) unless find(tuple[:id])
+        end
+      end
+
+      def clear
+        tuples.dup.each do |tuple|
+          delete(tuple)
         end
       end
 

@@ -247,10 +247,15 @@ module Unison
       end
 
       describe "#after_first_retain" do
-        attr_reader :relation
+        attr_reader :relation, :retainer
         before do
+          @retainer = Object.new
           @relation = users_set.where(Predicates::EqualTo.new(true, true))
           publicize relation, :tuples, :initial_read
+        end
+
+        after do
+          relation.release_from(retainer)
         end
 
         it "inserts each of the results of #initial_read" do
@@ -263,7 +268,7 @@ module Unison
           mock.proxy(relation).insert(user_1).ordered
           mock.proxy(relation).insert(user_2).ordered
 
-          relation.retain_with(Object.new)
+          relation.retain_with(retainer)
 
           relation.tuples.should == relation.initial_read
           relation.tuples.object_id.should == relation.tuples.object_id
@@ -276,6 +281,11 @@ module Unison
           @retainer = Object.new
           @relation = users_set.where(Predicates::EqualTo.new(true, true)).retain_with(retainer)
           publicize relation, :tuples, :initial_read
+        end
+
+        after do
+          RR.verify_doubles
+          relation.release_from(retainer)
         end
 
         describe "#on_insert" do

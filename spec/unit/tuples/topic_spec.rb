@@ -126,6 +126,10 @@ module Unison
           topic.retain_with(retainer)
         end
 
+        after do
+          topic.release_from(retainer)
+        end
+
         it "retains all exposed Objects" do
           topic.exposed_objects.each do |exposed_object|
             exposed_object.should be_retained_by(topic)
@@ -447,11 +451,13 @@ module Unison
               end
 
               it "does not trigger an on_change event for the 'hash_representation' Attribute" do
+                on_update_called = false
                 topic.on_update(retainer) do |attribute, old_value, new_value|
-                  raise "Don't taze me bro"
+                  on_update_called = true
                 end
 
                 change_signal_value
+                on_update_called.should be_false
               end
             end
           end

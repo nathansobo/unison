@@ -56,11 +56,19 @@ module Unison
           signal.retain_with(retainer)
         end
 
+        after do
+          signal.release_from(retainer)
+        end
+
         it "retains its #value" do
           value.should be_retained_by(signal)
         end
         
         context "when the #value changes" do
+          after do
+            value.release_from(retainer)
+          end
+          
           it "triggers the on_change event" do
             value.retain_with(retainer)
 

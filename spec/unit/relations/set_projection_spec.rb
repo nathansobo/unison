@@ -118,6 +118,10 @@ module Unison
           projection.retain_with(retainer)
         end
 
+        after do
+          projection.release_from(retainer)
+        end
+
         describe "#merge" do
           it "calls #merge on the #projected_set" do
             tuple = User.new(:id => 100, :name => "Jan")

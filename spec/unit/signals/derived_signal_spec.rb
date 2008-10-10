@@ -39,6 +39,10 @@ module Unison
           derived_signal.retain_with(retainer)
         end
 
+        after do
+          derived_signal.release_from(retainer)
+        end
+
         it "retains its #source" do
           source.should be_retained_by(derived_signal)
         end

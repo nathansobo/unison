@@ -59,8 +59,8 @@ module Unison
     end
 
     def release_from(retainer)
-      retainers.delete(retainer.object_id)
-      if refcount == 0
+      deleted = retainers.delete(retainer.object_id)
+      if deleted && refcount == 0
         destroy_subscriptions
         release_children
         after_last_release

@@ -116,6 +116,10 @@ module Unison
           ordering.retain_with(retainer)
         end
 
+        after do
+          ordering.release_from(retainer)
+        end
+
         describe "when a Tuple is inserted into the #operand" do
           context "when the #order_by_attributes is #ascending?" do
             before do
@@ -220,8 +224,17 @@ module Unison
 
       describe "when not #retained?" do
         describe "#after_first_retain" do
+          attr_reader :retainer
+          before do
+            @retainer = Object.new
+          end
+
+          after do
+            ordering.release_from(retainer)
+          end
+
           it "retains the Tuples inserted by #initial_read" do
-            ordering.retain_with(Object.new)
+            ordering.retain_with(retainer)
             ordering.should_not be_empty
             ordering.each do |tuple|
               tuple.should be_retained_by(ordering)

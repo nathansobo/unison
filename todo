@@ -1,6 +1,7 @@
 Backlog
 --------
-* Topic#expose should work for signals with relations as the values
+Release from should blow up if the object is not a retainer
+
 cleanup PrimitiveTuple#[] specs
 
 In InnerJoin, rephrase operand_1 and operand_2 in terms of left and right to match new CompositeTuple vocab

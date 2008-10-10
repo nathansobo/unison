@@ -43,6 +43,10 @@ module Unison
           predicate.retain_with(retainer)
         end
 
+        after do
+          predicate.release_from(retainer)
+        end
+
         describe "#after_last_release" do
           context "when #operand_1 and #operand_2 are not Signals" do
             before do
