@@ -18,4 +18,18 @@ describe Unison do
       Unison.or(predicate_1, predicate_2).should == Unison::Predicates::Or.new(predicate_1, predicate_2)
     end
   end
+
+  describe ".models_module" do
+    it "defaults to Object" do
+      Unison.models_module.should == Object
+    end
+  end
+
+  describe ".models_module=" do
+    it "sets the value of .models_module to the given Module" do
+      expected_module = Module.new
+      Unison.models_module = expected_module
+      Unison.models_module.should == expected_module
+    end
+  end
 end

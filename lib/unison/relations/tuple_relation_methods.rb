@@ -8,7 +8,7 @@ module Unison
       end
 
       def target_class
-        @target_class ||= class_name.to_s.constantize
+        @target_class ||= Unison.models_module.const_get(class_name.to_s)
       end
 
       def foreign_key

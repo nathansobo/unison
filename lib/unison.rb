@@ -37,7 +37,12 @@ module Unison
       @origin
     end
     attr_writer :origin
-
+    
+    def models_module
+      @models_module ||= Object
+    end
+    attr_writer :models_module
+    
     def and(*args)
       Predicates::And.new(*args)
     end
