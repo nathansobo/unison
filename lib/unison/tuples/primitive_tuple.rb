@@ -103,6 +103,14 @@ module Unison
           class_eval(method_definition, __FILE__, method_definition_line)
         end
 
+        def declare_fixtures(fixtures)
+          set.declare_fixtures(fixtures)
+        end
+
+        def load_fixtures
+          set.load_fixtures
+        end
+
         protected
         def single_set_inheritance_subclass?
           superclass != PrimitiveTuple && superclass != Topic

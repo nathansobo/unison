@@ -422,6 +422,47 @@ module Unison
         end
       end
 
+      describe "fixture declaration and loading" do
+        attr_reader :fixtures_hash_1, :fixtures_hash_2
+        before do
+          @fixtures_hash_1 = {
+            :bob => {:name => "Bob", :hobby => "Bein' a big boy"},
+            :jane => {:name => "Jane", :hobby => "Posing on anti-aircraft guns"}
+          }
+          @fixtures_hash_2 = {
+            :mary => {:name => "Mary", :hobby => "Celery and tomato juice"}
+          }
+        end
+
+        describe "#declare_fixtures" do
+          it "#merges the given hash of fixtures with the existing #declared_fixtures" do
+            users_set.declared_fixtures.should == {}
+            users_set.declare_fixtures(fixtures_hash_1)
+            users_set.declared_fixtures.should == fixtures_hash_1
+            users_set.declare_fixtures(fixtures_hash_2)
+            users_set.declared_fixtures.should == fixtures_hash_1.merge(fixtures_hash_2)
+          end
+        end
+
+        describe "#load_fixtures" do
+          it "instantiates an instance of #tuple_class for each fixture identified in #declared_fixtures" do
+            users_set.declare_fixtures(fixtures_hash_1)
+            fixtures_hash_1.keys.each do |id|
+              users_set.find(id).should be_nil
+            end
+
+            users_set.load_fixtures
+
+            fixtures_hash_1.each do |id, attributes|
+              fixture = users_set.find(id)
+              attributes.each do |name, value|
+                fixture[name].should == value
+              end
+            end
+          end
+        end
+      end
+
       describe "#to_sql" do
         it "returns a 'select #attributes from #name'" do
           set.to_sql.should be_like("SELECT `users`.`id`, `users`.`name` FROM `users`")

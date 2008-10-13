@@ -484,6 +484,23 @@ module Unison
             end
           end
         end
+
+        describe ".declare_fixtures" do
+          it "delegates to #set" do
+            fixtures_hash = {
+              "joe" => {:name => "Joe"}  
+            }
+            mock.proxy(User.set).declare_fixtures(fixtures_hash)
+            User.declare_fixtures(fixtures_hash)
+          end
+        end
+
+        describe ".load_fixtures" do
+          it "delegates to #set" do
+            mock.proxy(User.set).load_fixtures
+            User.load_fixtures
+          end
+        end
       end
 
       describe "Instance Methods" do
