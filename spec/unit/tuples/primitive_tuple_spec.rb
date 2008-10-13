@@ -431,10 +431,12 @@ module Unison
           end
         end
 
-        describe ".fetch" do
-          it ""
+        describe ".find_or_pull" do
+          it "delegates to #find_or_pull on the #relation" do
+            User.find_or_pull("buffington").should == User.set.find_or_pull("buffington")
+          end
         end
-        
+
         describe ".create" do
           it "instantiates an instance of the Tuple with the given attributes and inserts it into its .set, then returns it" do
             User.find("ernie").should be_nil

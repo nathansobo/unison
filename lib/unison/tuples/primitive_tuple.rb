@@ -88,8 +88,12 @@ module Unison
           set.where(predicate)
         end
 
-        def find(id)
-          set.find(id)
+        def find(id_or_predicate)
+          set.find(id_or_predicate)
+        end
+
+        def find_or_pull(id_or_predicate)
+          set.find_or_pull(id_or_predicate)
         end
 
         def relates_to_many(name, &definition)
