@@ -15,6 +15,13 @@ module Unison
       end
     end
 
+    describe ".load_all_fixtures" do
+      it "delegates to Relations::Set.load_all_fixtures" do
+        mock.proxy(Relations::Set).load_all_fixtures
+        Unison.load_all_fixtures
+      end
+    end
+
     describe ".and" do
       it "instantiates a Predicates::And with the passed-in arguments" do
         Unison.and(predicate_1, predicate_2).should == Unison::Predicates::And.new(predicate_1, predicate_2)

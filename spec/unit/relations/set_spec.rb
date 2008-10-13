@@ -17,12 +17,23 @@ module Unison
       end
 
       describe ".clear_all" do
-        it "deletes all Tuples from every instance of Set" do
+        it "calls #clear on every instance of Set" do
           users_set.should_not be_empty
           cameras_set.should_not be_empty
           Set.clear_all
           users_set.should be_empty
           cameras_set.should be_empty
+        end
+      end
+
+      describe ".load_all_fixtures" do
+        it "calls #load_fixtures on every instance of Set" do
+          publicize Set, :instances
+          Set.instances.should_not be_empty
+          Set.instances.each do |instance|
+            mock.proxy(instance).load_fixtures
+          end
+          Set.load_all_fixtures
         end
       end
 

@@ -262,6 +262,7 @@ Spec::Runner.configure do |config|
   end
 
   config.after do
+    Unison::Relations::Set.send(:instances).clear
     Object.class_eval do
       remove_const :Team
       remove_const :User

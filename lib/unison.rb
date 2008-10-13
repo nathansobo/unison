@@ -55,6 +55,10 @@ module Unison
       Relations::Set.clear_all
     end
 
+    def load_all_fixtures
+      Relations::Set.load_all_fixtures
+    end
+
     attr_writer :test_mode
     def test_mode?
       @test_mode ||= false

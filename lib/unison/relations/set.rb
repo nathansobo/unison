@@ -6,12 +6,14 @@ module Unison
           instances.each {|set| set.clear}
         end
 
+        def load_all_fixtures
+          instances.each {|set| set.load_fixtures}
+        end
+
         def instances
           @instances ||= []
         end
       end
-
-
       attr_reader :name, :attributes
 
       def initialize(name)
