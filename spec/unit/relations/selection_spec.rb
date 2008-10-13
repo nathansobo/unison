@@ -127,6 +127,19 @@ module Unison
         end
       end
 
+      describe "#merge" do
+        it "calls #merge on the #operand" do
+          tuple = Photo.new(:id => "photo_100", :user_id => "nathan", :name => "Photo 100")
+          operand.find(tuple[:id]).should be_nil
+          operand.should_not include(tuple)
+          mock.proxy(operand).merge([tuple])
+
+          selection.merge([tuple])
+
+          operand.should include(tuple)
+        end
+      end
+
       context "when #retained?" do
         attr_reader :retainer
         before do
@@ -137,19 +150,6 @@ module Unison
 
         after do
           selection.release_from(retainer)
-        end
-
-        describe "#merge" do
-          it "calls #merge on the #operand" do
-            tuple = Photo.new(:id => "photo_100", :user_id => "nathan", :name => "Photo 100")
-            operand.find(tuple[:id]).should be_nil
-            operand.should_not include(tuple)
-            mock.proxy(operand).merge([tuple])
-
-            selection.merge([tuple])
-
-            operand.should include(tuple)
-          end
         end
 
         context "when the #predicate is updated" do
@@ -484,14 +484,6 @@ module Unison
             tuples.each do |tuple|
               tuple[:user_id].should == "nathan"
             end
-          end
-        end
-
-        describe "#merge" do
-          it "raises an Exception" do
-            lambda do
-              selection.merge([Photo.new(:id => "photo_100", :user_id => "nathan", :name => "Photo 100")])
-            end.should raise_error
           end
         end
       end

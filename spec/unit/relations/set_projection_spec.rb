@@ -111,6 +111,16 @@ module Unison
         end
       end
 
+      describe "#merge" do
+        it "calls #merge on the #projected_set" do
+          tuple = User.new(:id => 100, :name => "Jan")
+          mock.proxy(projected_set).merge([tuple])
+          projected_set.should_not include(tuple)
+          projection.merge([tuple])
+          projected_set.should include(tuple)
+        end
+      end
+      
       context "when #retained?" do
         attr_reader :retainer
         before do
@@ -120,16 +130,6 @@ module Unison
 
         after do
           projection.release_from(retainer)
-        end
-
-        describe "#merge" do
-          it "calls #merge on the #projected_set" do
-            tuple = User.new(:id => 100, :name => "Jan")
-            mock.proxy(projected_set).merge([tuple])
-            projected_set.should_not include(tuple)
-            projection.merge([tuple])
-            projected_set.should include(tuple)
-          end
         end
 
         context "when the a Tuple is inserted into the #operand" do
@@ -373,14 +373,6 @@ module Unison
             it "returns the unique set of PrimitiveTuples corresponding to #projected_set from the #operand" do
               projection.tuples.should == operand.tuples.map {|tuple| tuple[projected_set]}.uniq
             end
-          end
-        end
-
-        describe "#merge" do
-          it "raises an Exception" do
-            lambda do
-              projection.merge([Photo.new(:id => 100, :user_id => 1, :name => "Photo 100")])
-            end.should raise_error
           end
         end
       end

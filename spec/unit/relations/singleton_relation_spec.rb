@@ -132,6 +132,19 @@ module Unison
         end
       end
 
+      describe "#merge" do
+        it "calls #merge on the #operand" do
+          tuple = Account.new(:employee_id => 0)
+          operand.find(tuple[:id]).should be_nil
+          operand.should_not include(tuple)
+          mock.proxy(operand).merge([tuple])
+
+          singleton_relation.merge([tuple])
+
+          operand.should include(tuple)
+        end
+      end
+
       context "when #retained?" do
         attr_reader :retainer
         before do
@@ -142,19 +155,6 @@ module Unison
 
         after do
           singleton_relation.release_from(retainer)
-        end
-
-        describe "#merge" do
-          it "calls #merge on the #operand" do
-            tuple = Account.new(:employee_id => 0)
-            operand.find(tuple[:id]).should be_nil
-            operand.should_not include(tuple)
-            mock.proxy(operand).merge([tuple])
-
-            singleton_relation.merge([tuple])
-
-            operand.should include(tuple)
-          end
         end
 
         context "when a Tuple is inserted into the #operand" do
@@ -683,14 +683,6 @@ module Unison
             it "returns [#operand.tuples.first]" do
               singleton_relation.tuples.should == [operand.tuples.first]
             end
-          end
-        end
-
-        describe "#merge" do
-          it "raises an Exception" do
-            lambda do
-              singleton_relation.merge([Photo.new(:id => "account_100", :user_id => "nathan", :name => "Photo 100")])
-            end.should raise_error
           end
         end
       end

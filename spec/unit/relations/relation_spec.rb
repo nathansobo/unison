@@ -112,9 +112,119 @@ module Unison
               users_set.where(users_set[:id].eq("not_in_set")).should be_empty
             end
 
-            it "returns that Tuple" do
+            it "returns nil" do
               user = users_set.find("not_in_set")
               user.should be_nil
+            end
+          end
+        end
+      end
+
+      describe "#find_or_pull" do
+        context "when passed a Predicate" do
+          context "when the Predicate results in a Selection that is not empty" do
+            it "returns the first matching Tuple" do
+              result = users_set.find_or_pull(users_set[:id].eq("nathan"))
+              result.class.should == User
+              result.id.should == "nathan"
+            end
+          end
+
+          context "when the Predicate results in a Selection that is empty" do
+            before do
+              users_set.find(user_id).should be_nil
+            end
+
+            context "when there are Tuples in Unison.origin that match the Predicate" do
+              def user_id
+                "buffington"
+              end
+
+              before do
+                connection[:users].filter(:id => user_id).should_not be_empty
+              end
+
+              it "returns the #first Tuple to be pulled from Unison.origin" do
+                user = users_set.find_or_pull(users_set[:id].eq(user_id))
+                user.should_not be_nil
+                users_set.find(user_id).should == user
+              end
+            end
+
+            context "when there are no Tuples in Unison.origin that match the Predicate" do
+              def user_id
+                "crap"
+              end
+
+              before do
+                connection[:users].filter(:id => user_id).should be_empty
+              end
+
+              it "returns nil and does not affect the Set" do
+                lambda do
+                  users_set.find_or_pull(users_set[:id].eq(user_id)).should be_nil
+                end.should_not change { users_set.size }
+              end
+            end
+          end
+        end
+
+        context "when passed an id" do
+          it "calls self[:id].convert on the argument" do
+            mock.proxy(users_set[:id]).convert("nathan")
+            users_set.find_or_pull("nathan")
+          end
+
+          context "when a Tuple with the given #id is in the Relation" do
+            before do
+              users_set.where(users_set[:id].eq("nathan")).should_not be_empty
+            end
+
+            it "returns that Tuple" do
+              user = users_set.find_or_pull("nathan")
+              user[:id].should == "nathan"
+            end
+          end
+
+          context "when no Tuple with the given #id is in the Relation" do
+            before do
+              users_set.where(users_set[:id].eq("not_in_set")).should be_empty
+            end
+
+            before do
+              users_set.find(user_id).should be_nil
+            end
+
+            context "when there is a Tuple with the given id in Unison.origin" do
+              def user_id
+                "buffington"
+              end
+
+              before do
+                connection[:users].filter(:id => user_id).should_not be_empty
+              end
+
+              it "returns the #first Tuple to be pulled from Unison.origin" do
+                user = users_set.find_or_pull(user_id)
+                user.should_not be_nil
+                users_set.find(user_id).should == user
+              end
+            end
+
+            context "when there are no Tuples with the given id in Unison.origin" do
+              def user_id
+                "crap"
+              end
+
+              before do
+                connection[:users].filter(:id => user_id).should be_empty
+              end
+
+              it "returns nil and does not affect the Set" do
+                lambda do
+                  users_set.find_or_pull(user_id).should be_nil
+                end.should_not change { users_set.size }
+              end
             end
           end
         end

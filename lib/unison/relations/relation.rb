@@ -54,6 +54,17 @@ module Unison
         where(predicate).tuples.first
       end
 
+      def find_or_pull(id_or_predicate)
+        if id_or_predicate.is_a?(Predicates::Base)
+          predicate = id_or_predicate
+        else
+          predicate = self[:id].eq(self[:id].convert(id_or_predicate))
+        end
+        selection = where(predicate)
+        selection.pull if selection.empty?
+        selection.tuples.first
+      end
+
       def where(predicate)
         Selection.new(self, predicate)
       end

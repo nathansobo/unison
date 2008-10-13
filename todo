@@ -14,6 +14,10 @@ Commonize PrimitiveTuple & ProjectedTuple as much as possible
 Sets should not have to be retained to support insert
 When a set is retained, it should retain its tuples, just like any other relation
 
+Decide what to do when fetching an object out of the database that is already in the cache (should we update the cached object?)
+
+Nuke unretained objects from the cache periodically using an LRU strategy
+
 Icebox
 --------
 

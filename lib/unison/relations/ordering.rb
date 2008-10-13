@@ -27,7 +27,6 @@ module Unison
       end
 
       def merge(tuples)
-        raise "Relation must be retained" unless retained?
         operand.merge(tuples)
       end
 

@@ -87,6 +87,18 @@ module Unison
         end
       end
 
+      describe "#merge" do
+        it "calls #merge on the #operand" do
+          tuple = User.new(:name => "Gottlob", :hobby => "Number Theory")
+          operand.find(tuple[:id]).should be_nil
+          mock.proxy(operand).merge([tuple])
+
+          ordering.merge([tuple])
+
+          operand.should include(tuple)
+        end
+      end
+
       describe "#composed_sets" do
         it "delegates to its #operand" do
           ordering.composed_sets.should == operand.composed_sets
@@ -208,18 +220,6 @@ module Unison
             arguments.should == [[tuple_to_update, order_by_attribute_1, old_value, new_value]]
           end
         end
-
-        describe "#merge" do
-          it "calls #merge on the #operand" do
-            tuple = User.new(:name => "Gottlob", :hobby => "Number Theory")
-            operand.find(tuple[:id]).should be_nil
-            mock.proxy(operand).merge([tuple])
-            
-            ordering.merge([tuple])
-
-            operand.should include(tuple)
-          end
-        end
       end
 
       describe "when not #retained?" do
@@ -267,14 +267,6 @@ module Unison
               tuples_in_expected_order.should_not == operand.tuples
               ordering.tuples.should == tuples_in_expected_order
             end
-          end
-        end
-
-        describe "#merge" do
-          it "raises an Exception" do
-            lambda do
-              ordering.merge([User.new(:name => "Bertrand", :hobby => "Analytic Philosophy")])
-            end.should raise_error
           end
         end
       end
