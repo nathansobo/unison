@@ -103,8 +103,8 @@ module Unison
           class_eval(method_definition, __FILE__, method_definition_line)
         end
 
-        def declare_fixtures(fixtures)
-          set.declare_fixtures(fixtures)
+        def memory_fixtures(fixtures)
+          set.memory_fixtures(fixtures)
         end
 
         def load_fixtures

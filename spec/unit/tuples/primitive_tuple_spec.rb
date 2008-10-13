@@ -485,13 +485,13 @@ module Unison
           end
         end
 
-        describe ".declare_fixtures" do
+        describe ".memory_fixtures" do
           it "delegates to #set" do
             fixtures_hash = {
               "joe" => {:name => "Joe"}  
             }
-            mock.proxy(User.set).declare_fixtures(fixtures_hash)
-            User.declare_fixtures(fixtures_hash)
+            mock.proxy(User.set).memory_fixtures(fixtures_hash)
+            User.memory_fixtures(fixtures_hash)
           end
         end
 

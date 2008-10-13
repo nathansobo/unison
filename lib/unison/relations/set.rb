@@ -154,16 +154,16 @@ module Unison
         tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
       end
 
-      def declare_fixtures(fixtures_hash)
-        declared_fixtures.merge!(fixtures_hash)
+      def memory_fixtures(fixtures_hash)
+        declared_memory_fixtures.merge!(fixtures_hash)
       end
 
-      def declared_fixtures
-        @declared_fixtures ||= {}
+      def declared_memory_fixtures
+        @declared_memory_fixtures ||= {}
       end
 
       def load_fixtures
-        declared_fixtures.each do |id, attributes|
+        declared_memory_fixtures.each do |id, attributes|
           attributes[:id] = id.to_s
           insert(tuple_class.new(attributes))
         end

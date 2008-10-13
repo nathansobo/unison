@@ -445,19 +445,19 @@ module Unison
           }
         end
 
-        describe "#declare_fixtures" do
-          it "#merges the given hash of fixtures with the existing #declared_fixtures" do
-            users_set.declared_fixtures.should == {}
-            users_set.declare_fixtures(fixtures_hash_1)
-            users_set.declared_fixtures.should == fixtures_hash_1
-            users_set.declare_fixtures(fixtures_hash_2)
-            users_set.declared_fixtures.should == fixtures_hash_1.merge(fixtures_hash_2)
+        describe "#memory_fixtures" do
+          it "#merges the given hash of fixtures with the existing #declared_memory_fixtures" do
+            users_set.declared_memory_fixtures.should == {}
+            users_set.memory_fixtures(fixtures_hash_1)
+            users_set.declared_memory_fixtures.should == fixtures_hash_1
+            users_set.memory_fixtures(fixtures_hash_2)
+            users_set.declared_memory_fixtures.should == fixtures_hash_1.merge(fixtures_hash_2)
           end
         end
 
         describe "#load_fixtures" do
-          it "instantiates an instance of #tuple_class for each fixture identified in #declared_fixtures" do
-            users_set.declare_fixtures(fixtures_hash_1)
+          it "instantiates an instance of #tuple_class for each fixture identified in #declared_memory_fixtures" do
+            users_set.memory_fixtures(fixtures_hash_1)
             fixtures_hash_1.keys.each do |id|
               users_set.find(id).should be_nil
             end
