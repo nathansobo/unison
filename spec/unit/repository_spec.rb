@@ -237,5 +237,11 @@ module Unison
         end
       end
     end
+
+    describe "#table_for" do
+      it "when given a Set, returns the Sequel table object corresponding to its #name" do
+        origin.table_for(users_set).inspect.should == origin.connection[users_set.name].inspect
+      end
+    end
   end
 end

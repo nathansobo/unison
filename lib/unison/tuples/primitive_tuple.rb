@@ -107,8 +107,16 @@ module Unison
           set.memory_fixtures(fixtures)
         end
 
-        def load_fixtures
-          set.load_fixtures
+        def load_memory_fixtures
+          set.load_memory_fixtures
+        end
+
+        def database_fixtures(fixtures)
+          set.database_fixtures(fixtures)
+        end
+
+        def load_database_fixtures
+          set.load_database_fixtures
         end
 
         protected

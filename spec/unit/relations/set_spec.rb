@@ -27,11 +27,12 @@ module Unison
       end
 
       describe ".load_all_fixtures" do
-        it "calls #load_fixtures on every instance of Set" do
+        it "calls #load_memory_fixtures and #load_database_fixtures on every instance of Set" do
           publicize Set, :instances
           Set.instances.should_not be_empty
           Set.instances.each do |instance|
-            mock.proxy(instance).load_fixtures
+            mock.proxy(instance).load_memory_fixtures
+            mock.proxy(instance).load_database_fixtures
           end
           Set.load_all_fixtures
         end
@@ -455,19 +456,48 @@ module Unison
           end
         end
 
-        describe "#load_fixtures" do
+        describe "#load_memory_fixtures" do
           it "instantiates an instance of #tuple_class for each fixture identified in #declared_memory_fixtures" do
             users_set.memory_fixtures(fixtures_hash_1)
             fixtures_hash_1.keys.each do |id|
               users_set.find(id).should be_nil
             end
 
-            users_set.load_fixtures
+            users_set.load_memory_fixtures
 
             fixtures_hash_1.each do |id, attributes|
               fixture = users_set.find(id)
               attributes.each do |name, value|
                 fixture[name].should == value
+              end
+            end
+          end
+        end
+
+        describe "#database_fixtures" do
+          it "#merges the given hash of fixtures with the existing #declared_database_fixtures" do
+            users_set.declared_database_fixtures.should == {}
+            users_set.database_fixtures(fixtures_hash_1)
+            users_set.declared_database_fixtures.should == fixtures_hash_1
+            users_set.database_fixtures(fixtures_hash_2)
+            users_set.declared_database_fixtures.should == fixtures_hash_1.merge(fixtures_hash_2)
+          end
+        end
+
+        describe "#load_database_fixtures" do
+          it "inserts each attributes hash in #declared_database_fixtures into the database table corresponding to the Set" do
+            users_set.database_fixtures(fixtures_hash_1)
+
+            fixtures_hash_1.keys.each do |id|
+              origin.table_for(users_set).filter(:id => id.to_s).should be_empty
+            end
+
+            users_set.load_database_fixtures
+
+            fixtures_hash_1.each do |id, attributes|
+              fixture_record = origin.table_for(users_set).filter(:id => id.to_s).first
+              attributes.each do |name, value|
+                fixture_record[name].should == value
               end
             end
           end

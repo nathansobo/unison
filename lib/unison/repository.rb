@@ -16,7 +16,7 @@ module Unison
       if relation_or_tuple.is_a?(Relations::InnerJoin) || relation_or_tuple.is_a?(CompositeTuple)
         raise NotImplementedError, "You cannot push CompositeTuples or Relations that contain CompositeTuples"
       end
-      table = connection[relation_or_tuple.set.name]
+      table = table_for(relation_or_tuple.set)
       if relation_or_tuple.respond_to?(:tuples)
         relation_or_tuple.tuples.each do |tuple|
           push_tuple(table, tuple)
@@ -24,6 +24,10 @@ module Unison
       else
         push_tuple(table, relation_or_tuple)
       end
+    end
+
+    def table_for(set)
+      connection[set.name]
     end
 
     protected

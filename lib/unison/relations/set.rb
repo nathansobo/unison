@@ -7,7 +7,10 @@ module Unison
         end
 
         def load_all_fixtures
-          instances.each {|set| set.load_fixtures}
+          instances.each do |set|
+            set.load_memory_fixtures
+            set.load_database_fixtures          
+          end
         end
 
         def instances
@@ -158,14 +161,30 @@ module Unison
         declared_memory_fixtures.merge!(fixtures_hash)
       end
 
+      def database_fixtures(fixtures_hash)
+        declared_database_fixtures.merge!(fixtures_hash)
+      end
+
       def declared_memory_fixtures
         @declared_memory_fixtures ||= {}
       end
 
-      def load_fixtures
+      def declared_database_fixtures
+        @declared_database_fixtures ||= {}
+      end
+
+      def load_memory_fixtures
         declared_memory_fixtures.each do |id, attributes|
           attributes[:id] = id.to_s
           insert(tuple_class.new(attributes))
+        end
+      end
+
+      def load_database_fixtures
+        table = Unison.origin.table_for(self)
+        declared_database_fixtures.each do |id, attributes|
+          attributes[:id] = id.to_s
+           table << attributes
         end
       end
 

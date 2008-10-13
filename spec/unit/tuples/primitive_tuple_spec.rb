@@ -495,10 +495,27 @@ module Unison
           end
         end
 
-        describe ".load_fixtures" do
+        describe ".load_memory_fixtures" do
           it "delegates to #set" do
-            mock.proxy(User.set).load_fixtures
-            User.load_fixtures
+            mock.proxy(User.set).load_memory_fixtures
+            User.load_memory_fixtures
+          end
+        end
+
+        describe ".database_fixtures" do
+          it "delegates to #set" do
+            fixtures_hash = {
+              "joe" => {:name => "Joe"}
+            }
+            mock.proxy(User.set).database_fixtures(fixtures_hash)
+            User.database_fixtures(fixtures_hash)
+          end
+        end
+
+        describe ".load_database_fixtures" do
+          it "delegates to #set" do
+            mock.proxy(User.set).load_database_fixtures
+            User.load_database_fixtures
           end
         end
       end
