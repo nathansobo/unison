@@ -8,14 +8,6 @@ module Unison
           set[attribute]
         end
 
-        def where(predicate)
-          set.where(predicate)
-        end
-
-        def find(id)
-          set.find(id)
-        end
-
         def basename
           name.split("::").last
         end

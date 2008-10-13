@@ -48,9 +48,9 @@ module Unison
           origin.connection[:photos].delete
           origin.connection[:users].delete
           
-          mock.proxy(operand).push(origin)
+          mock.proxy(operand).push
           origin.fetch(projection).should be_empty
-          projection.push(origin)
+          projection.push
           origin.fetch(projection).should == projection.tuples
         end
       end

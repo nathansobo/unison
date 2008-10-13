@@ -63,7 +63,7 @@ module Unison
 
           it "calls #push on the given Repository with self" do
             origin.fetch(singleton_relation).should be_empty
-            singleton_relation.push(origin)
+            singleton_relation.push
             origin.fetch(singleton_relation).should == singleton_relation.tuples
           end
         end
@@ -83,7 +83,7 @@ module Unison
 
             origin.fetch(users_projection).should be_empty
             origin.fetch(accounts_projection).should be_empty
-            singleton_relation.push(origin)
+            singleton_relation.push
             origin.fetch(users_projection).should == users_projection.tuples
             origin.fetch(accounts_projection).should == accounts_projection.tuples
           end

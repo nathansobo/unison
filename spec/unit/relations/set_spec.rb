@@ -238,7 +238,7 @@ module Unison
       describe "#push" do
         it "calls #push with self on the given Repository" do
           mock.proxy(origin).push(set)
-          set.push(origin)
+          set.push
         end
       end
 

@@ -178,7 +178,7 @@ module Unison
 
           context "with PrimitiveTuples that are dirty?" do
             it "updates all dirty? PrimitiveTuples and sets #dirty? to false on them" do
-              photos_set.pull(origin)
+              photos_set.pull
               pushed_photos = photos_set.select do |photo|
                 !photo.new?
               end
@@ -195,7 +195,7 @@ module Unison
             end
 
             it "does not update PrimitiveTuples that are not dirty?" do
-              photos_set.pull(origin)
+              photos_set.pull
               pushed_photos = photos_set.select do |photo|
                 !photo.dirty?
               end

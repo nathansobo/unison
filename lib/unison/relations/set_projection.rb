@@ -61,8 +61,8 @@ module Unison
         projected_set.merge(tuples)
       end
 
-      def push(repository)
-        operand.push(repository)
+      def push
+        operand.push
       end
       
       def set

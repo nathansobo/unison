@@ -417,6 +417,24 @@ module Unison
           end
         end
 
+        describe ".where" do
+          it "delegates to .relation" do
+            predicate = User[:name].eq("Nathan")
+            mock.proxy(User.set).where(User[:name].eq("Nathan"))
+            User.where(User[:name].eq("Nathan"))
+          end
+        end
+
+        describe ".find" do
+          it "delegates to #find on the #relation" do
+            User.find("nathan").should == User.set.find("nathan")
+          end
+        end
+
+        describe ".fetch" do
+          it ""
+        end
+        
         describe ".create" do
           it "instantiates an instance of the Tuple with the given attributes and inserts it into its .set, then returns it" do
             User.find("ernie").should be_nil

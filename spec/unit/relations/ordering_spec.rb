@@ -60,7 +60,7 @@ module Unison
 
           it "calls #push on the given Repository with self" do
             origin.fetch(ordering).should be_empty
-            ordering.push(origin)
+            ordering.push
             origin.fetch(ordering).should == ordering.tuples
           end
         end
@@ -80,7 +80,7 @@ module Unison
 
             origin.fetch(users_projection).should be_empty
             origin.fetch(photos_projection).should be_empty
-            ordering.push(origin)
+            ordering.push
             origin.fetch(users_projection).should == users_projection.tuples
             origin.fetch(photos_projection).should == photos_projection.tuples
           end

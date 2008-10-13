@@ -64,10 +64,10 @@ module Unison
             mock.proxy(origin).push(users_projection)
             mock.proxy(origin).push(photos_projection)
 
-            join.push(origin)
+            join.push
 
-            users_projection.pull(origin).should == users_projection.tuples
-            photos_projection.pull(origin).should == photos_projection.tuples
+            users_projection.pull.should == users_projection.tuples
+            photos_projection.pull.should == photos_projection.tuples
           end
         end
 
@@ -86,11 +86,11 @@ module Unison
             mock.proxy(origin).push(photos_projection)
             mock.proxy(origin).push(cameras_projection)
 
-            join.push(origin)
+            join.push
 
-            users_projection.pull(origin).should == users_projection.tuples
-            photos_projection.pull(origin).should == photos_projection.tuples
-            cameras_projection.pull(origin).should == cameras_projection.tuples
+            users_projection.pull.should == users_projection.tuples
+            photos_projection.pull.should == photos_projection.tuples
+            cameras_projection.pull.should == cameras_projection.tuples
           end
         end
       end

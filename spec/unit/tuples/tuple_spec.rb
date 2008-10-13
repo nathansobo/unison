@@ -12,20 +12,6 @@ module Unison
         end
       end
 
-      describe ".where" do
-        it "delegates to .relation" do
-          predicate = User[:name].eq("Nathan")
-          mock.proxy(User.set).where(User[:name].eq("Nathan"))
-          User.where(User[:name].eq("Nathan"))
-        end
-      end
-
-      describe ".find" do
-        it "delegates to #find on the #relation" do
-          User.find("nathan").should == User.set.find("nathan")
-        end
-      end
-
       describe ".basename" do
         it "returns the last segment of name" do
           tuple_class = Class.new(PrimitiveTuple)

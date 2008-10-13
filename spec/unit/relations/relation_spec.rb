@@ -38,31 +38,14 @@ module Unison
           @relation = users_set
         end
 
-        it "calls push(self) on the passed in Repository" do
-          repository = Repository.new(connection)
-          mock.proxy(repository).push(relation)
-          relation.push(repository)
-        end
-
-        it "defaults the Repository to Unison.origin" do
+        it "calls push(self) on Unison.origin" do
           mock.proxy(origin).push(relation)
           relation.push
         end
       end
 
       describe "#pull" do
-        it "#merges the results of #fetch on the given Repository" do
-          repository = Repository.new(connection)
-          new_users = origin.fetch(users_set)
-          mock.proxy(repository).fetch(users_set)
-          mock.proxy(users_set).merge(new_users)
-
-          new_users.each { |user| users_set.find(user.id).should be_nil }
-          users_set.pull(repository)
-          new_users.each { |user| users_set.find(user.id).should_not be_nil }
-        end
-
-        it "defaults the Repository to Unison.origin" do
+        it "#merges the results of #fetch on the Unison.origin" do
           new_users = origin.fetch(users_set)
           mock.proxy(origin).fetch(users_set)
           mock.proxy(users_set).merge(new_users)

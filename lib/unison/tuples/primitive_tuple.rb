@@ -84,6 +84,14 @@ module Unison
           set.insert(new(attributes))
         end
 
+        def where(predicate)
+          set.where(predicate)
+        end
+
+        def find(id)
+          set.find(id)
+        end
+
         def relates_to_many(name, &definition)
           relation_definitions_on_self.push(RelationDefinition.new(name, definition, caller, false))
           attr_reader "#{name}_relation"

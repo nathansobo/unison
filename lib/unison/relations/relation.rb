@@ -31,17 +31,17 @@ module Unison
         end
       end
 
-      def pull(repository=Unison.origin)
-        merge(repository.fetch(self))
+      def pull
+        merge(Unison.origin.fetch(self))
       end
 
-      def push(repository=Unison.origin)
+      def push
         if composite?
           composed_sets.each do |component_set|
-            repository.push(self.project(component_set))
+            Unison.origin.push(self.project(component_set))
           end
         else
-          repository.push(self)
+          Unison.origin.push(self)
         end
       end
 
