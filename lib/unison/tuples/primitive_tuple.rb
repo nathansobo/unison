@@ -125,7 +125,7 @@ module Unison
         end
 
         def create_default_set
-          Relations::Set.new(basename.underscore.pluralize)
+          Relations::Set.new(basename.underscore.pluralize.to_sym)
         end
         
         def relation_definitions

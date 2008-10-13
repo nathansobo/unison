@@ -442,8 +442,8 @@ module Unison
               @set = tuple_class.set
             end
 
-            it "returns a new Set whose name is underscored and pluralized class name" do
-              set.name.should == "my_shoes"
+            it "returns a new Set whose name is underscored and pluralized class name as a Symbol" do
+              set.name.should == :my_shoes
             end
 
             it "retains the new Set" do
