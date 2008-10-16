@@ -60,7 +60,7 @@ module Unison
 
     def release_from(retainer)
       deleted = retainers.delete(retainer.object_id)
-      if deleted && !has_ancestral_root_retainer_other_than?(object_id)
+      if deleted && !has_ancestral_root_retainer_other_than?(self)
         destroy_subscriptions
         release_children
         after_last_release
@@ -94,7 +94,7 @@ module Unison
             if retainer.retainers.empty?
               return true
             else
-              return retainer.has_ancestral_root_retainer_other_than?(origin_object, objects_seen_so_far + [self])
+              return true if retainer.has_ancestral_root_retainer_other_than?(origin_object, objects_seen_so_far + [self])
             end
           else
             return true

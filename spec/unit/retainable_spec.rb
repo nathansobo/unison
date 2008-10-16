@@ -2,10 +2,6 @@ require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
   describe Retainable do
-    def retainable
-      @retainable ||= anonymous_retainable_object
-    end
-
     def retainer
       @retainer ||= Object.new
     end
@@ -24,29 +20,43 @@ module Unison
       end.new(name)
     end
 
-    describe ".retain" do
-      attr_reader :retainable, :retainable_class, :child, :children, :hash_children
-      before do
-        @child = anonymous_retainable_object
-        @children = [anonymous_retainable_object, anonymous_retainable_object]
-        @hash_children = {
-          1 => anonymous_retainable_object,
-          2 => anonymous_retainable_object
-        }
+    def retainable
+      @retainable ||= retainable_class.new(child, children, hash_children)
+    end
 
-        @retainable_class = Class.new do
-          include Retainable
-          attr_reader :child, :children, :hash_children
+    def retainable_class
+      @retainable_class ||= Class.new do
+        include Retainable
+        attr_reader :child, :children, :hash_children
 
-          retain :child, :children, :hash_children
+        retain :child, :children, :hash_children
 
-          def initialize(child, children, hash_children)
-            @child, @children, @hash_children = child, children, hash_children
-          end
+        def initialize(child, children, hash_children)
+          @child, @children, @hash_children = child, children, hash_children
         end
-        @retainable = retainable_class.new(child, children, hash_children)
-      end
 
+        def inspect
+          "retainable"
+        end
+      end
+    end
+
+    def child
+      @child ||= anonymous_retainable_object
+    end
+
+    def children
+      @children ||= [anonymous_retainable_object, anonymous_retainable_object]
+    end
+
+    def hash_children
+      @hash_children ||= {
+        1 => anonymous_retainable_object,
+        2 => anonymous_retainable_object
+      }
+    end
+
+    describe ".retain" do
       def self.should_retain_its_children
         it "causes the objects named by the passed-in names to be retained after the first call to #retain_with" do
           child.should_not be_retained_by(retainable)
@@ -282,7 +292,7 @@ module Unison
         end
 
         before do
-          @b = anonymous_retainable_object
+          @b = anonymous_retainable_object("b")
           b.retain_with(a)
           a.retain_with(b)
         end
@@ -301,18 +311,17 @@ module Unison
         end
 
         def other_retainer
-          @other_retainer ||= anonymous_retainable_object("other")
+          @other_retainer ||= anonymous_retainable_object
         end
 
         before do
-          a.name = "a"
           @b = anonymous_retainable_object("b")
           a.retain_with(b)
           b.retain_with(other_retainer)
         end
 
-        context "when that retainer's retention graph is acyclic" do
-          context "when the other ancestral root mixes in Retainable" do
+        context "when the remaining retainer's retention graph is acyclic" do
+          context "when the remaining retainer's ancestral root mixes in Retainable" do
 
             before do
               other_retainer.class.ancestors.should include(Retainable)
@@ -324,7 +333,7 @@ module Unison
             end
           end
 
-          context "when the other ancestral root does not mix in Retainable" do
+          context "when the remaining retainer's ancestral root does not mix in Retainable" do
             def other_retainer
               @other_retainer ||= Object.new
             end
@@ -336,28 +345,31 @@ module Unison
           end
         end
 
-        context "when that retainer also has self as an ancestral retainer" do
-          before do
-            b.retain_with(a)
+        context "when the remaining retainer's retention graph is cyclic" do
+          context "when the remaining retainer has the object being released as an ancestral retainer, in addition to another ancestral root" do
+            before do
+              b.retain_with(a)
+            end
+
+            it "does not call #after_last_release on self" do
+              dont_allow(retainable).after_last_release
+              a.release_from(retainer)
+            end
           end
 
-          it "does not call #after_last_release on self" do
-            dont_allow(retainable).after_last_release
-            a.release_from(retainer)
-          end
-        end
+          context "when the remaining retainer has cycles in its retention graph that don't involve the object being released" do
+            attr_reader :c
+            before do
+              @c = anonymous_retainable_object("c")
+              b.retain_with(c)
+              c.retain_with(b)
+            end
 
-        context "when that retainer has cycles in its retention graph that don't involve self" do
-          attr_reader :c
-          before do
-            @c = anonymous_retainable_object("c")
-            b.retain_with(c)
-            c.retain_with(b)
-          end
-
-          it "does not call #after_last_release on self, and does not get stuck in and endless loop" do
-            dont_allow(retainable).after_last_release
-            a.release_from(retainer)
+            it "does not call #after_last_release on self, and does not get stuck in and endless loop" do
+              retainable.refcount.should == 2
+              dont_allow(retainable).after_last_release
+              a.release_from(retainer)
+            end
           end
         end
       end
