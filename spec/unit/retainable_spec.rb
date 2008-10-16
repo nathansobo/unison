@@ -3,15 +3,25 @@ require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 module Unison
   describe Retainable do
     def retainable
-      users_set
+      @retainable ||= anonymous_retainable_object
     end
 
     def retainer
       @retainer ||= Object.new
     end
 
-    def anonymous_retainable_object
-      Class.new {include Retainable}.new
+    def anonymous_retainable_object(name=nil)
+      Class.new do
+        include Retainable
+        attr_accessor :name
+        def initialize(name)
+          @name = name
+        end
+
+        def inspect
+          name || object_id
+        end
+      end.new(name)
     end
 
     describe ".retain" do
@@ -244,10 +254,9 @@ module Unison
     describe "#release_from" do
       before do
         retainable.retain_with(retainer)
-        retainable.should be_retained_by(retainer)
       end
 
-      it "causes #retain_with(retainer) to return false" do
+      it "causes #retained_by?(retainer) to return false" do
         retainable.release_from(retainer)
         retainable.should_not be_retained_by(retainer)
       end
@@ -258,27 +267,98 @@ module Unison
         end.should change {retainable.refcount}.by(-1)
       end
 
-      context "when #refcount becomes > 0" do
-        it "does not call #after_last_release on itself" do
-          retainable.retain_with(Object.new)
-          retainable.refcount.should be > 1
-          dont_allow(retainable).after_last_release
+      context "when the last remaining retainer is released" do
+        it "calls #after_last_release on self" do
+          retainable.refcount.should == 1
+          mock.proxy(retainable).after_last_release
           retainable.release_from(retainer)
         end
       end
 
-      context "when #refcount becomes 0" do
-        def retainable
-          @retainable ||= users_set.where(users_set[:id].eq(1))
+      context "when the only remaining retainers have self as their only root ancestral retainer" do
+        attr_reader :b
+        def a
+          retainable
         end
 
         before do
-          retainable.refcount.should == 1
+          @b = anonymous_retainable_object
+          b.retain_with(a)
+          a.retain_with(b)
         end
 
-        it "calls #after_last_release on itself" do
+        it "calls #after_last_release on self" do
+          a.refcount.should == 2
           mock.proxy(retainable).after_last_release
-          retainable.release_from(retainer)
+          a.release_from(retainer)
+        end
+      end
+
+      context "when a remaining retainer has an object other than self as a root ancestral retainer" do
+        attr_reader :b, :other_retainer
+        def a
+          retainable
+        end
+
+        def other_retainer
+          @other_retainer ||= anonymous_retainable_object("other")
+        end
+
+        before do
+          a.name = "a"
+          @b = anonymous_retainable_object("b")
+          a.retain_with(b)
+          b.retain_with(other_retainer)
+        end
+
+        context "when that retainer's retention graph is acyclic" do
+          context "when the other ancestral root mixes in Retainable" do
+
+            before do
+              other_retainer.class.ancestors.should include(Retainable)
+            end
+
+            it "does not call #after_last_release on self" do
+              dont_allow(retainable).after_last_release
+              a.release_from(retainer)
+            end
+          end
+
+          context "when the other ancestral root does not mix in Retainable" do
+            def other_retainer
+              @other_retainer ||= Object.new
+            end
+
+            it "does not call #after_last_release on self" do
+              dont_allow(retainable).after_last_release
+              a.release_from(retainer)
+            end
+          end
+        end
+
+        context "when that retainer also has self as an ancestral retainer" do
+          before do
+            b.retain_with(a)
+          end
+
+          it "does not call #after_last_release on self" do
+            dont_allow(retainable).after_last_release
+            a.release_from(retainer)
+          end
+        end
+
+        context "when that retainer has cycles in its retention graph that don't involve self" do
+          attr_reader :c
+          before do
+            @c = anonymous_retainable_object("c")
+            b.retain_with(c)
+            c.retain_with(b)
+          end
+
+          it "does not call #after_last_release on self, and does not get stuck in and endless loop" do
+            dont_allow(retainable).after_last_release
+            a.release_from(retainer)
+          end
         end
       end
     end

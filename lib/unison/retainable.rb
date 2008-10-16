@@ -60,7 +60,7 @@ module Unison
 
     def release_from(retainer)
       deleted = retainers.delete(retainer.object_id)
-      if deleted && refcount == 0
+      if deleted && !has_ancestral_root_retainer_other_than?(object_id)
         destroy_subscriptions
         release_children
         after_last_release
@@ -83,6 +83,25 @@ module Unison
       subscriptions.any? do |subscription|
         subscription_node.include?(subscription)
       end
+    end
+
+    def has_ancestral_root_retainer_other_than?(origin_object, objects_seen_so_far=[])
+      origin_object_id = origin_object.object_id
+      object_ids_seen_so_far = objects_seen_so_far.map {|object| object.object_id}
+      retainers.each do |retainer_object_id, retainer|
+        if retainer_object_id != origin_object_id && !object_ids_seen_so_far.include?(retainer_object_id)
+          if retainer.is_a?(Retainable)
+            if retainer.retainers.empty?
+              return true
+            else
+              return retainer.has_ancestral_root_retainer_other_than?(origin_object, objects_seen_so_far + [self])
+            end
+          else
+            return true
+          end
+        end
+      end
+      false
     end
 
     protected
