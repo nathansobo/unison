@@ -1,416 +1,475 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../unison_spec_helper")
 
 module Unison
-  describe Retainable do
-    def retainer
-      @retainer ||= Object.new
-    end
+  module RetainableSpec
+    describe Retainable do
+      attr_reader :child, :array_children, :hash_children
+      attr_reader :subscribed_child_1, :subscribed_child_2, :subscribed_child_3
+      attr_reader :retainable_instance, :retainer
 
-    def anonymous_retainable_object(name=nil)
-      Class.new do
+      class RetainableClass
         include Retainable
-        attr_accessor :name
-        def initialize(name)
+
+        attr_reader :child, :array_children, :hash_children
+        attr_reader :subscribed_child_1, :subscribed_child_2, :subscribed_child_3
+        retain :child, :array_children, :hash_children
+        retain :subscribed_child_1, :subscribed_child_2, :subscribed_child_3
+
+        subscribe do
+          subscribed_child_1.subscription_node.subscribe {}
+        end
+
+        subscribe do
+          [
+            subscribed_child_2.subscription_node.subscribe {},
+              subscribed_child_3.subscription_node.subscribe {}
+          ]
+        end
+
+        def initialize(child, array_children, hash_children, subscribed_child_1, subscribed_child_2, subscribed_child_3)
+          @child, @array_children, @hash_children = child, array_children, hash_children
+          @subscribed_child_1, @subscribed_child_2, @subscribed_child_3 = subscribed_child_1, subscribed_child_2, subscribed_child_3
+        end
+      end
+
+      class RetainableSubclass < RetainableClass
+        attr_reader :subclass_child, :subclass_subscribed_child
+        retain :subclass_child
+
+        subscribe do
+          subclass_subscribed_child.subscription_node.subscribe {}
+        end
+        
+        def initialize(child, array_children, hash_children, subscribed_child_1, subscribed_child_2, subscribed_child_3, subclass_child, subclass_subscribed_child)
+          super(child, array_children, hash_children, subscribed_child_1, subscribed_child_2, subscribed_child_3)
+          @subclass_child = subclass_child
+          @subclass_subscribed_child = subclass_subscribed_child
+        end
+      end
+
+      class SimpleRetainableClass
+        include Retainable
+        attr_reader :name
+        def initialize(name=nil)
           @name = name
         end
+      end
 
-        def inspect
-          name || object_id
-        end
-      end.new(name)
-    end
+      def make_retainable_object(name=nil)
+        SimpleRetainableClass.new(name)
+      end
 
-    def retainable
-      @retainable ||= retainable_class.new(child, children, hash_children)
-    end
-
-    def retainable_class
-      @retainable_class ||= Class.new do
+      class SimpleSubscribableClass < SimpleRetainableClass
         include Retainable
-        attr_reader :child, :children, :hash_children
+        attr_reader :subscription_node
 
-        retain :child, :children, :hash_children
-
-        def initialize(child, children, hash_children)
-          @child, @children, @hash_children = child, children, hash_children
-        end
-
-        def inspect
-          "retainable"
-        end
-      end
-    end
-
-    def child
-      @child ||= anonymous_retainable_object
-    end
-
-    def children
-      @children ||= [anonymous_retainable_object, anonymous_retainable_object]
-    end
-
-    def hash_children
-      @hash_children ||= {
-        1 => anonymous_retainable_object,
-        2 => anonymous_retainable_object
-      }
-    end
-
-    describe ".retain" do
-      def self.should_retain_its_children
-        it "causes the objects named by the passed-in names to be retained after the first call to #retain_with" do
-          child.should_not be_retained_by(retainable)
-          children.each do |child_in_children|
-            child_in_children.should_not be_retained_by(retainable)
-          end
-          hash_children.values.each do |hash_child|
-            hash_child.should_not be_retained_by(retainable)
-          end
-
-          retainable.retain_with(retainer)
-
-          child.should be_retained_by(retainable)
-          children.each do |child_in_children|
-            child_in_children.should be_retained_by(retainable)
-          end
-          hash_children.values.each do |hash_child|
-            hash_child.should be_retained_by(retainable)
-          end
-        end
-
-        it "causes the objects named by the passed-in names to be released after the last call to #release_from" do
-          retainable.retain_with(retainer)
-          child.should be_retained_by(retainable)
-          children.each do |child_in_children|
-            child_in_children.should be_retained_by(retainable)
-          end
-          hash_children.values.each do |hash_child|
-            hash_child.should be_retained_by(retainable)
-          end
-
-          retainable.release_from(retainer)
-
-          child.should_not be_retained_by(retainable)
-          children.each do |child_in_children|
-            child_in_children.should_not be_retained_by(retainable)
-          end
-          hash_children.values.each do |hash_child|
-            hash_child.should_not be_retained_by(retainable)
-          end
+        def initialize(name=nil)
+          super
+          @subscription_node = SubscriptionNode.new(self)
         end
       end
 
-      should_retain_its_children
-
-      context "when .retain is invoked by the superclass" do
-        before do
-          retainable_subclass = Class.new(retainable_class)
-          @retainable = retainable_subclass.new(child, children, hash_children)
-        end
-
-        should_retain_its_children
+      def make_subscribable_object(name=nil)
+        SimpleSubscribableClass.new(name)
       end
-    end
 
-    describe ".subscribe" do
-      attr_reader :retainable, :retainable_class, :child, :children
       before do
-        @child = anonymous_subscribable_object
+        @child = make_retainable_object("child")
+        @array_children = [make_retainable_object("array_child_1"), make_retainable_object("array_child_2")]
+        @hash_children = {
+          1 => make_retainable_object("hash_child_1"),
+          2 => make_retainable_object("hash_child_2")
+        }
 
-        @retainable_class = Class.new do
-          include Retainable
-          attr_reader :child
+        @subscribed_child_1 = make_subscribable_object("subscribed_child_1")
+        @subscribed_child_2 = make_subscribable_object("subscribed_child_2")
+        @subscribed_child_3 = make_subscribable_object("subscribed_child_3")
 
-          retain :child
-          subscribe do
-            child.subscription_node.subscribe {}
-          end
-          subscribe do
-            [child.subscription_node.subscribe {}, child.subscription_node.subscribe {}]
-          end
+        @retainable_instance = RetainableClass.new(child, array_children, hash_children, subscribed_child_1, subscribed_child_2, subscribed_child_3)
+        @retainer = Object.new
 
-          def initialize(child)
-            @child = child
-          end
+        publicize retainable_instance, :children_to_retain, :subscription_definitions
+      end
+
+      describe ".retain" do
+        it "adds the given Symbols to .names_of_children_to_retain in self" do
+          names_of_children_to_retain = RetainableClass.names_of_children_to_retain
+          names_of_children_to_retain.should include(:child)
+          names_of_children_to_retain.should include(:array_children)
+          names_of_children_to_retain.should include(:hash_children)
         end
-        @retainable = retainable_class.new(child)
+
+        it "adds the given Symbols to .names_of_children_to_retain in subclasses" do
+          names_of_children_to_retain = RetainableSubclass.names_of_children_to_retain
+          names_of_children_to_retain.should include(:child)
+          names_of_children_to_retain.should include(:subclass_child)
+        end
       end
 
-      def anonymous_subscribable_object
-        Class.new do
-          include Retainable
-          attr_reader :subscription_node
-
-          def initialize
-            @subscription_node = SubscriptionNode.new(self)
-          end
-        end.new
+      describe ".subscribe" do
+        it "adds the given Procs to .subscription_definitions in self" do
+          RetainableClass.subscription_definitions.length.should == 2
+        end
+        it "adds the given Procs to .subscription_definitions in subclasses" do
+          RetainableSubclass.subscription_definitions.length.should == 3
+        end
       end
 
-      def self.should_subscribe_to_its_children
-        it "causes the first call to #retain_with to create a Subscription based on the given definition" do
-          publicize retainable, :subscriptions
-          retainable.should_not be_subscribed_to(child.subscription_node)
+      describe "#retain_with" do
+        after do
+          retainable_instance.release_from(retainer)
+        end
+
+        it "returns self" do
+          retainable_instance.retain_with(retainer).should == retainable_instance
+        end
+
+        it "increments the #refcount by 1" do
           lambda do
-            retainable.retain_with(retainer)
-          end.should change {retainable.subscriptions.length}.by(3)
-          retainable.should be_subscribed_to(child.subscription_node)
+            retainable_instance.retain_with(retainer)
+          end.should change { retainable_instance.refcount }.by(1)
         end
 
-        it "causes the last call to #release_from call to #destroy the #subscriptions" do
-          retainable.retain_with(retainer)
-          retainable.should be_subscribed_to(child.subscription_node)
-
-          retainable.release_from(retainer)
-          retainable.should_not be_subscribed_to(child.subscription_node)
-        end
-      end
-
-      should_subscribe_to_its_children
-
-      context "when .subscribe is invoked by the superclass" do
-        before do
-          retainable_subclass = Class.new(retainable_class)
-          @retainable = retainable_subclass.new(child)
-        end
-
-        should_subscribe_to_its_children
-      end
-
-      context "when the subscription definition returns nil" do
-        before do
-          retainable_class.class_eval do
-            subscribe {nil}
+        context "when the receiver is not #retained? when called" do
+          before do
+            retainable_instance.should_not be_retained
           end
-          publicize retainable, :subscriptions
-        end
 
-        it "after the first call to #retain_with, does not attempt to track the nil subscription" do
-          retainable.retain_with(retainer)
-          retainable.subscriptions.should_not include(nil)
-        end
-      end
-
-      context "when the subscription definition returns an Array containing nil(s)" do
-        before do
-          retainable_class.class_eval do
-            subscribe {[nil, child.subscription_node.subscribe {}, nil]}
+          it "invokes #after_first_retain on self" do
+            mock.proxy(retainable_instance).after_first_retain
+            retainable_instance.retain_with(retainer)
           end
-          publicize retainable, :subscriptions
+
+          it "retains #children_to_retain" do
+            retainable_instance.children_to_retain.each do |child|
+              child.should_not be_retained_by(retainable_instance)
+            end
+
+            retainable_instance.retain_with(retainer)
+
+            retainable_instance.children_to_retain.each do |child|
+              child.should be_retained_by(retainable_instance)
+            end
+          end
+
+          it "adds single Subscriptions returned by executing #subscription_definitons to #subscriptions" do
+            retainable_instance.should_not be_subscribed_to(subscribed_child_1.subscription_node)
+            retainable_instance.retain_with(retainer)
+            retainable_instance.should be_subscribed_to(subscribed_child_1.subscription_node)
+          end
+
+          it "adds Arrays of Subscriptions returned by executing #subscription_definitons to #subscriptions" do
+            retainable_instance.should_not be_subscribed_to(subscribed_child_2.subscription_node)
+            retainable_instance.should_not be_subscribed_to(subscribed_child_3.subscription_node)
+            retainable_instance.retain_with(retainer)
+            retainable_instance.should be_subscribed_to(subscribed_child_2.subscription_node)
+            retainable_instance.should be_subscribed_to(subscribed_child_3.subscription_node)
+          end
         end
 
-        it "after the first call to #retain_with, does not attempt to track the nil subscription" do
-          lambda do
-            retainable.retain_with(retainer)
-          end.should change {retainable.subscriptions.length}.by(4)
-          retainable.subscriptions.should_not include(nil)
-        end
-      end
-    end
+        context "when the receiver is already #retained? when called" do
+          context "when the receiver is not already #retained_by? the argument" do
+            attr_reader :second_retainer
+            before do
+              @second_retainer = Object.new
+              retainable_instance.retain_with(second_retainer)
+            end
 
-    describe "#retain_with" do
-      it "returns self" do
-        retainable.retain_with(Object.new).should == retainable
-      end
+            after do
+              retainable_instance.release_from(second_retainer)
+            end
 
-      it "retains its .names_of_children_to_retain only upon its first invocation" do
-        retainable = users_set.where(users_set[:id].eq(1))
-        retainable.operand.should_not be_retained_by(retainable)
+            it "does not invoke #after_first_retain on self" do
+              dont_allow(retainable_instance).after_first_retain
+              retainable_instance.retain_with(retainer)
+            end
 
-        mock.proxy(retainable.operand).retain_with(retainable)
-        retainable.retain_with(Object.new)
-        retainable.operand.should be_retained_by(retainable)
+            it "does not attempt to retain #children_to_retain" do
+              retainable_instance.children_to_retain.each do |child|
+                dont_allow(child).retain_with(retainable_instance)
+              end
+              retainable_instance.retain_with(retainer)
+            end
 
-        dont_allow(retainable.operand).retain_with(retainable)
-        retainable.retain_with(Object.new)
-      end
+            it "does not attempt to execute #subscription_definitons" do
+              [subscribed_child_1, subscribed_child_2, subscribed_child_3].each do |child|
+                dont_allow(child.subscription_node).subscribe(retainable_instance)
+              end
+              retainable_instance.retain_with(retainer)
+            end
+          end
 
-      it "invokes #after_first_retain only after first invocation" do
-        retainable = Relations::Set.new(:test)
-        mock.proxy(retainable).after_first_retain
-        retainable.retain_with(Object.new)
+          context "when the receiver is already retained by the argument" do
+            before do
+              retainable_instance.retain_with(retainer)
+            end
 
-        dont_allow(retainable).after_first_retain
-        retainable.retain_with(Object.new)
-      end
-
-      context "when passing in a retainer for the first time" do
-        it "increments #refcount by 1" do
-          lambda do
-            retainable.retain_with(Object.new)
-          end.should change {retainable.refcount}.by(1)
-        end
-
-        it "causes #retained_by? to return true for the retainer" do
-          retainer = Object.new
-          retainable.should_not be_retained_by(retainer)
-          retainable.retain_with(retainer)
-          retainable.should be_retained_by(retainer)
-        end
-      end
-
-      context "when passing in a retainer for the second time" do
-        it "raises an ArgumentError" do
-          retainer = Object.new
-          retainable.retain_with(retainer)
-
-          lambda do
-            retainable.retain_with(retainer)
-          end.should raise_error(ArgumentError)
-        end
-      end
-    end
-
-    describe "#release_from" do
-      before do
-        retainable.retain_with(retainer)
-      end
-
-      it "causes #retained_by?(retainer) to return false" do
-        retainable.release_from(retainer)
-        retainable.should_not be_retained_by(retainer)
-      end
-
-      it "decrements #refcount by 1" do
-        lambda do
-          retainable.release_from(retainer)
-        end.should change {retainable.refcount}.by(-1)
-      end
-
-      context "when the last remaining retainer is released" do
-        it "calls #after_last_release on self" do
-          retainable.refcount.should == 1
-          mock.proxy(retainable).after_last_release
-          retainable.release_from(retainer)
+            it "raises an ArgumentError" do
+              lambda do
+                retainable_instance.retain_with(retainer)
+              end.should raise_error(ArgumentError)
+            end
+          end
         end
       end
 
-      context "when the only remaining retainers have self as their only root ancestral retainer" do
-        attr_reader :b
-        def a
-          retainable
-        end
-
+      describe "#release_from" do
         before do
-          @b = anonymous_retainable_object("b")
-          b.retain_with(a)
-          a.retain_with(b)
+          retainable_instance.retain_with(retainer)
         end
 
-        it "calls #after_last_release on self" do
-          a.refcount.should == 2
-          mock.proxy(retainable).after_last_release
-          a.release_from(retainer)
-        end
-      end
-
-      context "when a remaining retainer has an object other than self as a root ancestral retainer" do
-        attr_reader :b, :other_retainer
-        def a
-          retainable
+        it "decrements #refcount by 1" do
+          lambda do
+            retainable_instance.release_from(retainer)
+          end.should change { retainable_instance.refcount }.by(-1)
         end
 
-        def other_retainer
-          @other_retainer ||= anonymous_retainable_object
+        def self.should_perform_after_last_release_logic
+          it "calls #after_last_release on self" do
+            mock.proxy(retainable_instance).after_last_release
+            retainable_instance.release_from(retainer)
+          end
+
+          it "releases all #children_to_retain" do
+            retainable_instance.children_to_retain.each do |child|
+              child.should be_retained_by(retainable_instance)
+            end
+
+            retainable_instance.release_from(retainer)
+
+            retainable_instance.children_to_retain.each do |child|
+              child.should_not be_retained_by(retainable_instance)
+            end
+          end
+
+          it "destroys all #subscriptions" do
+            [subscribed_child_1, subscribed_child_2, subscribed_child_3].each do |child|
+              retainable_instance.should be_subscribed_to(child.subscription_node)
+            end
+
+            retainable_instance.release_from(retainer)
+
+            [subscribed_child_1, subscribed_child_2, subscribed_child_3].each do |child|
+              retainable_instance.should_not be_subscribed_to(child.subscription_node)
+            end
+          end
         end
 
-        before do
-          @b = anonymous_retainable_object("b")
-          a.retain_with(b)
-          b.retain_with(other_retainer)
+        def self.should_not_perform_after_last_release_logic
+          it "does not call #after_last_release on self" do
+            dont_allow(retainable_instance).after_last_release
+            retainable_instance.release_from(retainer)
+          end
+
+          it "does not release all #children_to_retain" do
+            retainable_instance.children_to_retain.each do |child|
+              child.should be_retained_by(retainable_instance)
+            end
+
+            retainable_instance.release_from(retainer)
+
+            retainable_instance.children_to_retain.each do |child|
+              child.should be_retained_by(retainable_instance)
+            end
+          end
+
+          it "does not destroys all #subscriptions" do
+            [subscribed_child_1, subscribed_child_2, subscribed_child_3].each do |child|
+              retainable_instance.should be_subscribed_to(child.subscription_node)
+            end
+
+            retainable_instance.release_from(retainer)
+
+            [subscribed_child_1, subscribed_child_2, subscribed_child_3].each do |child|
+              retainable_instance.should be_subscribed_to(child.subscription_node)
+            end
+          end
         end
 
-        context "when the remaining retainer's retention graph is acyclic" do
-          context "when the remaining retainer's ancestral root mixes in Retainable" do
+        context "when the last remaining retainer is released" do
+          before do
+            retainable_instance.refcount.should == 1
+          end
+
+          should_perform_after_last_release_logic
+        end
+
+        context "when the only remaining retainers have retention graphs with no terminus other than the receiver" do
+          #  retainer ---> a <--- b
+          #                |      ^
+          #                |------|
+
+          def a
+            retainable_instance
+          end
+
+          attr_reader :b
+          before do
+            @b = make_retainable_object
+
+            a.retain_with(b)
+            b.retain_with(a)
+          end
+
+          should_perform_after_last_release_logic
+        end
+
+        context "when a remaining retainer has a retention graph with a terminus other than the receiver" do
+          context "when the remaining retainer's retention graph is acyclic" do
+            before do
+              retainable_instance.retain_with(second_retainer)
+            end
+
+            context "when the remaining retainer's terminus mixes in Retainable" do
+              def second_retainer
+                @second_retainer ||= make_retainable_object
+              end
+
+              should_not_perform_after_last_release_logic
+            end
+
+            context "when the remaining retainer's ancestral terminus does not mix in Retainable" do
+              def second_retainer
+                @second_retainer ||= Object.new
+              end
+
+              should_not_perform_after_last_release_logic
+            end
+          end
+
+          context "when the remaining retainer's retention graph is cyclic" do
+            attr_reader :b, :c, :x
+            def a
+              retainable_instance
+            end
 
             before do
-              other_retainer.class.ancestors.should include(Retainable)
+              @b, @c, @x = make_retainable_object, make_retainable_object, Object.new
             end
 
-            it "does not call #after_last_release on self" do
-              dont_allow(retainable).after_last_release
-              a.release_from(retainer)
-            end
-          end
+            context "when the remaining retainer's retention graph has the object being released as one terminus, in addition to another terminus" do
+              # retainer ---> a <--- b <--- x
+              #               |      ^
+              #               |------|
 
-          context "when the remaining retainer's ancestral root does not mix in Retainable" do
-            def other_retainer
-              @other_retainer ||= Object.new
-            end
+              attr_reader :b, :x
+              before do
 
-            it "does not call #after_last_release on self" do
-              dont_allow(retainable).after_last_release
-              a.release_from(retainer)
-            end
-          end
-        end
+                a.retain_with(b)
+                b.retain_with(a)
+                b.retain_with(x)
+              end
 
-        context "when the remaining retainer's retention graph is cyclic" do
-          context "when the remaining retainer has the object being released as an ancestral retainer, in addition to another ancestral root" do
-            before do
-              b.retain_with(a)
+              should_not_perform_after_last_release_logic
             end
 
-            it "does not call #after_last_release on self" do
-              dont_allow(retainable).after_last_release
-              a.release_from(retainer)
-            end
-          end
+            context "when the remaining retainer's retention graph has cycles that don't involve the object being released" do
+              # retainer ---> a <--- b <--- c <--- x
+              #                      |      ^
+              #                      |------|
 
-          context "when the remaining retainer has cycles in its retention graph that don't involve the object being released" do
-            attr_reader :c
-            before do
-              @c = anonymous_retainable_object("c")
-              b.retain_with(c)
-              c.retain_with(b)
-            end
+              before do
+                a.retain_with(b)
+                c.retain_with(b)
+                c.retain_with(x)
+                b.retain_with(c)
+              end
 
-            it "does not call #after_last_release on self, and does not get stuck in and endless loop" do
-              retainable.refcount.should == 2
-              dont_allow(retainable).after_last_release
-              a.release_from(retainer)
+              # should not go into an endless loop either
+              should_not_perform_after_last_release_logic
             end
           end
         end
       end
-    end
 
-    describe "#retained?" do
-      def retainable
-        @retainable ||= Relations::Set.new(:test)
+      describe "#children_to_retain" do
+        it "includes single Retainable objects named by #names_of_children_to_retain" do
+          children_to_retain = retainable_instance.children_to_retain
+          children_to_retain.should include(child)
+        end
+
+        it "includes all Retainable elements in Arrays named by #names_of_children_to_retain" do
+          children_to_retain = retainable_instance.children_to_retain
+          array_children.each do |child|
+            children_to_retain.should include(child)
+          end
+        end
+
+        it "includes all Retainable values in  Hashes named by #names_of_children_to_retain" do
+          children_to_retain = retainable_instance.children_to_retain
+          hash_children.each do |key, child|
+            children_to_retain.should include(child)
+          end
+        end
       end
 
+      describe "#subscription_definitions" do
+        it "delegates to self.class" do
+          mock.proxy(RetainableClass).subscription_definitions
+          retainable_instance.subscription_definitions
+        end
+      end
+
+      describe "#retained?" do
       context "when retainable has been retained" do
         before do
-          retainable.retain_with(Object.new)
+          retainable_instance.retain_with(retainer)
+        end
+
+        after do
+          retainable_instance.release_from(retainer)
         end
 
         it "returns true" do
-          retainable.should be_retained
+          retainable_instance.should be_retained
         end
       end
 
       context "when retainable has not been retained" do
+        before do
+          retainable_instance.refcount.should == 0
+        end
+
         it "returns false" do
-          retainable.should_not be_retained
+          retainable_instance.should_not be_retained
         end
       end
     end
 
-    describe "#subscribed_to?" do
-      context "when #subscriptions contains a Subscription that is in the passed in SubscriptionNode" do
-        def retainable
-          @retainable ||= users_set.where(User[:id].eq(1))
+      describe "#retained_by?" do
+        context "when the #retain_with has been called with the argument" do
+          before do
+            retainable_instance.retain_with(retainer)
+          end
+
+          after do
+            retainable_instance.release_from(retainer)
+          end
+
+          it "returns true" do
+            retainable_instance.should be_retained_by(retainer)
+          end
         end
+        context "when the #retain_with has not been called with the argument" do
+          it "returns false" do
+            retainable_instance.should_not be_retained_by(retainer)
+          end
+        end
+      end
 
-        it "returns true" do
-          publicize retainable, :subscriptions
-          publicize users_set, :insert_subscription_node
+      describe "#subscribed_to?" do
+        context "when #subscriptions contains a Subscription that is in the passed in SubscriptionNode" do
+          before do
+            retainable_instance.retain_with(retainer)
+          end
 
-          retainable.retain_with(retainer)
-          retainable.subscriptions.should_not be_empty
+          after do
+            retainable_instance.release_from(retainer)
+          end
 
-          retainable.should be_subscribed_to(users_set.insert_subscription_node)
+          it "returns true" do
+            retainable_instance.should be_subscribed_to(subscribed_child_1.subscription_node)
+          end
         end
       end
     end
