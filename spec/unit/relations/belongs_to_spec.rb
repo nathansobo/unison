@@ -100,20 +100,6 @@ module Unison
           end
         end
       end
-
-
-      describe "#create" do
-        def parent_tuple
-          User.create(:name => "Wil")
-        end
-
-        it "creates an instance of the #operand.tuple_class and sets the #foreign_key on #parent_tuple to its :id" do
-          belongs_to.should be_nil
-          team = belongs_to.create(:id => "new team")
-          team.class.should == Team
-          belongs_to.should == team
-        end
-      end
     end
   end
 end

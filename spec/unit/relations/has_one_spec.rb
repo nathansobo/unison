@@ -39,8 +39,6 @@ module Unison
         end
       end
 
-
-
       describe ":foreign_key option" do
         context "when not passed :foreign_key" do
           describe "#foreign_key" do
@@ -92,18 +90,6 @@ module Unison
               has_one.operand.operand.should == Profile.set
             end
           end
-        end
-      end
-
-      describe "#create" do
-        def parent_tuple
-          User.create(:name => "Wil")
-        end
-
-        it "creates an instance of the #operand.tuple_class with its #foreign_key set to the parent_tuple.id" do
-          has_one.should be_nil
-          life_goal = has_one.create(:id => "wil_life_goal")
-          has_one.should == life_goal
         end
       end
     end
