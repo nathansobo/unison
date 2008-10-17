@@ -214,30 +214,139 @@ module Unison
       end
 
       describe "#release_from" do
-        it "decrements #refcount by 1"
+        before do
+          retainable_instance.retain_with(retainer)
+        end
+
+        it "decrements #refcount by 1" do
+          lambda do
+            retainable_instance.release_from(retainer)
+          end.should change { retainable_instance.refcount }.by(-1)
+        end
+
+        def self.should_perform_after_last_release_logic
+          it "calls #after_last_release on self" do
+            mock.proxy(retainable_instance).after_last_release
+            retainable_instance.release_from(retainer)
+          end
+
+          it "releases all #children_to_retain" do
+            retainable_instance.children_to_retain.each do |child|
+              child.should be_retained_by(retainable_instance)
+            end
+
+            retainable_instance.release_from(retainer)
+
+            retainable_instance.children_to_retain.each do |child|
+              child.should_not be_retained_by(retainable_instance)
+            end
+          end
+
+          it "destroys all #subscriptions" do
+            [subscribed_child_1, subscribed_child_2, subscribed_child_3].each do |child|
+              retainable_instance.should be_subscribed_to(child.subscription_node)
+            end
+
+            retainable_instance.release_from(retainer)
+
+            [subscribed_child_1, subscribed_child_2, subscribed_child_3].each do |child|
+              retainable_instance.should_not be_subscribed_to(child.subscription_node)
+            end
+          end
+        end
+
+        def self.should_not_perform_after_last_release_logic
+          it "does not call #after_last_release on self" do
+            dont_allow(retainable_instance).after_last_release
+            retainable_instance.release_from(retainer)
+          end
+
+          it "does not release all #children_to_retain" do
+            retainable_instance.children_to_retain.each do |child|
+              child.should be_retained_by(retainable_instance)
+            end
+
+            retainable_instance.release_from(retainer)
+
+            retainable_instance.children_to_retain.each do |child|
+              child.should be_retained_by(retainable_instance)
+            end
+          end
+
+          it "does not destroys all #subscriptions" do
+            [subscribed_child_1, subscribed_child_2, subscribed_child_3].each do |child|
+              retainable_instance.should be_subscribed_to(child.subscription_node)
+            end
+
+            retainable_instance.release_from(retainer)
+
+            [subscribed_child_1, subscribed_child_2, subscribed_child_3].each do |child|
+              retainable_instance.should be_subscribed_to(child.subscription_node)
+            end
+          end
+        end
 
         context "when the last remaining retainer is released" do
-          it "calls #after_last_release on self"
+          before do
+            retainable_instance.refcount.should == 1
+          end
+
+          should_perform_after_last_release_logic
         end
 
         context "when the only remaining retainers have retention graphs with no terminus other than the receiver" do
-          it "calls #after_last_release on self"
+          #  retainer ---> a <--- b
+          #                |      ^
+          #                |------|
+
+          def a
+            retainable_instance
+          end
+
+          attr_reader :b
+          before do
+            @b = make_retainable_object
+
+            a.retain_with(b)
+            b.retain_with(a)
+          end
+
+          should_perform_after_last_release_logic
         end
 
         context "when a remaining retainer has a retention graph with a terminus other than the receiver" do
           context "when the remaining retainer's retention graph is acyclic" do
+            before do
+              retainable_instance.retain_with(second_retainer)
+            end
+
             context "when the remaining retainer's terminus mixes in Retainable" do
-              it "does not call #after_last_release on self"
+              def second_retainer
+                @second_retainer ||= make_retainable_object
+              end
+
+              should_not_perform_after_last_release_logic
             end
 
             context "when the remaining retainer's ancestral terminus does not mix in Retainable" do
-              it "does not call #after_last_release on self"
+              def second_retainer
+                @second_retainer ||= Object.new
+              end
+
+              should_not_perform_after_last_release_logic
             end
           end
 
           context "when the remaining retainer's retention graph is cyclic" do
             context "when the remaining retainer's retention graph has the object being released as one terminus, in addition to another terminus" do
-              it "does not call #after_last_release on self"
+              # retainer ---> a <--- b <--- x
+              #               |      |
+              #               |------|
+
+              before do
+
+              end
+
             end
 
             context "when the remaining retainer's retention graph has cycles that don't involve the object being released" do
