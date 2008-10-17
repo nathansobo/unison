@@ -12,6 +12,12 @@ module Unison
       def foreign_key
         options[:foreign_key] || :"#{name}_id"
       end
+
+      def create(attributes={})
+        created_tuple = target_class.create(attributes)
+        owner[foreign_key] = created_tuple[:id]
+        created_tuple
+      end
     end
   end
 end
