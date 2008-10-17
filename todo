@@ -1,5 +1,7 @@
 Backlog
 --------
+Fixtures shouldn't trigger after_create
+
 Release from should blow up if the object is not a retainer
 
 cleanup PrimitiveTuple#[] specs
