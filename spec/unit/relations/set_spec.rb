@@ -405,6 +405,12 @@ module Unison
             set.merge(tuples)
             set.should include(not_in_set)
           end
+
+          it "calls #after_merge on inserted Tuples" do
+            mock.proxy(not_in_set).after_merge
+            dont_allow(in_set).after_merge
+            set.merge(tuples)
+          end
         end
       end
 

@@ -285,6 +285,9 @@ module Unison
       def after_create
       end
 
+      def after_merge
+      end
+
       def create_fields_hash
         returning({}) do |fields_hash|
           set.attributes.values.each do |attribute|

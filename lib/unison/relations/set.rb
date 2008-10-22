@@ -130,7 +130,10 @@ module Unison
 
       def merge(tuples)
         tuples.each do |tuple|
-          insert(tuple) unless find(tuple[:id])
+          unless find(tuple[:id])
+            insert(tuple)
+            tuple.send(:after_merge)
+          end
         end
       end
 
