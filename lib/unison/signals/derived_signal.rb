@@ -6,7 +6,7 @@ module Unison
         source.on_change do |source_new_value|
           old_value = value
           @value = apply_transform(source_new_value)
-          change_subscription_node.call(value) unless old_value == value
+          change_subscription_node.call(value)
         end
       end
 

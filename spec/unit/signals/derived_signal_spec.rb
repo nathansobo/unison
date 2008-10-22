@@ -49,42 +49,18 @@ module Unison
 
         context "when instantiated with a transform block and not with a Symbol as the second argument" do
           context "when the #source changes" do
-            context "when the value of #transform.call(#source.value) changes" do
-              it "triggers the on_change event with the result of #transform.call(#source.value)" do
-                new_name = "Ari"
-                expected_new_value = transform.call(new_name)
-                expected_new_value.should_not == transform.call(source.value)
+            it "triggers the on_change event with the result of #transform.call(#source.value)" do
+              new_name = "Ari"
+              expected_new_value = transform.call(new_name)
+              expected_new_value.should_not == transform.call(source.value)
 
-                on_update_arguments = []
-                derived_signal.on_change(retainer) do |*args|
-                  on_update_arguments.push(args)
-                end
-
-                tuple.name = new_name
-                on_update_arguments.should == [[expected_new_value]]
-              end              
-            end
-
-            context "when the value of #transform.call(#source.value) does not change" do
-              def transform
-                @transform ||= lambda do |name|
-                  "I am always the same, regales"
-                end
+              on_update_arguments = []
+              derived_signal.on_change(retainer) do |*args|
+                on_update_arguments.push(args)
               end
 
-              it "does not trigger the on_change event" do
-                new_name = "Ari"
-                expected_old_value = transform.call(source.value)
-                expected_new_value = transform.call(new_name)
-                transform.call(tuple.name).should == transform.call(new_name)
-
-                on_update_arguments = []
-                derived_signal.on_change(retainer) do |*args|
-                  raise "Don't taze me bro"
-                end
-
-                tuple.name = new_name
-              end
+              tuple.name = new_name
+              on_update_arguments.should == [[expected_new_value]]
             end
           end
         end
@@ -95,35 +71,18 @@ module Unison
           end
 
           context "when the #source changes" do
-            context "when the result #source.value.send(#method_name) changes" do
-              it "triggers the on_change event with the result of #source.value.send(#method_name)" do
-                new_name = "Ari"
-                expected_new_value = new_name.length
-                source.value.length.should_not == expected_new_value
+            it "triggers the on_change event with the result of #source.value.send(#method_name)" do
+              new_name = "Ari"
+              expected_new_value = new_name.length
+              source.value.length.should_not == expected_new_value
 
-                on_update_arguments = []
-                derived_signal.on_change(retainer) do |*args|
-                  on_update_arguments.push(args)
-                end
-
-                tuple.name = new_name
-                on_update_arguments.should == [[expected_new_value]]
+              on_update_arguments = []
+              derived_signal.on_change(retainer) do |*args|
+                on_update_arguments.push(args)
               end
-            end
 
-            context "when the result of #source.value.send(#method_name) does not change" do
-              it "does not trigger the on_change event" do
-                new_name = "A" * source.value.length
-                expected_new_value = new_name.length
-                source.value.length.should == expected_new_value
-
-                on_update_arguments = []
-                derived_signal.on_change(retainer) do |*args|
-                  raise "Don't taze me bro"
-                end
-
-                tuple.name = new_name
-              end
+              tuple.name = new_name
+              on_update_arguments.should == [[expected_new_value]]
             end
           end
         end
@@ -140,37 +99,19 @@ module Unison
           end
 
           context "when the #source changes" do
-            context "when #transform.call(#source.value.send(#method_name)) changes" do
-              it "triggers the on_change event with the result of #transform.call(#source.value.send(#method_name))" do
-                new_name = "Ari"
-                expected_old_value = transform.call(source.value.length)
-                expected_new_value = transform.call(new_name.length)
-                expected_old_value.should_not == expected_new_value
+            it "triggers the on_change event with the result of #transform.call(#source.value.send(#method_name))" do
+              new_name = "Ari"
+              expected_old_value = transform.call(source.value.length)
+              expected_new_value = transform.call(new_name.length)
+              expected_old_value.should_not == expected_new_value
 
-                on_update_arguments = []
-                derived_signal.on_change(retainer) do |*args|
-                  on_update_arguments.push(args)
-                end
-
-                tuple.name = new_name
-                on_update_arguments.should == [[expected_new_value]]
+              on_update_arguments = []
+              derived_signal.on_change(retainer) do |*args|
+                on_update_arguments.push(args)
               end
-            end
 
-            context "when #transform.call(#source.value.send(#method_name)) does not change" do
-              it "does not trigger the on_change event" do
-                new_name = "A" * source.value.length
-                expected_old_value = transform.call(source.value.length)
-                expected_new_value = transform.call(new_name.length)
-                expected_old_value.should == expected_new_value
-
-                on_update_arguments = []
-                derived_signal.on_change(retainer) do |*args|
-                  raise "Don't taze me bro"
-                end
-
-                tuple.name = new_name
-              end
+              tuple.name = new_name
+              on_update_arguments.should == [[expected_new_value]]
             end
           end
         end
