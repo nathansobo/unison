@@ -96,6 +96,18 @@ module Unison
           set.project(*attributes_or_set)
         end
 
+        def fetch
+          set.fetch
+        end
+
+        def push
+          set.push
+        end
+
+        def pull
+          set.pull
+        end
+
         def find(id_or_predicate)
           set.find(id_or_predicate)
         end

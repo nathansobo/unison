@@ -45,7 +45,7 @@ module Unison
       end
 
       describe "#pull" do
-        it "#merges the results of #fetch on the Unison.origin" do
+        it "#merges the results calling #fetch on Unison.origin with self" do
           new_users = origin.fetch(users_set)
           mock.proxy(origin).fetch(users_set)
           mock.proxy(users_set).merge(new_users)
@@ -53,6 +53,12 @@ module Unison
           new_users.each { |user| users_set.find(user.id).should be_nil }
           users_set.pull
           new_users.each { |user| users_set.find(user.id).should_not be_nil }
+        end
+      end
+
+      describe "#fetch" do
+        it "returns the results of calling #fetch on Unison.origin with self" do
+          users_set.fetch.should == origin.fetch(users_set)
         end
       end
 

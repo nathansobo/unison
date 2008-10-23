@@ -439,6 +439,27 @@ module Unison
           end
         end
 
+        describe ".push" do
+          it "delegates to .set" do
+            mock.proxy(User.set).push
+            User.push
+          end
+        end
+
+        describe ".pull" do
+          it "delegates to .set" do
+            mock.proxy(User.set).pull
+            User.pull
+          end
+        end
+        
+        describe ".fetch" do
+          it "delegates to .set" do
+            mock.proxy(User.set).fetch
+            User.fetch
+          end
+        end
+
         describe ".find" do
           it "delegates to .set" do
             User.find("nathan").should == User.set.find("nathan")

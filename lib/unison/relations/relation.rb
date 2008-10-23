@@ -45,6 +45,10 @@ module Unison
         end
       end
 
+      def fetch
+        Unison.origin.fetch(self)
+      end
+
       def find(id_or_predicate)
         find_or_pull(id_or_predicate, false)
       end
