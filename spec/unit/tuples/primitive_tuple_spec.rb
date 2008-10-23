@@ -418,15 +418,29 @@ module Unison
         end
 
         describe ".where" do
-          it "delegates to .relation" do
+          it "delegates to .set" do
             predicate = User[:name].eq("Nathan")
             mock.proxy(User.set).where(User[:name].eq("Nathan"))
             User.where(User[:name].eq("Nathan"))
           end
         end
 
+        describe ".order_by" do
+          it "delegates to .set" do
+            mock.proxy(User.set).order_by(User[:name])
+            User.order_by(User[:name])
+          end
+        end
+
+        describe ".project" do
+          it "delegates to .set" do
+            mock.proxy(User.set).project(User[:name])
+            User.project(User[:name])
+          end
+        end
+
         describe ".find" do
-          it "delegates to #find on the #relation" do
+          it "delegates to .set" do
             User.find("nathan").should == User.set.find("nathan")
           end
         end

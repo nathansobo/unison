@@ -88,6 +88,14 @@ module Unison
           set.where(predicate)
         end
 
+        def order_by(*order_by_attributes)
+          set.order_by(*order_by_attributes)
+        end
+
+        def project(*attributes_or_set)
+          set.project(*attributes_or_set)
+        end
+
         def find(id_or_predicate)
           set.find(id_or_predicate)
         end
