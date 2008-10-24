@@ -46,6 +46,10 @@ module Unison
         operand.merge(tuples)
       end
 
+      def fetch
+        super.first
+      end
+
       def singleton
         self
       end

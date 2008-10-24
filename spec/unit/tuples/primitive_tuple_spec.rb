@@ -439,6 +439,13 @@ module Unison
           end
         end
 
+        describe ".singleton" do
+          it "delegates to .set" do
+            mock.proxy(User.set).singleton
+            User.singleton
+          end
+        end
+
         describe ".push" do
           it "delegates to .set" do
             mock.proxy(User.set).push

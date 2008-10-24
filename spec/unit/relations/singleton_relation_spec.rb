@@ -43,6 +43,18 @@ module Unison
         end
       end
 
+      describe "#fetch" do
+        def operand
+          users_set
+        end
+
+        it "returns the #first of the Array returned by calling #fetch on Unison.origin with self" do
+          expected_tuple = origin.fetch(singleton_relation).first
+          expected_tuple.should_not be_nil
+          singleton_relation.fetch.should == expected_tuple 
+        end
+      end
+
       describe "#nil?" do
         it "delegates to #tuple" do
           mock.proxy(singleton_relation.tuple).nil?

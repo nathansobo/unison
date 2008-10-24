@@ -96,6 +96,10 @@ module Unison
           set.project(*attributes_or_set)
         end
 
+        def singleton
+          set.singleton
+        end
+
         def fetch
           set.fetch
         end
