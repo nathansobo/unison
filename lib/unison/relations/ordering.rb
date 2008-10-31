@@ -1,7 +1,7 @@
 module Unison
   module Relations
     class Ordering < CompositeRelation
-      attr_reader :operand, :order_by_attributes
+      attr_reader :operand, :ordering_attributes
       retain :operand
 
       subscribe do
@@ -21,9 +21,9 @@ module Unison
         end
       end
 
-      def initialize(operand, *order_by_attributes)
+      def initialize(operand, *ordering_attributes)
         super()
-        @operand, @order_by_attributes = operand, order_by_attributes
+        @operand, @ordering_attributes = operand, ordering_attributes
       end
 
       def merge(tuples)
@@ -31,7 +31,7 @@ module Unison
       end
 
       def to_arel
-        operand.to_arel.order(*order_by_attributes.map {|order_by_attribute| order_by_attribute.to_arel})
+        operand.to_arel.order(*ordering_attributes.map {|ordering_attribute| ordering_attribute.to_arel})
       end
 
       def tuple_class
@@ -47,7 +47,7 @@ module Unison
       end
 
       def inspect
-        "#{operand.inspect}.order_by(#{order_by_attributes.map {|attribute| attribute.inspect}.join(", ")})"
+        "#{operand.inspect}.order_by(#{ordering_attributes.map {|attribute| attribute.inspect}.join(", ")})"
       end
 
       protected
@@ -76,7 +76,7 @@ module Unison
       end
 
       def compare(a, b)
-        order_by_attributes.each do |attribute|
+        ordering_attributes.each do |attribute|
           result = direction_coefficient(attribute) * (a[attribute] <=> b[attribute])
           return result unless result == 0
         end
