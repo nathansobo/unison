@@ -23,7 +23,8 @@ module Unison
 
       def initialize(operand, *order_by_attributes)
         super()
-        @operand, @order_by_attributes = operand, order_by_attributes
+        @operand = operand 
+        @order_by_attributes = attributes_for(order_by_attributes)
       end
 
       def merge(tuples)
@@ -82,6 +83,17 @@ module Unison
           return result unless result == 0
         end
         0
+      end
+
+      def attributes_for(attributes_or_symbols)
+        attributes_or_symbols.map do |attribute_or_symbol|
+          case attribute_or_symbol
+          when Symbol
+            operand.attribute(attribute_or_symbol)
+          when Attributes::Attribute
+            attribute_or_symbol
+          end
+        end
       end
     end
   end

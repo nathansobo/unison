@@ -3,19 +3,35 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../unison_spec_helper")
 module Unison
   module Relations
     describe Ordering do
-      attr_reader :operand, :order_by_attributes, :ordering, :order_by_attribute_1, :order_by_attribute_2
+      attr_reader :operand, :order_by_attributes, :ordering
       before do
         @operand = User.set
-        @order_by_attribute_1 = User.set[:name]
-        @order_by_attribute_2 = User.set[:id]
         @order_by_attributes = [order_by_attribute_1, order_by_attribute_2]
         @ordering = Ordering.new(operand, *order_by_attributes)
+      end
+
+      def order_by_attribute_1
+        @order_by_attribute_1 ||= User.set[:name]
+      end
+
+      def order_by_attribute_2
+        @order_by_attribute_2 ||= User.set[:id]
       end
 
       describe "#initialize" do
         it "sets the #operand and #order_by_attributes" do
           ordering.operand.should == operand
           ordering.order_by_attributes.should == order_by_attributes
+        end
+
+        context "when given an ordering_attribute that is a Symbol" do
+          def order_by_attribute_2
+            :id
+          end
+
+          it "translates the Symbol to the corresponding Attribute on the #operand" do
+            ordering.order_by_attributes.should == [operand[:name], operand[:id]]
+          end
         end
       end
 
