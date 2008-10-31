@@ -9,7 +9,6 @@ module Unison
         raise ArgumentError, "Type #{type.inspect} is invalid. Valid types are #{VALID_TYPES.inspect}" unless VALID_TYPES.include?(type)
         super(set, name)
         @type, @transform = type, transform
-        @ascending = true
         if name == :id && !options.has_key?(:default)
           @default = lambda { Guid.new.to_s }
         else
@@ -22,24 +21,6 @@ module Unison
       rescue Exception => e
         e.message.replace("Error converting value for '#{set.name}.#{name}' attribute\n#{e.message}")
         raise e
-      end
-
-      def ascending
-        @ascending = true
-        self
-      end
-
-      def ascending?
-        @ascending == true
-      end
-
-      def descending
-        @ascending = false
-        self
-      end
-
-      def descending?
-        !ascending?
       end
 
       def ==(other)

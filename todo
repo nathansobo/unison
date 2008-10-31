@@ -20,6 +20,8 @@ Decide what to do when fetching an object out of the database that is already in
 
 Nuke unretained objects from the cache periodically using an LRU strategy
 
+Introduce directionality on order_by_attributes
+
 Icebox
 --------
 

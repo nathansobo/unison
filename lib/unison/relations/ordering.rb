@@ -64,9 +64,10 @@ module Unison
       def initial_read
         operand.tuples.sort(&comparator)
       end
-      
+
+      #TODO: Introduce directionality on order_by_attributes
       def direction_coefficient(attribute)
-        attribute.ascending?? 1 : -1
+        1
       end
 
       def comparator
