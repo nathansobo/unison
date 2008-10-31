@@ -23,6 +23,13 @@ module Unison
         end
       end
 
+      describe "#new_tuple" do
+        it "delegates to its #operand" do
+          attributes = { :id => 'dog_photos', :name => 'Dog Photos' }
+          selection.new_tuple(attributes).should == operand.new_tuple(attributes)
+        end
+      end
+
       describe "#push" do
         before do
           origin.connection[:users].delete

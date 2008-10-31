@@ -57,6 +57,13 @@ module Unison
         end
       end
 
+      describe "#new_tuple" do
+        it "delegates to its #operand" do
+          attributes = {:id => 1, :name => 'Joe Six Pack'}
+          ordering.new_tuple(attributes).should == operand.new_tuple(attributes)
+        end
+      end
+
       describe "#set" do
         it "delegates to its #operand" do
           ordering.set.should == operand.set

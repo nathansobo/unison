@@ -57,6 +57,10 @@ module Unison
         projected_set.tuple_class
       end
 
+      def new_tuple(attributes)
+        projected_set.new_tuple(attributes)
+      end
+
       def merge(tuples)
         projected_set.merge(tuples)
       end

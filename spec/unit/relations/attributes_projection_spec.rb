@@ -108,6 +108,11 @@ module Unison
         end
       end
 
+      it "delegates to its #operand" do
+        attributes = { :id => 'dog_photos', :name => 'Dog Photos' }
+        projection.new_tuple(attributes).should == operand.new_tuple(attributes)
+      end
+
       context "when #retained?" do
         attr_reader :retainer
         before do

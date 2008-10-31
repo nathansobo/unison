@@ -57,6 +57,10 @@ module Unison
         operand.tuple_class
       end
 
+      def new_tuple(attributes)
+        operand.new_tuple(attributes)
+      end
+
       def to_arel
         operand.to_arel.where(predicate.to_arel)
       end

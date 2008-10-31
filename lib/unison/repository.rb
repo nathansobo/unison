@@ -8,7 +8,7 @@ module Unison
     def fetch(relation)
       raise NotImplementedError, "You cannot fetch Relations that contain CompositeTuples" if relation.is_a?(Relations::InnerJoin)
       connection[relation.to_sql].map do |record|
-        relation.tuple_class.new(record).pushed
+        relation.new_tuple(record).pushed
       end
     end
 

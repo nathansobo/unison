@@ -67,6 +67,12 @@ module Unison
           end
         end
 
+        describe "#new_tuple" do
+          it "returns a new instance of #tuple_class" do
+            users_set.new_tuple(:name => 'Jan').class.should == User
+          end
+        end
+
         context "when an Attribute with the same name has already been added" do
           context "when the previously added Attribute has the same #type" do
             attr_reader :set, :attribute
@@ -261,7 +267,7 @@ module Unison
           end
 
           it "adds the given Tuple to the results of #tuples" do
-            tuple = set.tuple_class.new(:id => "nathan", :name => "Nathan")
+            tuple = set.new_tuple(:id => "nathan", :name => "Nathan")
             lambda do
               set.insert(tuple).should == tuple
             end.should change {set.size}.by(1)
@@ -270,13 +276,13 @@ module Unison
 
           context "when an Tuple with the same #id exists in the Set" do
             before do
-              set.insert(set.tuple_class.new(:id => "nathan"))
+              set.insert(set.new_tuple(:id => "nathan"))
             end
 
             it "raises an ArgumentError" do
               set.find("nathan").should_not be_nil
               lambda do
-                set.insert(set.tuple_class.new(:id => "nathan"))
+                set.insert(set.new_tuple(:id => "nathan"))
               end.should raise_error(ArgumentError)
             end
           end
@@ -284,7 +290,7 @@ module Unison
           context "when the Tuple is #new?" do
             it "calls #after_create on the PrimitiveTuple before triggering the the on_insert event" do
               call_order = []
-              tuple = set.tuple_class.new(:id => "nathan", :name => "Nathan")
+              tuple = set.new_tuple(:id => "nathan", :name => "Nathan")
               mock.proxy(tuple).after_create do |returns|
                 call_order.push(:after_create)
                 returns
@@ -300,7 +306,7 @@ module Unison
 
           context "when the Tuple is not #new?" do
             it "does not call #after_create on the PrimitiveTuple" do
-              tuple = set.tuple_class.new(:id => "nathan", :name => "Nathan")
+              tuple = set.new_tuple(:id => "nathan", :name => "Nathan")
               tuple.pushed
               tuple.should_not be_new
               dont_allow(tuple).after_create
@@ -327,7 +333,7 @@ module Unison
 
           it "raises an error" do
             lambda do
-              set.insert(set.tuple_class.new(:id => "bob"))
+              set.insert(set.new_tuple(:id => "bob"))
             end.should raise_error
           end
         end
@@ -350,7 +356,7 @@ module Unison
         context "when the Tuple is not in the Set" do
           attr_reader :tuple_not_in_set
           before do
-            @tuple_not_in_set = set.tuple_class.new(:id => "nathan_not_in_set", :name => "Nathan")
+            @tuple_not_in_set = set.new_tuple(:id => "nathan_not_in_set", :name => "Nathan")
             set.tuples.should_not include(tuple_not_in_set)
           end
           
@@ -368,7 +374,7 @@ module Unison
           set.on_insert(retainer) do |tuple|
             inserted = tuple
           end
-          tuple = set.tuple_class.new(:id => "nathan", :name => "Nathan")
+          tuple = set.new_tuple(:id => "nathan", :name => "Nathan")
           set.insert(tuple)
           inserted.should == tuple
         end
@@ -392,8 +398,8 @@ module Unison
           attr_reader :in_set, :not_in_set, :tuples
           before do
             set.tuple_class.create(:id => "in_set", :name => "Wil")
-            @in_set = set.tuple_class.new(:id => "in_set", :name => "Kunal")
-            @not_in_set = set.tuple_class.new(:id => "not_in_set", :name => "Nathan")
+            @in_set = set.new_tuple(:id => "in_set", :name => "Kunal")
+            @not_in_set = set.new_tuple(:id => "not_in_set", :name => "Nathan")
             set.find(in_set[:id]).should_not be_nil
             set.find(not_in_set[:id]).should be_nil
             @tuples = [in_set, not_in_set]

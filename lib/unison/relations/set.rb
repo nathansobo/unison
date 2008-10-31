@@ -35,6 +35,10 @@ module Unison
       end
       attr_writer :tuple_class
 
+      def new_tuple(attributes)
+        tuple_class.new(attributes)
+      end
+
       def add_primitive_attribute(name, type, options={}, &transform)
         if attributes[name]
           if attributes[name].type == type
@@ -179,7 +183,7 @@ module Unison
       def load_memory_fixtures
         declared_memory_fixtures.each do |id, attributes|
           attributes[:id] = id.to_s
-          insert(tuple_class.new(attributes))
+          insert(new_tuple(attributes))
         end
       end
 

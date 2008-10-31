@@ -23,6 +23,13 @@ module Unison
         end
       end
 
+      describe "#new_tuple" do
+        it "delegates to #projected_set" do
+          attributes = {:id => 1, :name => 'Vacation Photos'}
+          projection.new_tuple(attributes).should == projected_set.new_tuple(attributes)
+        end
+      end
+
       describe "#to_sql" do
         it "returns select attributes from operand" do
           projection.to_sql.should be_like("

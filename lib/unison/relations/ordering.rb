@@ -39,6 +39,10 @@ module Unison
         operand.tuple_class
       end
 
+      def new_tuple(attributes)
+        operand.new_tuple(attributes)
+      end
+
       def set
         operand.set
       end

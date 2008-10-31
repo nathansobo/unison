@@ -24,6 +24,13 @@ module Unison
         end
       end
 
+      describe "#new_tuple" do
+        it "delegates to its #operand" do
+          attributes = {:id => 1, :name => 'Laszlo Maholy-Nagy', :employee_id => 1}
+          singleton_relation.new_tuple(attributes).should == operand.new_tuple(attributes)
+        end
+      end
+
       describe "#method_missing" do
         it "delegates to #tuple" do
           mock(singleton_relation.tuple).foo(1, 2)
