@@ -51,25 +51,126 @@ module Unison
       end
 
       describe "#new_tuple" do
-        it "instantiates a CompositeTuple with the results of segregating the given attributes hash by qualified table names" do
-          qualified_attributes = {
-            :users__id => "sharon",
-            :users__name => "Sharon Ly",
-            :photos__id => "sharon_photo",
-            :photos__name => "A photo of Sharon"
-          }
+        context "when both #left_operand and #right_operand are not #composite?" do
+          before do
+            left_operand.should_not be_composite
+            right_operand.should_not be_composite
+          end
 
-          user_attributes = {
-            :id => "sharon",
-            :name => "Sharon Ly"
-          }
+          it "instantiates a CompositeTuple with the results of segregating the given attributes hash by qualified table names" do
+            qualified_attributes = {
+              :users__id => "sharon",
+              :users__name => "Sharon Ly",
+              :photos__id => "sharon_photo",
+              :photos__name => "A photo of Sharon"
+            }
 
-          photo_attributes = {
-            :id => "sharon_photo",
-            :name => "A photo of Sharon"
-          }
+            user_attributes = {
+              :id => "sharon",
+              :name => "Sharon Ly"
+            }
 
-          join.new_tuple(qualified_attributes).should == CompositeTuple.new(User.new(user_attributes), Photo.new(photo_attributes))
+            photo_attributes = {
+              :id => "sharon_photo",
+              :name => "A photo of Sharon"
+            }
+
+            join.new_tuple(qualified_attributes).should == CompositeTuple.new(User.new(user_attributes), Photo.new(photo_attributes))
+          end
+        end
+        
+        context "when the #left_operand is #composite?" do
+          def left_operand
+            @left_operand ||= InnerJoin.new(users_set, photos_set, Photo[:user_id].eq(User[:id]))
+          end
+
+          def right_operand
+            cameras_set
+          end
+
+          def predicate
+            @predicate ||= Photo[:camera_id].eq(Camera[:id])
+          end
+
+          before do
+            left_operand.should be_composite
+            right_operand.should_not be_composite
+          end
+
+          it "instantiates a CompositeTuple with the results of segregating the given attributes hash by qualified table names" do
+            qualified_attributes = {
+              :users__id => "sharon",
+              :users__name => "Sharon Ly",
+              :photos__id => "sharon_photo",
+              :photos__name => "A photo of Sharon",
+              :cameras__id => "minolta",
+              :cameras__name => "Minolta"
+            }
+
+            user_attributes = {
+              :id => "sharon",
+              :name => "Sharon Ly"
+            }
+
+            photo_attributes = {
+              :id => "sharon_photo",
+              :name => "A photo of Sharon"
+            }
+
+            camera_attributes = {
+              :id => "minolta",
+              :name => "Minolta"
+            }
+
+            join.new_tuple(qualified_attributes).should == CompositeTuple.new(CompositeTuple.new(User.new(user_attributes), Photo.new(photo_attributes)), Camera.new(camera_attributes))
+          end
+        end
+
+        context "when the #right_operand is #composite?" do
+          def left_operand
+            users_set
+          end
+
+          def right_operand
+            @right_operand ||= InnerJoin.new(photos_set, cameras_set, Camera[:id].eq(Photo[:camera_id]))
+          end
+
+          def predicate
+            @predicate ||= Photo[:user_id].eq(User[:id])
+          end
+
+          before do
+            left_operand.should_not be_composite
+            right_operand.should be_composite
+          end
+
+          it "instantiates a CompositeTuple with the results of segregating the given attributes hash by qualified table names" do
+            qualified_attributes = {
+              :users__id => "sharon",
+              :users__name => "Sharon Ly",
+              :photos__id => "sharon_photo",
+              :photos__name => "A photo of Sharon",
+              :cameras__id => "minolta",
+              :cameras__name => "Minolta"
+            }
+
+            user_attributes = {
+              :id => "sharon",
+              :name => "Sharon Ly"
+            }
+
+            photo_attributes = {
+              :id => "sharon_photo",
+              :name => "A photo of Sharon"
+            }
+
+            camera_attributes = {
+              :id => "minolta",
+              :name => "Minolta"
+            }
+
+            join.new_tuple(qualified_attributes).should == CompositeTuple.new(User.new(user_attributes), CompositeTuple.new(Photo.new(photo_attributes), Camera.new(camera_attributes)))
+          end
         end
       end
 
