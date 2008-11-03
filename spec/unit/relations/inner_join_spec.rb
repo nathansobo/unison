@@ -120,11 +120,131 @@ module Unison
                 end.should raise_error(ArgumentError)
               end
             end
-
           end
         end
 
-        it "segregates a hash of table_name__attribute_name => attribute value into two suu"
+        context "when the #left_operand is #composite?" do
+          def left_operand
+            @left_operand ||= InnerJoin.new(users_set, photos_set, Photo[:user_id].eq(User[:id]))
+          end
+
+          def right_operand
+            cameras_set
+          end
+
+          def predicate
+            @predicate ||= Photo[:camera_id].eq(Camera[:id])
+          end
+
+          before do
+            left_operand.should be_composite
+            right_operand.should_not be_composite
+          end
+
+          context 'given a Hash that is keyed by #{table_name}__#{attribute_name}' do
+            context "when all the qualified table names correspond to one of the #left_operand's #composed_sets or the #right_operand's #set" do
+              it "returns a Hash for the #left_operand that is still qualified with its #composed_sets' names and an unqualified Hash for the #right_operand" do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :users__name => "Sharon Ly",
+                  :photos__id => "sharon_photo",
+                  :photos__name => "A photo of Sharon",
+                  :cameras__id => "minolta",
+                  :cameras__name => "Minolta"
+                }
+
+                expected_left = {
+                  :users__id => "sharon",
+                  :users__name => "Sharon Ly",
+                  :photos__id => "sharon_photo",
+                  :photos__name => "A photo of Sharon"
+                }
+
+                expected_right = {
+                  :id => "minolta",
+                  :name => "Minolta"
+                }
+
+                join.segregate_attributes(qualified_attributes).should == [expected_left, expected_right]
+              end
+            end
+
+            context "when one of the qualified table names is invalid" do
+              it "raises an ArgumentError" do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :invalid__id => "sharon_photo"
+                }
+
+                lambda do
+                  join.segregate_attributes(qualified_attributes)
+                end.should raise_error(ArgumentError)
+              end
+            end
+          end
+        end
+
+        context "when the #right_operand is #composite?" do
+          def left_operand
+            users_set
+          end
+
+          def right_operand
+            @right_operand ||= InnerJoin.new(photos_set, cameras_set, Camera[:id].eq(Photo[:camera_id]))
+          end
+
+          def predicate
+            @predicate ||= Photo[:user_id].eq(User[:id])
+          end
+
+          before do
+            left_operand.should_not be_composite
+            right_operand.should be_composite
+          end
+
+          context 'given a Hash that is keyed by #{table_name}__#{attribute_name}' do
+            context "when all the qualified table names correspond to the #left_operand's #set or one of the #right_operand's #composed_sets" do
+              it "returns an unqualified Hash for the #left_operand and a Hash for the #right_operand that is still qualified with its #composed_sets' names" do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :users__name => "Sharon Ly",
+                  :photos__id => "sharon_photo",
+                  :photos__name => "A photo of Sharon",
+                  :cameras__id => "minolta",
+                  :cameras__name => "Minolta"
+                }
+
+                expected_left = {
+                  :id => "sharon",
+                  :name => "Sharon Ly",
+                }
+
+                expected_right = {
+                  :photos__id => "sharon_photo",
+                  :photos__name => "A photo of Sharon",
+                  :cameras__id => "minolta",
+                  :cameras__name => "Minolta"
+                }
+
+                join.segregate_attributes(qualified_attributes).should == [expected_left, expected_right]
+              end
+            end
+
+            context "when one of the qualified table names is invalid" do
+              it "raises an ArgumentError" do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :invalid__id => "sharon_photo"
+                }
+
+                lambda do
+                  join.segregate_attributes(qualified_attributes)
+                end.should raise_error(ArgumentError)
+              end
+            end
+          end
+        end
+
       end
 
       describe "#push" do

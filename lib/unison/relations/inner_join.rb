@@ -106,18 +106,26 @@ module Unison
 
       protected
       def segregate_attributes(qualified_attributes)
-        left_set_name = left_operand.set.name
-        right_set_name = right_operand.set.name
+        left_set_names = left_operand.composed_sets.map { |set| set.name }
+        right_set_names = right_operand.composed_sets.map { |set| set.name }
 
         left_attributes = {}
         right_attributes = {}
 
-        qualified_attributes.each do |name, value|
-          table_name, attribute_name = name.to_s.split("__").map { |x| x.to_sym }
-          if table_name == left_set_name
-            left_attributes[attribute_name] = value
-          elsif table_name == right_set_name
-            right_attributes[attribute_name] = value
+        qualified_attributes.each do |qualified_name, value|
+          table_name, unqualified_name = qualified_name.to_s.split("__").map { |x| x.to_sym }
+          if left_set_names.include?(table_name)
+            if left_operand.composite?
+              left_attributes[qualified_name] = value
+            else
+              left_attributes[unqualified_name] = value
+            end
+          elsif right_set_names.include?(table_name)
+            if right_operand.composite?
+              right_attributes[qualified_name] = value
+            else
+              right_attributes[unqualified_name] = value
+            end
           else
             raise ArgumentError, "Invalid qualified table name: #{table_name.inspect}"
           end
