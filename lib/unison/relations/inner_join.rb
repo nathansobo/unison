@@ -76,7 +76,9 @@ module Unison
       end
 
       def to_arel
-        left_operand.to_arel.join(right_operand.to_arel).on(predicate.to_arel)
+        arel_join = left_operand.to_arel.join(right_operand.to_arel).on(predicate.to_arel)
+        aliased_attributes = arel_join.attributes.map { |a| a.as("#{a.relation.name}__#{a.name}") }
+        arel_join.project(*aliased_attributes)
       end
 
       def composite?
