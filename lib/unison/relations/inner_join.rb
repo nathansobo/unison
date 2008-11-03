@@ -95,14 +95,19 @@ module Unison
         raise NotImplementedError
       end
 
+      def new_tuple(qualified_attributes)
+        left_attributes, right_attributes = segregate_attributes(qualified_attributes)
+        CompositeTuple.new(left_operand.new_tuple(left_attributes), right_operand.new_tuple(right_attributes))
+      end
+
       def inspect
         "#{left_operand.inspect}.join(#{right_operand.inspect}).on(#{predicate.inspect})"
       end
 
       protected
       def segregate_attributes(qualified_attributes)
-        left_set_name = left_operand.composed_sets.first.name
-        right_set_name = right_operand.composed_sets.first.name
+        left_set_name = left_operand.set.name
+        right_set_name = right_operand.set.name
 
         left_attributes = {}
         right_attributes = {}

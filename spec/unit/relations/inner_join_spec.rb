@@ -50,10 +50,29 @@ module Unison
         end
       end
 
-#      describe "#new_tuple" do
-#        it "segregates the given attributes hash into a right hash and left hash based on the qualified attribute names and instantiates a CompositeTuple with them"
-#      end
-#
+      describe "#new_tuple" do
+        it "instantiates a CompositeTuple with the results of segregating the given attributes hash by qualified table names" do
+          qualified_attributes = {
+            :users__id => "sharon",
+            :users__name => "Sharon Ly",
+            :photos__id => "sharon_photo",
+            :photos__name => "A photo of Sharon"
+          }
+
+          user_attributes = {
+            :id => "sharon",
+            :name => "Sharon Ly"
+          }
+
+          photo_attributes = {
+            :id => "sharon_photo",
+            :name => "A photo of Sharon"
+          }
+
+          join.new_tuple(qualified_attributes).should == CompositeTuple.new(User.new(user_attributes), Photo.new(photo_attributes))
+        end
+      end
+
       describe "#segregate_attributes" do
         before do
           publicize join, :segregate_attributes
