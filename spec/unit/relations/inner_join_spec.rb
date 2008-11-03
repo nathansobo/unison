@@ -54,11 +54,59 @@ module Unison
 #        it "segregates the given attributes hash into a right hash and left hash based on the qualified attribute names and instantiates a CompositeTuple with them"
 #      end
 #
-#      describe "#segregate_attributes" do
-#        context "when both #right and #left"
-#
-#        it "segregates a hash of table_name__attribute_name => attribute value into two suu"
-#      end
+      describe "#segregate_attributes" do
+        before do
+          publicize join, :segregate_attributes
+        end
+
+        context "when both #left_operand and #right_operand are not #composite?" do
+          before do
+            left_operand.should_not be_composite
+            right_operand.should_not be_composite
+          end
+
+          context 'given a hash that is keyed by #{table_name}__#{attribute_name}' do
+            context "when all the qualified table names correspond to the left or right operands" do
+              it 'returns a hash for each table' do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :users__name => "Sharon Ly",
+                  :photos__id => "sharon_photo",
+                  :photos__name => "A photo of Sharon"
+                }
+
+                expected_left = {
+                  :id => "sharon",
+                  :name => "Sharon Ly"
+                }
+
+                expected_right = {
+                  :id => "sharon_photo",
+                  :name => "A photo of Sharon"
+                }
+
+                join.segregate_attributes(qualified_attributes).should == [expected_left, expected_right]
+              end
+            end
+
+            context "when one of the qualified table names is invalid" do
+              it "raises an ArgumentError" do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :invalid__id => "sharon_photo"
+                }
+
+                lambda do
+                  join.segregate_attributes(qualified_attributes)
+                end.should raise_error(ArgumentError)
+              end
+            end
+
+          end
+        end
+
+        it "segregates a hash of table_name__attribute_name => attribute value into two suu"
+      end
 
       describe "#push" do
         before do

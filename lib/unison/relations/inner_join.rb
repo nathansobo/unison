@@ -100,6 +100,27 @@ module Unison
       end
 
       protected
+      def segregate_attributes(qualified_attributes)
+        left_set_name = left_operand.composed_sets.first.name
+        right_set_name = right_operand.composed_sets.first.name
+
+        left_attributes = {}
+        right_attributes = {}
+
+        qualified_attributes.each do |name, value|
+          table_name, attribute_name = name.to_s.split("__").map { |x| x.to_sym }
+          if table_name == left_set_name
+            left_attributes[attribute_name] = value
+          elsif table_name == right_set_name
+            right_attributes[attribute_name] = value
+          else
+            raise ArgumentError, "Invalid qualified table name: #{table_name.inspect}"
+          end
+        end
+
+        [left_attributes, right_attributes]
+      end
+
       def insert_if_predicate_matches(composite_tuple)
         insert(composite_tuple) if predicate.eval(composite_tuple)
       end
