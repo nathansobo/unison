@@ -21,7 +21,7 @@ module Unison
       end
 
       describe "#initialize" do
-        it "sets #left and #right" do
+        it "sets #left and #right to the first and second argument, respectively" do
           tuple.left.should == left
           tuple.right.should == right
         end

@@ -5,14 +5,14 @@ module Unison
     describe InnerJoin do
       attr_reader :join, :predicate
       before do
-        @join = InnerJoin.new(operand_1, operand_2, predicate)
+        @join = InnerJoin.new(left_operand, right_operand, predicate)
       end
 
-      def operand_1
+      def left_operand
         users_set
       end
 
-      def operand_2
+      def right_operand
         photos_set
       end
 
@@ -21,9 +21,9 @@ module Unison
       end
 
       describe "#initialize" do
-        it "sets #operand_1, #operand_2, and #predicate" do
-          join.operand_1.should == users_set
-          join.operand_2.should == photos_set
+        it "sets #left_operand, #right_operand, and #predicate" do
+          join.left_operand.should == users_set
+          join.right_operand.should == photos_set
           predicate.should == Photo[:user_id].eq(User[:id])
         end
 
@@ -33,7 +33,7 @@ module Unison
       end
 
       describe "#to_sql" do
-        it "returns 'select #operand_1 inner join #operand_2 on #predicate'" do
+        it "returns 'select #left_operand inner join #right_operand on #predicate'" do
           join.to_sql.should be_like("
             SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`, `users`.`show_fans`,
                    `photos`.`id`, `photos`.`user_id`, `photos`.`camera_id`, `photos`.`name`
@@ -46,9 +46,19 @@ module Unison
 
       describe "#to_arel" do
         it "returns an Arel representation of the relation" do
-          join.to_arel.should == operand_1.to_arel.join(operand_2.to_arel).on(predicate.to_arel)
+          join.to_arel.should == left_operand.to_arel.join(right_operand.to_arel).on(predicate.to_arel)
         end
       end
+
+#      describe "#new_tuple" do
+#        it "segregates the given attributes hash into a right hash and left hash based on the qualified attribute names and instantiates a CompositeTuple with them"
+#      end
+#
+#      describe "#segregate_attributes" do
+#        context "when both #right and #left"
+#
+#        it "segregates a hash of table_name__attribute_name => attribute value into two suu"
+#      end
 
       describe "#push" do
         before do
@@ -112,7 +122,7 @@ module Unison
       describe "#composed_sets" do
         context "when the operands contain PrimitiveTuples" do
           it "returns the union of the #composed_sets of the operands" do
-            join.composed_sets.should == operand_1.composed_sets + operand_2.composed_sets
+            join.composed_sets.should == left_operand.composed_sets + right_operand.composed_sets
           end
         end
 
@@ -133,32 +143,32 @@ module Unison
         context "when an Attribute with the given name is defined on both operands" do
           before do
             @name = :name
-            operand_1.should have_attribute(name)
-            operand_2.should have_attribute(name)
+            left_operand.should have_attribute(name)
+            right_operand.should have_attribute(name)
           end
 
-          it "returns the value of #operand_1.attribute for the name" do
-            join.attribute(name).should == operand_1.attribute(name)
+          it "returns the value of #left_operand.attribute for the name" do
+            join.attribute(name).should == left_operand.attribute(name)
           end
         end
 
-        context "when an Attribute with the given #name is defined only on #operand_2" do
+        context "when an Attribute with the given #name is defined only on #right_operand" do
           before do
             @name = :user_id
-            operand_1.should_not have_attribute(name)
-            operand_2.should have_attribute(name)
+            left_operand.should_not have_attribute(name)
+            right_operand.should have_attribute(name)
           end
 
-          it "returns the value of #operand_1.attribute for the name" do
-            join.attribute(name).should == operand_2.attribute(name)
+          it "returns the value of #left_operand.attribute for the name" do
+            join.attribute(name).should == right_operand.attribute(name)
           end
         end
 
         context "when no operand has an Attribute with the given name" do
           before do
             @name = :hussein
-            operand_1.should_not have_attribute(name)
-            operand_2.should_not have_attribute(name)
+            left_operand.should_not have_attribute(name)
+            right_operand.should_not have_attribute(name)
           end
 
           it "raises an ArgumentError" do
@@ -178,46 +188,46 @@ module Unison
       end
 
       describe "attribute" do
-        context "when #operand_1.has_attribute? is true" do
-          it "delegates to #operand_1" do
-            operand_1_attribute = operand_1.attribute(:id)
-            operand_1_attribute.should_not be_nil
+        context "when #left_operand.has_attribute? is true" do
+          it "delegates to #left_operand" do
+            left_operand_attribute = left_operand.attribute(:id)
+            left_operand_attribute.should_not be_nil
 
-            mock.proxy(operand_1).attribute(:id)
-            join.attribute(:id).should == operand_1_attribute
+            mock.proxy(left_operand).attribute(:id)
+            join.attribute(:id).should == left_operand_attribute
           end
         end
 
-        context "when #operand_1.has_attribute? is false" do
-          it "delegates to #operand_2" do
-            operand_1.should_not have_attribute(:user_id)
-            operand_2.should have_attribute(:user_id)
-            operand_2_attribute = operand_2.attribute(:user_id)
+        context "when #left_operand.has_attribute? is false" do
+          it "delegates to #right_operand" do
+            left_operand.should_not have_attribute(:user_id)
+            right_operand.should have_attribute(:user_id)
+            right_operand_attribute = right_operand.attribute(:user_id)
 
-            dont_allow(operand_1).attribute(:user_id)
-            mock.proxy(operand_2).attribute(:user_id)
-            join.attribute(:user_id).should == operand_2_attribute
+            dont_allow(left_operand).attribute(:user_id)
+            mock.proxy(right_operand).attribute(:user_id)
+            join.attribute(:user_id).should == right_operand_attribute
           end
         end
       end
 
       describe "#has_attribute?" do
-        context "when #operand_1.has_attribute? is true" do
-          it "delegates to #operand_1" do
-            operand_1.has_attribute?(:id).should be_true
+        context "when #left_operand.has_attribute? is true" do
+          it "delegates to #left_operand" do
+            left_operand.has_attribute?(:id).should be_true
 
-            mock.proxy(operand_1).has_attribute?(:id)
+            mock.proxy(left_operand).has_attribute?(:id)
             join.has_attribute?(:id).should be_true
           end
         end
 
-        context "when #operand_1.has_attribute? is false" do
-          it "delegates to #operand_1 and #operand_2" do
-            operand_1.has_attribute?(:user_id).should be_false
-            operand_2.has_attribute?(:user_id).should be_true
+        context "when #left_operand.has_attribute? is false" do
+          it "delegates to #left_operand and #right_operand" do
+            left_operand.has_attribute?(:user_id).should be_false
+            right_operand.has_attribute?(:user_id).should be_true
 
-            mock.proxy(operand_1).has_attribute?(:user_id)
-            mock.proxy(operand_2).has_attribute?(:user_id)
+            mock.proxy(left_operand).has_attribute?(:user_id)
+            mock.proxy(right_operand).has_attribute?(:user_id)
             join.has_attribute?(:user_id).should be_true
           end
         end
@@ -234,7 +244,7 @@ module Unison
           join.release_from(retainer)
         end
 
-        context "when a Tuple is inserted into #operand_1" do
+        context "when a Tuple is inserted into #left_operand" do
           context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
@@ -301,7 +311,7 @@ module Unison
           end
         end
 
-        context "when a Tuple is inserted into #operand_2" do
+        context "when a Tuple is inserted into #right_operand" do
           context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
@@ -368,7 +378,7 @@ module Unison
           end
         end
 
-        context "when a Tuple is deleted from #operand_1" do
+        context "when a Tuple is deleted from #left_operand" do
           attr_reader :user, :tuple_class
           context "when the Tuple is a component of some CompositeTuple in #tuples" do
             attr_reader :photo, :composite_tuple
@@ -428,7 +438,7 @@ module Unison
           end
         end
 
-        context "when a Tuple is deleted from #operand_2" do
+        context "when a Tuple is deleted from #right_operand" do
           attr_reader :photo, :tuple_class
           context "when the Tuple is a component of some CompositeTuple in #tuples" do
             attr_reader :user, :composite_tuple
@@ -488,7 +498,7 @@ module Unison
           end
         end
 
-        context "when a Tuple in #operand_1 is updated" do
+        context "when a Tuple in #left_operand is updated" do
           context "when the Tuple is not a component of any CompositeTuple in #tuples" do
             attr_reader :user, :photo, :expected_composite_tuple
             before do
@@ -614,7 +624,7 @@ module Unison
           end
         end
 
-        context "when a Tuple in #operand_2 is updated" do
+        context "when a Tuple in #right_operand is updated" do
           context "when the Tuple is not a component of any CompositeTuple in #tuples" do
             attr_reader :user, :photo, :expected_composite_tuple
             before do
@@ -846,8 +856,8 @@ module Unison
             tuples[2][Photo[:name]].should == corey_photo_1.name
           end
 
-          context "when #operand_1 is an empty singleton Relation" do
-            def operand_1
+          context "when #left_operand is an empty singleton Relation" do
+            def left_operand
               users_set.where(User[:id].eq(-1)).singleton
             end
             
@@ -856,8 +866,8 @@ module Unison
             end
           end
 
-          context "when #operand_2 is an empty singleton Relation" do
-            def operand_2
+          context "when #right_operand is an empty singleton Relation" do
+            def right_operand
               photos_set.where(Photo[:id].eq(-1)).singleton
             end
 
@@ -869,11 +879,11 @@ module Unison
       end
 
       context "with complex operands" do
-        def operand_1
-          @operand_1 ||= InnerJoin.new(users_set, photos_set, Photo[:user_id].eq(User[:id]))
+        def left_operand
+          @left_operand ||= InnerJoin.new(users_set, photos_set, Photo[:user_id].eq(User[:id]))
         end
 
-        def operand_2
+        def right_operand
           cameras_set
         end
 
@@ -892,7 +902,7 @@ module Unison
             join.release_from(retainer)
           end
 
-          context "when a Tuple is inserted into #operand_1" do
+          context "when a Tuple is inserted into #left_operand" do
             context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
               attr_reader :photo, :expected_tuple
               before do
@@ -949,7 +959,7 @@ module Unison
             end
           end
 
-          context "when a Tuple is inserted into #operand_2" do
+          context "when a Tuple is inserted into #right_operand" do
             context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
               attr_reader :camera, :expected_tuple
               before do
@@ -1006,7 +1016,7 @@ module Unison
             end
           end
 
-          context "when a Tuple is deleted from #operand_1" do
+          context "when a Tuple is deleted from #left_operand" do
             attr_reader :user, :tuple_class
             context "when the Tuple is a component of some CompositeTuple in #tuples" do
               attr_reader :photo, :composite_tuple
@@ -1061,7 +1071,7 @@ module Unison
             end
           end
 
-          context "when a Tuple is deleted from #operand_2" do
+          context "when a Tuple is deleted from #right_operand" do
             context "when the Tuple is a component of some CompositeTuple in #tuples" do
               attr_reader :camera, :composite_tuple
               before do
@@ -1115,7 +1125,7 @@ module Unison
             end
           end
 
-          context "when a Tuple in #operand_1 is updated" do
+          context "when a Tuple in #left_operand is updated" do
             context "when the Tuple is not a component of any CompositeTuple in #tuples" do
               attr_reader :user, :photo, :camera, :expected_composite_tuple
               before do
@@ -1227,7 +1237,7 @@ module Unison
             end
           end
 
-          context "when a Tuple in #operand_2 is updated" do
+          context "when a Tuple in #right_operand is updated" do
             context "when the Tuple is not a component of any CompositeTuple in #tuples" do
               attr_reader :photo, :camera, :expected_composite_tuple
               before do
