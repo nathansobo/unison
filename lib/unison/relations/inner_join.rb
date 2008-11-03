@@ -115,17 +115,11 @@ module Unison
         qualified_attributes.each do |qualified_name, value|
           table_name, unqualified_name = qualified_name.to_s.split("__").map { |x| x.to_sym }
           if left_set_names.include?(table_name)
-            if left_operand.composite?
-              left_attributes[qualified_name] = value
-            else
-              left_attributes[unqualified_name] = value
-            end
+            name = left_operand.composite?? qualified_name : unqualified_name
+            left_attributes[name] = value
           elsif right_set_names.include?(table_name)
-            if right_operand.composite?
-              right_attributes[qualified_name] = value
-            else
-              right_attributes[unqualified_name] = value
-            end
+            name = right_operand.composite?? qualified_name : unqualified_name
+            right_attributes[name] = value
           else
             raise ArgumentError, "Invalid qualified table name: #{table_name.inspect}"
           end
