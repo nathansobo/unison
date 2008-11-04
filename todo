@@ -22,6 +22,8 @@ Nuke unretained objects from the cache periodically using an LRU strategy
 
 Introduce directionality on order_by_attributes
 
+AttributesProjection#fetch_sql and #merge should delegate to #operand
+
 Icebox
 --------
 
