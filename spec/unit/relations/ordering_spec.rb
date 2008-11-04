@@ -70,13 +70,6 @@ module Unison
         end
       end
 
-      describe "#pull" do
-        it "delegates to its operand and returns self" do
-          mock.proxy(operand).pull
-          ordering.pull.should equal(ordering)
-        end
-      end
-
       describe "#push" do
         before do
           origin.connection[:users].delete
