@@ -8,7 +8,7 @@ require "sequel"
 require "guid"
 require "json"
 
-# TODO: Make a better fix
+# TODO: Arel implements to_sql on String, which causes problems. Make a better fix.
 class String
   remove_method :to_sql
 end

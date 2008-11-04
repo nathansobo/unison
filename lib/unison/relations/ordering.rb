@@ -31,8 +31,8 @@ module Unison
         operand.merge(tuples)
       end
 
-      def to_arel
-        operand.to_arel.order(*order_by_attributes.map {|order_by_attribute| order_by_attribute.to_arel})
+      def fetch_arel
+        operand.fetch_arel.order(*order_by_attributes.map {|order_by_attribute| order_by_attribute.fetch_arel})
       end
 
       def tuple_class

@@ -11,9 +11,9 @@ module Unison
         @predicate = LessThanOrEqualTo.new(operand_1, operand_2)
       end      
       
-      describe "#to_arel" do
+      describe "#fetch_arel" do
         it "returns an Arel::Where representation" do
-          predicate.to_arel.should == Arel::LessThanOrEqualTo.new(operand_1.to_arel, operand_2.to_arel)
+          predicate.fetch_arel.should == Arel::LessThanOrEqualTo.new(operand_1.fetch_arel, operand_2.fetch_arel)
         end
       end
 

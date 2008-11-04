@@ -16,8 +16,8 @@ module Unison
         @tuples = nil
       end
 
-      def to_sql
-        to_arel.to_sql
+      def fetch_sql
+        fetch_arel.to_sql
       end
 
       def [](index)

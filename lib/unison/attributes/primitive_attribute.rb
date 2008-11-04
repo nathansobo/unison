@@ -28,8 +28,8 @@ module Unison
         set.equal?(other.set) && name == other.name && transform == other.transform
       end
 
-      def to_arel
-        set.to_arel[name]
+      def fetch_arel
+        set.fetch_arel[name]
       end
 
       def create_field(tuple)

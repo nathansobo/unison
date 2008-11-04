@@ -70,8 +70,8 @@ module Unison
         operand.new_tuple(attributes)
       end
 
-      def to_arel
-        operand.to_arel.take(1)
+      def fetch_arel
+        operand.fetch_arel.take(1)
       end
 
       def set

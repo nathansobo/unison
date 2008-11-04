@@ -152,7 +152,7 @@ module Unison
       end
       attr_writer :default_foreign_key_name
 
-      def to_arel
+      def fetch_arel
         @arel ||= Arel::Table.new(name, Adapters::Arel::Engine.new(self))
       end
 

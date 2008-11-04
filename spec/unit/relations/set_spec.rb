@@ -516,28 +516,28 @@ module Unison
         end
       end
 
-      describe "#to_sql" do
+      describe "#fetch_sql" do
         it "returns a 'select #attributes from #name'" do
-          set.to_sql.should be_like("SELECT `users`.`id`, `users`.`name` FROM `users`")
+          set.fetch_sql.should be_like("SELECT `users`.`id`, `users`.`name` FROM `users`")
         end
       end
 
-      describe "#to_arel" do
+      describe "#fetch_arel" do
         it "returns the Arel::Table representation of the instance" do
-          set.to_arel.should == Arel::Table.new(set.name, Adapters::Arel::Engine.new(self))
+          set.fetch_arel.should == Arel::Table.new(set.name, Adapters::Arel::Engine.new(self))
         end
 
         it "when called many times, returns the same instance" do
-          set.to_arel.object_id.should == set.to_arel.object_id
+          set.fetch_arel.object_id.should == set.fetch_arel.object_id
         end
 
         describe "returned value" do
           it "has the Arel representation of the Set's Attributes" do
             set.attributes.should_not be_empty
-            set.to_arel.attributes.should_not be_empty
-            set.attributes.length.should == set.to_arel.attributes.length
+            set.fetch_arel.attributes.should_not be_empty
+            set.attributes.length.should == set.fetch_arel.attributes.length
             set.attributes.each do |attribute_name, attribute|
-              set.to_arel[attribute_name].should_not be_nil
+              set.fetch_arel[attribute_name].should_not be_nil
             end
           end
         end

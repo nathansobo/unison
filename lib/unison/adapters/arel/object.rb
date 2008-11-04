@@ -1,5 +1,5 @@
 class Object
-  def to_arel
+  def fetch_arel
     self
   end
 end

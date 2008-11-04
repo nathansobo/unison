@@ -32,9 +32,9 @@ module Unison
         end
       end
 
-      describe "#to_sql" do
+      describe "#fetch_sql" do
         it "returns 'select #left_operand inner join #right_operand on #predicate', with the Attributes aliased to include their table name" do
-          join.to_sql.should be_like("
+          join.fetch_sql.should be_like("
             SELECT DISTINCT `users`.`id` AS 'users__id', `users`.`name` AS 'users__name', `users`.`hobby` AS 'users__hobby',
                             `users`.`team_id` AS 'users__team_id', `users`.`developer` AS 'users__developer', 
                             `users`.`show_fans` AS 'users__show_fans', `photos`.`id` AS 'photos__id', `photos`.`user_id` AS 'photos__user_id',
@@ -45,11 +45,11 @@ module Unison
         end
       end
 
-      describe "#to_arel" do
+      describe "#fetch_arel" do
         it "returns an Arel representation of the relation, where the Attributes are aliased to include their table name" do
-          arel_join = left_operand.to_arel.join(right_operand.to_arel).on(predicate.to_arel)
+          arel_join = left_operand.fetch_arel.join(right_operand.fetch_arel).on(predicate.fetch_arel)
           aliased_attributes = arel_join.attributes.map { |a| a.as("#{a.original_relation.name}__#{a.name}") }
-          join.to_arel.should == arel_join.project(*aliased_attributes) 
+          join.fetch_arel.should == arel_join.project(*aliased_attributes)
         end
       end
 

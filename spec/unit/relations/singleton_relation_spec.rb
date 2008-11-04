@@ -109,17 +109,17 @@ module Unison
         end
       end
 
-      describe "#to_sql" do
+      describe "#fetch_sql" do
         context "when #operand is a Set" do
           it "returns 'select #operand where #predicate'" do
-            singleton_relation.to_sql.should be_like("SELECT `accounts`.`id`, `accounts`.`user_id`, `accounts`.`name`, `accounts`.`deactivated_at`, `accounts`.`employee_id` FROM `accounts` ORDER BY `accounts`.`employee_id` LIMIT 1")
+            singleton_relation.fetch_sql.should be_like("SELECT `accounts`.`id`, `accounts`.`user_id`, `accounts`.`name`, `accounts`.`deactivated_at`, `accounts`.`employee_id` FROM `accounts` ORDER BY `accounts`.`employee_id` LIMIT 1")
           end
         end
       end
 
-      describe "#to_arel" do
+      describe "#fetch_arel" do
         it "returns an Arel representation of the relation" do
-          singleton_relation.to_arel.should == operand.to_arel.take(1)
+          singleton_relation.fetch_arel.should == operand.fetch_arel.take(1)
         end
       end
 

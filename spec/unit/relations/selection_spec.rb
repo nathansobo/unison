@@ -70,14 +70,14 @@ module Unison
         end
       end
 
-      describe "#to_sql" do
+      describe "#fetch_sql" do
         context "when #operand is a Set" do
           before do
             @selection = users_set.where(users_set[:id].eq("nathan"))
           end
 
           it "returns 'select #operand where #predicate'" do
-            selection.to_sql.should be_like("
+            selection.fetch_sql.should be_like("
               SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`, `users`.`show_fans`
               FROM `users`
               WHERE `users`.`id` = 'nathan'
@@ -91,7 +91,7 @@ module Unison
           end
 
           it "returns 'select #operand where #predicate'" do
-            selection.to_sql.should be_like("
+            selection.fetch_sql.should be_like("
               SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`, `users`.`show_fans`
               FROM `users`
               WHERE `users`.`id` = 'nathan' AND `users`.`name` = 'Nathan'
@@ -100,9 +100,9 @@ module Unison
         end
       end
 
-      describe "#to_arel" do
+      describe "#fetch_arel" do
         it "returns an Arel representation of the relation" do
-          selection.to_arel.should == operand.to_arel.where(predicate.to_arel)
+          selection.fetch_arel.should == operand.fetch_arel.where(predicate.fetch_arel)
         end
       end
 

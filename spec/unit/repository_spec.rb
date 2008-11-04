@@ -12,7 +12,7 @@ module Unison
       end
 
       context "when passed a Set" do
-        it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#to_sql" do
+        it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#fetch_sql" do
           origin.fetch(users_set).should == [
             User.new(:id => "buffington", :name => "Buffington", :hobby => "Bots", :team_id => "mangos", :show_fans => true),
             User.new(:id => "keefa", :name => "Keefa", :hobby => "Begging", :team_id => "chargers", :show_fans => true)
@@ -21,14 +21,14 @@ module Unison
       end
 
       context "when passed a Selection" do
-        it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#to_sql" do
+        it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#fetch_sql" do
           selection = users_set.where(users_set[:name].eq("Buffington"))
           origin.fetch(selection).should == [User.new(:id => "buffington", :name => "Buffington", :hobby => "Bots", :team_id => "mangos", :show_fans => true)]
         end
       end
 
       context "when passed a SetProjection" do
-        it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#to_sql" do
+        it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#fetch_sql" do
           projection = users_set \
             .join(photos_set) \
             .on(users_set[:id].eq(photos_set[:user_id])) \
@@ -43,7 +43,7 @@ module Unison
       end
 
       context "when passed an InnerJoin" do
-        it "returns an array of CompositeTuples based on the result of a query using Relation#to_sql" do
+        it "returns an array of CompositeTuples based on the result of a query using Relation#fetch_sql" do
           join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
           results = origin.fetch(join)
           results.should_not be_empty

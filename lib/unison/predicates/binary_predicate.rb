@@ -29,7 +29,7 @@ module Unison
         apply(tuple.bind(eval_operand(operand_1)), tuple.bind(eval_operand(operand_2)))
       end
 
-      def to_arel
+      def fetch_arel
         raise NotImplementedError
       end
 

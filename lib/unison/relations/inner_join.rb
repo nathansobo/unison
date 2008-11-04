@@ -75,8 +75,8 @@ module Unison
         [left_operand, right_operand]
       end
 
-      def to_arel
-        arel_join = left_operand.to_arel.join(right_operand.to_arel).on(predicate.to_arel)
+      def fetch_arel
+        arel_join = left_operand.fetch_arel.join(right_operand.fetch_arel).on(predicate.fetch_arel)
         aliased_attributes = arel_join.attributes.map { |a| a.as("#{a.original_relation.name}__#{a.name}") }
         arel_join.project(*aliased_attributes)
       end

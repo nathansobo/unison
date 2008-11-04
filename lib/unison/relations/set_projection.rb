@@ -49,8 +49,8 @@ module Unison
         projected_set.has_attribute?(attribute)
       end 
 
-      def to_arel
-        Arel::Project.new( operand.to_arel, *projected_set.to_arel.attributes )
+      def fetch_arel
+        Arel::Project.new( operand.fetch_arel, *projected_set.fetch_arel.attributes )
       end
 
       def tuple_class

@@ -1,8 +1,8 @@
 module Unison
   module Predicates
     class LessThan < BinaryPredicate
-      def to_arel
-        Arel::LessThan.new(operand_1.to_arel, operand_2.to_arel)
+      def fetch_arel
+        Arel::LessThan.new(operand_1.fetch_arel, operand_2.fetch_arel)
       end
 
       def inspect

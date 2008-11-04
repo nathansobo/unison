@@ -35,9 +35,9 @@ module Unison
         end
       end
 
-      describe "#to_sql" do
+      describe "#fetch_sql" do
         it "returns the operand's SQL ordered by the #order_by_attributes" do
-          ordering.to_sql.should be_like("
+          ordering.fetch_sql.should be_like("
             SELECT          `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`, `users`.`show_fans`
             FROM            `users`
             ORDER BY       `users`.`name`, `users`.`id`
@@ -45,9 +45,9 @@ module Unison
         end
       end
 
-      describe "#to_arel" do
+      describe "#fetch_arel" do
         it "returns an Arel representation of the relation" do
-          ordering.to_arel.should == operand.to_arel.order(order_by_attribute_1.to_arel, order_by_attribute_2.to_arel)
+          ordering.fetch_arel.should == operand.fetch_arel.order(order_by_attribute_1.fetch_arel, order_by_attribute_2.fetch_arel)
         end
       end
 

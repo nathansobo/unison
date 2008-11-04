@@ -30,9 +30,9 @@ module Unison
         end
       end
 
-      describe "#to_sql" do
+      describe "#fetch_sql" do
         it "returns select attributes from operand" do
-          projection.to_sql.should be_like("
+          projection.fetch_sql.should be_like("
             SELECT DISTINCT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`, `users`.`show_fans`
             FROM `users`
             INNER JOIN `photos`
@@ -41,11 +41,11 @@ module Unison
         end
       end
 
-      describe "#to_arel" do
+      describe "#fetch_arel" do
         it "returns an Arel representation of the relation" do
-          projection.to_arel.should == Arel::Project.new(
-            operand.to_arel,
-            *users_set.to_arel.attributes
+          projection.fetch_arel.should == Arel::Project.new(
+            operand.fetch_arel,
+            *users_set.fetch_arel.attributes
           )
         end
       end
