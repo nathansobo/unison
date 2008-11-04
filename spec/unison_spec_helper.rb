@@ -74,8 +74,8 @@ Spec::Runner.configure do |config|
 
     photos = connection[:photos]
     photos.delete
-    photos << {:id => "buffington_photo", :user_id => "buffington", :name => "Photo of Buffington.", :camera_id => "nikkon_d50"}
-    photos << {:id => "buffington_bad_photo", :user_id => "buffington", :name => "Another photo of Buffington. This one is bad.", :camera_id => "nikkon_d50"}
+    photos << {:id => "buffing_photo", :user_id => "buffington", :name => "Photo of Buffington.", :camera_id => "nikkon_d50"}
+    photos << {:id => "buffing_bad_photo", :user_id => "buffington", :name => "Another photo of Buffington. This one is bad.", :camera_id => "nikkon_d50"}
     photos << {:id => "keefa_kicking_teddys_ass", :user_id => "keefa", :name => "Photo of Keefa in a dog fight. She's totally kicking Teddy's ass.", :camera_id => "sony_cybershot"}
 
     cameras = connection[:cameras]

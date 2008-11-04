@@ -50,17 +50,6 @@ module Unison
         end
       end
 
-      describe "#pull" do
-        it "delegates to #operand and returns #self" do
-          mock.proxy(operand).pull
-          projection.find("buffington").should be_nil
-          operand.find(Photo[:id].eq("buffington_photo")).should be_nil
-          projection.pull.should equal(projection)
-          projection.find("buffington").should_not be_nil
-          operand.find(Photo[:id].eq("buffington_photo")).should_not be_nil
-        end
-      end
-
       describe "#push" do
         it "delegates to #operand" do
           origin.connection[:photos].delete
