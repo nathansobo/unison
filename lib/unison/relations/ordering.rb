@@ -27,6 +27,11 @@ module Unison
         @order_by_attributes = attributes_for(order_by_attributes)
       end
 
+      def pull
+        operand.pull
+        self
+      end
+
       def merge(tuples)
         operand.merge(tuples)
       end
