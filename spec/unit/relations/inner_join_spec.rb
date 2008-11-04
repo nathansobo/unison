@@ -37,8 +37,8 @@ module Unison
           join.to_sql.should be_like("
             SELECT DISTINCT `users`.`id` AS 'users__id', `users`.`name` AS 'users__name', `users`.`hobby` AS 'users__hobby',
                             `users`.`team_id` AS 'users__team_id', `users`.`developer` AS 'users__developer', 
-                            `users`.`show_fans` AS 'users__show_fans', `photos`.`id` AS 'users__id', `photos`.`user_id` AS 'users__user_id',
-                            `photos`.`camera_id` AS 'users__camera_id', `photos`.`name` AS 'users__name'
+                            `users`.`show_fans` AS 'users__show_fans', `photos`.`id` AS 'photos__id', `photos`.`user_id` AS 'photos__user_id',
+                            `photos`.`camera_id` AS 'photos__camera_id', `photos`.`name` AS 'photos__name'
             FROM `users`
             INNER JOIN `photos` ON `photos`.`user_id` = `users`.`id`
           ")
@@ -48,7 +48,7 @@ module Unison
       describe "#to_arel" do
         it "returns an Arel representation of the relation, where the Attributes are aliased to include their table name" do
           arel_join = left_operand.to_arel.join(right_operand.to_arel).on(predicate.to_arel)
-          aliased_attributes = arel_join.attributes.map { |a| a.as("#{a.relation.name}__#{a.name}") }
+          aliased_attributes = arel_join.attributes.map { |a| a.as("#{a.original_relation.name}__#{a.name}") }
           join.to_arel.should == arel_join.project(*aliased_attributes) 
         end
       end

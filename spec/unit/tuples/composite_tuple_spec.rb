@@ -27,6 +27,14 @@ module Unison
         end
       end
 
+      describe "#pushed" do
+        it "calls #pushed on #left and #right and returns self" do
+          mock(left).pushed
+          mock(right).pushed
+          tuple.pushed.should == tuple
+        end
+      end
+
       describe "#nested_tuples" do
         it "returns an Array of #left and #right" do
           tuple.nested_tuples.should == [left, right]

@@ -34,16 +34,24 @@ module Unison
             .on(users_set[:id].eq(photos_set[:user_id])) \
             .project(photos_set)
 
-          origin.fetch(projection).should == origin.fetch(photos_set)
+          results = origin.fetch(projection)
+          results.should_not be_empty
+          results.each do |result|
+            result.class.should == Photo
+          end
         end
       end
 
       context "when passed an InnerJoin" do
-        it "raises a NotImplementedError" do
+        it "returns an array of CompositeTuples based on the result of a query using Relation#to_sql" do
           join = users_set.join(photos_set).on(users_set[:id].eq(photos_set[:user_id]))
-          lambda do
-            origin.fetch(join)
-          end.should raise_error(NotImplementedError)
+          results = origin.fetch(join)
+          results.should_not be_empty
+          results.each do |result|
+            result.class.should == CompositeTuple
+            result.left.class.should == User
+            result.right.class.should == Photo
+          end
         end
       end
     end
