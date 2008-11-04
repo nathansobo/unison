@@ -28,7 +28,7 @@ module Unison
       end
 
       context "when passed a SetProjection" do
-        it "returns an array of Relation#tuple_class instances based on the result of a query using Relation#fetch_sql" do
+        it "returns an array of CompositeTuples based on the result of a query using SetProjection#fetch_sql" do
           projection = users_set \
             .join(photos_set) \
             .on(users_set[:id].eq(photos_set[:user_id])) \
@@ -37,7 +37,9 @@ module Unison
           results = origin.fetch(projection)
           results.should_not be_empty
           results.each do |result|
-            result.class.should == Photo
+            result.class.should == CompositeTuple
+            result.left.class.should == User
+            result.right.class.should == Photo
           end
         end
       end

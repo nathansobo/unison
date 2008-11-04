@@ -61,11 +61,11 @@ module Unison
             mock.proxy(origin).push(users_projection)
             mock.proxy(origin).push(photos_projection)
 
-            origin.fetch(users_projection).should be_empty
-            origin.fetch(photos_projection).should be_empty
+            users_set.fetch.should be_empty
+            photos_set.fetch.should be_empty
             selection.push
-            origin.fetch(users_projection).should == users_projection.tuples
-            origin.fetch(photos_projection).should == photos_projection.tuples
+            users_set.fetch.should == users_projection.tuples
+            photos_set.fetch.should == photos_projection.tuples
           end
         end
       end

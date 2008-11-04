@@ -24,29 +24,21 @@ module Unison
       end
 
       describe "#new_tuple" do
-        it "delegates to #projected_set" do
-          attributes = {:id => 1, :name => 'Vacation Photos'}
-          projection.new_tuple(attributes).should == projected_set.new_tuple(attributes)
+        it "delegates to #operand" do
+          attributes = {:users__id => "sharon", :users__name => 'Sharon Ly', :photos__id => "sharon_photo", :photos__name => "Sharon's Face"}
+          projection.new_tuple(attributes).should == operand.new_tuple(attributes)
         end
       end
 
       describe "#fetch_sql" do
-        it "returns select attributes from operand" do
-          projection.fetch_sql.should be_like("
-            SELECT DISTINCT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`, `users`.`show_fans`
-            FROM `users`
-            INNER JOIN `photos`
-            ON `photos`.`user_id` = `users`.`id`"
-          )
+        it "delegates to #operand" do
+          projection.fetch_sql.should == operand.fetch_sql
         end
       end
 
       describe "#fetch_arel" do
-        it "returns an Arel representation of the relation" do
-          projection.fetch_arel.should == Arel::Project.new(
-            operand.fetch_arel,
-            *users_set.fetch_arel.attributes
-          )
+        it "delegates to #operand" do
+          projection.fetch_arel.should == operand.fetch_arel
         end
       end
 
@@ -56,9 +48,10 @@ module Unison
           origin.connection[:users].delete
           
           mock.proxy(operand).push
-          origin.fetch(projection).should be_empty
+
+          projected_set.fetch.should be_empty
           projection.push
-          origin.fetch(projection).should == projection.tuples
+          projected_set.fetch.should == projection.tuples
         end
       end
 
@@ -119,12 +112,13 @@ module Unison
       end
 
       describe "#merge" do
-        it "calls #merge on the #projected_set" do
-          tuple = User.new(:id => 100, :name => "Jan")
-          mock.proxy(projected_set).merge([tuple])
-          projected_set.should_not include(tuple)
+        it "calls #merge on the #operand" do
+          tuple = CompositeTuple.new(User.find("jan"), Photo.new(:id => "jan_photo", :user_id => "jan")).pushed
+          mock.proxy(operand).merge([tuple])
+
+          operand.should_not include(tuple)
           projection.merge([tuple])
-          projected_set.should include(tuple)
+          operand.should include(tuple)
         end
       end
       

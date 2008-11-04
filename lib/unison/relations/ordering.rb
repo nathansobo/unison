@@ -47,6 +47,10 @@ module Unison
         operand.set
       end
 
+      def push
+        operand.push
+      end
+
       def composed_sets
         operand.composed_sets
       end

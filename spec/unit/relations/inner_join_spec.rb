@@ -354,6 +354,7 @@ module Unison
         before do
           origin.connection[:users].delete
           origin.connection[:photos].delete
+          origin.connection[:cameras].delete
         end
 
         context "when #composed_sets.size == 2" do
@@ -366,8 +367,8 @@ module Unison
 
             join.push
 
-            users_projection.pull.should == users_projection.tuples
-            photos_projection.pull.should == photos_projection.tuples
+            users_set.fetch.should == users_projection.tuples
+            photos_set.fetch.should == photos_projection.tuples
           end
         end
 
@@ -388,9 +389,9 @@ module Unison
 
             join.push
 
-            users_projection.pull.should == users_projection.tuples
-            photos_projection.pull.should == photos_projection.tuples
-            cameras_projection.pull.should == cameras_projection.tuples
+            users_set.fetch.should == users_projection.tuples
+            photos_set.fetch.should == photos_projection.tuples
+            cameras_set.fetch.should == cameras_projection.tuples
           end
         end
       end

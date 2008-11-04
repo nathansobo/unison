@@ -50,7 +50,7 @@ module Unison
       end 
 
       def fetch_arel
-        Arel::Project.new( operand.fetch_arel, *projected_set.fetch_arel.attributes )
+        operand.fetch_arel
       end
 
       def tuple_class
@@ -58,11 +58,11 @@ module Unison
       end
 
       def new_tuple(attributes)
-        projected_set.new_tuple(attributes)
+        operand.new_tuple(attributes)
       end
 
-      def merge(tuples)
-        projected_set.merge(tuples)
+      def merge(composite_tuples)
+        operand.merge(composite_tuples)
       end
 
       def push

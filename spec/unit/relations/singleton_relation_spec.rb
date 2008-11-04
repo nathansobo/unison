@@ -100,11 +100,11 @@ module Unison
             mock.proxy(origin).push(users_projection)
             mock.proxy(origin).push(accounts_projection)
 
-            origin.fetch(users_projection).should be_empty
-            origin.fetch(accounts_projection).should be_empty
+            users_set.fetch.should be_empty
+            accounts_set.fetch.should be_empty
             singleton_relation.push
-            origin.fetch(users_projection).should == users_projection.tuples
-            origin.fetch(accounts_projection).should == accounts_projection.tuples
+            users_set.fetch.should == users_projection.tuples
+            accounts_set.fetch.should == accounts_projection.tuples
           end
         end
       end
