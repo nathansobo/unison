@@ -65,6 +65,11 @@ module Unison
         projected_set.merge(tuples)
       end
 
+      def pull
+        operand.pull
+        self
+      end
+
       def push
         operand.push
       end

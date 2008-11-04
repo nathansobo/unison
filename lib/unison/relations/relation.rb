@@ -33,6 +33,7 @@ module Unison
 
       def pull
         merge(Unison.origin.fetch(self))
+        self
       end
 
       def push
