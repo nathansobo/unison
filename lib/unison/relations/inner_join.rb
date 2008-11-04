@@ -93,8 +93,17 @@ module Unison
         left_operand.composed_sets + right_operand.composed_sets
       end
 
-      def merge(tuples)
-        raise NotImplementedError
+      def merge(composite_tuples)
+        left_tuples = []
+        right_tuples = []
+
+        composite_tuples.each do |composite_tuple|
+          left_tuples.push(composite_tuple.left)
+          right_tuples.push(composite_tuple.right)
+        end
+
+        left_operand.merge(left_tuples)
+        right_operand.merge(right_tuples)
       end
 
       def new_tuple(qualified_attributes)

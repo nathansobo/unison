@@ -348,7 +348,6 @@ module Unison
             end
           end
         end
-
       end
 
       describe "#push" do
@@ -471,10 +470,26 @@ module Unison
       end
 
       describe "#merge" do
-        it "raises a NotImplementedError" do
-          lambda do
-            join.merge([])
-          end.should raise_error(NotImplementedError)
+        it "merges all the #left components of the given CompositeTuples into the #left_operand" do
+          user = User.new(:id => "sharon", :name => "Sharon Ly")
+          photo_1 = Photo.new(:id => "sharon_photo_1", :user_id => "sharon")
+          photo_2 = Photo.new(:id => "sharon_photo_2", :user_id => "sharon")
+
+          composite_tuples = [
+            CompositeTuple.new(user, photo_1),
+            CompositeTuple.new(user, photo_2)
+          ]
+
+          left_operand.find("sharon").should be_nil
+          right_operand.find("sharon_photo_1").should be_nil
+          right_operand.find("sharon_photo_2").should be_nil
+
+          join.merge(composite_tuples)
+
+          left_operand.find("sharon").should == user
+          right_operand.find("sharon_photo_1").should == photo_1
+          right_operand.find("sharon_photo_2").should == photo_2
+
         end
       end
 
