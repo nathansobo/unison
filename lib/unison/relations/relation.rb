@@ -25,7 +25,7 @@ module Unison
         when Symbol
           attribute(index)
         when Integer
-          delegate_to_read(:[], index)
+          tuples[index]
         else
           raise ArgumentError, "[] does not support #{index.inspect} as an argument"
         end
@@ -174,11 +174,15 @@ module Unison
       end
 
       def method_missing(method_name, *args, &block)
-        delegate_to_read(method_name, *args, &block)
+        if method_missing_delegation_target.respond_to?(method_name)
+          method_missing_delegation_target.send(method_name, *args, &block)
+        else
+          super
+        end
       end
 
-      def delegate_to_read(method_name, *args, &block)
-        tuples.send(method_name, *args, &block)
+      def method_missing_delegation_target
+        tuples
       end
 
       class PartialInnerJoin
