@@ -24,6 +24,7 @@ module Unison
         @name = name
         @attributes = SequencedHash.new
         self.class.instances.push(self)
+        enable_after_create
       end
 
       def tuple_class
@@ -120,7 +121,7 @@ module Unison
           raise ArgumentError, "Tuple with id #{tuple[:id]} already exists in this Set"
         end
         tuples.push(tuple)
-        tuple.send(:after_create) if tuple.new?
+        tuple.send(:after_create) if after_create_enabled? && tuple.new? 
         insert_subscription_node.call(tuple)
         tuple
       end
@@ -180,11 +181,25 @@ module Unison
         @declared_database_fixtures ||= {}
       end
 
+      def after_create_enabled?
+        @after_create_enabled
+      end
+
+      def enable_after_create
+        @after_create_enabled = true
+      end
+      
+      def disable_after_create
+        @after_create_enabled = false
+      end
+
       def load_memory_fixtures
+        disable_after_create
         declared_memory_fixtures.each do |id, attributes|
           attributes[:id] = id.to_s
           insert(new_tuple(attributes))
         end
+        enable_after_create
       end
 
       def load_database_fixtures

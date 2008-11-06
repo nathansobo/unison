@@ -41,12 +41,16 @@ module Unison
       describe "#initialize" do
         it "sets the name of the set" do
           set.name.should == :users
-
         end
+
         it "sets the #tuple_class of the Set to a subclass of Tuple::Base, and sets its #relation to itself" do
           tuple_class = set.tuple_class
           tuple_class.superclass.should == PrimitiveTuple
           tuple_class.set.should == set
+        end
+
+        it "sets #after_create_enabled? to true" do
+          set.after_create_enabled?.should be_true
         end
       end
 
@@ -260,6 +264,23 @@ module Unison
         end
       end
 
+      describe "#enable_after_create" do
+        it "sets #after_create_enabled? to true" do
+          set.disable_after_create
+          set.after_create_enabled?.should be_false
+          set.enable_after_create
+          set.after_create_enabled?.should be_true
+        end
+      end
+
+      describe "#disable_after_create" do
+        it "sets #after_create_enable? to false" do
+          set.after_create_enabled?.should be_true
+          set.disable_after_create
+          set.after_create_enabled?.should be_false
+        end
+      end
+
       describe "#insert" do
         context "when #retained?" do
           before do
@@ -288,19 +309,39 @@ module Unison
           end
 
           context "when the Tuple is #new?" do
-            it "calls #after_create on the PrimitiveTuple before triggering the the on_insert event" do
-              call_order = []
-              tuple = set.new_tuple(:id => "nathan", :name => "Nathan")
-              mock.proxy(tuple).after_create do |returns|
-                call_order.push(:after_create)
-                returns
-              end
-              set.on_insert(retainer) do |*args|
-                call_order.push(:on_insert)
+
+            context "when after_create is enabled" do
+              before do
+                set.after_create_enabled?.should be_true
               end
 
-              set.insert(tuple)
-              call_order.should == [:after_create, :on_insert]
+              it "calls #after_create on the PrimitiveTuple before triggering the the on_insert event" do
+                call_order = []
+                tuple = set.new_tuple(:id => "nathan", :name => "Nathan")
+                mock.proxy(tuple).after_create do |returns|
+                  call_order.push(:after_create)
+                  returns
+                end
+                set.on_insert(retainer) do |*args|
+                  call_order.push(:on_insert)
+                end
+
+                set.insert(tuple)
+                call_order.should == [:after_create, :on_insert]
+              end
+            end
+
+            context "when after_create is disabled" do
+              before do
+                set.disable_after_create
+              end
+
+              it "does not call #after_create on the PrimitiveTuple" do
+                call_order = []
+                tuple = set.new_tuple(:id => "nathan", :name => "Nathan")
+                dont_allow(tuple).after_create
+                set.insert(tuple)
+              end
             end
           end
 
@@ -469,7 +510,7 @@ module Unison
         end
 
         describe "#load_memory_fixtures" do
-          it "instantiates an instance of #tuple_class for each fixture identified in #declared_memory_fixtures" do
+          it "instantiates an instance of #tuple_class for each fixture identified in #declared_memory_fixtures, and inserts it into the Set without #after_create being called" do
             users_set.memory_fixtures(fixtures_hash_1)
             fixtures_hash_1.keys.each do |id|
               users_set.find(id).should be_nil
@@ -479,6 +520,7 @@ module Unison
 
             fixtures_hash_1.each do |id, attributes|
               fixture = users_set.find(id)
+              fixture.after_create_called?.should be_false
               attributes.each do |name, value|
                 fixture[name].should == value
               end
