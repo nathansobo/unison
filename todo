@@ -1,27 +1,16 @@
 Backlog
 --------
-Fixtures shouldn't trigger after_create
-
+has_one :through
+join with a TupleClass should use its #set
 Release from should blow up if the object is not a retainer
-
 cleanup PrimitiveTuple#[] specs
-
-In InnerJoin, rephrase operand_1 and operand_2 in terms of left and right to match new CompositeTuple vocab
-
 Instantiating an AttributesProjection with an operand that is composite raises an exception because we rely on #tuple_class
 Commonize PrimitiveTuple & ProjectedTuple as much as possible
-
-
-
 Sets should not have to be retained to support insert
 When a set is retained, it should retain its tuples, just like any other relation
-
 Decide what to do when fetching an object out of the database that is already in the cache (should we update the cached object?)
-
 Nuke unretained objects from the cache periodically using an LRU strategy
-
 Introduce directionality on order_by_attributes
-
 AttributesProjection#fetch_sql and #merge should delegate to #operand
 
 Icebox
@@ -29,21 +18,9 @@ Icebox
 
 Need to add specs for #initial_read on all Relation classes
 
-Make it possible to pull AttributeProjections and InnerJoins:
-  Rather than implementing #set of every relation that tells Repository where to put the results of pulling that relation's
-  SQL query, implement #insert on every relation. Insert will be in charge of taking a given row and multiplexing the data
-  contained therein to underlying models. This will require that AttributeProjections and InnerJoins implement #tuple_class,
-  so that the repository can instantiate an instance thereof.
-
 
 Potentially rip out support for referencing hash_representation on unretained Topics... OR
   do transform in PrimitiveField and not the [] reader, which means we need to address the following:
   PrimitiveTuple#attributes calls the transform block on field values. Do we want to do this on persist? If not, add PrimitiveTuple#persistent_attributes
 
-Catch NoMethodError exceptions in Relation#method_missing. NoMethod errors are bitching about Array, which is confusing!
-
-
-Set#clear... it proxies to the underlying Array. Not sure if this is actually kosher.
-
 Give ProjectedTuple its own private values to avoid problems of in-place mutation of its Fields' values.
-
