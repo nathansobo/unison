@@ -2,6 +2,7 @@ Backlog
 --------
 has_one :through
 join with a TupleClass should use its #set
+project with a TupleClass should use its #set
 Release from should blow up if the object is not a retainer
 cleanup PrimitiveTuple#[] specs
 Instantiating an AttributesProjection with an operand that is composite raises an exception because we rely on #tuple_class

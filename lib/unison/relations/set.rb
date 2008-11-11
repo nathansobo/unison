@@ -25,6 +25,7 @@ module Unison
         @attributes = SequencedHash.new
         self.class.instances.push(self)
         enable_after_create
+        enable_after_merge
       end
 
       def tuple_class
@@ -137,7 +138,7 @@ module Unison
         tuples.each do |tuple|
           unless find(tuple[:id])
             insert(tuple)
-            tuple.send(:after_merge)
+            tuple.send(:after_merge) if after_merge_enabled?
           end
         end
       end
@@ -191,6 +192,18 @@ module Unison
       
       def disable_after_create
         @after_create_enabled = false
+      end
+
+      def after_merge_enabled?
+        @after_merge_enabled
+      end
+
+      def enable_after_merge
+        @after_merge_enabled = true
+      end
+
+      def disable_after_merge
+        @after_merge_enabled = false
       end
 
       def load_memory_fixtures

@@ -52,6 +52,10 @@ module Unison
         it "sets #after_create_enabled? to true" do
           set.after_create_enabled?.should be_true
         end
+
+        it "sets #after_merge_enabled? to true" do
+          set.after_merge_enabled?.should be_true
+        end
       end
 
       describe "#add_primitive_attribute" do
@@ -281,6 +285,23 @@ module Unison
         end
       end
 
+      describe "#enable_after_merge" do
+        it "sets #after_merge_enabled? to true" do
+          set.disable_after_merge
+          set.after_merge_enabled?.should be_false
+          set.enable_after_merge
+          set.after_merge_enabled?.should be_true
+        end
+      end
+
+      describe "#disable_after_merge" do
+        it "sets #after_merge_enable? to false" do
+          set.after_merge_enabled?.should be_true
+          set.disable_after_merge
+          set.after_merge_enabled?.should be_false
+        end
+      end
+
       describe "#insert" do
         context "when #retained?" do
           before do
@@ -453,10 +474,28 @@ module Unison
             set.should include(not_in_set)
           end
 
-          it "calls #after_merge on inserted Tuples" do
-            mock.proxy(not_in_set).after_merge
-            dont_allow(in_set).after_merge
-            set.merge(tuples)
+          context "when #after_merge_enabled? is true" do
+            before do
+              set.after_merge_enabled?.should be_true
+            end
+
+            it "calls #after_merge on inserted Tuples" do
+              mock.proxy(not_in_set).after_merge
+              dont_allow(in_set).after_merge
+              set.merge(tuples)
+            end
+          end
+
+          context "when #after_merge_enabled? is false" do
+            before do
+              set.disable_after_merge
+            end
+
+            it "does not call #after_merge on inserted Tuples" do
+              dont_allow(not_in_set).after_merge
+              dont_allow(in_set).after_merge
+              set.merge(tuples)
+            end
           end
         end
       end
