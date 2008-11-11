@@ -84,6 +84,11 @@ module Unison
           set.insert(new(attributes))
         end
 
+        (Relations::Set.instance_methods + Array.instance_methods - PrimitiveTuple.methods).each do |method|
+          next if method =~ /^__|^to_ary$/
+          delegate method, :to => :set
+        end
+
         def where(predicate)
           set.where(predicate)
         end
