@@ -8,8 +8,19 @@ module Unison
 
         def load_fixtures
           instances.each do |set|
+            set.load_fixtures
+          end
+        end
+
+        def load_memory_fixtures
+          instances.each do |set|
             set.load_memory_fixtures
-            set.load_database_fixtures          
+          end
+        end
+
+        def load_database_fixtures
+          instances.each do |set|
+            set.load_database_fixtures
           end
         end
 

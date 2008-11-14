@@ -27,11 +27,33 @@ module Unison
       end
 
       describe ".load_fixtures" do
-        it "calls #load_memory_fixtures and #load_database_fixtures on every instance of Set" do
+        it "calls #load_fixtures on every instance of Set" do
+          publicize Set, :instances
+          Set.instances.should_not be_empty
+          Set.instances.each do |instance|
+            mock.proxy(instance).load_fixtures
+          end
+          Set.load_fixtures
+        end
+      end
+
+      describe ".load_memory_fixtures" do
+        it "calls #load_memory_fixtures on every instance of Set" do
           publicize Set, :instances
           Set.instances.should_not be_empty
           Set.instances.each do |instance|
             mock.proxy(instance).load_memory_fixtures
+            mock.proxy(instance).load_database_fixtures
+          end
+          Set.load_fixtures
+        end
+      end
+
+      describe ".load_database_fixtures" do
+        it "calls #load_database_fixtures on every instance of Set" do
+          publicize Set, :instances
+          Set.instances.should_not be_empty
+          Set.instances.each do |instance|
             mock.proxy(instance).load_database_fixtures
           end
           Set.load_fixtures
