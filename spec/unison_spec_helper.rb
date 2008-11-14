@@ -334,4 +334,13 @@ class Spec::ExampleGroup
   def connection
     origin.connection
   end
+
+  def profile(min_percent=20, &block)
+    require 'ruby-prof'
+    result = RubyProf.profile(&block)
+    printer = RubyProf::GraphHtmlPrinter.new(result)
+    File.open(File.expand_path("~/Desktop/profile.html"), "w") do |output|
+      printer.print(output, :min_percent => min_percent)
+    end
+  end
 end

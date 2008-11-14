@@ -660,8 +660,10 @@ module Unison
         describe "#[]" do
           context "when passed an Attribute defined on #relation" do
             it "returns the value" do
-              tuple[User.set[:id]].should == "nathan"
-              tuple[User.set[:name]].should == "Nathan"
+              profile do
+                tuple[User.set[:id]].should == "nathan"
+                tuple[User.set[:name]].should == "Nathan"
+              end
             end
           end
 

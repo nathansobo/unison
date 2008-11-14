@@ -139,13 +139,13 @@ module Unison
       end
 
       def [](attribute_or_symbol)
-        if attribute_or_symbol.is_a?(Relations::Set)
+        if attribute_or_symbol.instance_of?(Relations::Set)
           raise "#attribute is only defined for Attributes of this Tuple's #relation or its #relation itself" unless attribute_or_symbol == set
           self
         else
           attribute = attribute_for(attribute_or_symbol)
           value = fields_hash[attribute].value
-          (attribute.respond_to?(:transform) && attribute.transform) ? instance_exec(value, &attribute.transform) : value
+          attribute.transform ? instance_exec(value, &attribute.transform) : value
         end
       end
 
