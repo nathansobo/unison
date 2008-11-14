@@ -59,6 +59,14 @@ module Unison
       Relations::Set.load_fixtures
     end
 
+    def load_memory_fixtures
+      Relations::Set.load_memory_fixtures
+    end
+
+    def load_database_fixtures
+      Relations::Set.load_database_fixtures
+    end
+
     attr_writer :test_mode
     def test_mode?
       @test_mode ||= false
