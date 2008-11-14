@@ -556,7 +556,6 @@ module Unison
           end
         end
 
-
         describe ".memory_fixtures" do
           it "delegates to #set" do
             fixtures_hash = {

@@ -89,42 +89,6 @@ module Unison
           delegate method, :to => :set
         end
 
-        def where(predicate)
-          set.where(predicate)
-        end
-
-        def order_by(*order_by_attributes)
-          set.order_by(*order_by_attributes)
-        end
-
-        def project(*attributes_or_set)
-          set.project(*attributes_or_set)
-        end
-
-        def singleton
-          set.singleton
-        end
-
-        def fetch
-          set.fetch
-        end
-
-        def push
-          set.push
-        end
-
-        def pull
-          set.pull
-        end
-
-        def find(id_or_predicate)
-          set.find(id_or_predicate)
-        end
-
-        def find_or_pull(id_or_predicate)
-          set.find_or_pull(id_or_predicate)
-        end
-
         def relates_to_many(name, &definition)
           relation_definitions_on_self.push(RelationDefinition.new(name, definition, caller, false))
           attr_reader "#{name}_relation"
@@ -142,22 +106,6 @@ module Unison
             end
           }
           class_eval(method_definition, __FILE__, method_definition_line)
-        end
-
-        def memory_fixtures(fixtures)
-          set.memory_fixtures(fixtures)
-        end
-
-        def load_memory_fixtures
-          set.load_memory_fixtures
-        end
-
-        def database_fixtures(fixtures)
-          set.database_fixtures(fixtures)
-        end
-
-        def load_database_fixtures
-          set.load_database_fixtures
         end
 
         protected

@@ -26,7 +26,7 @@ module Unison
         end
       end
 
-      describe ".load_all_fixtures" do
+      describe ".load_fixtures" do
         it "calls #load_memory_fixtures and #load_database_fixtures on every instance of Set" do
           publicize Set, :instances
           Set.instances.should_not be_empty
@@ -34,7 +34,7 @@ module Unison
             mock.proxy(instance).load_memory_fixtures
             mock.proxy(instance).load_database_fixtures
           end
-          Set.load_all_fixtures
+          Set.load_fixtures
         end
       end
 
@@ -536,6 +536,22 @@ module Unison
           @fixtures_hash_2 = {
             :mary => {:name => "Mary", :hobby => "Celery and tomato juice"}
           }
+        end
+
+        describe "#fixtures" do
+          it "delegates to both #memory_fixtures and #database_fixtures" do
+            mock.proxy(users_set).memory_fixtures(fixtures_hash_1)
+            mock.proxy(users_set).database_fixtures(fixtures_hash_1)
+            users_set.fixtures(fixtures_hash_1)
+          end
+        end
+
+        describe "#load_fixtures" do
+          it "delegates to both #load_memory_fixtures and #load_database_fixtures" do
+            mock.proxy(users_set).load_memory_fixtures
+            mock.proxy(users_set).load_database_fixtures
+            users_set.load_fixtures
+          end
         end
 
         describe "#memory_fixtures" do

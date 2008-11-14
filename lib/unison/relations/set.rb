@@ -6,7 +6,7 @@ module Unison
           instances.each {|set| set.clear}
         end
 
-        def load_all_fixtures
+        def load_fixtures
           instances.each do |set|
             set.load_memory_fixtures
             set.load_database_fixtures          
@@ -166,6 +166,11 @@ module Unison
         tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
       end
 
+      def fixtures(fixtures_hash)
+        memory_fixtures(fixtures_hash)
+        database_fixtures(fixtures_hash)
+      end
+
       def memory_fixtures(fixtures_hash)
         declared_memory_fixtures.merge!(fixtures_hash)
       end
@@ -180,6 +185,28 @@ module Unison
 
       def declared_database_fixtures
         @declared_database_fixtures ||= {}
+      end
+
+      def load_fixtures
+        load_memory_fixtures
+        load_database_fixtures
+      end
+
+      def load_memory_fixtures
+        disable_after_create
+        declared_memory_fixtures.each do |id, attributes|
+          attributes[:id] = id.to_s
+          insert(new_tuple(attributes))
+        end
+        enable_after_create
+      end
+
+      def load_database_fixtures
+        table = Unison.origin.table_for(self)
+        declared_database_fixtures.each do |id, attributes|
+          attributes[:id] = id.to_s
+           table << attributes
+        end
       end
 
       def after_create_enabled?
@@ -204,23 +231,6 @@ module Unison
 
       def disable_after_merge
         @after_merge_enabled = false
-      end
-
-      def load_memory_fixtures
-        disable_after_create
-        declared_memory_fixtures.each do |id, attributes|
-          attributes[:id] = id.to_s
-          insert(new_tuple(attributes))
-        end
-        enable_after_create
-      end
-
-      def load_database_fixtures
-        table = Unison.origin.table_for(self)
-        declared_database_fixtures.each do |id, attributes|
-          attributes[:id] = id.to_s
-           table << attributes
-        end
       end
 
       protected
