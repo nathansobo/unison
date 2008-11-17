@@ -193,7 +193,10 @@ module Unison
       end
 
       def field_for(attribute_or_symbol)
-        fields_hash[attribute_for(attribute_or_symbol)]
+        attribute = attribute_for(attribute_or_symbol)
+        field = fields_hash[attribute]
+        raise ArgumentError, "No field found for Attribute #{attribute.inspect}." unless field
+        field
       end
 
       def push

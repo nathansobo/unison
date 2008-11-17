@@ -34,9 +34,6 @@ module Unison
       attr_reader :update_subscription_node
 
       def attribute_for(attribute_or_name)
-        unless set.has_attribute?(attribute_or_name)
-          raise ArgumentError, "Attribute #{attribute_or_name.inspect} must be part of the Tuple's Set"
-        end
         case attribute_or_name
         when Attributes::Attribute
           attribute_or_name
