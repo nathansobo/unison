@@ -319,6 +319,16 @@ module Unison
         customization_block ? instance_exec(relation, &customization_block) : relation
       end
 
+      def attribute_for(attribute_or_name)
+        case attribute_or_name
+        when Attributes::Attribute
+          attribute_or_name
+        when Symbol
+          set[attribute_or_name]
+        else
+          raise ArgumentError, "attribute_for only accepts an Attribute or Symbol"
+        end
+      end
     end
   end
 end
