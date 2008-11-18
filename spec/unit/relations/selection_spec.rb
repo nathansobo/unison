@@ -23,6 +23,13 @@ module Unison
         end
       end
 
+      describe "#new_tuple" do
+        it "delegates to its #operand" do
+          attributes = { :id => 'dog_photos', :name => 'Dog Photos' }
+          selection.new_tuple(attributes).should == operand.new_tuple(attributes)
+        end
+      end
+
       describe "#push" do
         before do
           origin.connection[:users].delete
@@ -54,23 +61,23 @@ module Unison
             mock.proxy(origin).push(users_projection)
             mock.proxy(origin).push(photos_projection)
 
-            origin.fetch(users_projection).should be_empty
-            origin.fetch(photos_projection).should be_empty
+            users_set.fetch.should be_empty
+            photos_set.fetch.should be_empty
             selection.push
-            origin.fetch(users_projection).should == users_projection.tuples
-            origin.fetch(photos_projection).should == photos_projection.tuples
+            users_set.fetch.should == users_projection.tuples
+            photos_set.fetch.should == photos_projection.tuples
           end
         end
       end
 
-      describe "#to_sql" do
+      describe "#fetch_sql" do
         context "when #operand is a Set" do
           before do
             @selection = users_set.where(users_set[:id].eq("nathan"))
           end
 
           it "returns 'select #operand where #predicate'" do
-            selection.to_sql.should be_like("
+            selection.fetch_sql.should be_like("
               SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`, `users`.`show_fans`
               FROM `users`
               WHERE `users`.`id` = 'nathan'
@@ -84,7 +91,7 @@ module Unison
           end
 
           it "returns 'select #operand where #predicate'" do
-            selection.to_sql.should be_like("
+            selection.fetch_sql.should be_like("
               SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`, `users`.`show_fans`
               FROM `users`
               WHERE `users`.`id` = 'nathan' AND `users`.`name` = 'Nathan'
@@ -93,9 +100,9 @@ module Unison
         end
       end
 
-      describe "#to_arel" do
+      describe "#fetch_arel" do
         it "returns an Arel representation of the relation" do
-          selection.to_arel.should == operand.to_arel.where(predicate.to_arel)
+          selection.fetch_arel.should == operand.fetch_arel.where(predicate.fetch_arel)
         end
       end
 

@@ -49,16 +49,20 @@ module Unison
         projected_set.has_attribute?(attribute)
       end 
 
-      def to_arel
-        Arel::Project.new( operand.to_arel, *projected_set.to_arel.attributes )
+      def fetch_arel
+        operand.fetch_arel
       end
 
       def tuple_class
         projected_set.tuple_class
       end
 
-      def merge(tuples)
-        projected_set.merge(tuples)
+      def new_tuple(attributes)
+        operand.new_tuple(attributes)
+      end
+
+      def merge(composite_tuples)
+        operand.merge(composite_tuples)
       end
 
       def push

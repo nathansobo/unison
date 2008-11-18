@@ -23,23 +23,32 @@ module Unison
 
       def initialize(operand, *order_by_attributes)
         super()
-        @operand, @order_by_attributes = operand, order_by_attributes
+        @operand = operand 
+        @order_by_attributes = attributes_for(order_by_attributes)
       end
 
       def merge(tuples)
         operand.merge(tuples)
       end
 
-      def to_arel
-        operand.to_arel.order(*order_by_attributes.map {|order_by_attribute| order_by_attribute.to_arel})
+      def fetch_arel
+        operand.fetch_arel.order(*order_by_attributes.map {|order_by_attribute| order_by_attribute.fetch_arel})
       end
 
       def tuple_class
         operand.tuple_class
       end
 
+      def new_tuple(attributes)
+        operand.new_tuple(attributes)
+      end
+
       def set
         operand.set
+      end
+
+      def push
+        operand.push
       end
 
       def composed_sets
@@ -64,9 +73,10 @@ module Unison
       def initial_read
         operand.tuples.sort(&comparator)
       end
-      
+
+      #TODO: Introduce directionality on order_by_attributes
       def direction_coefficient(attribute)
-        attribute.ascending?? 1 : -1
+        1
       end
 
       def comparator
@@ -81,6 +91,17 @@ module Unison
           return result unless result == 0
         end
         0
+      end
+
+      def attributes_for(attributes_or_symbols)
+        attributes_or_symbols.map do |attribute_or_symbol|
+          case attribute_or_symbol
+          when Symbol
+            operand.attribute(attribute_or_symbol)
+          when Attributes::Attribute
+            attribute_or_symbol
+          end
+        end
       end
     end
   end

@@ -24,6 +24,13 @@ module Unison
         end
       end
 
+      describe "#new_tuple" do
+        it "delegates to its #operand" do
+          attributes = {:id => 1, :name => 'Laszlo Maholy-Nagy', :employee_id => 1}
+          singleton_relation.new_tuple(attributes).should == operand.new_tuple(attributes)
+        end
+      end
+
       describe "#method_missing" do
         it "delegates to #tuple" do
           mock(singleton_relation.tuple).foo(1, 2)
@@ -93,26 +100,26 @@ module Unison
             mock.proxy(origin).push(users_projection)
             mock.proxy(origin).push(accounts_projection)
 
-            origin.fetch(users_projection).should be_empty
-            origin.fetch(accounts_projection).should be_empty
+            users_set.fetch.should be_empty
+            accounts_set.fetch.should be_empty
             singleton_relation.push
-            origin.fetch(users_projection).should == users_projection.tuples
-            origin.fetch(accounts_projection).should == accounts_projection.tuples
+            users_set.fetch.should == users_projection.tuples
+            accounts_set.fetch.should == accounts_projection.tuples
           end
         end
       end
 
-      describe "#to_sql" do
+      describe "#fetch_sql" do
         context "when #operand is a Set" do
           it "returns 'select #operand where #predicate'" do
-            singleton_relation.to_sql.should be_like("SELECT `accounts`.`id`, `accounts`.`user_id`, `accounts`.`name`, `accounts`.`deactivated_at`, `accounts`.`employee_id` FROM `accounts` ORDER BY `accounts`.`employee_id` LIMIT 1")
+            singleton_relation.fetch_sql.should be_like("SELECT `accounts`.`id`, `accounts`.`user_id`, `accounts`.`name`, `accounts`.`deactivated_at`, `accounts`.`employee_id` FROM `accounts` ORDER BY `accounts`.`employee_id` LIMIT 1")
           end
         end
       end
 
-      describe "#to_arel" do
+      describe "#fetch_arel" do
         it "returns an Arel representation of the relation" do
-          singleton_relation.to_arel.should == operand.to_arel.take(1)
+          singleton_relation.fetch_arel.should == operand.fetch_arel.take(1)
         end
       end
 

@@ -31,9 +31,9 @@ module Unison
         end
       end
 
-      describe "#to_arel" do
-        it "return to_arel value of each operand joined by and" do
-          predicate.to_arel.should == operand_1.to_arel.or(operand_2.to_arel)
+      describe "#fetch_arel" do
+        it "return fetch_arel value of each operand joined by and" do
+          predicate.fetch_arel.should == operand_1.fetch_arel.or(operand_2.fetch_arel)
         end
       end
     end

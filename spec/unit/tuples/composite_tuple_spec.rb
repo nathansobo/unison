@@ -21,9 +21,17 @@ module Unison
       end
 
       describe "#initialize" do
-        it "sets #left and #right" do
+        it "sets #left and #right to the first and second argument, respectively" do
           tuple.left.should == left
           tuple.right.should == right
+        end
+      end
+
+      describe "#pushed" do
+        it "calls #pushed on #left and #right and returns self" do
+          mock(left).pushed
+          mock(right).pushed
+          tuple.pushed.should == tuple
         end
       end
 

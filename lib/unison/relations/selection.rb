@@ -57,8 +57,12 @@ module Unison
         operand.tuple_class
       end
 
-      def to_arel
-        operand.to_arel.where(predicate.to_arel)
+      def new_tuple(attributes)
+        operand.new_tuple(attributes)
+      end
+
+      def fetch_arel
+        operand.fetch_arel.where(predicate.fetch_arel)
       end
 
       def set

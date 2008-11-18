@@ -66,8 +66,12 @@ module Unison
         operand.tuple_class
       end
 
-      def to_arel
-        operand.to_arel.take(1)
+      def new_tuple(attributes)
+        operand.new_tuple(attributes)
+      end
+
+      def fetch_arel
+        operand.fetch_arel.take(1)
       end
 
       def set

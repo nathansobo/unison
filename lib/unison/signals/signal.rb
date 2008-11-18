@@ -11,8 +11,8 @@ module Unison
         change_subscription_node.subscribe(*args, &block)
       end
 
-      def to_arel
-        value.to_arel
+      def fetch_arel
+        value.fetch_arel
       end
 
       def signal(method_name=nil, &block)

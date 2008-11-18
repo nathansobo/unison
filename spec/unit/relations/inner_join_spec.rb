@@ -5,14 +5,14 @@ module Unison
     describe InnerJoin do
       attr_reader :join, :predicate
       before do
-        @join = InnerJoin.new(operand_1, operand_2, predicate)
+        @join = InnerJoin.new(left_operand, right_operand, predicate)
       end
 
-      def operand_1
+      def left_operand
         users_set
       end
 
-      def operand_2
+      def right_operand
         photos_set
       end
 
@@ -21,9 +21,9 @@ module Unison
       end
 
       describe "#initialize" do
-        it "sets #operand_1, #operand_2, and #predicate" do
-          join.operand_1.should == users_set
-          join.operand_2.should == photos_set
+        it "sets #left_operand, #right_operand, and #predicate" do
+          join.left_operand.should == users_set
+          join.right_operand.should == photos_set
           predicate.should == Photo[:user_id].eq(User[:id])
         end
 
@@ -32,21 +32,321 @@ module Unison
         end
       end
 
-      describe "#to_sql" do
-        it "returns 'select #operand_1 inner join #operand_2 on #predicate'" do
-          join.to_sql.should be_like("
-            SELECT `users`.`id`, `users`.`name`, `users`.`hobby`, `users`.`team_id`, `users`.`developer`, `users`.`show_fans`,
-                   `photos`.`id`, `photos`.`user_id`, `photos`.`camera_id`, `photos`.`name`
+      describe "#fetch_sql" do
+        it "returns 'select #left_operand inner join #right_operand on #predicate', with the Attributes aliased to include their table name" do
+          join.fetch_sql.should be_like("
+            SELECT DISTINCT `users`.`id` AS 'users__id', `users`.`name` AS 'users__name', `users`.`hobby` AS 'users__hobby',
+                            `users`.`team_id` AS 'users__team_id', `users`.`developer` AS 'users__developer', 
+                            `users`.`show_fans` AS 'users__show_fans', `photos`.`id` AS 'photos__id', `photos`.`user_id` AS 'photos__user_id',
+                            `photos`.`camera_id` AS 'photos__camera_id', `photos`.`name` AS 'photos__name'
             FROM `users`
-            INNER JOIN `photos`
-            ON `photos`.`user_id` = `users`.`id`
+            INNER JOIN `photos` ON `photos`.`user_id` = `users`.`id`
           ")
         end
       end
 
-      describe "#to_arel" do
-        it "returns an Arel representation of the relation" do
-          join.to_arel.should == operand_1.to_arel.join(operand_2.to_arel).on(predicate.to_arel)
+      describe "#fetch_arel" do
+        it "returns an Arel representation of the relation, where the Attributes are aliased to include their table name" do
+          arel_join = left_operand.fetch_arel.join(right_operand.fetch_arel).on(predicate.fetch_arel)
+          aliased_attributes = arel_join.attributes.map { |a| a.as("#{a.original_relation.name}__#{a.name}") }
+          join.fetch_arel.should == arel_join.project(*aliased_attributes)
+        end
+      end
+
+      describe "#new_tuple" do
+        context "when both #left_operand and #right_operand are not #composite?" do
+          before do
+            left_operand.should_not be_composite
+            right_operand.should_not be_composite
+          end
+
+          it "instantiates a CompositeTuple with the results of segregating the given attributes hash by qualified table names" do
+            qualified_attributes = {
+              :users__id => "sharon",
+              :users__name => "Sharon Ly",
+              :photos__id => "sharon_photo",
+              :photos__name => "A photo of Sharon"
+            }
+
+            user_attributes = {
+              :id => "sharon",
+              :name => "Sharon Ly"
+            }
+
+            photo_attributes = {
+              :id => "sharon_photo",
+              :name => "A photo of Sharon"
+            }
+
+            join.new_tuple(qualified_attributes).should == CompositeTuple.new(User.new(user_attributes), Photo.new(photo_attributes))
+          end
+        end
+        
+        context "when the #left_operand is #composite?" do
+          def left_operand
+            @left_operand ||= InnerJoin.new(users_set, photos_set, Photo[:user_id].eq(User[:id]))
+          end
+
+          def right_operand
+            cameras_set
+          end
+
+          def predicate
+            @predicate ||= Photo[:camera_id].eq(Camera[:id])
+          end
+
+          before do
+            left_operand.should be_composite
+            right_operand.should_not be_composite
+          end
+
+          it "instantiates a CompositeTuple with the results of segregating the given attributes hash by qualified table names" do
+            qualified_attributes = {
+              :users__id => "sharon",
+              :users__name => "Sharon Ly",
+              :photos__id => "sharon_photo",
+              :photos__name => "A photo of Sharon",
+              :cameras__id => "minolta",
+              :cameras__name => "Minolta"
+            }
+
+            user_attributes = {
+              :id => "sharon",
+              :name => "Sharon Ly"
+            }
+
+            photo_attributes = {
+              :id => "sharon_photo",
+              :name => "A photo of Sharon"
+            }
+
+            camera_attributes = {
+              :id => "minolta",
+              :name => "Minolta"
+            }
+
+            join.new_tuple(qualified_attributes).should == CompositeTuple.new(CompositeTuple.new(User.new(user_attributes), Photo.new(photo_attributes)), Camera.new(camera_attributes))
+          end
+        end
+
+        context "when the #right_operand is #composite?" do
+          def left_operand
+            users_set
+          end
+
+          def right_operand
+            @right_operand ||= InnerJoin.new(photos_set, cameras_set, Camera[:id].eq(Photo[:camera_id]))
+          end
+
+          def predicate
+            @predicate ||= Photo[:user_id].eq(User[:id])
+          end
+
+          before do
+            left_operand.should_not be_composite
+            right_operand.should be_composite
+          end
+
+          it "instantiates a CompositeTuple with the results of segregating the given attributes hash by qualified table names" do
+            qualified_attributes = {
+              :users__id => "sharon",
+              :users__name => "Sharon Ly",
+              :photos__id => "sharon_photo",
+              :photos__name => "A photo of Sharon",
+              :cameras__id => "minolta",
+              :cameras__name => "Minolta"
+            }
+
+            user_attributes = {
+              :id => "sharon",
+              :name => "Sharon Ly"
+            }
+
+            photo_attributes = {
+              :id => "sharon_photo",
+              :name => "A photo of Sharon"
+            }
+
+            camera_attributes = {
+              :id => "minolta",
+              :name => "Minolta"
+            }
+
+            join.new_tuple(qualified_attributes).should == CompositeTuple.new(User.new(user_attributes), CompositeTuple.new(Photo.new(photo_attributes), Camera.new(camera_attributes)))
+          end
+        end
+      end
+
+      describe "#segregate_attributes" do
+        before do
+          publicize join, :segregate_attributes
+        end
+
+        context "when both #left_operand and #right_operand are not #composite?" do
+          before do
+            left_operand.should_not be_composite
+            right_operand.should_not be_composite
+          end
+
+          context 'given a hash that is keyed by #{table_name}__#{attribute_name}' do
+            context "when all the qualified table names correspond to the left or right operands" do
+              it 'returns a hash for each table' do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :users__name => "Sharon Ly",
+                  :photos__id => "sharon_photo",
+                  :photos__name => "A photo of Sharon"
+                }
+
+                expected_left = {
+                  :id => "sharon",
+                  :name => "Sharon Ly"
+                }
+
+                expected_right = {
+                  :id => "sharon_photo",
+                  :name => "A photo of Sharon"
+                }
+
+                join.segregate_attributes(qualified_attributes).should == [expected_left, expected_right]
+              end
+            end
+
+            context "when one of the qualified table names is invalid" do
+              it "raises an ArgumentError" do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :invalid__id => "sharon_photo"
+                }
+
+                lambda do
+                  join.segregate_attributes(qualified_attributes)
+                end.should raise_error(ArgumentError)
+              end
+            end
+          end
+        end
+
+        context "when the #left_operand is #composite?" do
+          def left_operand
+            @left_operand ||= InnerJoin.new(users_set, photos_set, Photo[:user_id].eq(User[:id]))
+          end
+
+          def right_operand
+            cameras_set
+          end
+
+          def predicate
+            @predicate ||= Photo[:camera_id].eq(Camera[:id])
+          end
+
+          before do
+            left_operand.should be_composite
+            right_operand.should_not be_composite
+          end
+
+          context 'given a Hash that is keyed by #{table_name}__#{attribute_name}' do
+            context "when all the qualified table names correspond to one of the #left_operand's #composed_sets or the #right_operand's #set" do
+              it "returns a Hash for the #left_operand that is still qualified with its #composed_sets' names and an unqualified Hash for the #right_operand" do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :users__name => "Sharon Ly",
+                  :photos__id => "sharon_photo",
+                  :photos__name => "A photo of Sharon",
+                  :cameras__id => "minolta",
+                  :cameras__name => "Minolta"
+                }
+
+                expected_left = {
+                  :users__id => "sharon",
+                  :users__name => "Sharon Ly",
+                  :photos__id => "sharon_photo",
+                  :photos__name => "A photo of Sharon"
+                }
+
+                expected_right = {
+                  :id => "minolta",
+                  :name => "Minolta"
+                }
+
+                join.segregate_attributes(qualified_attributes).should == [expected_left, expected_right]
+              end
+            end
+
+            context "when one of the qualified table names is invalid" do
+              it "raises an ArgumentError" do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :invalid__id => "sharon_photo"
+                }
+
+                lambda do
+                  join.segregate_attributes(qualified_attributes)
+                end.should raise_error(ArgumentError)
+              end
+            end
+          end
+        end
+
+        context "when the #right_operand is #composite?" do
+          def left_operand
+            users_set
+          end
+
+          def right_operand
+            @right_operand ||= InnerJoin.new(photos_set, cameras_set, Camera[:id].eq(Photo[:camera_id]))
+          end
+
+          def predicate
+            @predicate ||= Photo[:user_id].eq(User[:id])
+          end
+
+          before do
+            left_operand.should_not be_composite
+            right_operand.should be_composite
+          end
+
+          context 'given a Hash that is keyed by #{table_name}__#{attribute_name}' do
+            context "when all the qualified table names correspond to the #left_operand's #set or one of the #right_operand's #composed_sets" do
+              it "returns an unqualified Hash for the #left_operand and a Hash for the #right_operand that is still qualified with its #composed_sets' names" do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :users__name => "Sharon Ly",
+                  :photos__id => "sharon_photo",
+                  :photos__name => "A photo of Sharon",
+                  :cameras__id => "minolta",
+                  :cameras__name => "Minolta"
+                }
+
+                expected_left = {
+                  :id => "sharon",
+                  :name => "Sharon Ly",
+                }
+
+                expected_right = {
+                  :photos__id => "sharon_photo",
+                  :photos__name => "A photo of Sharon",
+                  :cameras__id => "minolta",
+                  :cameras__name => "Minolta"
+                }
+
+                join.segregate_attributes(qualified_attributes).should == [expected_left, expected_right]
+              end
+            end
+
+            context "when one of the qualified table names is invalid" do
+              it "raises an ArgumentError" do
+                qualified_attributes = {
+                  :users__id => "sharon",
+                  :invalid__id => "sharon_photo"
+                }
+
+                lambda do
+                  join.segregate_attributes(qualified_attributes)
+                end.should raise_error(ArgumentError)
+              end
+            end
+          end
         end
       end
 
@@ -54,6 +354,7 @@ module Unison
         before do
           origin.connection[:users].delete
           origin.connection[:photos].delete
+          origin.connection[:cameras].delete
         end
 
         context "when #composed_sets.size == 2" do
@@ -66,8 +367,8 @@ module Unison
 
             join.push
 
-            users_projection.pull.should == users_projection.tuples
-            photos_projection.pull.should == photos_projection.tuples
+            users_set.fetch.should == users_projection.tuples
+            photos_set.fetch.should == photos_projection.tuples
           end
         end
 
@@ -88,9 +389,9 @@ module Unison
 
             join.push
 
-            users_projection.pull.should == users_projection.tuples
-            photos_projection.pull.should == photos_projection.tuples
-            cameras_projection.pull.should == cameras_projection.tuples
+            users_set.fetch.should == users_projection.tuples
+            photos_set.fetch.should == photos_projection.tuples
+            cameras_set.fetch.should == cameras_projection.tuples
           end
         end
       end
@@ -112,7 +413,7 @@ module Unison
       describe "#composed_sets" do
         context "when the operands contain PrimitiveTuples" do
           it "returns the union of the #composed_sets of the operands" do
-            join.composed_sets.should == operand_1.composed_sets + operand_2.composed_sets
+            join.composed_sets.should == left_operand.composed_sets + right_operand.composed_sets
           end
         end
 
@@ -133,32 +434,32 @@ module Unison
         context "when an Attribute with the given name is defined on both operands" do
           before do
             @name = :name
-            operand_1.should have_attribute(name)
-            operand_2.should have_attribute(name)
+            left_operand.should have_attribute(name)
+            right_operand.should have_attribute(name)
           end
 
-          it "returns the value of #operand_1.attribute for the name" do
-            join.attribute(name).should == operand_1.attribute(name)
+          it "returns the value of #left_operand.attribute for the name" do
+            join.attribute(name).should == left_operand.attribute(name)
           end
         end
 
-        context "when an Attribute with the given #name is defined only on #operand_2" do
+        context "when an Attribute with the given #name is defined only on #right_operand" do
           before do
             @name = :user_id
-            operand_1.should_not have_attribute(name)
-            operand_2.should have_attribute(name)
+            left_operand.should_not have_attribute(name)
+            right_operand.should have_attribute(name)
           end
 
-          it "returns the value of #operand_1.attribute for the name" do
-            join.attribute(name).should == operand_2.attribute(name)
+          it "returns the value of #left_operand.attribute for the name" do
+            join.attribute(name).should == right_operand.attribute(name)
           end
         end
 
         context "when no operand has an Attribute with the given name" do
           before do
             @name = :hussein
-            operand_1.should_not have_attribute(name)
-            operand_2.should_not have_attribute(name)
+            left_operand.should_not have_attribute(name)
+            right_operand.should_not have_attribute(name)
           end
 
           it "raises an ArgumentError" do
@@ -170,54 +471,70 @@ module Unison
       end
 
       describe "#merge" do
-        it "raises a NotImplementedError" do
-          lambda do
-            join.merge([])
-          end.should raise_error(NotImplementedError)
+        it "merges all the #left components of the given CompositeTuples into the #left_operand" do
+          user = User.new(:id => "sharon", :name => "Sharon Ly")
+          photo_1 = Photo.new(:id => "sharon_photo_1", :user_id => "sharon")
+          photo_2 = Photo.new(:id => "sharon_photo_2", :user_id => "sharon")
+
+          composite_tuples = [
+            CompositeTuple.new(user, photo_1),
+            CompositeTuple.new(user, photo_2)
+          ]
+
+          left_operand.find("sharon").should be_nil
+          right_operand.find("sharon_photo_1").should be_nil
+          right_operand.find("sharon_photo_2").should be_nil
+
+          join.merge(composite_tuples)
+
+          left_operand.find("sharon").should == user
+          right_operand.find("sharon_photo_1").should == photo_1
+          right_operand.find("sharon_photo_2").should == photo_2
+
         end
       end
 
       describe "attribute" do
-        context "when #operand_1.has_attribute? is true" do
-          it "delegates to #operand_1" do
-            operand_1_attribute = operand_1.attribute(:id)
-            operand_1_attribute.should_not be_nil
+        context "when #left_operand.has_attribute? is true" do
+          it "delegates to #left_operand" do
+            left_operand_attribute = left_operand.attribute(:id)
+            left_operand_attribute.should_not be_nil
 
-            mock.proxy(operand_1).attribute(:id)
-            join.attribute(:id).should == operand_1_attribute
+            mock.proxy(left_operand).attribute(:id)
+            join.attribute(:id).should == left_operand_attribute
           end
         end
 
-        context "when #operand_1.has_attribute? is false" do
-          it "delegates to #operand_2" do
-            operand_1.should_not have_attribute(:user_id)
-            operand_2.should have_attribute(:user_id)
-            operand_2_attribute = operand_2.attribute(:user_id)
+        context "when #left_operand.has_attribute? is false" do
+          it "delegates to #right_operand" do
+            left_operand.should_not have_attribute(:user_id)
+            right_operand.should have_attribute(:user_id)
+            right_operand_attribute = right_operand.attribute(:user_id)
 
-            dont_allow(operand_1).attribute(:user_id)
-            mock.proxy(operand_2).attribute(:user_id)
-            join.attribute(:user_id).should == operand_2_attribute
+            dont_allow(left_operand).attribute(:user_id)
+            mock.proxy(right_operand).attribute(:user_id)
+            join.attribute(:user_id).should == right_operand_attribute
           end
         end
       end
 
       describe "#has_attribute?" do
-        context "when #operand_1.has_attribute? is true" do
-          it "delegates to #operand_1" do
-            operand_1.has_attribute?(:id).should be_true
+        context "when #left_operand.has_attribute? is true" do
+          it "delegates to #left_operand" do
+            left_operand.has_attribute?(:id).should be_true
 
-            mock.proxy(operand_1).has_attribute?(:id)
+            mock.proxy(left_operand).has_attribute?(:id)
             join.has_attribute?(:id).should be_true
           end
         end
 
-        context "when #operand_1.has_attribute? is false" do
-          it "delegates to #operand_1 and #operand_2" do
-            operand_1.has_attribute?(:user_id).should be_false
-            operand_2.has_attribute?(:user_id).should be_true
+        context "when #left_operand.has_attribute? is false" do
+          it "delegates to #left_operand and #right_operand" do
+            left_operand.has_attribute?(:user_id).should be_false
+            right_operand.has_attribute?(:user_id).should be_true
 
-            mock.proxy(operand_1).has_attribute?(:user_id)
-            mock.proxy(operand_2).has_attribute?(:user_id)
+            mock.proxy(left_operand).has_attribute?(:user_id)
+            mock.proxy(right_operand).has_attribute?(:user_id)
             join.has_attribute?(:user_id).should be_true
           end
         end
@@ -234,7 +551,7 @@ module Unison
           join.release_from(retainer)
         end
 
-        context "when a Tuple is inserted into #operand_1" do
+        context "when a Tuple is inserted into #left_operand" do
           context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
@@ -301,7 +618,7 @@ module Unison
           end
         end
 
-        context "when a Tuple is inserted into #operand_2" do
+        context "when a Tuple is inserted into #right_operand" do
           context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
             attr_reader :photo, :user, :tuple_class, :expected_tuple
             before do
@@ -368,7 +685,7 @@ module Unison
           end
         end
 
-        context "when a Tuple is deleted from #operand_1" do
+        context "when a Tuple is deleted from #left_operand" do
           attr_reader :user, :tuple_class
           context "when the Tuple is a component of some CompositeTuple in #tuples" do
             attr_reader :photo, :composite_tuple
@@ -428,7 +745,7 @@ module Unison
           end
         end
 
-        context "when a Tuple is deleted from #operand_2" do
+        context "when a Tuple is deleted from #right_operand" do
           attr_reader :photo, :tuple_class
           context "when the Tuple is a component of some CompositeTuple in #tuples" do
             attr_reader :user, :composite_tuple
@@ -488,7 +805,7 @@ module Unison
           end
         end
 
-        context "when a Tuple in #operand_1 is updated" do
+        context "when a Tuple in #left_operand is updated" do
           context "when the Tuple is not a component of any CompositeTuple in #tuples" do
             attr_reader :user, :photo, :expected_composite_tuple
             before do
@@ -614,7 +931,7 @@ module Unison
           end
         end
 
-        context "when a Tuple in #operand_2 is updated" do
+        context "when a Tuple in #right_operand is updated" do
           context "when the Tuple is not a component of any CompositeTuple in #tuples" do
             attr_reader :user, :photo, :expected_composite_tuple
             before do
@@ -846,8 +1163,8 @@ module Unison
             tuples[2][Photo[:name]].should == corey_photo_1.name
           end
 
-          context "when #operand_1 is an empty singleton Relation" do
-            def operand_1
+          context "when #left_operand is an empty singleton Relation" do
+            def left_operand
               users_set.where(User[:id].eq(-1)).singleton
             end
             
@@ -856,8 +1173,8 @@ module Unison
             end
           end
 
-          context "when #operand_2 is an empty singleton Relation" do
-            def operand_2
+          context "when #right_operand is an empty singleton Relation" do
+            def right_operand
               photos_set.where(Photo[:id].eq(-1)).singleton
             end
 
@@ -869,11 +1186,11 @@ module Unison
       end
 
       context "with complex operands" do
-        def operand_1
-          @operand_1 ||= InnerJoin.new(users_set, photos_set, Photo[:user_id].eq(User[:id]))
+        def left_operand
+          @left_operand ||= InnerJoin.new(users_set, photos_set, Photo[:user_id].eq(User[:id]))
         end
 
-        def operand_2
+        def right_operand
           cameras_set
         end
 
@@ -892,7 +1209,7 @@ module Unison
             join.release_from(retainer)
           end
 
-          context "when a Tuple is inserted into #operand_1" do
+          context "when a Tuple is inserted into #left_operand" do
             context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
               attr_reader :photo, :expected_tuple
               before do
@@ -949,7 +1266,7 @@ module Unison
             end
           end
 
-          context "when a Tuple is inserted into #operand_2" do
+          context "when a Tuple is inserted into #right_operand" do
             context "when the inserted Tuple creates a CompositeTuple that matches the #predicate" do
               attr_reader :camera, :expected_tuple
               before do
@@ -1006,7 +1323,7 @@ module Unison
             end
           end
 
-          context "when a Tuple is deleted from #operand_1" do
+          context "when a Tuple is deleted from #left_operand" do
             attr_reader :user, :tuple_class
             context "when the Tuple is a component of some CompositeTuple in #tuples" do
               attr_reader :photo, :composite_tuple
@@ -1061,7 +1378,7 @@ module Unison
             end
           end
 
-          context "when a Tuple is deleted from #operand_2" do
+          context "when a Tuple is deleted from #right_operand" do
             context "when the Tuple is a component of some CompositeTuple in #tuples" do
               attr_reader :camera, :composite_tuple
               before do
@@ -1115,7 +1432,7 @@ module Unison
             end
           end
 
-          context "when a Tuple in #operand_1 is updated" do
+          context "when a Tuple in #left_operand is updated" do
             context "when the Tuple is not a component of any CompositeTuple in #tuples" do
               attr_reader :user, :photo, :camera, :expected_composite_tuple
               before do
@@ -1227,7 +1544,7 @@ module Unison
             end
           end
 
-          context "when a Tuple in #operand_2 is updated" do
+          context "when a Tuple in #right_operand is updated" do
             context "when the Tuple is not a component of any CompositeTuple in #tuples" do
               attr_reader :photo, :camera, :expected_composite_tuple
               before do

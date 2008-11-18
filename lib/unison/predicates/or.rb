@@ -7,9 +7,9 @@ module Unison
         end
       end
 
-      def to_arel
+      def fetch_arel
         operands.inject(nil) do |acc, operand|
-          acc ? acc.or(operand.to_arel) : operand.to_arel
+          acc ? acc.or(operand.fetch_arel) : operand.fetch_arel
         end
       end
 

@@ -312,52 +312,18 @@ module Unison
         end
       end
 
-      describe "ordering directions" do
-        it "defaults to ascending" do
-          attribute.should be_ascending
-        end
-
-        describe "#ascending" do
-          before do
-            attribute.ascending
-          end
-
-          it "sets #ascending? to true" do
-            attribute.should be_ascending
-          end
-
-          it "sets #descending? to false" do
-            attribute.should_not be_descending
-          end
-        end
-
-        describe "#descending" do
-          before do
-            attribute.descending
-          end
-
-          it "sets #descending? to true" do
-            attribute.should be_descending
-          end
-
-          it "sets #ascending? to false" do
-            attribute.should_not be_ascending
-          end
-        end
-      end
-
-      describe "#to_arel" do
+      describe "#fetch_arel" do
         before do
           @set = users_set
           @attribute = PrimitiveAttribute.new(set, :name, :string)
         end
 
-        it "returns the Arel::Attribute with the same #name from #set.to_arel" do
-          attribute.to_arel.should == attribute.set.to_arel[attribute.name]
+        it "returns the Arel::Attribute with the same #name from #set.fetch_arel" do
+          attribute.fetch_arel.should == attribute.set.fetch_arel[attribute.name]
         end
 
         it "when called repeatedly, returns the same Arel::Attribute instance" do
-          attribute.to_arel.object_id.should == attribute.to_arel.object_id
+          attribute.fetch_arel.object_id.should == attribute.fetch_arel.object_id
         end
       end
     end    

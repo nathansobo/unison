@@ -9,7 +9,6 @@ module Unison
         raise ArgumentError, "Type #{type.inspect} is invalid. Valid types are #{VALID_TYPES.inspect}" unless VALID_TYPES.include?(type)
         super(set, name)
         @type, @transform = type, transform
-        @ascending = true
         if name == :id && !options.has_key?(:default)
           @default = lambda { Guid.new.to_s }
         else
@@ -24,31 +23,13 @@ module Unison
         raise e
       end
 
-      def ascending
-        @ascending = true
-        self
-      end
-
-      def ascending?
-        @ascending == true
-      end
-
-      def descending
-        @ascending = false
-        self
-      end
-
-      def descending?
-        !ascending?
-      end
-
       def ==(other)
         return false unless other.instance_of?(PrimitiveAttribute)
         set.equal?(other.set) && name == other.name && transform == other.transform
       end
 
-      def to_arel
-        set.to_arel[name]
+      def fetch_arel
+        set.fetch_arel[name]
       end
 
       def create_field(tuple)

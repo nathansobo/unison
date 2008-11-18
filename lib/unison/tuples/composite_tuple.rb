@@ -9,6 +9,12 @@ module Unison
         @left, @right = left, right
       end
 
+      def pushed
+        left.pushed
+        right.pushed
+        self
+      end
+
       def nested_tuples
         [left, right]
       end
