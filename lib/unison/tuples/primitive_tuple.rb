@@ -144,7 +144,7 @@ module Unison
           self
         else
           attribute = attribute_for(attribute_or_symbol)
-          value = fields_hash[attribute].value
+          value = field_for(attribute).value
           attribute.transform ? instance_exec(value, &attribute.transform) : value
         end
       end
