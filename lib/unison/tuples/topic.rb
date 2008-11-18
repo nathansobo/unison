@@ -184,7 +184,7 @@ module Unison
       def method_missing(method_name, *args, &block)
         subject.send(method_name, *args, &block)
       rescue NoMethodError => e
-        e.message.replace("undefined method `#{method_name}' for #{inspect}")
+        e.message.replace("undefined method `#{method_name}' for #{self.class}")
         raise e
       end
 
