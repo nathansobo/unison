@@ -55,8 +55,16 @@ module Unison
       Relations::Set.clear_all
     end
 
-    def load_all_fixtures
-      Relations::Set.load_all_fixtures
+    def load_fixtures
+      Relations::Set.load_fixtures
+    end
+
+    def load_memory_fixtures
+      Relations::Set.load_memory_fixtures
+    end
+
+    def load_database_fixtures
+      Relations::Set.load_database_fixtures
     end
 
     attr_writer :test_mode

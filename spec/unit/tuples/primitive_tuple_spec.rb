@@ -547,6 +547,15 @@ module Unison
           end
         end
 
+        describe "all instance methods of Set and Array, excluding to_ary, methods of PrimitiveTuple, and methods that start with __" do
+          it "are delegated from PrimitiveTuple subclasses to their .set" do
+            (Relations::Set.instance_methods + Array.instance_methods - PrimitiveTuple.methods).each do |method_name|
+              next if method_name =~ /^__|^to_ary$/
+              User.send(method_name)
+            end
+          end
+        end
+
         describe ".memory_fixtures" do
           it "delegates to #set" do
             fixtures_hash = {
@@ -651,8 +660,10 @@ module Unison
         describe "#[]" do
           context "when passed an Attribute defined on #relation" do
             it "returns the value" do
-              tuple[User.set[:id]].should == "nathan"
-              tuple[User.set[:name]].should == "Nathan"
+              profile do
+                tuple[User.set[:id]].should == "nathan"
+                tuple[User.set[:name]].should == "Nathan"
+              end
             end
           end
 

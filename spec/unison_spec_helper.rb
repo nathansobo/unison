@@ -143,6 +143,14 @@ Spec::Runner.configure do |config|
         has_many :heroes, :through => :friendships_from_me, :class_name => :User, :foreign_key => :to_id
 
         has_many :cameras, :through => :photos
+
+        def after_create
+          @after_create_called = true
+        end
+
+        def after_create_called?
+          !@after_create_called.nil?
+        end
       end)
 
       const_set(:Developer, Class.new(User) do
@@ -325,5 +333,14 @@ class Spec::ExampleGroup
 
   def connection
     origin.connection
+  end
+
+  def profile(min_percent=20, &block)
+    require 'ruby-prof'
+    result = RubyProf.profile(&block)
+    printer = RubyProf::GraphHtmlPrinter.new(result)
+    File.open(File.expand_path("~/Desktop/profile.html"), "w") do |output|
+      printer.print(output, :min_percent => min_percent)
+    end
   end
 end

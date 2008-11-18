@@ -26,27 +26,57 @@ module Unison
         end
       end
 
-      describe ".load_all_fixtures" do
-        it "calls #load_memory_fixtures and #load_database_fixtures on every instance of Set" do
+      describe ".load_fixtures" do
+        it "calls #load_fixtures on every instance of Set" do
+          publicize Set, :instances
+          Set.instances.should_not be_empty
+          Set.instances.each do |instance|
+            mock.proxy(instance).load_fixtures
+          end
+          Set.load_fixtures
+        end
+      end
+
+      describe ".load_memory_fixtures" do
+        it "calls #load_memory_fixtures on every instance of Set" do
           publicize Set, :instances
           Set.instances.should_not be_empty
           Set.instances.each do |instance|
             mock.proxy(instance).load_memory_fixtures
             mock.proxy(instance).load_database_fixtures
           end
-          Set.load_all_fixtures
+          Set.load_fixtures
+        end
+      end
+
+      describe ".load_database_fixtures" do
+        it "calls #load_database_fixtures on every instance of Set" do
+          publicize Set, :instances
+          Set.instances.should_not be_empty
+          Set.instances.each do |instance|
+            mock.proxy(instance).load_database_fixtures
+          end
+          Set.load_fixtures
         end
       end
 
       describe "#initialize" do
         it "sets the name of the set" do
           set.name.should == :users
-
         end
+
         it "sets the #tuple_class of the Set to a subclass of Tuple::Base, and sets its #relation to itself" do
           tuple_class = set.tuple_class
           tuple_class.superclass.should == PrimitiveTuple
           tuple_class.set.should == set
+        end
+
+        it "sets #after_create_enabled? to true" do
+          set.after_create_enabled?.should be_true
+        end
+
+        it "sets #after_merge_enabled? to true" do
+          set.after_merge_enabled?.should be_true
         end
       end
 
@@ -260,6 +290,40 @@ module Unison
         end
       end
 
+      describe "#enable_after_create" do
+        it "sets #after_create_enabled? to true" do
+          set.disable_after_create
+          set.after_create_enabled?.should be_false
+          set.enable_after_create
+          set.after_create_enabled?.should be_true
+        end
+      end
+
+      describe "#disable_after_create" do
+        it "sets #after_create_enable? to false" do
+          set.after_create_enabled?.should be_true
+          set.disable_after_create
+          set.after_create_enabled?.should be_false
+        end
+      end
+
+      describe "#enable_after_merge" do
+        it "sets #after_merge_enabled? to true" do
+          set.disable_after_merge
+          set.after_merge_enabled?.should be_false
+          set.enable_after_merge
+          set.after_merge_enabled?.should be_true
+        end
+      end
+
+      describe "#disable_after_merge" do
+        it "sets #after_merge_enable? to false" do
+          set.after_merge_enabled?.should be_true
+          set.disable_after_merge
+          set.after_merge_enabled?.should be_false
+        end
+      end
+
       describe "#insert" do
         context "when #retained?" do
           before do
@@ -288,19 +352,39 @@ module Unison
           end
 
           context "when the Tuple is #new?" do
-            it "calls #after_create on the PrimitiveTuple before triggering the the on_insert event" do
-              call_order = []
-              tuple = set.new_tuple(:id => "nathan", :name => "Nathan")
-              mock.proxy(tuple).after_create do |returns|
-                call_order.push(:after_create)
-                returns
-              end
-              set.on_insert(retainer) do |*args|
-                call_order.push(:on_insert)
+
+            context "when after_create is enabled" do
+              before do
+                set.after_create_enabled?.should be_true
               end
 
-              set.insert(tuple)
-              call_order.should == [:after_create, :on_insert]
+              it "calls #after_create on the PrimitiveTuple before triggering the the on_insert event" do
+                call_order = []
+                tuple = set.new_tuple(:id => "nathan", :name => "Nathan")
+                mock.proxy(tuple).after_create do |returns|
+                  call_order.push(:after_create)
+                  returns
+                end
+                set.on_insert(retainer) do |*args|
+                  call_order.push(:on_insert)
+                end
+
+                set.insert(tuple)
+                call_order.should == [:after_create, :on_insert]
+              end
+            end
+
+            context "when after_create is disabled" do
+              before do
+                set.disable_after_create
+              end
+
+              it "does not call #after_create on the PrimitiveTuple" do
+                call_order = []
+                tuple = set.new_tuple(:id => "nathan", :name => "Nathan")
+                dont_allow(tuple).after_create
+                set.insert(tuple)
+              end
             end
           end
 
@@ -412,10 +496,28 @@ module Unison
             set.should include(not_in_set)
           end
 
-          it "calls #after_merge on inserted Tuples" do
-            mock.proxy(not_in_set).after_merge
-            dont_allow(in_set).after_merge
-            set.merge(tuples)
+          context "when #after_merge_enabled? is true" do
+            before do
+              set.after_merge_enabled?.should be_true
+            end
+
+            it "calls #after_merge on inserted Tuples" do
+              mock.proxy(not_in_set).after_merge
+              dont_allow(in_set).after_merge
+              set.merge(tuples)
+            end
+          end
+
+          context "when #after_merge_enabled? is false" do
+            before do
+              set.disable_after_merge
+            end
+
+            it "does not call #after_merge on inserted Tuples" do
+              dont_allow(not_in_set).after_merge
+              dont_allow(in_set).after_merge
+              set.merge(tuples)
+            end
           end
         end
       end
@@ -458,6 +560,22 @@ module Unison
           }
         end
 
+        describe "#fixtures" do
+          it "delegates to both #memory_fixtures and #database_fixtures" do
+            mock.proxy(users_set).memory_fixtures(fixtures_hash_1)
+            mock.proxy(users_set).database_fixtures(fixtures_hash_1)
+            users_set.fixtures(fixtures_hash_1)
+          end
+        end
+
+        describe "#load_fixtures" do
+          it "delegates to both #load_memory_fixtures and #load_database_fixtures" do
+            mock.proxy(users_set).load_memory_fixtures
+            mock.proxy(users_set).load_database_fixtures
+            users_set.load_fixtures
+          end
+        end
+
         describe "#memory_fixtures" do
           it "#merges the given hash of fixtures with the existing #declared_memory_fixtures" do
             users_set.declared_memory_fixtures.should == {}
@@ -469,7 +587,7 @@ module Unison
         end
 
         describe "#load_memory_fixtures" do
-          it "instantiates an instance of #tuple_class for each fixture identified in #declared_memory_fixtures" do
+          it "instantiates an instance of #tuple_class for each fixture identified in #declared_memory_fixtures, and inserts it into the Set without #after_create being called" do
             users_set.memory_fixtures(fixtures_hash_1)
             fixtures_hash_1.keys.each do |id|
               users_set.find(id).should be_nil
@@ -479,6 +597,7 @@ module Unison
 
             fixtures_hash_1.each do |id, attributes|
               fixture = users_set.find(id)
+              fixture.after_create_called?.should be_false
               attributes.each do |name, value|
                 fixture[name].should == value
               end

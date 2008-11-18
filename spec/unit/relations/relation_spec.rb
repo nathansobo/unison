@@ -374,6 +374,36 @@ module Unison
         end
       end
 
+      describe "#method_missing" do
+        before do
+          @relation = users_set
+          publicize relation, :method_missing_delegation_target
+        end
+
+        context "when #tuple.respond_to? returns true for the given message" do
+          before do
+            stub(relation.method_missing_delegation_target).foo
+            relation.method_missing_delegation_target.should respond_to(:foo)
+          end
+
+          it "delegates to #method_missing_delegation_target" do
+            mock(relation.method_missing_delegation_target).foo(1, 2)
+            relation.foo(1, 2)
+          end
+        end
+
+        context "when #tuple.respond_to? returns false for the given message" do
+          it "does not attempt to delegate to #method_missing_delegation_target" do
+            dont_allow(relation.method_missing_delegation_target).foo(1, 2)
+            stub(relation.method_missing_delegation_target).respond_to?(:foo) { false }
+
+            lambda do
+              relation.foo(1, 2)
+            end.should raise_error(NoMethodError)
+          end
+        end
+      end
+
       context "when #retained?" do
         attr_reader :retainer
         before do

@@ -16,6 +16,10 @@ module Unison
       def create_field(tuple)
         SyntheticField.new(tuple, self)
       end
+
+      def transform
+        nil
+      end
     end
   end
 end

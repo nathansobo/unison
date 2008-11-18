@@ -15,10 +15,24 @@ module Unison
       end
     end
 
-    describe ".load_all_fixtures" do
-      it "delegates to Relations::Set.load_all_fixtures" do
-        mock.proxy(Relations::Set).load_all_fixtures
-        Unison.load_all_fixtures
+    describe ".load_fixtures" do
+      it "delegates to Relations::Set.load_fixtures" do
+        mock.proxy(Relations::Set).load_fixtures
+        Unison.load_fixtures
+      end
+    end
+
+    describe ".load_memory_fixtures" do
+      it "delegates to Relations::Set.load_memory_fixtures" do
+        mock.proxy(Relations::Set).load_memory_fixtures
+        Unison.load_memory_fixtures
+      end
+    end
+
+    describe ".load_database_fixtures" do
+      it "delegates to Relations::Set.load_database_fixtures" do
+        mock.proxy(Relations::Set).load_database_fixtures
+        Unison.load_database_fixtures
       end
     end
 

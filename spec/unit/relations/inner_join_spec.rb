@@ -1135,7 +1135,7 @@ module Unison
 
         describe "#tuples" do
           it "returns all tuples in its operands for which its predicate returns true" do
-            tuples = join
+            tuples = join.tuples
             tuples.size.should == 3
 
             nathan = User.find("nathan")

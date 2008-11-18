@@ -111,8 +111,9 @@ module Unison
         [operand.tuples.first].compact
       end
 
-      def delegate_to_read(method_name, *args, &block)
-        tuples.first.send(method_name, *args, &block)
+
+      def method_missing_delegation_target
+        tuple
       end
     end
   end

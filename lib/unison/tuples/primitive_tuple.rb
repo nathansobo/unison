@@ -84,40 +84,9 @@ module Unison
           set.insert(new(attributes))
         end
 
-        def where(predicate)
-          set.where(predicate)
-        end
-
-        def order_by(*order_by_attributes)
-          set.order_by(*order_by_attributes)
-        end
-
-        def project(*attributes_or_set)
-          set.project(*attributes_or_set)
-        end
-
-        def singleton
-          set.singleton
-        end
-
-        def fetch
-          set.fetch
-        end
-
-        def push
-          set.push
-        end
-
-        def pull
-          set.pull
-        end
-
-        def find(id_or_predicate)
-          set.find(id_or_predicate)
-        end
-
-        def find_or_pull(id_or_predicate)
-          set.find_or_pull(id_or_predicate)
+        (Relations::Set.instance_methods + Array.instance_methods - PrimitiveTuple.methods).each do |method|
+          next if method =~ /^__|^to_ary$/
+          delegate method, :to => :set
         end
 
         def relates_to_many(name, &definition)
@@ -137,22 +106,6 @@ module Unison
             end
           }
           class_eval(method_definition, __FILE__, method_definition_line)
-        end
-
-        def memory_fixtures(fixtures)
-          set.memory_fixtures(fixtures)
-        end
-
-        def load_memory_fixtures
-          set.load_memory_fixtures
-        end
-
-        def database_fixtures(fixtures)
-          set.database_fixtures(fixtures)
-        end
-
-        def load_database_fixtures
-          set.load_database_fixtures
         end
 
         protected
@@ -186,13 +139,13 @@ module Unison
       end
 
       def [](attribute_or_symbol)
-        if attribute_or_symbol.is_a?(Relations::Set)
+        if attribute_or_symbol.instance_of?(Relations::Set)
           raise "#attribute is only defined for Attributes of this Tuple's #relation or its #relation itself" unless attribute_or_symbol == set
           self
         else
           attribute = attribute_for(attribute_or_symbol)
-          value = fields_hash[attribute].value
-          (attribute.respond_to?(:transform) && attribute.transform) ? instance_exec(value, &attribute.transform) : value
+          value = field_for(attribute).value
+          attribute.transform ? instance_exec(value, &attribute.transform) : value
         end
       end
 
@@ -240,7 +193,10 @@ module Unison
       end
 
       def field_for(attribute_or_symbol)
-        fields_hash[attribute_for(attribute_or_symbol)]
+        attribute = attribute_for(attribute_or_symbol)
+        field = fields_hash[attribute]
+        raise ArgumentError, "No field found for Attribute #{attribute.inspect}." unless field
+        field
       end
 
       def push
@@ -363,6 +319,16 @@ module Unison
         customization_block ? instance_exec(relation, &customization_block) : relation
       end
 
+      def attribute_for(attribute_or_name)
+        case attribute_or_name
+        when Attributes::Attribute
+          attribute_or_name
+        when Symbol
+          set[attribute_or_name]
+        else
+          raise ArgumentError, "attribute_for only accepts an Attribute or Symbol"
+        end
+      end
     end
   end
 end

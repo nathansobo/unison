@@ -6,10 +6,21 @@ module Unison
           instances.each {|set| set.clear}
         end
 
-        def load_all_fixtures
+        def load_fixtures
+          instances.each do |set|
+            set.load_fixtures
+          end
+        end
+
+        def load_memory_fixtures
           instances.each do |set|
             set.load_memory_fixtures
-            set.load_database_fixtures          
+          end
+        end
+
+        def load_database_fixtures
+          instances.each do |set|
+            set.load_database_fixtures
           end
         end
 
@@ -24,6 +35,8 @@ module Unison
         @name = name
         @attributes = SequencedHash.new
         self.class.instances.push(self)
+        enable_after_create
+        enable_after_merge
       end
 
       def tuple_class
@@ -120,7 +133,7 @@ module Unison
           raise ArgumentError, "Tuple with id #{tuple[:id]} already exists in this Set"
         end
         tuples.push(tuple)
-        tuple.send(:after_create) if tuple.new?
+        tuple.send(:after_create) if after_create_enabled? && tuple.new? 
         insert_subscription_node.call(tuple)
         tuple
       end
@@ -136,7 +149,7 @@ module Unison
         tuples.each do |tuple|
           unless find(tuple[:id])
             insert(tuple)
-            tuple.send(:after_merge)
+            tuple.send(:after_merge) if after_merge_enabled?
           end
         end
       end
@@ -164,6 +177,11 @@ module Unison
         tuple_update_subscription_node.call(tuple, attribute, old_value, new_value)
       end
 
+      def fixtures(fixtures_hash)
+        memory_fixtures(fixtures_hash)
+        database_fixtures(fixtures_hash)
+      end
+
       def memory_fixtures(fixtures_hash)
         declared_memory_fixtures.merge!(fixtures_hash)
       end
@@ -180,11 +198,18 @@ module Unison
         @declared_database_fixtures ||= {}
       end
 
+      def load_fixtures
+        load_memory_fixtures
+        load_database_fixtures
+      end
+
       def load_memory_fixtures
+        disable_after_create
         declared_memory_fixtures.each do |id, attributes|
           attributes[:id] = id.to_s
           insert(new_tuple(attributes))
         end
+        enable_after_create
       end
 
       def load_database_fixtures
@@ -193,6 +218,30 @@ module Unison
           attributes[:id] = id.to_s
            table << attributes
         end
+      end
+
+      def after_create_enabled?
+        @after_create_enabled
+      end
+
+      def enable_after_create
+        @after_create_enabled = true
+      end
+      
+      def disable_after_create
+        @after_create_enabled = false
+      end
+
+      def after_merge_enabled?
+        @after_merge_enabled
+      end
+
+      def enable_after_merge
+        @after_merge_enabled = true
+      end
+
+      def disable_after_merge
+        @after_merge_enabled = false
       end
 
       protected

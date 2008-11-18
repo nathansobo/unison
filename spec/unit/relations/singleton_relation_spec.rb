@@ -31,13 +31,6 @@ module Unison
         end
       end
 
-      describe "#method_missing" do
-        it "delegates to #tuple" do
-          mock(singleton_relation.tuple).foo(1, 2)
-          singleton_relation.foo(1, 2)
-        end
-      end
-
       describe "#singleton" do
         it "returns self" do
           singleton_relation.singleton.should equal(singleton_relation)
